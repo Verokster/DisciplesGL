@@ -183,11 +183,11 @@ namespace Window
 		switch (config.image.filter)
 		{
 		case FilterLinear:
-			CheckMenuItem(hMenu, glVersion ? IDM_FILT_LINEAR : IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
+			CheckMenuItem(hMenu, glVersion ? IDM_FILT_LINEAR : IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 			break;
 
 		case FilterCubic:
-			CheckMenuItem(hMenu, isFilters20 == MF_ENABLED ? IDM_FILT_CUBIC : IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
+			CheckMenuItem(hMenu, isFilters20 == MF_ENABLED ? IDM_FILT_CUBIC : IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 			break;
 
 		case FilterScaleNx:
@@ -209,7 +209,7 @@ namespace Window
 				}
 			}
 			else
-				CheckMenuItem(hMenu, IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
+				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 
 			break;
 
@@ -223,7 +223,7 @@ namespace Window
 				CheckMenuItem(hMenu, IDM_FILT_EAGLE_2X, MF_BYCOMMAND | MF_CHECKED);
 			}
 			else
-				CheckMenuItem(hMenu, IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
+				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 
 			break;
 
@@ -237,7 +237,7 @@ namespace Window
 				CheckMenuItem(hMenu, IDM_FILT_XSAL_2X, MF_BYCOMMAND | MF_CHECKED);
 			}
 			else
-				CheckMenuItem(hMenu, IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
+				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 
 			break;
 
@@ -260,7 +260,7 @@ namespace Window
 				}
 			}
 			else
-				CheckMenuItem(hMenu, IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
+				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 
 			break;
 
@@ -295,7 +295,7 @@ namespace Window
 				}
 			}
 			else
-				CheckMenuItem(hMenu, IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
+				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 
 			break;
 

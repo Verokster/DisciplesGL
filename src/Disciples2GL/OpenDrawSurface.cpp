@@ -71,7 +71,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp)
 	this->mode.bpp = bpp;
 
 	DWORD size = width * height * (bpp >> 3);
-	this->indexBuffer = AlignedAlloc(size, 16);
+	this->indexBuffer = AlignedAlloc(size);
 	MemoryZero(this->indexBuffer, size);
 }
 

@@ -32,8 +32,6 @@
 #include "Window.h"
 #include "Hooks.h"
 
-const GUID IID_IDirectDraw7 = { 0x15e65ec0, 0x3b9c, 0x11d2, 0xb9, 0x2f, 0x00, 0x60, 0x97, 0x97, 0xea, 0x5b };
-
 VOID __fastcall UseShaderProgram(ShaderProgram* program, DWORD texSize)
 {
 	if (!program->id)
@@ -233,7 +231,7 @@ VOID OpenDraw::RenderOld()
 		GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		this->viewport.refresh = TRUE;
 
-		VOID* frameBuffer = AlignedAlloc(maxTexSize * maxTexSize * (this->mode.bpp == 16 && glVersion > GL_VER_1_1 ? sizeof(WORD) : sizeof(DWORD)), 16);
+		VOID* frameBuffer = AlignedAlloc(maxTexSize * maxTexSize * (this->mode.bpp == 16 && glVersion > GL_VER_1_1 ? sizeof(WORD) : sizeof(DWORD)));
 		{
 			FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 			{
@@ -554,6 +552,8 @@ VOID OpenDraw::RenderOld()
 						SwapBuffers(this->hDc);
 						if (fpsState != FpsBenchmark)
 							WaitForSingleObject(this->hDrawEvent, INFINITE);
+						else
+							Sleep(0);
 						if (isVSync)
 							GLFinish();
 					}
@@ -645,7 +645,7 @@ VOID OpenDraw::RenderMid()
 					GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 					this->viewport.refresh = TRUE;
 
-					VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)), 16);
+					VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)));
 					{
 						FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 						{
@@ -820,6 +820,8 @@ VOID OpenDraw::RenderMid()
 									SwapBuffers(this->hDc);
 									if (fpsState != FpsBenchmark)
 										WaitForSingleObject(this->hDrawEvent, INFINITE);
+									else
+										Sleep(0);
 									if (isVSync)
 										GLFinish();
 								}
@@ -955,7 +957,7 @@ VOID OpenDraw::RenderNew()
 									GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 									this->viewport.refresh = TRUE;
 
-									VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)), 16);
+									VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)));
 									{
 										FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 										{
@@ -1324,6 +1326,8 @@ VOID OpenDraw::RenderNew()
 													SwapBuffers(this->hDc);
 													if (fpsState != FpsBenchmark)
 														WaitForSingleObject(this->hDrawEvent, INFINITE);
+													else
+														Sleep(0);
 													if (isVSync)
 														GLFinish();
 												}
@@ -1607,10 +1611,7 @@ VOID OpenDraw::SetWindowedMode()
 
 HRESULT __stdcall OpenDraw::QueryInterface(REFIID id, LPVOID* lpObj)
 {
-	if (id == IID_IDirectDraw7)
-		*lpObj = new OpenDraw((IDrawUnknown**)&drawList);
-	else
-		Main::ShowError("QueryInterface required", __FILE__, __LINE__);
+	*lpObj = new OpenDraw((IDrawUnknown**)&drawList);
 	return DD_OK;
 }
 

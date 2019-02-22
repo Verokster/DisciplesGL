@@ -36,8 +36,9 @@ DEACTIVATEACTCTX DeactivateActCtxC;
 
 MALLOC MemoryAlloc;
 FREE MemoryFree;
-ALIGNED_MALLOC AlignedAlloc;
-ALIGNED_FREE AlignedFree;
+ALIGNED_MALLOC MemoryAlignedAlloc;
+MALLOC AlignedAlloc;
+FREE AlignedFree;
 MEMSET MemorySet;
 MEMCPY MemoryCopy;
 CEIL MathCeil;
@@ -103,6 +104,11 @@ DOUBLE __fastcall MathRound(DOUBLE number)
 	return floorVal + 0.5f > number ? floorVal : MathCeil(number);
 }
 
+VOID* __cdecl AlignedAllocFunc(size_t size)
+{
+	return MemoryAlignedAlloc(size, 16);
+}
+
 VOID LoadKernel32()
 {
 	HMODULE hLib = GetModuleHandle("KERNEL32.dll");
@@ -125,8 +131,17 @@ VOID LoadMsvCRT()
 		MemoryAlloc = (MALLOC)GetProcAddress(hLib, "malloc");
 		MemoryFree = (FREE)GetProcAddress(hLib, "free");
 
-		AlignedAlloc = (ALIGNED_MALLOC)GetProcAddress(hLib, "_aligned_malloc");
-		AlignedFree = (ALIGNED_FREE)GetProcAddress(hLib, "_aligned_free");
+		MemoryAlignedAlloc = (ALIGNED_MALLOC)GetProcAddress(hLib, "_aligned_malloc");
+		if (MemoryAlignedAlloc)
+		{
+			AlignedAlloc = AlignedAllocFunc;
+			AlignedFree = (FREE)GetProcAddress(hLib, "_aligned_free");
+		}
+		else
+		{
+			AlignedAlloc = MemoryAlloc;
+			AlignedFree = MemoryFree;
+		}
 
 		MemorySet = (MEMSET)GetProcAddress(hLib, "memset");
 		MemoryCopy = (MEMCPY)GetProcAddress(hLib, "memcpy");
