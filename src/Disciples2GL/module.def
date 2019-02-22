@@ -1,0 +1,24 @@
+LIBRARY	"DDRAW"
+EXPORTS
+	AcquireDDThreadLock				= ?exAcquireDDThreadLock@@YGXXZ				PRIVATE
+	CompleteCreateSysmemSurface		= ?exCompleteCreateSysmemSurface@@YGXXZ		PRIVATE
+	D3DParseUnknownCommand			= ?exD3DParseUnknownCommand@@YGXXZ			PRIVATE
+	DDGetAttachedSurfaceLcl			= ?exDDGetAttachedSurfaceLcl@@YGXXZ			PRIVATE
+	DDInternalLock					= ?exDDInternalLock@@YGXXZ					PRIVATE
+	DDInternalUnlock				= ?exDDInternalUnlock@@YGXXZ				PRIVATE
+	DSoundHelp						= ?exDSoundHelp@@YGXXZ						PRIVATE
+	DirectDrawCreate				= ?exDirectDrawCreate@@YGXXZ				PRIVATE
+	DirectDrawCreateClipper			= ?exDirectDrawCreateClipper@@YGXXZ			PRIVATE
+	DirectDrawCreateEx				= ?exDirectDrawCreateEx@@YGXXZ				PRIVATE
+	DirectDrawEnumerateA			= ?exDirectDrawEnumerateA@@YGXXZ			PRIVATE
+	DirectDrawEnumerateExA			= ?exDirectDrawEnumerateExA@@YGXXZ			PRIVATE
+	DirectDrawEnumerateExW			= ?exDirectDrawEnumerateExW@@YGXXZ			PRIVATE
+	DirectDrawEnumerateW			= ?exDirectDrawEnumerateW@@YGXXZ			PRIVATE
+	DllCanUnloadNow					= ?exDllCanUnloadNow@@YGXXZ					PRIVATE
+	DllGetClassObject				= ?exDllGetClassObject@@YGXXZ				PRIVATE
+	GetDDSurfaceLocal				= ?exGetDDSurfaceLocal@@YGXXZ				PRIVATE
+	GetOLEThunkData					= ?exGetOLEThunkData@@YGXXZ					PRIVATE
+	GetSurfaceFromDC				= ?exGetSurfaceFromDC@@YGXXZ				PRIVATE
+	RegisterSpecialCase				= ?exRegisterSpecialCase@@YGXXZ				PRIVATE
+	ReleaseDDThreadLock				= ?exReleaseDDThreadLock@@YGXXZ				PRIVATE
+	SetAppCompatData				= ?exSetAppCompatData@@YGXXZ				PRIVATE

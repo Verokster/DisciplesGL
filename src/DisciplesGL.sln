@@ -1,0 +1,90 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Disciples2GL", "Disciples2GL\Disciples2GL.vcxproj", "{62A3E190-3331-4F08-9A9F-24315D6A805E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders Files", "Shaders Files", "{520D4B5D-885D-43CC-B75C-4F342C729245}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "linear", "linear", "{170CEC3B-59D7-4260-ADA6-14EA0F7ED042}"
+	ProjectSection(SolutionItems) = preProject
+		glsl\linear\fragment.glsl = glsl\linear\fragment.glsl
+		glsl\linear\vertex.glsl = glsl\linear\vertex.glsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cubic", "cubic", "{E4F599C2-AF64-4BAC-98C8-5B29F95F6B34}"
+	ProjectSection(SolutionItems) = preProject
+		glsl\cubic\fragment.glsl = glsl\cubic\fragment.glsl
+		glsl\cubic\vertex.glsl = glsl\cubic\vertex.glsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scalehq", "scalehq", "{82C8BA11-F68D-4990-B4BC-D066DBFB2047}"
+	ProjectSection(SolutionItems) = preProject
+		glsl\scalehq\fragment_2x.glsl = glsl\scalehq\fragment_2x.glsl
+		glsl\scalehq\fragment_4x.glsl = glsl\scalehq\fragment_4x.glsl
+		glsl\scalehq\vertex_2x.glsl = glsl\scalehq\vertex_2x.glsl
+		glsl\scalehq\vertex_4x.glsl = glsl\scalehq\vertex_4x.glsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xbrz", "xbrz", "{75EC0D6A-FB7F-43B7-B75B-AF33E141C68B}"
+	ProjectSection(SolutionItems) = preProject
+		glsl\xbrz\fragment_2x.glsl = glsl\xbrz\fragment_2x.glsl
+		glsl\xbrz\fragment_3x.glsl = glsl\xbrz\fragment_3x.glsl
+		glsl\xbrz\fragment_4x.glsl = glsl\xbrz\fragment_4x.glsl
+		glsl\xbrz\fragment_5x.glsl = glsl\xbrz\fragment_5x.glsl
+		glsl\xbrz\fragment_6x.glsl = glsl\xbrz\fragment_6x.glsl
+		glsl\xbrz\vertex.glsl = glsl\xbrz\vertex.glsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scalenx", "scalenx", "{C618BC8F-282D-4668-92CB-0A19EE2C45FE}"
+	ProjectSection(SolutionItems) = preProject
+		glsl\scalenx\fragment_2x.glsl = glsl\scalenx\fragment_2x.glsl
+		glsl\scalenx\fragment_3x.glsl = glsl\scalenx\fragment_3x.glsl
+		glsl\scalenx\vertex_2x.glsl = glsl\scalenx\vertex_2x.glsl
+		glsl\scalenx\vertex_3x.glsl = glsl\scalenx\vertex_3x.glsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "eagle", "eagle", "{AE45BC76-A7E0-49BF-B05B-F58D72A4E3C6}"
+	ProjectSection(SolutionItems) = preProject
+		glsl\eagle\fragment.glsl = glsl\eagle\fragment.glsl
+		glsl\eagle\vertex.glsl = glsl\eagle\vertex.glsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xsal", "xsal", "{C7909C56-36E5-4C1E-A7DA-E7F7EB05C41D}"
+	ProjectSection(SolutionItems) = preProject
+		glsl\xsal\fragment.glsl = glsl\xsal\fragment.glsl
+		glsl\xsal\vertex.glsl = glsl\xsal\vertex.glsl
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62A3E190-3331-4F08-9A9F-24315D6A805E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{62A3E190-3331-4F08-9A9F-24315D6A805E}.Debug|Win32.Build.0 = Debug|Win32
+		{62A3E190-3331-4F08-9A9F-24315D6A805E}.Debug|x64.ActiveCfg = Debug|Win32
+		{62A3E190-3331-4F08-9A9F-24315D6A805E}.Release|Win32.ActiveCfg = Release|Win32
+		{62A3E190-3331-4F08-9A9F-24315D6A805E}.Release|Win32.Build.0 = Release|Win32
+		{62A3E190-3331-4F08-9A9F-24315D6A805E}.Release|x64.ActiveCfg = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{170CEC3B-59D7-4260-ADA6-14EA0F7ED042} = {520D4B5D-885D-43CC-B75C-4F342C729245}
+		{E4F599C2-AF64-4BAC-98C8-5B29F95F6B34} = {520D4B5D-885D-43CC-B75C-4F342C729245}
+		{82C8BA11-F68D-4990-B4BC-D066DBFB2047} = {520D4B5D-885D-43CC-B75C-4F342C729245}
+		{75EC0D6A-FB7F-43B7-B75B-AF33E141C68B} = {520D4B5D-885D-43CC-B75C-4F342C729245}
+		{C618BC8F-282D-4668-92CB-0A19EE2C45FE} = {520D4B5D-885D-43CC-B75C-4F342C729245}
+		{AE45BC76-A7E0-49BF-B05B-F58D72A4E3C6} = {520D4B5D-885D-43CC-B75C-4F342C729245}
+		{C7909C56-36E5-4C1E-A7DA-E7F7EB05C41D} = {520D4B5D-885D-43CC-B75C-4F342C729245}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {76298140-6EFF-4E41-BE27-FD61CE97B9DE}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,179 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Manifest
+//
+
+IDM_MANIFEST            RT_MANIFEST             "module.manifest"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Quit",							IDM_FILE_QUIT
+    END
+    POPUP "&Display"
+    BEGIN
+        MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
+        POPUP "&Filtering\a"
+        BEGIN
+            MENUITEM "&Off",						IDM_FILT_OFF
+            MENUITEM "Bi&linear",					IDM_FILT_LINEAR
+			MENUITEM "Bi&cubic",					IDM_FILT_CUBIC
+			MENUITEM SEPARATOR
+			POPUP "&ScaleNx"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_SCALENX_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_SCALENX_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_SCALENX_2X
+				MENUITEM "x3",						IDM_FILT_SCALENX_3X
+			END
+			POPUP "Super &Eagle"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_EAGLE_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_EAGLE_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_EAGLE_2X
+			END
+			POPUP "2x&SaI"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_XSAL_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_XSAL_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_XSAL_2X
+			END
+			POPUP "Scale&HQ"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_SCALEHQ_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_SCALEHQ_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_SCALEHQ_2X
+				MENUITEM "x4",						IDM_FILT_SCALEHQ_4X
+			END
+			POPUP "&xBRz"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_XRBZ_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_XRBZ_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_XRBZ_2X
+				MENUITEM "x3",						IDM_FILT_XRBZ_3X
+				MENUITEM "x4",						IDM_FILT_XRBZ_4X
+				MENUITEM "x5",						IDM_FILT_XRBZ_5X
+				MENUITEM "x6",						IDM_FILT_XRBZ_6X
+			END
+        END
+        MENUITEM "Keep &Aspect Ratio\a",			IDM_ASPECT_RATIO
+        MENUITEM "Enable &VSync\a",					IDM_VSYNC
+    END
+    POPUP "&Help"
+    BEGIN
+		MENUITEM "&About...\aF1",					IDM_HELP_ABOUT
+    END
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUT DIALOGEX 22, 17, 162, 90
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
+FONT 8, "System", 0, 0, 0x1
+BEGIN
+    CTEXT           "Disciples I && II\nOpenGL Wrapper",1002,0,6,162,18
+    CTEXT           "Version 1.00   Build 27",IDC_STATIC,0,30,162,8
+    CTEXT           "Copyright © 2019 Verok",1006,0,48,162,8
+	DEFPUSHBUTTON   "OK",IDC_BTN_OK,65,72,32,14,WS_GROUP
+	CONTROL         "verokster@gmail.com",IDC_LNK_EMAIL,"SysLink",WS_TABSTOP,48,57,72,12
+	ICON            "",IDC_STATIC,8,17,20,20
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RCDATA
+//
+
+IDR_LINEAR_VERTEX			RCDATA                  "..\\glsl\\linear\\vertex.glsl"
+IDR_LINEAR_FRAGMENT			RCDATA                  "..\\glsl\\linear\\fragment.glsl"
+
+IDR_CUBIC_VERTEX			RCDATA                  "..\\glsl\\cubic\\vertex.glsl"
+IDR_CUBIC_FRAGMENT			RCDATA                  "..\\glsl\\cubic\\fragment.glsl"
+
+IDR_XSAL_VERTEX				RCDATA                  "..\\glsl\\xsal\\vertex.glsl"
+IDR_XSAL_FRAGMENT			RCDATA                  "..\\glsl\\xsal\\fragment.glsl"
+
+IDR_EAGLE_VERTEX			RCDATA                  "..\\glsl\\eagle\\vertex.glsl"
+IDR_EAGLE_FRAGMENT			RCDATA                  "..\\glsl\\eagle\\fragment.glsl"
+
+IDR_XBRZ_VERTEX				RCDATA                  "..\\glsl\\xbrz\\vertex.glsl"
+IDR_XBRZ_FRAGMENT_2X		RCDATA                  "..\\glsl\\xbrz\\fragment_2x.glsl"
+IDR_XBRZ_FRAGMENT_3X		RCDATA                  "..\\glsl\\xbrz\\fragment_3x.glsl"
+IDR_XBRZ_FRAGMENT_4X		RCDATA                  "..\\glsl\\xbrz\\fragment_4x.glsl"
+IDR_XBRZ_FRAGMENT_5X		RCDATA                  "..\\glsl\\xbrz\\fragment_5x.glsl"
+IDR_XBRZ_FRAGMENT_6X		RCDATA                  "..\\glsl\\xbrz\\fragment_6x.glsl"
+
+IDR_SCALEHQ_VERTEX_2X		RCDATA                  "..\\glsl\\scalehq\\vertex_2x.glsl"
+IDR_SCALEHQ_FRAGMENT_2X		RCDATA                  "..\\glsl\\scalehq\\fragment_2x.glsl"
+IDR_SCALEHQ_VERTEX_4X		RCDATA                  "..\\glsl\\scalehq\\vertex_4x.glsl"
+IDR_SCALEHQ_FRAGMENT_4X		RCDATA                  "..\\glsl\\scalehq\\fragment_4x.glsl"
+
+IDR_SCALENX_VERTEX_2X		RCDATA                  "..\\glsl\\scalenx\\vertex_2x.glsl"
+IDR_SCALENX_FRAGMENT_2X		RCDATA                  "..\\glsl\\scalenx\\fragment_2x.glsl"
+IDR_SCALENX_VERTEX_3X		RCDATA                  "..\\glsl\\scalenx\\vertex_3x.glsl"
+IDR_SCALENX_FRAGMENT_3X		RCDATA                  "..\\glsl\\scalenx\\fragment_3x.glsl"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2019,2,22,27
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS VS_FF_DEBUG
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS VOS__WINDOWS32
+ FILETYPE VFT_DLL
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "FileDescription", "HoMM III - OpenGL wrapper"
+            VALUE "FileVersion", "2019.02.22.27"
+            VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
+            VALUE "OriginalFilename", "ddraw.dll"
+            VALUE "ProductVersion", "1.0.0"
+            VALUE "ProductName", "Disciples2GL"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
