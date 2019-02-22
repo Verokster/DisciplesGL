@@ -24,7 +24,6 @@
 
 #include "stdafx.h"
 #include "IDrawPalette.h"
-#include "IDraw7.h"
 
 // Inherited via IDrawPalette
 HRESULT __stdcall IDrawPalette::GetCaps(LPDWORD) { return DD_OK; }

@@ -24,7 +24,6 @@
 
 #include "stdafx.h"
 #include "IDrawClipper.h"
-#include "IDraw7.h"
 
 // Inherited via IDrawClipper
 HRESULT __stdcall IDrawClipper::GetClipList(LPRECT, LPRGNDATA, LPDWORD) { return DD_OK; }
