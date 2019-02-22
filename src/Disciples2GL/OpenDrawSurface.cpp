@@ -75,6 +75,13 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp)
 	MemoryZero(this->indexBuffer, size);
 }
 
+VOID OpenDrawSurface::Flush()
+{
+	MemoryCopy(this->indexBuffer, this->attachedSurface->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp >> 3));
+	SetEvent(this->ddraw->hDrawEvent);
+	Sleep(0);
+}
+
 ULONG __stdcall OpenDrawSurface::Release()
 {
 	ULONG count = --this->refCount;
@@ -189,10 +196,7 @@ HRESULT __stdcall OpenDrawSurface::GetAttachedSurface(LPDDSCAPS2 lpDDSCaps, IDra
 
 HRESULT __stdcall OpenDrawSurface::Flip(IDrawSurface7* lpSurface, DWORD dwFlags)
 {
-	MemoryCopy(this->indexBuffer, this->attachedSurface->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp >> 3));
-	SetEvent(this->ddraw->hDrawEvent);
-	Sleep(0);
-
+	this->Flush();
 	return DD_OK;
 }
 
@@ -252,11 +256,7 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 	else
 	{
 		if (!this->index && lpDDSrcSurface == this->attachedSurface)
-		{
-			MemoryCopy(this->indexBuffer, this->attachedSurface->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp >> 3));
-			SetEvent(this->ddraw->hDrawEvent);
-			Sleep(0);
-		}
+			this->Flush();
 		else
 		{
 			OpenDrawSurface* surface = (OpenDrawSurface*)lpDDSrcSurface;
@@ -308,20 +308,6 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 			INT width = lpSrcRect->right - lpSrcRect->left;
 			INT height = lpSrcRect->bottom - lpSrcRect->top;
 
-			/*if (this->mode.bpp == 32)
-			{
-				DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-				DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
-
-				do
-				{
-					MemoryCopy(destination, source, width << 2);
-					source += sWidth;
-					destination += dWidth;
-				} while (--height);
-			}
-			else if (this->mode.bpp == 16)
-			{*/
 			WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
 			WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
 
@@ -331,7 +317,6 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 				source += sWidth;
 				destination += dWidth;
 			} while (--height);
-			//}
 		}
 	}
 
@@ -400,40 +385,6 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 	INT width = lpSrcRect->right - lpSrcRect->left;
 	INT height = lpSrcRect->bottom - lpSrcRect->top;
 
-	/*if (this->mode.bpp == 32)
-	{
-		DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-		DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
-
-		if (surface->colorKey)
-		{
-			do
-			{
-				DWORD* src = source;
-				DWORD* dest = destination;
-				source += sWidth;
-				destination += dWidth;
-
-				DWORD count = width;
-				do
-				{
-					if (*src != surface->colorKey)
-						*dest = *src;
-
-					++src;
-					++dest;
-				} while (--count);
-			} while (--height);
-		}
-		else do
-		{
-			MemoryCopy(destination, source, width << 2);
-			source += sWidth;
-			destination += dWidth;
-		} while (--height);
-	}
-	else if (this->mode.bpp == 16)
-	{*/
 	WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
 	WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
 
@@ -463,7 +414,6 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 		source += sWidth;
 		destination += dWidth;
 	} while (--height);
-	//}
 
 	return DD_OK;
 }

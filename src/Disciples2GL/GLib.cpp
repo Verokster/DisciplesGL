@@ -34,6 +34,7 @@ WGLMAKECURRENT WGLMakeCurrent;
 WGLCREATECONTEXT WGLCreateContext;
 WGLDELETECONTEXT WGLDeleteContext;
 WGLCREATECONTEXTATTRIBSARB WGLCreateContextAttribs;
+WGLCHOOSEPIXELFORMAT WGLChoosePixelFormat;
 WGLSWAPINTERVAL WGLSwapInterval;
 
 GLGETSTRING GLGetString;
@@ -110,7 +111,7 @@ GLBINDRENDERBUFFER GLBindRenderbuffer;
 GLRENDERBUFFERSTORAGE GLRenderbufferStorage;
 GLFRAMEBUFFERRENDERBUFFER GLFramebufferRenderbuffer;
 
-HMODULE hModule;
+HMODULE hGLModule;
 
 DWORD glVersion;
 DWORD glCapsClampToEdge;
@@ -120,28 +121,31 @@ namespace GL
 {
 	BOOL __fastcall Load()
 	{
-		if (!hModule)
-			hModule = LoadLibrary("OPENGL32.dll");
+		if (!hGLModule)
+			hGLModule = LoadLibrary("OPENGL32.dll");
 
-		if (!hModule)
+		if (!hGLModule)
 			return FALSE;
 
-		WGLGetProcAddress = (WGLGETPROCADDRESS)GetProcAddress(hModule, "wglGetProcAddress");
-		WGLMakeCurrent = (WGLMAKECURRENT)GetProcAddress(hModule, "wglMakeCurrent");
-		WGLCreateContext = (WGLCREATECONTEXT)GetProcAddress(hModule, "wglCreateContext");
-		WGLDeleteContext = (WGLDELETECONTEXT)GetProcAddress(hModule, "wglDeleteContext");
+		WGLGetProcAddress = (WGLGETPROCADDRESS)GetProcAddress(hGLModule, "wglGetProcAddress");
+		WGLMakeCurrent = (WGLMAKECURRENT)GetProcAddress(hGLModule, "wglMakeCurrent");
+		WGLCreateContext = (WGLCREATECONTEXT)GetProcAddress(hGLModule, "wglCreateContext");
+		WGLDeleteContext = (WGLDELETECONTEXT)GetProcAddress(hGLModule, "wglDeleteContext");
 
 		return TRUE;
 	}
 
 	VOID __fastcall Free()
 	{
-		if (FreeLibrary(hModule))
-			hModule = NULL;
+		if (hGLModule && FreeLibrary(hGLModule))
+			hGLModule = NULL;
 	}
 
 	VOID __fastcall LoadFunction(CHAR* buffer, const CHAR* prefix, const CHAR* name, PROC* func, const CHAR* sufix = NULL)
 	{
+		if (*func)
+			return;
+
 		StrCopy(buffer, prefix);
 		StrCat(buffer, name);
 
@@ -152,9 +156,9 @@ namespace GL
 			*func = WGLGetProcAddress(buffer);
 
 		if ((INT)*func >= -1 && (INT)*func <= 3)
-			*func = GetProcAddress(hModule, buffer);
+			*func = GetProcAddress(hGLModule, buffer);
 
-		if (!sufix && !*func)
+		if (!sufix)
 		{
 			LoadFunction(buffer, prefix, name, func, "EXT");
 			if (!*func)
@@ -162,8 +166,14 @@ namespace GL
 		}
 	}
 
-	BOOL __fastcall GetContext(HDC hDc, HGLRC* lpHRc, BOOL showError, DWORD* wglAttributes)
+	BOOL __fastcall GetContext(HDC hDc, HGLRC* lpHRc, DWORD major, DWORD minor, BOOL showError)
 	{
+		DWORD wglAttributes[] = {
+			WGL_CONTEXT_MAJOR_VERSION_ARB, major,
+			WGL_CONTEXT_MINOR_VERSION_ARB, minor,
+			0
+		};
+
 		HGLRC hRc = WGLCreateContextAttribs(hDc, NULL, wglAttributes);
 		if (hRc)
 		{
@@ -183,17 +193,6 @@ namespace GL
 		}
 
 		return FALSE;
-	}
-
-	BOOL __fastcall GetContext(HDC hDc, HGLRC* lpHRc, DWORD major, DWORD minor, BOOL showError)
-	{
-		DWORD wglAttributes[] = {
-			WGL_CONTEXT_MAJOR_VERSION_ARB, major,
-			WGL_CONTEXT_MINOR_VERSION_ARB, minor,
-			0
-		};
-
-		return GetContext(hDc, lpHRc, showError, wglAttributes);
 	}
 
 	VOID __fastcall CreateContextAttribs(HDC hDc, HGLRC* hRc)
@@ -345,36 +344,43 @@ namespace GL
 			glVersion = GL_VER_1_1;
 	}
 
-	VOID __fastcall PreparePixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)
+	VOID __fastcall ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)
 	{
-		DEVMODE devMode;
-		MemoryZero(&devMode, sizeof(DEVMODE));
-		devMode.dmSize = sizeof(DEVMODE);
-
-		DWORD bpp;
-		if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode) && devMode.dmBitsPerPel >= 16 && devMode.dmBitsPerPel <= 32)
-			bpp = devMode.dmBitsPerPel;
-		else
-			bpp = 32;
-
 		MemoryZero(pfd, sizeof(PIXELFORMATDESCRIPTOR));
 		pfd->nSize = sizeof(PIXELFORMATDESCRIPTOR);
 		pfd->nVersion = 1;
+	}
+
+	VOID __fastcall PreparePixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)
+	{
+		ResetPixelFormatDescription(pfd);
+
+		INT bpp;
+		HDC hDc = GetDC(NULL);
+		if (hDc)
+		{
+			bpp = GetDeviceCaps(hDc, BITSPIXEL);
+			ReleaseDC(NULL, hDc);
+		}
+		else
+			bpp = 0;
+
 		pfd->dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE | PFD_STEREO_DONTCARE | PFD_SWAP_EXCHANGE;
 		pfd->iPixelType = PFD_TYPE_RGBA;
-		pfd->cColorBits = LOBYTE(bpp);
-		pfd->cStencilBits = 8;
+		pfd->cColorBits = (bpp == 16 || bpp == 24) ? (BYTE)bpp : 32;
 		pfd->iLayerType = PFD_MAIN_PLANE;
 	}
 
 	INT __fastcall PreparePixelFormat(PIXELFORMATDESCRIPTOR* pfd)
 	{
+		PreparePixelFormatDescription(pfd);
+
 		INT res = 0;
 
 		HWND hWnd = CreateWindowEx(
 			WS_EX_APPWINDOW,
 			WC_DRAW,
-			"DUMMY",
+			NULL,
 			WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
 			0, 0,
 			1, 1,
@@ -390,42 +396,39 @@ namespace GL
 			if (hDc)
 			{
 				res = ChoosePixelFormat(hDc, pfd);
-				if (res)
+				if (res && ::SetPixelFormat(hDc, res, pfd))
 				{
-					if (SetPixelFormat(hDc, res, pfd))
+					HGLRC hRc = WGLCreateContext(hDc);
+					if (hRc)
 					{
-						HGLRC hRc = WGLCreateContext(hDc);
-						if (hRc)
+						if (WGLMakeCurrent(hDc, hRc))
 						{
-							if (WGLMakeCurrent(hDc, hRc))
+							CHAR buffer[32];
+							LoadFunction(buffer, PREFIX_WGL, "ChoosePixelFormat", (PROC*)&WGLChoosePixelFormat, "ARB");
+							if (WGLChoosePixelFormat)
 							{
-								WGLCHOOSEPIXELFORMATARB WGLChoosePixelFormatARB = (WGLCHOOSEPIXELFORMATARB)WGLGetProcAddress("wglChoosePixelFormatARB");
-								if (WGLChoosePixelFormatARB)
-								{
-									INT piFormats[128];
-									UINT nNumFormats;
+								INT piFormats[128];
+								UINT nNumFormats = 0;
 
-									INT glAttributes[] = {
-										WGL_DRAW_TO_WINDOW_ARB, (pfd->dwFlags & PFD_DRAW_TO_WINDOW) ? GL_TRUE : GL_FALSE,
-										WGL_SUPPORT_OPENGL_ARB, (pfd->dwFlags & PFD_SUPPORT_OPENGL) ? GL_TRUE : GL_FALSE,
-										WGL_DOUBLE_BUFFER_ARB, (pfd->dwFlags & PFD_DOUBLEBUFFER) ? GL_TRUE : GL_FALSE,
-										WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
-										WGL_COLOR_BITS_ARB, pfd->cColorBits,
-										WGL_STENCIL_BITS_ARB, pfd->cStencilBits,
-										WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-										WGL_SWAP_METHOD_ARB, (pfd->dwFlags & PFD_SWAP_EXCHANGE) ? WGL_SWAP_EXCHANGE_ARB : WGL_SWAP_COPY_ARB,
-										0
-									};
+								INT glAttributes[] = {
+									WGL_DRAW_TO_WINDOW_ARB, (pfd->dwFlags & PFD_DRAW_TO_WINDOW) ? GL_TRUE : GL_FALSE,
+									WGL_SUPPORT_OPENGL_ARB, (pfd->dwFlags & PFD_SUPPORT_OPENGL) ? GL_TRUE : GL_FALSE,
+									WGL_DOUBLE_BUFFER_ARB, (pfd->dwFlags & PFD_DOUBLEBUFFER) ? GL_TRUE : GL_FALSE,
+									WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+									WGL_COLOR_BITS_ARB, pfd->cColorBits,
+									WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+									WGL_SWAP_METHOD_ARB, (pfd->dwFlags & PFD_SWAP_EXCHANGE) ? WGL_SWAP_EXCHANGE_ARB : WGL_SWAP_COPY_ARB,
+									0
+								};
 
-									if (WGLChoosePixelFormatARB(hDc, glAttributes, NULL, sizeof(piFormats) / sizeof(INT), piFormats, &nNumFormats) && nNumFormats)
-										res = piFormats[0];
-								}
-
-								WGLMakeCurrent(hDc, NULL);
+								if (WGLChoosePixelFormat(hDc, glAttributes, NULL, sizeof(piFormats) / sizeof(INT), piFormats, &nNumFormats) && nNumFormats)
+									res = piFormats[0];
 							}
 
-							WGLDeleteContext(hRc);
+							WGLMakeCurrent(hDc, NULL);
 						}
+
+						WGLDeleteContext(hRc);
 					}
 				}
 
@@ -436,6 +439,28 @@ namespace GL
 		}
 
 		return res;
+	}
+
+	VOID __fastcall SetPixelFormat(HDC hDc)
+	{
+		PIXELFORMATDESCRIPTOR pfd;
+		INT glPixelFormat = GL::PreparePixelFormat(&pfd);
+		if (!glPixelFormat)
+		{
+			glPixelFormat = ::ChoosePixelFormat(hDc, &pfd);
+			if (!glPixelFormat)
+				Main::ShowError("ChoosePixelFormat failed", __FILE__, __LINE__);
+		}
+
+		if (!::SetPixelFormat(hDc, glPixelFormat, &pfd))
+			Main::ShowError("SetPixelFormat failed", __FILE__, __LINE__);
+
+		GL::ResetPixelFormatDescription(&pfd);
+		if (!::DescribePixelFormat(hDc, glPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd))
+			Main::ShowError("DescribePixelFormat failed", __FILE__, __LINE__);
+
+		if (pfd.iPixelType != PFD_TYPE_RGBA || pfd.cRedBits < 5 || pfd.cGreenBits < 5 || pfd.cBlueBits < 5)
+			Main::ShowError("Bad pixel type", __FILE__, __LINE__);
 	}
 
 	GLuint __fastcall CompileShaderSource(DWORD name, const CHAR* version, GLenum type)
@@ -454,9 +479,18 @@ namespace GL
 
 		GLuint shader = GLCreateShader(type);
 
-		const GLchar* source[] = { "#version ", version, "\n", (GLchar*)pData };
-		const GLint lengths[] = { 9, 3, 1, (GLint)SizeofResource(hDllModule, hResource) };
-		GLShaderSource(shader, 4, source, lengths);
+		DWORD length = SizeofResource(hDllModule, hResource);
+		DWORD size = length + 13;
+		CHAR* source = (CHAR*)MemoryAlloc(size + 1);
+		const GLchar* srcData[] = { source };
+		{
+			MemoryCopy(source, version, 13);
+			MemoryCopy(source + 13, pData, length);
+			*(source + size) = NULL;
+
+			GLShaderSource(shader, 1, srcData, NULL);
+		}
+		MemoryFree(source);
 
 		GLint result;
 		GLCompileShader(shader);
@@ -482,7 +516,6 @@ namespace GL
 	DWORD __stdcall ResetThread(LPVOID lpParameter)
 	{
 		PIXELFORMATDESCRIPTOR pfd;
-		GL::PreparePixelFormatDescription(&pfd);
 		GL::PreparePixelFormat(&pfd);
 
 		return NULL;
@@ -490,12 +523,11 @@ namespace GL
 
 	VOID __fastcall ResetContext()
 	{
-		DWORD threadId;
-		SECURITY_ATTRIBUTES sAttribs;
-		MemoryZero(&sAttribs, sizeof(SECURITY_ATTRIBUTES));
-		sAttribs.nLength = sizeof(SECURITY_ATTRIBUTES);
-		HANDLE hDummy = CreateThread(&sAttribs, NULL, ResetThread, NULL, NORMAL_PRIORITY_CLASS, &threadId);
-		WaitForSingleObject(hDummy, INFINITE);
-		CloseHandle(hDummy);
+		HANDLE hThread = CreateThread(NULL, NULL, ResetThread, NULL, NORMAL_PRIORITY_CLASS, NULL);
+		if (hThread)
+		{
+			WaitForSingleObject(hThread, INFINITE);
+			CloseHandle(hThread);
+		}
 	}
 }

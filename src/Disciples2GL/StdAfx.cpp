@@ -42,7 +42,6 @@ MEMSET MemorySet;
 MEMCPY MemoryCopy;
 CEIL MathCeil;
 FLOOR MathFloor;
-ROUND MathRound;
 SPRINTF StrPrint;
 STRCMP StrCompare;
 STRCPY StrCopy;
@@ -98,9 +97,9 @@ VOID _declspec(naked) __stdcall exRegisterSpecialCase() { _asm { JMP pRegisterSp
 VOID _declspec(naked) __stdcall exReleaseDDThreadLock() { _asm { JMP pReleaseDDThreadLock } }
 VOID _declspec(naked) __stdcall exSetAppCompatData() { _asm { JMP pSetAppCompatData } }
 
-double __cdecl round(double number)
+DOUBLE __fastcall MathRound(DOUBLE number)
 {
-	double floorVal = MathFloor(number);
+	DOUBLE floorVal = MathFloor(number);
 	return floorVal + 0.5f > number ? floorVal : MathCeil(number);
 }
 
@@ -134,8 +133,6 @@ VOID LoadMsvCRT()
 
 		MathCeil = (CEIL)GetProcAddress(hLib, "ceil");
 		MathFloor = (FLOOR)GetProcAddress(hLib, "floor");
-
-		MathRound = round;
 
 		StrCompare = (STRCMP)GetProcAddress(hLib, "strcmp");
 		StrCopy = (STRCPY)GetProcAddress(hLib, "strcpy");

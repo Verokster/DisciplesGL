@@ -61,9 +61,8 @@ typedef VOID*(__cdecl *ALIGNED_MALLOC)(size_t, size_t);
 typedef VOID(__cdecl *ALIGNED_FREE)(VOID*);
 typedef VOID*(__cdecl *MEMSET)(VOID*, INT, size_t);
 typedef VOID*(__cdecl *MEMCPY)(VOID*, const VOID*, size_t);
-typedef double(__cdecl *CEIL)(double);
-typedef double(__cdecl *FLOOR)(double);
-typedef double(__cdecl *ROUND)(double);
+typedef DOUBLE(__cdecl *CEIL)(DOUBLE);
+typedef DOUBLE(__cdecl *FLOOR)(DOUBLE);
 typedef INT(__cdecl *SPRINTF)(CHAR*, const CHAR*, ...);
 typedef INT(__cdecl *STRCMP)(const CHAR*, const CHAR*);
 typedef CHAR*(__cdecl *STRCPY)(CHAR*, const CHAR*);
@@ -81,7 +80,6 @@ extern MEMSET MemorySet;
 extern MEMCPY MemoryCopy;
 extern CEIL MathCeil;
 extern FLOOR MathFloor;
-extern ROUND MathRound;
 extern SPRINTF StrPrint;
 extern STRCMP StrCompare;
 extern STRCPY StrCopy;
@@ -91,7 +89,9 @@ extern STRSTR StrStr;
 extern WCSTOMBS StrToAnsi;
 extern EXIT Exit;
 
-#define MemoryZero(Destination,Length) MemorySet((Destination),0,(Length))
+DOUBLE __fastcall MathRound(DOUBLE);
+
+#define MemoryZero(destination,length) MemorySet(destination,0,length)
 
 extern HMODULE hDllModule;
 extern HANDLE hActCtx;

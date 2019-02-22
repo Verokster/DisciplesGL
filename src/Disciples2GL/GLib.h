@@ -44,8 +44,8 @@ typedef char GLchar;
 #define GL_VER_2_0 0x02000000
 #define GL_VER_3_0 0x03000000
 
-#define GLSL_VER_1_10 "110"
-#define GLSL_VER_1_30 "130"
+#define GLSL_VER_1_10 "#version 110\n"
+#define GLSL_VER_1_30 "#version 130\n"
 
 #define WGL_DRAW_TO_WINDOW_ARB         0x2001
 #define WGL_SUPPORT_OPENGL_ARB         0x2010
@@ -110,6 +110,7 @@ typedef HGLRC(__stdcall *WGLCREATECONTEXT)(HDC devContext);
 typedef BOOL(__stdcall *WGLDELETECONTEXT)(HGLRC glContext);
 typedef HGLRC(__stdcall *WGLCREATECONTEXTATTRIBSARB)(HDC hDC, HGLRC hshareContext, const DWORD *attribList);
 typedef BOOL(__stdcall *WGLCHOOSEPIXELFORMATARB) (HDC hDC, const INT* piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, INT *piFormats, UINT *nNumFormats);
+typedef BOOL(__stdcall *WGLCHOOSEPIXELFORMAT) (HDC hDC, const INT* piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, INT *piFormats, UINT *nNumFormats);
 typedef BOOL(__stdcall *WGLSWAPINTERVAL)(INT interval);
 
 typedef const GLubyte* (__stdcall *GLGETSTRING)(GLenum name);
@@ -192,6 +193,7 @@ extern WGLMAKECURRENT WGLMakeCurrent;
 extern WGLCREATECONTEXT WGLCreateContext;
 extern WGLDELETECONTEXT WGLDeleteContext;
 extern WGLCREATECONTEXTATTRIBSARB WGLCreateContextAttribs;
+extern WGLCHOOSEPIXELFORMAT WGLChoosePixelFormat;
 extern WGLSWAPINTERVAL WGLSwapInterval;
 
 extern GLGETSTRING GLGetString;
@@ -277,6 +279,7 @@ namespace GL
 	BOOL __fastcall Load();
 	VOID __fastcall Free();
 	VOID __fastcall CreateContextAttribs(HDC hDc, HGLRC* hRc);
+	VOID __fastcall ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd);
 	VOID __fastcall PreparePixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd);
 	INT __fastcall PreparePixelFormat(PIXELFORMATDESCRIPTOR* pfd);
 	GLuint __fastcall CompileShaderSource(DWORD name, const CHAR* version, GLenum type);

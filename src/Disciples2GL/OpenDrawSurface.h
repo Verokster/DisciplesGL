@@ -50,6 +50,7 @@ public:
 
 	VOID CreateBuffer(DWORD, DWORD, DWORD);
 	VOID ReleaseBuffer();
+	VOID Flush();
 
 	// Inherited via IDrawSurface
 	ULONG __stdcall Release();

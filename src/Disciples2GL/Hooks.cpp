@@ -261,7 +261,17 @@ namespace Hooks
 	{
 		BOOL isMain = !StrCompare(lpClassName, "MQ_UIManager");
 		if (isMain)
+		{
 			dwStyle = WS_WINDOWED;
+			RECT rect = { 0, 0, (LONG)config.mode->width, (LONG)config.mode->height };
+			AdjustWindowRect(&rect, dwStyle, TRUE);
+			
+			nWidth = rect.right - rect.left;
+			nHeight = rect.bottom - rect.top;
+
+			X = (GetSystemMetrics(SM_CXSCREEN) - nWidth) >> 1;
+			Y = (GetSystemMetrics(SM_CYSCREEN) - nHeight) >> 1;
+		}
 
 		HWND hWnd = CreateWindowEx(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 		if (isMain)
@@ -313,14 +323,6 @@ namespace Hooks
 		HWND hWnd = GetForegroundWindow();
 		OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 		return ddraw ? ddraw->hWnd : hWnd;
-	}
-
-	BOOL __stdcall PeekMessageHook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
-	{
-		BOOL res = PeekMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
-		if (!res)
-			Sleep(0);
-		return res;
 	}
 
 	INT __stdcall MessageBoxHook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)
@@ -474,7 +476,6 @@ namespace Hooks
 				PatchFunction(&file, "SetWindowLongA", SetWindowLongHook);
 				PatchFunction(&file, "ShowWindow", ShowWindowHook);
 
-				PatchFunction(&file, "PeekMessageA", PeekMessageHook);
 				PatchFunction(&file, "MessageBoxA", MessageBoxHook);
 
 				PatchFunction(&file, "ShowCursor", ShowCursorHook);
