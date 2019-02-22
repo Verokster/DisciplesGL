@@ -114,7 +114,6 @@ typedef BOOL(__stdcall *WGLSWAPINTERVAL)(INT interval);
 
 typedef const GLubyte* (__stdcall *GLGETSTRING)(GLenum name);
 typedef VOID(__stdcall *GLVERTEX2S)(GLshort x, GLshort y);
-typedef VOID(__stdcall *GLCOLOR4UBV)(const GLubyte* v);
 typedef VOID(__stdcall *GLTEXCOORD2F)(GLfloat s, GLfloat t);
 typedef VOID(__stdcall *GLBEGIN)(GLenum mode);
 typedef VOID(__stdcall *GLEND)();
@@ -124,13 +123,11 @@ typedef VOID(__stdcall *GLLOADIDENTITY)();
 typedef VOID(__stdcall *GLORTHO)(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
 typedef VOID(__stdcall *GLFINISH)();
 typedef VOID(__stdcall *GLENABLE)(GLenum cap);
-typedef VOID(__stdcall *GLDISABLE)(GLenum cap);
 typedef VOID(__stdcall *GLBINDTEXTURE)(GLenum target, GLuint texture);
 typedef VOID(__stdcall *GLDELETETEXTURES)(GLsizei n, const GLuint *textures);
 typedef VOID(__stdcall *GLTEXPARAMETERI)(GLenum target, GLenum pname, GLint param);
 typedef VOID(__stdcall *GLTEXENVI)(GLenum target, GLenum pname, GLint param);
 typedef VOID(__stdcall *GLGETTEXIMAGE)(GLenum target, GLint level, GLenum format, GLenum type, GLvoid* pixels);
-typedef VOID(__stdcall *GLTEXSUBIMAGE1D)(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid* data);
 typedef VOID(__stdcall *GLTEXIMAGE2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels);
 typedef VOID(__stdcall *GLTEXSUBIMAGE2D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels);
 typedef GLenum(__stdcall *GLGENTEXTURES)(GLsizei n, GLuint* textures);
@@ -138,8 +135,6 @@ typedef VOID(__stdcall *GLGETINTEGERV)(GLenum pname, GLint* data);
 typedef VOID(__stdcall *GLCLEAR)(GLbitfield mask);
 typedef VOID(__stdcall *GLCLEARCOLOR)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
 typedef VOID(__stdcall *GLCOLORMASK)(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
-typedef VOID(__stdcall *GLSTENCILFUNC)(GLenum func, GLint ref, GLuint mask);
-typedef VOID(__stdcall *GLSTENCILOP)(GLenum fail, GLenum zfail, GLenum zpass);
 
 #ifdef _DEBUG
 typedef GLenum(__stdcall *GLGETERROR)();
@@ -201,7 +196,6 @@ extern WGLSWAPINTERVAL WGLSwapInterval;
 
 extern GLGETSTRING GLGetString;
 extern GLVERTEX2S GLVertex2s;
-extern GLCOLOR4UBV GLColor4ubv;
 extern GLTEXCOORD2F GLTexCoord2f;
 extern GLBEGIN GLBegin;
 extern GLEND GLEnd;
@@ -211,13 +205,11 @@ extern GLLOADIDENTITY GLLoadIdentity;
 extern GLORTHO GLOrtho;
 extern GLFINISH GLFinish;
 extern GLENABLE GLEnable;
-extern GLDISABLE GLDisable;
 extern GLBINDTEXTURE GLBindTexture;
 extern GLDELETETEXTURES GLDeleteTextures;
 extern GLTEXPARAMETERI GLTexParameteri;
 extern GLTEXENVI GLTexEnvi;
 extern GLGETTEXIMAGE GLGetTexImage;
-extern GLTEXSUBIMAGE1D GLTexSubImage1D;
 extern GLTEXIMAGE2D GLTexImage2D;
 extern GLTEXSUBIMAGE2D GLTexSubImage2D;
 extern GLGENTEXTURES GLGenTextures;
@@ -225,8 +217,6 @@ extern GLGETINTEGERV GLGetIntegerv;
 extern GLCLEAR GLClear;
 extern GLCLEARCOLOR GLClearColor;
 extern GLCOLORMASK GLColorMask;
-extern GLSTENCILFUNC GLStencilFunc;
-extern GLSTENCILOP GLStencilOp;
 
 #ifdef _DEBUG
 extern GLGETERROR GLGetError;

@@ -154,13 +154,13 @@ namespace Config
 			if (config.image.xBRz.type & 0xFE)
 				config.image.xBRz.type = 0;
 
-
+			// F1 - reserved for "About"
 			CHAR buffer[20];
 			if (Config::Get(CONFIG_KEYS, "FpsCounter", "", buffer, sizeof(buffer)))
 			{
 				value = Config::Get(CONFIG_KEYS, "FpsCounter", 0);
 				config.keys.fpsCounter = LOBYTE(value);
-				if (config.keys.fpsCounter > 24)
+				if (config.keys.fpsCounter > 1 && config.keys.fpsCounter > 24)
 					config.keys.fpsCounter = 0;
 			}
 
@@ -168,7 +168,7 @@ namespace Config
 			{
 				value = Config::Get(CONFIG_KEYS, "ImageFilter", 0);
 				config.keys.imageFilter = LOBYTE(value);
-				if (config.keys.imageFilter > 24)
+				if (config.keys.imageFilter > 1 && config.keys.imageFilter > 24)
 					config.keys.imageFilter = 0;
 			}
 
@@ -176,7 +176,7 @@ namespace Config
 			{
 				value = Config::Get(CONFIG_KEYS, "WindowedMode", 0);
 				config.keys.windowedMode = LOBYTE(value);
-				if (config.keys.windowedMode > 24)
+				if (config.keys.windowedMode > 1 && config.keys.windowedMode > 24)
 					config.keys.windowedMode = 0;
 			}
 
@@ -184,7 +184,7 @@ namespace Config
 			{
 				value = Config::Get(CONFIG_KEYS, "AspectRatio", 0);
 				config.keys.aspectRatio = LOBYTE(value);
-				if (config.keys.aspectRatio > 24)
+				if (config.keys.aspectRatio > 1 && config.keys.aspectRatio > 24)
 					config.keys.aspectRatio = 0;
 			}
 
@@ -192,7 +192,7 @@ namespace Config
 			{
 				value = Config::Get(CONFIG_KEYS, "VSync", 0);
 				config.keys.vSync = LOBYTE(value);
-				if (config.keys.vSync > 24)
+				if (config.keys.vSync > 1 && config.keys.vSync > 24)
 					config.keys.vSync = 0;
 			}
 		}

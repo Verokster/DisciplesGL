@@ -36,50 +36,44 @@ DEACTIVATEACTCTX DeactivateActCtxC;
 
 MALLOC MemoryAlloc;
 FREE MemoryFree;
+ALIGNED_MALLOC AlignedAlloc;
+ALIGNED_FREE AlignedFree;
 MEMSET MemorySet;
 MEMCPY MemoryCopy;
-MEMCMP MemoryCompare;
 CEIL MathCeil;
 FLOOR MathFloor;
 ROUND MathRound;
 SPRINTF StrPrint;
 STRCMP StrCompare;
-STRICMP StrCompareInsensitive;
 STRCPY StrCopy;
 STRCAT StrCat;
-STRCHR StrChar;
 STRRCHR StrLastChar;
 STRSTR StrStr;
-STRDUP StrDuplicate;
 WCSTOMBS StrToAnsi;
-FOPEN FileOpen;
-FCLOSE FileClose;
-RAND Random;
-SRAND SeedRandom;
 EXIT Exit;
 
 DWORD
-pAcquireDDThreadLock,
-pCompleteCreateSysmemSurface,
-pD3DParseUnknownCommand,
-pDDGetAttachedSurfaceLcl,
-pDDInternalLock,
-pDDInternalUnlock,
-pDSoundHelp,
-pDirectDrawCreateClipper,
-pDirectDrawCreateEx,
-pDirectDrawEnumerateA,
-pDirectDrawEnumerateExA,
-pDirectDrawEnumerateExW,
-pDirectDrawEnumerateW,
-pDllCanUnloadNow,
-pDllGetClassObject,
-pGetDDSurfaceLocal,
-pGetOLEThunkData,
-pGetSurfaceFromDC,
-pRegisterSpecialCase,
-pReleaseDDThreadLock,
-pSetAppCompatData;
+	pAcquireDDThreadLock,
+	pCompleteCreateSysmemSurface,
+	pD3DParseUnknownCommand,
+	pDDGetAttachedSurfaceLcl,
+	pDDInternalLock,
+	pDDInternalUnlock,
+	pDSoundHelp,
+	pDirectDrawCreateClipper,
+	pDirectDrawCreateEx,
+	pDirectDrawEnumerateA,
+	pDirectDrawEnumerateExA,
+	pDirectDrawEnumerateExW,
+	pDirectDrawEnumerateW,
+	pDllCanUnloadNow,
+	pDllGetClassObject,
+	pGetDDSurfaceLocal,
+	pGetOLEThunkData,
+	pGetSurfaceFromDC,
+	pRegisterSpecialCase,
+	pReleaseDDThreadLock,
+	pSetAppCompatData;
 
 VOID _declspec(naked) __stdcall exAcquireDDThreadLock() { _asm { JMP pAcquireDDThreadLock } }
 VOID _declspec(naked) __stdcall exCompleteCreateSysmemSurface() { _asm { JMP pCompleteCreateSysmemSurface } }
@@ -131,9 +125,12 @@ VOID LoadMsvCRT()
 
 		MemoryAlloc = (MALLOC)GetProcAddress(hLib, "malloc");
 		MemoryFree = (FREE)GetProcAddress(hLib, "free");
+
+		AlignedAlloc = (ALIGNED_MALLOC)GetProcAddress(hLib, "_aligned_malloc");
+		AlignedFree = (ALIGNED_FREE)GetProcAddress(hLib, "_aligned_free");
+
 		MemorySet = (MEMSET)GetProcAddress(hLib, "memset");
 		MemoryCopy = (MEMCPY)GetProcAddress(hLib, "memcpy");
-		MemoryCompare = (MEMCMP)GetProcAddress(hLib, "memcmp");
 
 		MathCeil = (CEIL)GetProcAddress(hLib, "ceil");
 		MathFloor = (FLOOR)GetProcAddress(hLib, "floor");
@@ -141,20 +138,12 @@ VOID LoadMsvCRT()
 		MathRound = round;
 
 		StrCompare = (STRCMP)GetProcAddress(hLib, "strcmp");
-		StrCompareInsensitive = (STRICMP)GetProcAddress(hLib, "_stricmp");
 		StrCopy = (STRCPY)GetProcAddress(hLib, "strcpy");
 		StrCat = (STRCAT)GetProcAddress(hLib, "strcat");
-		StrChar = (STRCHR)GetProcAddress(hLib, "strchr");
 		StrLastChar = (STRRCHR)GetProcAddress(hLib, "strrchr");
 		StrStr = (STRSTR)GetProcAddress(hLib, "strstr");
-		StrDuplicate = (STRDUP)GetProcAddress(hLib, "_strdup");
 		StrToAnsi = (WCSTOMBS)GetProcAddress(hLib, "wcstombs");
 
-		FileOpen = (FOPEN)GetProcAddress(hLib, "fopen");
-		FileClose = (FCLOSE)GetProcAddress(hLib, "fclose");
-
-		Random = (RAND)GetProcAddress(hLib, "rand");
-		SeedRandom = (SRAND)GetProcAddress(hLib, "srand");
 		Exit = (EXIT)GetProcAddress(hLib, "exit");
 	}
 }

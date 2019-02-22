@@ -38,7 +38,6 @@ WGLSWAPINTERVAL WGLSwapInterval;
 
 GLGETSTRING GLGetString;
 GLVERTEX2S GLVertex2s;
-GLCOLOR4UBV GLColor4ubv;
 GLTEXCOORD2F GLTexCoord2f;
 GLBEGIN GLBegin;
 GLEND GLEnd;
@@ -48,13 +47,11 @@ GLLOADIDENTITY GLLoadIdentity;
 GLORTHO GLOrtho;
 GLFINISH GLFinish;
 GLENABLE GLEnable;
-GLDISABLE GLDisable;
 GLBINDTEXTURE GLBindTexture;
 GLDELETETEXTURES GLDeleteTextures;
 GLTEXPARAMETERI GLTexParameteri;
 GLTEXENVI GLTexEnvi;
 GLGETTEXIMAGE GLGetTexImage;
-GLTEXSUBIMAGE1D GLTexSubImage1D;
 GLTEXIMAGE2D GLTexImage2D;
 GLTEXSUBIMAGE2D GLTexSubImage2D;
 GLGENTEXTURES GLGenTextures;
@@ -62,8 +59,6 @@ GLGETINTEGERV GLGetIntegerv;
 GLCLEAR GLClear;
 GLCLEARCOLOR GLClearColor;
 GLCOLORMASK GLColorMask;
-GLSTENCILFUNC GLStencilFunc;
-GLSTENCILOP GLStencilOp;
 
 #ifdef _DEBUG
 GLGETERROR GLGetError;
@@ -217,7 +212,6 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "GetString", (PROC*)&GLGetString);
 		LoadFunction(buffer, PREFIX_GL, "TexCoord2f", (PROC*)&GLTexCoord2f);
 		LoadFunction(buffer, PREFIX_GL, "Vertex2s", (PROC*)&GLVertex2s);
-		LoadFunction(buffer, PREFIX_GL, "Color4ubv", (PROC*)&GLColor4ubv);
 		LoadFunction(buffer, PREFIX_GL, "Begin", (PROC*)&GLBegin);
 		LoadFunction(buffer, PREFIX_GL, "End", (PROC*)&GLEnd);
 		LoadFunction(buffer, PREFIX_GL, "Viewport", (PROC*)&GLViewport);
@@ -226,13 +220,11 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "Ortho", (PROC*)&GLOrtho);
 		LoadFunction(buffer, PREFIX_GL, "Finish", (PROC*)&GLFinish);
 		LoadFunction(buffer, PREFIX_GL, "Enable", (PROC*)&GLEnable);
-		LoadFunction(buffer, PREFIX_GL, "Disable", (PROC*)&GLDisable);
 		LoadFunction(buffer, PREFIX_GL, "BindTexture", (PROC*)&GLBindTexture);
 		LoadFunction(buffer, PREFIX_GL, "DeleteTextures", (PROC*)&GLDeleteTextures);
 		LoadFunction(buffer, PREFIX_GL, "TexParameteri", (PROC*)&GLTexParameteri);
 		LoadFunction(buffer, PREFIX_GL, "TexEnvi", (PROC*)&GLTexEnvi);
 		LoadFunction(buffer, PREFIX_GL, "GetTexImage", (PROC*)&GLGetTexImage);
-		LoadFunction(buffer, PREFIX_GL, "TexSubImage1D", (PROC*)&GLTexSubImage1D);
 		LoadFunction(buffer, PREFIX_GL, "TexImage2D", (PROC*)&GLTexImage2D);
 		LoadFunction(buffer, PREFIX_GL, "TexSubImage2D", (PROC*)&GLTexSubImage2D);
 		LoadFunction(buffer, PREFIX_GL, "GenTextures", (PROC*)&GLGenTextures);
@@ -240,8 +232,6 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "Clear", (PROC*)&GLClear);
 		LoadFunction(buffer, PREFIX_GL, "ClearColor", (PROC*)&GLClearColor);
 		LoadFunction(buffer, PREFIX_GL, "ColorMask", (PROC*)&GLColorMask);
-		LoadFunction(buffer, PREFIX_GL, "StencilFunc", (PROC*)&GLStencilFunc);
-		LoadFunction(buffer, PREFIX_GL, "StencilOp", (PROC*)&GLStencilOp);
 
 #ifdef _DEBUG
 		LoadFunction(buffer, PREFIX_GL, "GetError", (PROC*)&GLGetError);

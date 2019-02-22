@@ -60,7 +60,7 @@ OpenDrawSurface::~OpenDrawSurface()
 VOID OpenDrawSurface::ReleaseBuffer()
 {
 	if (this->indexBuffer)
-		MemoryFree(this->indexBuffer);
+		AlignedFree(this->indexBuffer);
 }
 
 VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp)
@@ -71,7 +71,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp)
 	this->mode.bpp = bpp;
 
 	DWORD size = width * height * (bpp >> 3);
-	this->indexBuffer = MemoryAlloc(size);
+	this->indexBuffer = AlignedAlloc(size, 16);
 	MemoryZero(this->indexBuffer, size);
 }
 
@@ -107,12 +107,6 @@ HRESULT __stdcall OpenDrawSurface::GetPixelFormat(LPDDPIXELFORMAT lpDDPixelForma
 	else
 	{
 		lpDDPixelFormat->dwFlags = DDPF_RGB;
-
-		//lpDDPixelFormat->dwRBitMask = 0x7C00;
-		//lpDDPixelFormat->dwGBitMask = 0x03E0;
-		//lpDDPixelFormat->dwBBitMask = 0x001F;
-		//lpDDPixelFormat->dwRGBAlphaBitMask = 0x8000;
-
 		lpDDPixelFormat->dwRBitMask = 0xF800;
 		lpDDPixelFormat->dwGBitMask = 0x07E0;
 		lpDDPixelFormat->dwBBitMask = 0x001F;
@@ -195,9 +189,6 @@ HRESULT __stdcall OpenDrawSurface::GetAttachedSurface(LPDDSCAPS2 lpDDSCaps, IDra
 
 HRESULT __stdcall OpenDrawSurface::Flip(IDrawSurface7* lpSurface, DWORD dwFlags)
 {
-	//if (this->attachedSurface)
-	//{
-
 	MemoryCopy(this->indexBuffer, this->attachedSurface->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp >> 3));
 	SetEvent(this->ddraw->hDrawEvent);
 	Sleep(0);

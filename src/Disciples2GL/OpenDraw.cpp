@@ -233,7 +233,7 @@ VOID OpenDraw::RenderOld()
 		GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		this->viewport.refresh = TRUE;
 
-		VOID* frameBuffer = MemoryAlloc(maxTexSize * maxTexSize * (this->mode.bpp == 16 && glVersion > GL_VER_1_1 ? sizeof(WORD) : sizeof(DWORD)));
+		VOID* frameBuffer = AlignedAlloc(maxTexSize * maxTexSize * (this->mode.bpp == 16 && glVersion > GL_VER_1_1 ? sizeof(WORD) : sizeof(DWORD)), 16);
 		{
 			FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 			{
@@ -741,7 +741,7 @@ VOID OpenDraw::RenderOld()
 			}
 			delete fpsCounter;
 		}
-		MemoryFree(frameBuffer);
+		AlignedFree(frameBuffer);
 
 		frame = frames;
 		DWORD count = frameCount;
@@ -829,7 +829,7 @@ VOID OpenDraw::RenderMid()
 					GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 					this->viewport.refresh = TRUE;
 
-					VOID* frameBuffer = MemoryAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)));
+					VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)), 16);
 					{
 						FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 						{
@@ -1068,7 +1068,7 @@ VOID OpenDraw::RenderMid()
 						}
 						delete fpsCounter;
 					}
-					MemoryFree(frameBuffer);
+					AlignedFree(frameBuffer);
 				}
 				GLDeleteTextures(1, &textureId);
 			}
@@ -1200,7 +1200,7 @@ VOID OpenDraw::RenderNew()
 									GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 									this->viewport.refresh = TRUE;
 
-									VOID* frameBuffer = MemoryAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)));
+									VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)), 16);
 									{
 										FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 										{
@@ -1523,7 +1523,6 @@ VOID OpenDraw::RenderNew()
 													if (frameFilter == FilterXRBZ || frameFilter == FilterScaleHQ ||
 														frameFilter == FilterXSal || frameFilter == FilterEagle || frameFilter == FilterScaleNx)
 													{
-														GLDisable(GL_STENCIL_TEST);
 														//GLFinish();
 														GLBindFramebuffer(GL_DRAW_FRAMEBUFFER, NULL);
 
@@ -1634,7 +1633,7 @@ VOID OpenDraw::RenderNew()
 										}
 										delete fpsCounter;
 									}
-									MemoryFree(frameBuffer);
+									AlignedFree(frameBuffer);
 								}
 
 								if (viewSize)
@@ -1883,6 +1882,18 @@ VOID OpenDraw::SetWindowedMode()
 		rect->bottom = rect->top + this->mode.height;
 		AdjustWindowRect(rect, WS_WINDOWED, TRUE);
 
+		if (rect->right - rect->left > monWidth)
+		{
+			rect->left = 0;
+			rect->right = monWidth;
+		}
+
+		if (rect->bottom - rect->top > monHeight)
+		{
+			rect->top = 0;
+			rect->bottom = monHeight;
+		}
+
 		this->windowPlacement.ptMinPosition.x = this->windowPlacement.ptMinPosition.y = -1;
 		this->windowPlacement.ptMaxPosition.x = this->windowPlacement.ptMaxPosition.y = -1;
 
@@ -1931,8 +1942,6 @@ HRESULT __stdcall OpenDraw::SetCooperativeLevel(HWND hWnd, DWORD dwFlags)
 		this->RenderStart();
 	}
 
-	//Hooks::CheckRefreshRate();
-
 	return DD_OK;
 }
 
@@ -1944,8 +1953,6 @@ HRESULT __stdcall OpenDraw::SetDisplayMode(DWORD dwWidth, DWORD dwHeight, DWORD 
 
 	this->SetFullscreenMode();
 	this->RenderStart();
-
-	//Hooks::CheckRefreshRate();
 
 	return DD_OK;
 }
