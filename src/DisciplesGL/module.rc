@@ -98,7 +98,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
 FONT 8, "System", 0, 0, 0x1
 BEGIN
     CTEXT           "Disciples I && II\nOpenGL Wrapper",1002,0,6,162,18
-    CTEXT           "Version 1.02   Build 76",IDC_STATIC,0,30,162,8
+    CTEXT           "Version 1.02   Build 78",IDC_STATIC,0,30,162,8
     CTEXT           "Copyright © 2019 Verok",1006,0,48,162,8
 	DEFPUSHBUTTON   "OK",IDC_BTN_OK,65,72,32,14,WS_GROUP
 	CONTROL         "verokster@gmail.com",IDC_LNK_EMAIL,"SysLink",WS_TABSTOP,48,57,72,12
@@ -145,7 +145,7 @@ IDR_SCALENX_FRAGMENT_3X		RCDATA                  "..\\glsl\\scalenx\\fragment_3x
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,2,27,76
+ FILEVERSION 2019,2,27,78
  PRODUCTVERSION 1,0,2,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -162,7 +162,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-            VALUE "FileVersion", "2019.02.27.076"
+            VALUE "FileVersion", "2019.02.27.078"
             VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
             VALUE "OriginalFilename", "C4dll.dll"
             VALUE "ProductVersion", "1.0.2"

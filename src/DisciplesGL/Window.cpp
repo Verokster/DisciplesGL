@@ -743,7 +743,7 @@ namespace Window
 							ddraw->SetFullscreenMode();
 
 						config.windowedMode = !config.windowedMode;
-						Config::Set(CONFIG_DISCIPLE, config.version == 1 ? "InWindow" : "DisplayMode", config.windowedMode);
+						Config::Set(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", config.windowedMode);
 						CheckMenu(hWnd);
 					}
 					ddraw->RenderStart();

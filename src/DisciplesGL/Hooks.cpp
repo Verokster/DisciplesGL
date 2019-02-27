@@ -540,7 +540,7 @@ namespace Hooks
 				PatchFunction(&file, "GetClientRect", GetClientRectHook);
 				PatchFunction(&file, "GetWindowRect", GetWindowRectHook);
 
-				if (config.version == 1)
+				if (config.version)
 				{
 					PatchFunction(&file, "GetCursorPos", GetCursorPosHookV1);
 					PatchFunction(&file, "ClientToScreen", ClientToScreenHook);

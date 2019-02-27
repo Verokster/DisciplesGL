@@ -59,21 +59,13 @@ namespace Config
 
 				if (!StrCompareInsensitive(libraryName, "smackw32.dll"))
 				{
-					config.version = 1;
-					break;
-				}
-				else if (!StrCompareInsensitive(libraryName, "binkw32.dll"))
-				{
-					config.version = 2;
+					config.version = TRUE;
 					break;
 				}
 			}
 		}
 
-		if (!config.version)
-			return FALSE;
-
-		if (config.version == 1 && !Config::Get(CONFIG_DISCIPLE, "DDraw", 1) || config.version == 2 && Config::Get(CONFIG_DISCIPLE, "UseD3D", 0))
+		if (config.version && !Config::Get(CONFIG_DISCIPLE, "DDraw", 1) || !config.version && Config::Get(CONFIG_DISCIPLE, "UseD3D", 0))
 			return FALSE;
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(IDR_MENU));
@@ -81,9 +73,9 @@ namespace Config
 			OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
 			DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
 
-		config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version == 1 ? "InWindow" : "DisplayMode", 0);
+		config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", 0);
 
-		if (config.version == 1)
+		if (config.version)
 			config.mode = modesList;
 		else
 		{
