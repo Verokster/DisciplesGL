@@ -29,10 +29,8 @@
 #include "IDrawClipper.h"
 #include "IDrawSurface7.h"
 
-#pragma once
 class IDraw7 : public IDrawUnknown
 {
-public:
 	// Inherited via IDirectDraw7
 	virtual HRESULT __stdcall Compact();
 	virtual HRESULT __stdcall CreateClipper(DWORD, IDrawClipper**, IUnknown*);

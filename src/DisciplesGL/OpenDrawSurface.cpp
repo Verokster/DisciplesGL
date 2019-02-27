@@ -70,14 +70,40 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp)
 	this->mode.height = height;
 	this->mode.bpp = bpp;
 
-	DWORD size = width * height * (bpp >> 3);
+	bpp >>= 3;
+	if (bpp == 1 && !this->index)
+		bpp = sizeof(DWORD);
+
+	DWORD size = width * height * bpp;
 	this->indexBuffer = AlignedAlloc(size);
 	MemoryZero(this->indexBuffer, size);
 }
 
 VOID OpenDrawSurface::Flush()
 {
-	MemoryCopy(this->indexBuffer, this->attachedSurface->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp >> 3));
+	if (this->mode.bpp == 8)
+	{
+		BYTE* source = (BYTE*)this->attachedSurface->indexBuffer;
+		DWORD* destination = (DWORD*)this->indexBuffer;
+
+		DWORD copyHeight = this->mode.height;
+		do
+		{
+			BYTE* src = source;
+			source += this->mode.width;
+
+			DWORD* dest = destination;
+			destination += this->mode.width;
+
+			DWORD copyWidth = this->mode.width;
+			do
+				*dest++ = *(DWORD*)&this->attachedPalette->entries[*src++];
+			while (--copyWidth);
+		} while (--copyHeight);
+	}
+	else
+		MemoryCopy(this->indexBuffer, this->attachedSurface->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp >> 3));
+
 	SetEvent(this->ddraw->hDrawEvent);
 	Sleep(0);
 }
@@ -269,6 +295,16 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 				src.right = surface->mode.width;
 				src.bottom = surface->mode.height;
 				lpSrcRect = &src;
+			}
+
+			RECT dst;
+			if (!lpDestRect)
+			{
+				dst.left = 0;
+				dst.top = 0;
+				dst.right = this->mode.width;
+				dst.bottom = this->mode.height;
+				lpDestRect = &dst;
 			}
 
 			DWORD sWidth;

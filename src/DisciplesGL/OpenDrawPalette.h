@@ -23,20 +23,21 @@
 */
 
 #pragma once
-#include "IDrawClipper.h"
+#include "IDrawPalette.h"
 
 class OpenDraw;
 
-class OpenDrawClipper : public IDrawClipper
+class OpenDrawPalette : public IDrawPalette
 {
 public:
 	OpenDraw* ddraw;
-	HWND hWnd;
+	PALETTEENTRY entries[256];
 
-	OpenDrawClipper(IDrawUnknown**, OpenDraw*);
-	~OpenDrawClipper();
+	OpenDrawPalette(IDrawUnknown**, OpenDraw*);
+	~OpenDrawPalette();
 
-	// Inherited via IDrawClipper
-	HRESULT __stdcall SetHWnd(DWORD, HWND);
+	// Inherited via IDrawPalette
+	HRESULT __stdcall GetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY) override;
+	HRESULT __stdcall SetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY) override;
 };
 

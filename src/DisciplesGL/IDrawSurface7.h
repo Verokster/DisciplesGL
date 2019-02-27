@@ -30,7 +30,6 @@
 
 class IDrawSurface7 : public IDrawUnknown
 {
-public:
 	// Inherited via IDirectDrawSurface7
 	virtual HRESULT __stdcall AddAttachedSurface(IDrawSurface7*);
 	virtual HRESULT __stdcall AddOverlayDirtyRect(LPRECT);

@@ -115,7 +115,6 @@ HMODULE hGLModule;
 
 DWORD glVersion;
 DWORD glCapsClampToEdge;
-BOOL glCapsBGRA;
 
 namespace GL
 {
@@ -328,16 +327,10 @@ namespace GL
 			{
 				CHAR* extensions = (CHAR*)GLGetString(GL_EXTENSIONS);
 				if (extensions)
-				{
 					glCapsClampToEdge = (StrStr(extensions, "GL_EXT_texture_edge_clamp") || StrStr(extensions, "GL_SGIS_texture_edge_clamp")) ? GL_CLAMP_TO_EDGE : GL_CLAMP;
-					glCapsBGRA = StrStr(extensions, "GL_EXT_bgra") || StrStr(extensions, "GL_EXT_texture_format_BGRA8888") || StrStr(extensions, "GL_APPLE_texture_format_BGRA8888");
-				}
 			}
 			else
-			{
 				glCapsClampToEdge = GL_CLAMP_TO_EDGE;
-				glCapsBGRA = TRUE;
-			}
 		}
 
 		if (!glVersion)

@@ -28,7 +28,8 @@
 
 ConfigItems config;
 
-DisplayMode modesList[3] = {
+DisplayMode modesList[] = {
+	640, 480, 8,
 	800, 600, 16,
 	1024, 768, 16,
 	1280, 1024, 16
@@ -45,7 +46,34 @@ namespace Config
 		*p = NULL;
 		StrCopy(p, "\\disciple.ini");
 
-		if (Config::Get(CONFIG_DISCIPLE, "UseD3D", 0))
+		DWORD base = (DWORD)hModule;
+		PIMAGE_NT_HEADERS headNT = (PIMAGE_NT_HEADERS)((BYTE*)base + ((PIMAGE_DOS_HEADER)hModule)->e_lfanew);
+
+		PIMAGE_DATA_DIRECTORY dataDir = &headNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+		if (dataDir->Size)
+		{
+			PIMAGE_IMPORT_DESCRIPTOR imports = (PIMAGE_IMPORT_DESCRIPTOR)(base + dataDir->VirtualAddress);
+			for (DWORD idx = 0; imports->Name; ++idx, ++imports)
+			{
+				CHAR* libraryName = (CHAR*)(base + imports->Name);
+
+				if (!StrCompareInsensitive(libraryName, "smackw32.dll"))
+				{
+					config.version = 1;
+					break;
+				}
+				else if (!StrCompareInsensitive(libraryName, "binkw32.dll"))
+				{
+					config.version = 2;
+					break;
+				}
+			}
+		}
+
+		if (!config.version)
+			return FALSE;
+
+		if (config.version == 1 && !Config::Get(CONFIG_DISCIPLE, "DDraw", 1) || config.version == 2 && Config::Get(CONFIG_DISCIPLE, "UseD3D", 0))
 			return FALSE;
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(IDR_MENU));
@@ -53,12 +81,17 @@ namespace Config
 			OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
 			DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
 
-		config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, "DisplayMode", 0);
+		config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version == 1 ? "InWindow" : "DisplayMode", 0);
 
-		DWORD modeIdx = Config::Get(CONFIG_DISCIPLE, "DisplaySize", 0);
-		if (modeIdx > 2)
-			modeIdx = 0;
-		config.mode = &modesList[modeIdx];
+		if (config.version == 1)
+			config.mode = modesList;
+		else
+		{
+			DWORD modeIdx = Config::Get(CONFIG_DISCIPLE, "DisplaySize", 0);
+			if (modeIdx > 2)
+				modeIdx = 0;
+			config.mode = &modesList[modeIdx + 1];
+		}
 
 		config.isExist = !(BOOL)Config::Get(CONFIG_WRAPPER, "ReInit", TRUE);
 		Config::Set(CONFIG_WRAPPER, "ReInit", FALSE);

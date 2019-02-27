@@ -23,20 +23,21 @@
 */
 
 #pragma once
-#include "IDrawPalette.h"
 
-class OpenDraw;
+#include "ExtraTypes.h"
 
-class OpenDrawPalette : public IDrawPalette
+#define CONFIG_WRAPPER "Wrapper"
+#define CONFIG_DISCIPLE "Disciple"
+#define CONFIG_KEYS "FunktionKeys"
+
+extern ConfigItems config;
+extern DisplayMode modesList[4];
+
+namespace Config
 {
-public:
-	OpenDraw* ddraw;
-	PALETTEENTRY entries[256];
-
-	OpenDrawPalette(IDrawUnknown**, OpenDraw*);
-	~OpenDrawPalette();
-
-	// Inherited via IDrawPalette
-	HRESULT __stdcall GetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY);
-};
-
+	BOOL __fastcall Load();
+	INT __fastcall Get(const CHAR* app, const CHAR* key, INT default);
+	DWORD __fastcall Get(const CHAR* app, const CHAR* key, CHAR* default, CHAR* returnString, DWORD nSize);
+	BOOL __fastcall Set(const CHAR* app, const CHAR* key, INT value);
+	BOOL __fastcall Set(const CHAR* app, const CHAR* key, CHAR* value);
+}

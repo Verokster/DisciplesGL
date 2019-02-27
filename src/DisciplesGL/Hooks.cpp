@@ -24,6 +24,7 @@
 
 #include "stdafx.h"
 #include "Shellapi.h"
+#include "Objbase.h"
 #include "Hooks.h"
 #include "Main.h"
 #include "Config.h"
@@ -377,7 +378,43 @@ namespace Hooks
 		return FALSE;
 	}
 
-	BOOL __stdcall GetCursorPosHook(LPPOINT lpPoint)
+	BOOL __stdcall GetCursorPosHookV1(LPPOINT lpPoint)
+	{
+		if (GetCursorPos(lpPoint))
+		{
+			RECT rect;
+			if (GetClientRect(hWndMain, &rect) &&
+				ClientToScreen(hWndMain, (LPPOINT)&rect))
+			{
+				FLOAT fx = (FLOAT)config.mode->width / rect.right;
+				FLOAT fy = (FLOAT)config.mode->height / rect.bottom;
+
+				POINT offset = { 0, 0 };
+				if (config.image.aspect && fx != fy)
+				{
+					if (fx < fy)
+					{
+						fx = fy;
+						offset.x = (rect.right - LONG((FLOAT)config.mode->width / fx)) >> 1;
+					}
+					else
+					{
+						fy = fx;
+						offset.y = (rect.bottom - LONG((FLOAT)config.mode->height / fy)) >> 1;
+					}
+				}
+
+				lpPoint->x = LONG(fx * (lpPoint->x - offset.x - rect.left));
+				lpPoint->y = LONG(fy * (lpPoint->y - offset.y - rect.top));
+			}
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	BOOL __stdcall GetCursorPosHookV2(LPPOINT lpPoint)
 	{
 		if (GetCursorPos(lpPoint))
 		{
@@ -446,12 +483,30 @@ namespace Hooks
 		return SetCursorPos(X, Y);
 	}
 
+	BOOL __stdcall ClientToScreenHook(HWND hWnd, LPPOINT lpPoint)
+	{
+		if (hWnd == hWndMain)
+			return TRUE;
+
+		return ClientToScreen(hWnd, lpPoint);
+	}
+
 	INT __stdcall GetDeviceCapsHook(HDC hdc, INT index)
 	{
 		if (index == BITSPIXEL)
 			return 16;
 
 		return GetDeviceCaps(hdc, index);
+	}
+
+	IID CLSID_DirectDraw = { 0xD7B70EE0, 0x4340, 0x11CF, 0xB0, 0x63, 0x00, 0x20, 0xAF, 0xC2, 0xCD, 0x35 };
+
+	HRESULT __stdcall CoCreateInstanceHook(REFCLSID rclsid, LPUNKNOWN pUnkOuter, DWORD dwClsContext, REFIID riid, LPVOID* ppv)
+	{
+		if (!MemoryCompare((VOID*)&rclsid, &CLSID_DirectDraw, sizeof(IID)))
+			return Main::DrawCreateEx(NULL, ppv, riid, NULL);
+
+		return CoCreateInstance(rclsid, pUnkOuter, dwClsContext, riid, ppv);
 	}
 
 	BOOL Load()
@@ -463,9 +518,10 @@ namespace Hooks
 		{
 			MappedFile file = { hModule, NULL, NULL, NULL };
 			{
-				PatchFunction(&file, "DirectDrawEnumerateExA", Main::DirectDrawEnumerateEx);
-				PatchFunction(&file, "DirectDrawCreate", Main::DirectDrawCreate);
-				PatchFunction(&file, "DirectDrawCreateEx", Main::DirectDrawCreateEx);
+				PatchFunction(&file, "CoCreateInstance", CoCreateInstanceHook);
+				PatchFunction(&file, "DirectDrawEnumerateExA", Main::DrawEnumerateEx);
+				PatchFunction(&file, "DirectDrawCreate", Main::DrawCreate);
+				PatchFunction(&file, "DirectDrawCreateEx", Main::DrawCreateEx);
 
 				PatchFunction(&file, "GetDeviceCaps", GetDeviceCapsHook);
 				PatchFunction(&file, "GetForegroundWindow", GetForegroundWindowHook);
@@ -484,8 +540,16 @@ namespace Hooks
 				PatchFunction(&file, "GetClientRect", GetClientRectHook);
 				PatchFunction(&file, "GetWindowRect", GetWindowRectHook);
 
-				PatchFunction(&file, "GetCursorPos", GetCursorPosHook);
-				PatchFunction(&file, "SetCursorPos", SetCursorPosHook);
+				if (config.version == 1)
+				{
+					PatchFunction(&file, "GetCursorPos", GetCursorPosHookV1);
+					PatchFunction(&file, "ClientToScreen", ClientToScreenHook);
+				}
+				else
+				{
+					PatchFunction(&file, "GetCursorPos", GetCursorPosHookV2);
+					PatchFunction(&file, "SetCursorPos", SetCursorPosHook);
+				}
 			}
 
 			if (file.address)
@@ -497,8 +561,6 @@ namespace Hooks
 			if (file.hFile)
 				CloseHandle(file.hFile);
 		}
-
-		PatchNop(0x0055EB6F, 5);
 
 		return TRUE;
 	}

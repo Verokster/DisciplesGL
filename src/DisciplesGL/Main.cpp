@@ -31,20 +31,20 @@ OpenDraw* drawList;
 
 namespace Main
 {
-	HRESULT __stdcall DirectDrawEnumerateEx(LPDDENUMCALLBACKEXA lpCallback, LPVOID lpContext, DWORD dwFlags)
+	HRESULT __stdcall DrawEnumerateEx(LPDDENUMCALLBACKEXA lpCallback, LPVOID lpContext, DWORD dwFlags)
 	{
 		GUID id = { 0x51221AA6, 0xC5DA, 0x468F, 0x82, 0x31, 0x68, 0x0E, 0xC9, 0x03, 0xA3, 0xB8 };
 		lpCallback(&id, "OpenGL Wrapper", "OpenGL Wrapper", lpContext, NULL);
 		return DD_OK;
 	}
 
-	HRESULT __stdcall DirectDrawCreate(GUID* lpGUID, LPDIRECTDRAW* lplpDD, IUnknown* pUnkOuter)
+	HRESULT __stdcall DrawCreate(GUID* lpGUID, LPDIRECTDRAW* lplpDD, IUnknown* pUnkOuter)
 	{
 		*lplpDD = (LPDIRECTDRAW)new OpenDraw((IDrawUnknown**)&drawList);
 		return DD_OK;
 	}
 
-	HRESULT __stdcall DirectDrawCreateEx(GUID* lpGuid, LPVOID* lplpDD, const IID* const iid, IUnknown* pUnkOuter)
+	HRESULT __stdcall DrawCreateEx(GUID* lpGuid, LPVOID* lplpDD, REFIID iid, IUnknown* pUnkOuter)
 	{
 		*lplpDD = new OpenDraw((IDrawUnknown**)&drawList);
 		return DD_OK;

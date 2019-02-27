@@ -22,27 +22,17 @@
 	SOFTWARE.
 */
 
-#include "stdafx.h"
-#include "OpenDrawPalette.h"
-#include "OpenDraw.h"
+#pragma once
 
-OpenDrawPalette::OpenDrawPalette(IDrawUnknown** list, OpenDraw* lpDD)
+#include "IDrawUnknown.h"
+
+class IDrawClipper : public IDrawUnknown
 {
-	this->refCount = 1;
-	this->list = list;
-	this->last = *list;
-	*list = this;
-
-	this->ddraw = lpDD;
-}
-
-OpenDrawPalette::~OpenDrawPalette()
-{
-	IDrawDestruct(this);
-}
-
-HRESULT __stdcall OpenDrawPalette::GetEntries(DWORD dwFlags, DWORD dwBase, DWORD dwNumEntries, LPPALETTEENTRY lpEntries)
-{
-	MemoryCopy(lpEntries, this->entries + dwBase, dwNumEntries * sizeof(PALETTEENTRY));
-	return DD_OK;
-}
+	// Inherited via IDirectDrawClipper
+	virtual HRESULT __stdcall GetClipList(LPRECT, LPRGNDATA, LPDWORD);
+	virtual HRESULT __stdcall GetHWnd(HWND*);
+	virtual HRESULT __stdcall Initialize(LPDIRECTDRAW, DWORD);
+	virtual HRESULT __stdcall IsClipListChanged(BOOL*);
+	virtual HRESULT __stdcall SetClipList(LPRGNDATA, DWORD);
+	virtual HRESULT __stdcall SetHWnd(DWORD, HWND);
+};

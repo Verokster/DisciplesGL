@@ -272,7 +272,6 @@ extern GLFRAMEBUFFERRENDERBUFFER GLFramebufferRenderbuffer;
 
 extern DWORD glVersion;
 extern DWORD glCapsClampToEdge;
-extern BOOL glCapsBGRA;
 
 namespace GL
 {

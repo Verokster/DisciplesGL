@@ -36,11 +36,9 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 	{
-		hDllModule = hModule;
-
 		LoadMsvCRT();
-		LoadDDraw();
 
+		hDllModule = hModule;
 		if (Config::Load())
 		{
 			Hooks::Load();

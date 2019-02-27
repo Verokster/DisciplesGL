@@ -480,17 +480,15 @@ namespace Window
 	{
 		switch (uMsg)
 		{
-		case WM_ERASEBKGND:
+		case WM_PAINT:
 		{
-			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-			if (ddraw && !config.windowedMode)
+			PAINTSTRUCT paint;
+			HDC hDc = BeginPaint(hWnd, &paint);
+			if (hDc)
 			{
-				RECT rc;
-				GetClientRect(hWnd, &rc);
-				FillRect((HDC)wParam, &rc, (HBRUSH)GetStockObject(BLACK_BRUSH));
-				return TRUE;
+				EndPaint(hWnd, &paint);
+				return NULL;
 			}
-			return NULL;
 		}
 
 		case WM_MOVE:
@@ -745,7 +743,7 @@ namespace Window
 							ddraw->SetFullscreenMode();
 
 						config.windowedMode = !config.windowedMode;
-						Config::Set(CONFIG_DISCIPLE, "DisplayMode", config.windowedMode);
+						Config::Set(CONFIG_DISCIPLE, config.version == 1 ? "InWindow" : "DisplayMode", config.windowedMode);
 						CheckMenu(hWnd);
 					}
 					ddraw->RenderStart();

@@ -134,6 +134,7 @@ struct VideoFile
 
 struct ConfigItems
 {
+	DWORD version;
 	BOOL windowedMode;
 	DisplayMode* mode;
 	

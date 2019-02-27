@@ -24,20 +24,14 @@
 
 #pragma once
 
-#include "ExtraTypes.h"
+#include "IDrawUnknown.h"
 
-#define CONFIG_WRAPPER "Wrapper"
-#define CONFIG_DISCIPLE "Disciple"
-#define CONFIG_KEYS "FunktionKeys"
-
-extern ConfigItems config;
-extern DisplayMode modesList[3];
-
-namespace Config
+class IDrawPalette : public IDrawUnknown
 {
-	BOOL __fastcall Load();
-	INT __fastcall Get(const CHAR* app, const CHAR* key, INT default);
-	DWORD __fastcall Get(const CHAR* app, const CHAR* key, CHAR* default, CHAR* returnString, DWORD nSize);
-	BOOL __fastcall Set(const CHAR* app, const CHAR* key, INT value);
-	BOOL __fastcall Set(const CHAR* app, const CHAR* key, CHAR* value);
-}
+	// Inherited via IDirectDrawPalette
+	virtual HRESULT __stdcall GetCaps(LPDWORD);
+	virtual HRESULT __stdcall GetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY);
+	virtual HRESULT __stdcall Initialize(LPDIRECTDRAW, DWORD, LPPALETTEENTRY);
+	virtual HRESULT __stdcall SetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY);
+};
+

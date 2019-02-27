@@ -71,13 +71,13 @@ public:
 	VOID RenderNew();
 
 	// Inherited via  IDraw
-	HRESULT __stdcall OpenDraw::QueryInterface(REFIID, LPVOID*);
-	ULONG __stdcall Release();
-	HRESULT __stdcall CreateClipper(DWORD, IDrawClipper**, IUnknown*);
-	HRESULT __stdcall CreateSurface(LPDDSURFACEDESC2, IDrawSurface7**, IUnknown*);
-	HRESULT __stdcall SetCooperativeLevel(HWND, DWORD);
-	HRESULT __stdcall SetDisplayMode(DWORD, DWORD, DWORD, DWORD, DWORD);
-	HRESULT __stdcall EnumDisplayModes(DWORD, LPDDSURFACEDESC2, LPVOID, LPDDENUMMODESCALLBACK2);
-	HRESULT __stdcall GetDisplayMode(LPDDSURFACEDESC2);
-	HRESULT __stdcall CreatePalette(DWORD, LPPALETTEENTRY, IDrawPalette**, IUnknown*);
+	HRESULT __stdcall OpenDraw::QueryInterface(REFIID, LPVOID*) override;
+	ULONG __stdcall Release() override;
+	HRESULT __stdcall CreateClipper(DWORD, IDrawClipper**, IUnknown*) override;
+	HRESULT __stdcall CreateSurface(LPDDSURFACEDESC2, IDrawSurface7**, IUnknown*) override;
+	HRESULT __stdcall SetCooperativeLevel(HWND, DWORD) override;
+	HRESULT __stdcall SetDisplayMode(DWORD, DWORD, DWORD, DWORD, DWORD) override;
+	HRESULT __stdcall EnumDisplayModes(DWORD, LPDDSURFACEDESC2, LPVOID, LPDDENUMMODESCALLBACK2) override;
+	HRESULT __stdcall GetDisplayMode(LPDDSURFACEDESC2) override;
+	HRESULT __stdcall CreatePalette(DWORD, LPPALETTEENTRY, IDrawPalette**, IUnknown*) override;
 };

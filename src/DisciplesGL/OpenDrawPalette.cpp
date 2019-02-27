@@ -22,17 +22,33 @@
 	SOFTWARE.
 */
 
-#pragma once
+#include "stdafx.h"
+#include "OpenDrawPalette.h"
+#include "OpenDraw.h"
 
-#include "IDrawUnknown.h"
-
-class IDrawPalette : public IDrawUnknown
+OpenDrawPalette::OpenDrawPalette(IDrawUnknown** list, OpenDraw* lpDD)
 {
-public:
-	// Inherited via IDirectDrawPalette
-	virtual HRESULT __stdcall GetCaps(LPDWORD);
-	virtual HRESULT __stdcall GetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY);
-	virtual HRESULT __stdcall Initialize(LPDIRECTDRAW, DWORD, LPPALETTEENTRY);
-	virtual HRESULT __stdcall SetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY);
-};
+	this->refCount = 1;
+	this->list = list;
+	this->last = *list;
+	*list = this;
 
+	this->ddraw = lpDD;
+}
+
+OpenDrawPalette::~OpenDrawPalette()
+{
+	IDrawDestruct(this);
+}
+
+HRESULT __stdcall OpenDrawPalette::GetEntries(DWORD dwFlags, DWORD dwBase, DWORD dwNumEntries, LPPALETTEENTRY lpEntries)
+{
+	MemoryCopy(lpEntries, this->entries + dwBase, dwNumEntries * sizeof(PALETTEENTRY));
+	return DD_OK;
+}
+
+HRESULT __stdcall OpenDrawPalette::SetEntries(DWORD dwFlags, DWORD dwBase, DWORD dwNumEntries, LPPALETTEENTRY lpEntries)
+{
+	MemoryCopy(this->entries + dwBase, lpEntries, dwNumEntries * sizeof(PALETTEENTRY));
+	return DD_OK;
+}

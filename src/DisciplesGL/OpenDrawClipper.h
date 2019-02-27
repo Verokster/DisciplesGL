@@ -23,17 +23,20 @@
 */
 
 #pragma once
+#include "IDrawClipper.h"
 
-#include "IDrawUnknown.h"
+class OpenDraw;
 
-class IDrawClipper : public IDrawUnknown
+class OpenDrawClipper : public IDrawClipper
 {
 public:
-	// Inherited via IDirectDrawClipper
-	virtual HRESULT __stdcall GetClipList(LPRECT, LPRGNDATA, LPDWORD);
-	virtual HRESULT __stdcall GetHWnd(HWND*);
-	virtual HRESULT __stdcall Initialize(LPDIRECTDRAW, DWORD);
-	virtual HRESULT __stdcall IsClipListChanged(BOOL*);
-	virtual HRESULT __stdcall SetClipList(LPRGNDATA, DWORD);
-	virtual HRESULT __stdcall SetHWnd(DWORD, HWND);
+	OpenDraw* ddraw;
+	HWND hWnd;
+
+	OpenDrawClipper(IDrawUnknown**, OpenDraw*);
+	~OpenDrawClipper();
+
+	// Inherited via IDrawClipper
+	HRESULT __stdcall SetHWnd(DWORD, HWND) override;
 };
+

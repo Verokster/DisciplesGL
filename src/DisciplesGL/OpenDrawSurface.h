@@ -53,20 +53,20 @@ public:
 	VOID Flush();
 
 	// Inherited via IDrawSurface
-	ULONG __stdcall Release();
-	HRESULT __stdcall Blt(LPRECT, IDrawSurface7*, LPRECT, DWORD, LPDDBLTFX);
-	HRESULT __stdcall BltFast(DWORD, DWORD, IDrawSurface7*, LPRECT, DWORD);
-	HRESULT __stdcall GetPixelFormat(LPDDPIXELFORMAT);
-	HRESULT __stdcall GetSurfaceDesc(LPDDSURFACEDESC2);
-	HRESULT __stdcall Lock(LPRECT, LPDDSURFACEDESC2, DWORD, HANDLE);
-	HRESULT __stdcall SetClipper(IDrawClipper*);
-	HRESULT __stdcall GetClipper(IDrawClipper**);
-	HRESULT __stdcall SetColorKey(DWORD, LPDDCOLORKEY);
+	ULONG __stdcall Release() override;
+	HRESULT __stdcall Blt(LPRECT, IDrawSurface7*, LPRECT, DWORD, LPDDBLTFX) override;
+	HRESULT __stdcall BltFast(DWORD, DWORD, IDrawSurface7*, LPRECT, DWORD) override;
+	HRESULT __stdcall GetPixelFormat(LPDDPIXELFORMAT) override;
+	HRESULT __stdcall GetSurfaceDesc(LPDDSURFACEDESC2) override;
+	HRESULT __stdcall Lock(LPRECT, LPDDSURFACEDESC2, DWORD, HANDLE) override;
+	HRESULT __stdcall SetClipper(IDrawClipper*) override;
+	HRESULT __stdcall GetClipper(IDrawClipper**) override;
+	HRESULT __stdcall SetColorKey(DWORD, LPDDCOLORKEY) override;
 
-	HRESULT __stdcall GetAttachedSurface(LPDDSCAPS2, IDrawSurface7**);
-	HRESULT __stdcall GetColorKey(DWORD, LPDDCOLORKEY);
-	HRESULT __stdcall Flip(IDrawSurface7*, DWORD);
-	HRESULT __stdcall SetPalette(IDrawPalette*);
-	HRESULT __stdcall GetPalette(IDrawPalette**);
+	HRESULT __stdcall GetAttachedSurface(LPDDSCAPS2, IDrawSurface7**) override;
+	HRESULT __stdcall GetColorKey(DWORD, LPDDCOLORKEY) override;
+	HRESULT __stdcall Flip(IDrawSurface7*, DWORD) override;
+	HRESULT __stdcall SetPalette(IDrawPalette*) override;
+	HRESULT __stdcall GetPalette(IDrawPalette**) override;
 };
 

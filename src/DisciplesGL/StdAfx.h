@@ -32,18 +32,9 @@
 #include "ddraw.h"
 #include "ExtraTypes.h"
 
-#define WC_DRAW "drawclass"
+#define WC_DRAW "7903f211-51ca-4a51-9ec5-e1301db2d24d"
 #define WS_WINDOWED (WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS)
 #define WS_FULLSCREEN (WS_POPUP | WS_SYSMENU | WS_VISIBLE | WS_CLIPSIBLINGS | WS_MAXIMIZE)
-
-typedef DWORD(__stdcall *AIL_WAVEOUTOPEN)(LPVOID driver, DWORD a1, DWORD a2, LPPCMWAVEFORMAT waveFormat);
-typedef LPVOID(__stdcall *AIL_OPEN_STREAM)(LPVOID driver, CHAR* filePath, DWORD unknown);
-typedef DWORD(__stdcall *AIL_STREAM_POSITION)(LPVOID stream);
-typedef VOID(__stdcall *AIL_SET_STREAM_POSITION)(LPVOID stream, DWORD position);
-
-typedef HRESULT(__stdcall *DIRECTDRAWCREATE)(GUID* lpGUID, LPDIRECTDRAW* lplpDD, IUnknown* pUnkOuter);
-
-extern DIRECTDRAWCREATE DDCreate;
 
 typedef HANDLE(__stdcall *CREATEACTCTXA)(ACTCTX* pActCtx);
 typedef VOID(__stdcall *RELEASEACTCTX)(HANDLE hActCtx);
@@ -60,10 +51,12 @@ typedef VOID(__cdecl *FREE)(VOID*);
 typedef VOID*(__cdecl *ALIGNED_MALLOC)(size_t, size_t);
 typedef VOID*(__cdecl *MEMSET)(VOID*, INT, size_t);
 typedef VOID*(__cdecl *MEMCPY)(VOID*, const VOID*, size_t);
+typedef INT(__cdecl *MEMCMP)(const VOID*, const VOID*, size_t);
 typedef DOUBLE(__cdecl *CEIL)(DOUBLE);
 typedef DOUBLE(__cdecl *FLOOR)(DOUBLE);
 typedef INT(__cdecl *SPRINTF)(CHAR*, const CHAR*, ...);
 typedef INT(__cdecl *STRCMP)(const CHAR*, const CHAR*);
+typedef INT(__cdecl *STRICMP)(const CHAR*, const CHAR*);
 typedef CHAR*(__cdecl *STRCPY)(CHAR*, const CHAR*);
 typedef CHAR*(__cdecl *STRCAT)(CHAR*, const CHAR*);
 typedef CHAR*(__cdecl *STRRCHR)(const CHAR*, INT);
@@ -78,10 +71,12 @@ extern MALLOC AlignedAlloc;
 extern FREE AlignedFree;
 extern MEMSET MemorySet;
 extern MEMCPY MemoryCopy;
+extern MEMCMP MemoryCompare;
 extern CEIL MathCeil;
 extern FLOOR MathFloor;
 extern SPRINTF StrPrint;
 extern STRCMP StrCompare;
+extern STRICMP StrCompareInsensitive;
 extern STRCPY StrCopy;
 extern STRCAT StrCat;
 extern STRRCHR StrLastChar;
@@ -89,13 +84,12 @@ extern STRSTR StrStr;
 extern WCSTOMBS StrToAnsi;
 extern EXIT Exit;
 
-DOUBLE __fastcall MathRound(DOUBLE);
-
 #define MemoryZero(destination,length) MemorySet(destination,0,length)
+
+DOUBLE __fastcall MathRound(DOUBLE);
 
 extern HMODULE hDllModule;
 extern HANDLE hActCtx;
 
 VOID LoadKernel32();
 VOID LoadMsvCRT();
-VOID LoadDDraw();
