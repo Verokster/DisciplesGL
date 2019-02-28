@@ -32,26 +32,6 @@ RELEASEACTCTX ReleaseActCtxC;
 ACTIVATEACTCTX ActivateActCtxC;
 DEACTIVATEACTCTX DeactivateActCtxC;
 
-MALLOC MemoryAlloc;
-FREE MemoryFree;
-ALIGNED_MALLOC MemoryAlignedAlloc;
-MALLOC AlignedAlloc;
-FREE AlignedFree;
-MEMSET MemorySet;
-MEMCPY MemoryCopy;
-MEMCMP MemoryCompare;
-CEIL MathCeil;
-FLOOR MathFloor;
-SPRINTF StrPrint;
-STRCMP StrCompare;
-STRICMP StrCompareInsensitive;
-STRCPY StrCopy;
-STRCAT StrCat;
-STRRCHR StrLastChar;
-STRSTR StrStr;
-WCSTOMBS StrToAnsi;
-EXIT Exit;
-
 extern "C"
 {
 	VOID __stdcall _c4ltoa45(DWORD, DWORD, DWORD);
@@ -135,9 +115,54 @@ DOUBLE __fastcall MathRound(DOUBLE number)
 	return floorVal + 0.5f > number ? floorVal : MathCeil(number);
 }
 
-VOID* __cdecl AlignedAllocFunc(size_t size)
+typedef VOID*(__cdecl *MALLOC)(size_t);
+typedef VOID(__cdecl *FREE)(VOID*);
+
+struct Aligned
 {
-	return MemoryAlignedAlloc(size, 16);
+	Aligned* last;
+	VOID* data;
+	VOID* block;
+} *alignedList;
+
+VOID* __fastcall AlignedAlloc(size_t size)
+{
+	Aligned* entry = (Aligned*)MemoryAlloc(sizeof(Aligned));
+	entry->last = alignedList;
+	alignedList = entry;
+
+	entry->data = MemoryAlloc(size + 16);
+	entry->block = (VOID*)(((DWORD)entry->data + 16) & 0xFFFFFFF0);
+
+	return entry->block;
+}
+
+VOID __fastcall AlignedFree(VOID* block)
+{
+	Aligned* entry = alignedList;
+	if (entry)
+	{
+		if (entry->block == block)
+		{
+			MemoryFree(entry->data);
+			MemoryFree(entry);
+			alignedList = NULL;
+			return;
+		}
+		else while (entry->last)
+		{
+			if (entry->last->block == block)
+			{
+				Aligned* last = entry->last->last;
+				MemoryFree(entry->last->data);
+				MemoryFree(entry->last);
+				entry->last = last;
+				return;
+			}
+
+			entry = entry->last;
+		}
+	}
 }
 
 VOID LoadKernel32()
@@ -149,47 +174,5 @@ VOID LoadKernel32()
 		ReleaseActCtxC = (RELEASEACTCTX)GetProcAddress(hLib, "ReleaseActCtx");
 		ActivateActCtxC = (ACTIVATEACTCTX)GetProcAddress(hLib, "ActivateActCtx");
 		DeactivateActCtxC = (DEACTIVATEACTCTX)GetProcAddress(hLib, "DeactivateActCtx");
-	}
-}
-
-VOID LoadMsvCRT()
-{
-	HMODULE hLib = GetModuleHandle("MSVCRT.dll");
-	if (!hLib)
-		hLib = LoadLibrary("MSVCRT.dll");
-	if (hLib)
-	{
-		StrPrint = (SPRINTF)GetProcAddress(hLib, "sprintf");
-
-		MemoryAlloc = (MALLOC)GetProcAddress(hLib, "malloc");
-		MemoryFree = (FREE)GetProcAddress(hLib, "free");
-
-		MemoryAlignedAlloc = (ALIGNED_MALLOC)GetProcAddress(hLib, "_aligned_malloc");
-		if (MemoryAlignedAlloc)
-		{
-			AlignedAlloc = AlignedAllocFunc;
-			AlignedFree = (FREE)GetProcAddress(hLib, "_aligned_free");
-		}
-		else
-		{
-			AlignedAlloc = MemoryAlloc;
-			AlignedFree = MemoryFree;
-		}
-
-		MemorySet = (MEMSET)GetProcAddress(hLib, "memset");
-		MemoryCopy = (MEMCPY)GetProcAddress(hLib, "memcpy");
-		MemoryCompare = (MEMCMP)GetProcAddress(hLib, "memcmp");
-
-		MathCeil = (CEIL)GetProcAddress(hLib, "ceil");
-		MathFloor = (FLOOR)GetProcAddress(hLib, "floor");
-
-		StrCompare = (STRCMP)GetProcAddress(hLib, "strcmp");
-		StrCompareInsensitive = (STRICMP)GetProcAddress(hLib, "_stricmp");
-		StrCopy = (STRCPY)GetProcAddress(hLib, "strcpy");
-		StrCat = (STRCAT)GetProcAddress(hLib, "strcat");
-		StrLastChar = (STRRCHR)GetProcAddress(hLib, "strrchr");
-		StrStr = (STRSTR)GetProcAddress(hLib, "strstr");
-		StrToAnsi = (WCSTOMBS)GetProcAddress(hLib, "wcstombs");
-		Exit = (EXIT)GetProcAddress(hLib, "exit");
 	}
 }

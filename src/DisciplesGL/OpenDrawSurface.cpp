@@ -97,7 +97,7 @@ VOID OpenDrawSurface::Flush()
 
 			DWORD copyWidth = this->mode.width;
 			do
-				*dest++ = *(DWORD*)&this->attachedPalette->entries[*src++];
+				*dest++ = this->attachedPalette->entries[*src++];
 			while (--copyWidth);
 		} while (--copyHeight);
 	}
@@ -444,6 +444,8 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			} while (--count);
 		} while (--height);
 	}
+	else if (this->mode.width == surface->mode.width && this->mode.width == width)
+		MemoryCopy(destination, source, (width * height) << 1);
 	else do
 	{
 		MemoryCopy(destination, source, width << 1);

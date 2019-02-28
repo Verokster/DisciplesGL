@@ -31,7 +31,7 @@ class OpenDrawPalette : public IDrawPalette
 {
 public:
 	OpenDraw* ddraw;
-	PALETTEENTRY entries[256];
+	DWORD* entries;
 
 	OpenDrawPalette(IDrawUnknown**, OpenDraw*);
 	~OpenDrawPalette();

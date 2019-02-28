@@ -26,9 +26,8 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include "windows.h"
-#include "stdlib.h"
-#include "stdio.h"
 #include "mmreg.h"
+#include "math.h"
 #include "ddraw.h"
 #include "ExtraTypes.h"
 
@@ -46,50 +45,31 @@ extern RELEASEACTCTX ReleaseActCtxC;
 extern ACTIVATEACTCTX ActivateActCtxC;
 extern DEACTIVATEACTCTX DeactivateActCtxC;
 
-typedef VOID*(__cdecl *MALLOC)(size_t);
-typedef VOID(__cdecl *FREE)(VOID*);
-typedef VOID*(__cdecl *ALIGNED_MALLOC)(size_t, size_t);
-typedef VOID*(__cdecl *MEMSET)(VOID*, INT, size_t);
-typedef VOID*(__cdecl *MEMCPY)(VOID*, const VOID*, size_t);
-typedef INT(__cdecl *MEMCMP)(const VOID*, const VOID*, size_t);
-typedef DOUBLE(__cdecl *CEIL)(DOUBLE);
-typedef DOUBLE(__cdecl *FLOOR)(DOUBLE);
-typedef INT(__cdecl *SPRINTF)(CHAR*, const CHAR*, ...);
-typedef INT(__cdecl *STRCMP)(const CHAR*, const CHAR*);
-typedef INT(__cdecl *STRICMP)(const CHAR*, const CHAR*);
-typedef CHAR*(__cdecl *STRCPY)(CHAR*, const CHAR*);
-typedef CHAR*(__cdecl *STRCAT)(CHAR*, const CHAR*);
-typedef CHAR*(__cdecl *STRRCHR)(const CHAR*, INT);
-typedef CHAR*(__cdecl *STRSTR)(const CHAR*, const CHAR*);
-typedef size_t(__cdecl *WCSTOMBS)(CHAR*, const WCHAR*, size_t);
-typedef VOID(__cdecl *EXIT)(INT);
+extern "C" _CRTIMP int __cdecl sprintf(char *, const char *, ...);
 
-extern MALLOC MemoryAlloc;
-extern FREE MemoryFree;
-extern ALIGNED_MALLOC MemoryAlignedAlloc;
-extern MALLOC AlignedAlloc;
-extern FREE AlignedFree;
-extern MEMSET MemorySet;
-extern MEMCPY MemoryCopy;
-extern MEMCMP MemoryCompare;
-extern CEIL MathCeil;
-extern FLOOR MathFloor;
-extern SPRINTF StrPrint;
-extern STRCMP StrCompare;
-extern STRICMP StrCompareInsensitive;
-extern STRCPY StrCopy;
-extern STRCAT StrCat;
-extern STRRCHR StrLastChar;
-extern STRSTR StrStr;
-extern WCSTOMBS StrToAnsi;
-extern EXIT Exit;
-
-#define MemoryZero(destination,length) MemorySet(destination,0,length)
+#define MemoryAlloc(size) malloc(size)
+#define MemoryFree(block) free(block)
+#define MemorySet(dst,val,size) memset(dst,val,size)
+#define MemoryZero(dst,size) memset(dst,0,size)
+#define MemoryCopy(dst,src,size) memcpy(dst,src,size)
+#define MemoryCompare(buf1,buf2,size) memcmp(buf1,buf2,size)
+#define MathCeil(x) ceil(x)
+#define MathFloor(x) floor(x)
+#define StrPrint(buf,fmt,...) sprintf(buf,fmt,__VA_ARGS__)
+#define StrCompare(str1,str2) strcmp(str1,str2)
+#define StrCompareInsensitive(str1,str2) _stricmp(str1,str2)
+#define StrCopy(dst,src) strcpy(dst,src)
+#define StrCat(dst,src) strcat(dst,src)
+#define StrLastChar(str,ch) strrchr(str,ch)
+#define StrStr(str,substr) strstr(str,substr)
+#define StrToAnsi(dst,src,size) wcstombs(dst,src,size)
+#define Exit(code) exit(code)
 
 DOUBLE __fastcall MathRound(DOUBLE);
+VOID* __fastcall AlignedAlloc(size_t size);
+VOID __fastcall AlignedFree(VOID* block);
 
 extern HMODULE hDllModule;
 extern HANDLE hActCtx;
 
 VOID LoadKernel32();
-VOID LoadMsvCRT();

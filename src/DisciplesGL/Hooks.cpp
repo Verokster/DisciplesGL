@@ -518,11 +518,6 @@ namespace Hooks
 		{
 			MappedFile file = { hModule, NULL, NULL, NULL };
 			{
-				PatchFunction(&file, "CoCreateInstance", CoCreateInstanceHook);
-				PatchFunction(&file, "DirectDrawEnumerateExA", Main::DrawEnumerateEx);
-				PatchFunction(&file, "DirectDrawCreate", Main::DrawCreate);
-				PatchFunction(&file, "DirectDrawCreateEx", Main::DrawCreateEx);
-
 				PatchFunction(&file, "GetDeviceCaps", GetDeviceCapsHook);
 				PatchFunction(&file, "GetForegroundWindow", GetForegroundWindowHook);
 
@@ -542,11 +537,15 @@ namespace Hooks
 
 				if (config.version)
 				{
+					PatchFunction(&file, "CoCreateInstance", CoCreateInstanceHook);
 					PatchFunction(&file, "GetCursorPos", GetCursorPosHookV1);
 					PatchFunction(&file, "ClientToScreen", ClientToScreenHook);
 				}
 				else
 				{
+					PatchFunction(&file, "DirectDrawEnumerateExA", Main::DrawEnumerateEx);
+					PatchFunction(&file, "DirectDrawCreate", Main::DrawCreate);
+					PatchFunction(&file, "DirectDrawCreateEx", Main::DrawCreateEx);
 					PatchFunction(&file, "GetCursorPos", GetCursorPosHookV2);
 					PatchFunction(&file, "SetCursorPos", SetCursorPosHook);
 				}

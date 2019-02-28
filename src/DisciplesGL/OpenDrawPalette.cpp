@@ -34,10 +34,14 @@ OpenDrawPalette::OpenDrawPalette(IDrawUnknown** list, OpenDraw* lpDD)
 	*list = this;
 
 	this->ddraw = lpDD;
+
+	this->entries = (DWORD*)AlignedAlloc(256 * sizeof(DWORD));
 }
 
 OpenDrawPalette::~OpenDrawPalette()
 {
+	AlignedFree(this->entries);
+
 	IDrawDestruct(this);
 }
 
