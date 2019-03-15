@@ -34,7 +34,6 @@ public:
 	HWND hWnd;
 
 	OpenDrawClipper(IDrawUnknown**, OpenDraw*);
-	~OpenDrawClipper();
 
 	// Inherited via IDrawClipper
 	HRESULT __stdcall SetHWnd(DWORD, HWND) override;

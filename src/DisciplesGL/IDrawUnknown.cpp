@@ -25,6 +25,34 @@
 #include "stdafx.h"
 #include "IDrawUnknown.h"
 
+VOID* IDrawUnknown::operator new(size_t size) { return MemoryAlloc(size); }
+
+VOID IDrawUnknown::operator delete(VOID* p)
+{
+	IDrawUnknown* item = (IDrawUnknown*)p;
+	IDrawUnknown* entry = *item->list;
+	if (entry)
+	{
+		if (entry == item)
+		{
+			*item->list = entry->last;
+			MemoryFree(p);
+			return;
+		}
+		else while (entry->last)
+		{
+			if (entry->last == item)
+			{
+				entry->last = item->last;
+				MemoryFree(p);
+				return;
+			}
+
+			entry = entry->last;
+		}
+	}
+}
+
 HRESULT __stdcall IDrawUnknown::QueryInterface(REFIID, LPVOID*) { return DD_OK; }
 
 ULONG __stdcall IDrawUnknown::AddRef()
@@ -34,27 +62,9 @@ ULONG __stdcall IDrawUnknown::AddRef()
 
 ULONG __stdcall IDrawUnknown::Release()
 {
-	ULONG count = --this->refCount;
-	if (!count)
-		delete this;
+	if (--this->refCount)
+		return this->refCount;
 
-	return count;
-}
-
-VOID IDrawDestruct(IDrawUnknown* item)
-{
-	IDrawUnknown* entry = *item->list;
-
-	if (entry == item)
-		*item->list = NULL;
-	else while (entry)
-	{
-		if (entry->last == item)
-		{
-			entry->last = item->last;
-			break;
-		}
-
-		entry = entry->last;
-	}
+	delete this;
+	return 0;
 }

@@ -37,11 +37,6 @@ OpenDrawClipper::OpenDrawClipper(IDrawUnknown** list, OpenDraw* lpDD)
 	this->hWnd = NULL;
 }
 
-OpenDrawClipper::~OpenDrawClipper()
-{
-	IDrawDestruct(this);
-}
-
 HRESULT __stdcall OpenDrawClipper::SetHWnd(DWORD dwFlags, HWND hWnd)
 {
 	this->hWnd = hWnd;

@@ -25,9 +25,8 @@
 #pragma once
 
 #include "ddraw.h"
-#include "Allocation.h"
 
-class IDrawUnknown : public Allocation
+class IDrawUnknown
 {
 protected:
 	ULONG refCount;
@@ -36,9 +35,10 @@ public:
 	IDrawUnknown** list;
 	IDrawUnknown* last;
 
+	VOID* operator new(size_t);
+	VOID operator delete(VOID*);
+
 	virtual HRESULT __stdcall QueryInterface(REFIID, LPVOID*);
 	virtual ULONG __stdcall AddRef();
 	virtual ULONG __stdcall Release();
 };
-
-VOID IDrawDestruct(IDrawUnknown*);

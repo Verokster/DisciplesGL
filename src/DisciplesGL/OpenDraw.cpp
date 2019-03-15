@@ -1747,7 +1747,8 @@ OpenDraw::OpenDraw(IDrawUnknown** list)
 
 OpenDraw::~OpenDraw()
 {
-	IDrawDestruct(this);
+	this->RenderStop();
+	CloseHandle(this->hDrawEvent);
 }
 
 VOID OpenDraw::SetFullscreenMode()
@@ -1811,18 +1812,11 @@ HRESULT __stdcall OpenDraw::QueryInterface(REFIID id, LPVOID* lpObj)
 
 ULONG __stdcall OpenDraw::Release()
 {
-	ULONG count = --this->refCount;
-	if (!count)
-	{
-		this->RenderStop();
+	if (--this->refCount)
+		return this->refCount;
 
-		CloseHandle(this->hDrawEvent);
-		ClipCursor(NULL);
-
-		delete this;
-	}
-
-	return count;
+	delete this;
+	return 0;
 }
 
 HRESULT __stdcall OpenDraw::SetCooperativeLevel(HWND hWnd, DWORD dwFlags)
@@ -1857,6 +1851,7 @@ HRESULT __stdcall OpenDraw::CreateSurface(LPDDSURFACEDESC2 lpDDSurfaceDesc, IDra
 	// 4103 - DDSD_PIXELFORMAT | DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 2112 - DDSCAPS_SYSTEMMEMORY | DDSCAPS_OFFSCREENPLAIN
 	// 7 - DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 64 - DDSCAPS_OFFSCREENPLAIN
 	// 7 - DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 2112 - DDSCAPS_SYSTEMMEMORY | DDSCAPS_OFFSCREENPLAIN
+	// 4103 - DDSD_PIXELFORMAT | DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 268451904 - DDSCAPS_LOCALVIDMEM | DDSCAPS_VIDEOMEMORY | DDSCAPS_OFFSCREENPLAIN
 
 	OpenDrawSurface* surface;
 

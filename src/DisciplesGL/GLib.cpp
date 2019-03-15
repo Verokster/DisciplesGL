@@ -118,6 +118,7 @@ DWORD glCapsClampToEdge;
 
 namespace GL
 {
+#pragma optimize("s", on)
 	BOOL __fastcall Load()
 	{
 		if (!hGLModule)
@@ -523,4 +524,5 @@ namespace GL
 			CloseHandle(hThread);
 		}
 	}
+#pragma optimize("", on)
 }

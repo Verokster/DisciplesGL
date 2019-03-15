@@ -53,8 +53,19 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, DWORD inde
 
 OpenDrawSurface::~OpenDrawSurface()
 {
+	if (this->ddraw->attachedSurface == this)
+		this->ddraw->attachedSurface = NULL;
+
+	if (this->attachedPalette)
+		this->attachedPalette->Release();
+
+	if (this->attachedClipper)
+		this->attachedClipper->Release();
+
+	if (this->attachedSurface)
+		this->attachedSurface->Release();
+
 	this->ReleaseBuffer();
-	IDrawDestruct(this);
 }
 
 VOID OpenDrawSurface::ReleaseBuffer()
@@ -110,25 +121,11 @@ VOID OpenDrawSurface::Flush()
 
 ULONG __stdcall OpenDrawSurface::Release()
 {
-	ULONG count = --this->refCount;
-	if (!count)
-	{
-		if (this->ddraw->attachedSurface == this)
-			this->ddraw->attachedSurface = NULL;
+	if (--this->refCount)
+		return this->refCount;
 
-		if (this->attachedPalette)
-			this->attachedPalette->Release();
-
-		if (this->attachedClipper)
-			this->attachedClipper->Release();
-
-		if (this->attachedSurface)
-			this->attachedSurface->Release();
-
-		delete this;
-	}
-
-	return count;
+	delete this;
+	return 0;
 }
 
 HRESULT __stdcall OpenDrawSurface::GetPixelFormat(LPDDPIXELFORMAT lpDDPixelFormat)
@@ -152,13 +149,7 @@ HRESULT __stdcall OpenDrawSurface::GetPixelFormat(LPDDPIXELFORMAT lpDDPixelForma
 HRESULT __stdcall OpenDrawSurface::Lock(LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurfaceDesc, DWORD dwFlags, HANDLE hEvent)
 {
 	// 2049 - DDLOCK_NOSYSLOCK | DDLOCK_WAIT 
-
-	lpDDSurfaceDesc->dwWidth = this->mode.width;
-	lpDDSurfaceDesc->dwHeight = this->mode.height;
-	lpDDSurfaceDesc->lPitch = this->mode.width * (this->mode.bpp >> 3);
-	lpDDSurfaceDesc->lpSurface = this->indexBuffer;
-
-	this->GetPixelFormat(&lpDDSurfaceDesc->ddpfPixelFormat);
+	this->GetSurfaceDesc(lpDDSurfaceDesc);
 
 	return DD_OK;
 }

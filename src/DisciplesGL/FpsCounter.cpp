@@ -282,6 +282,10 @@ const WORD counters[10][FPS_HEIGHT] = {
 	}
 };
 
+VOID* FpsCounter::operator new(size_t size) { return MemoryAlloc(size); }
+
+VOID FpsCounter::operator delete(VOID* p) { MemoryFree(p); }
+
 FpsCounter::FpsCounter(DWORD accuracy)
 {
 	this->accuracy = accuracy;

@@ -41,8 +41,6 @@ OpenDrawPalette::OpenDrawPalette(IDrawUnknown** list, OpenDraw* lpDD)
 OpenDrawPalette::~OpenDrawPalette()
 {
 	AlignedFree(this->entries);
-
-	IDrawDestruct(this);
 }
 
 HRESULT __stdcall OpenDrawPalette::GetEntries(DWORD dwFlags, DWORD dwBase, DWORD dwNumEntries, LPPALETTEENTRY lpEntries)

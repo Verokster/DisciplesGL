@@ -144,9 +144,10 @@ VOID __fastcall AlignedFree(VOID* block)
 	{
 		if (entry->block == block)
 		{
+			Aligned* last = entry->last;
 			MemoryFree(entry->data);
 			MemoryFree(entry);
-			alignedList = NULL;
+			alignedList = last;
 			return;
 		}
 		else while (entry->last)
