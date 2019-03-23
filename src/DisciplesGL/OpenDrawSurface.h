@@ -32,10 +32,13 @@ class OpenDraw;
 
 class OpenDrawSurface : public IDrawSurface7
 {
+private:
+	DDSCAPS2 caps;
+	BOOL isCreated;
+	DDCOLORKEY colorKey;
+
 public:
 	OpenDraw* ddraw;
-	DDSCAPS2 caps;
-	DWORD index;
 	DisplayMode mode;
 
 	OpenDrawClipper* attachedClipper;
@@ -43,12 +46,11 @@ public:
 	OpenDrawSurface* attachedSurface;
 
 	VOID* indexBuffer;
-	DWORD colorKey;
 
-	OpenDrawSurface(IDrawUnknown**, OpenDraw*, DWORD, LPDDSCAPS2);
+	OpenDrawSurface(IDrawUnknown**, OpenDraw*, LPDDSCAPS2);
 	~OpenDrawSurface();
 
-	VOID CreateBuffer(DWORD, DWORD, DWORD);
+	VOID CreateBuffer(DWORD, DWORD, DWORD, VOID*);
 	VOID ReleaseBuffer();
 	VOID Flush();
 
@@ -62,11 +64,11 @@ public:
 	HRESULT __stdcall SetClipper(IDrawClipper*) override;
 	HRESULT __stdcall GetClipper(IDrawClipper**) override;
 	HRESULT __stdcall SetColorKey(DWORD, LPDDCOLORKEY) override;
-
 	HRESULT __stdcall GetAttachedSurface(LPDDSCAPS2, IDrawSurface7**) override;
 	HRESULT __stdcall GetColorKey(DWORD, LPDDCOLORKEY) override;
 	HRESULT __stdcall Flip(IDrawSurface7*, DWORD) override;
 	HRESULT __stdcall SetPalette(IDrawPalette*) override;
 	HRESULT __stdcall GetPalette(IDrawPalette**) override;
+	HRESULT __stdcall GetDDInterface(LPVOID*) override;
 };
 

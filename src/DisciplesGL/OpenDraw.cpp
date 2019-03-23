@@ -83,7 +83,6 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 	if (ddraw->hDc)
 	{
 		PIXELFORMATDESCRIPTOR pfd;
-		GL::PreparePixelFormatDescription(&pfd);
 		INT glPixelFormat = GL::PreparePixelFormat(&pfd);
 		if (!glPixelFormat)
 		{
@@ -209,7 +208,7 @@ VOID OpenDraw::RenderOld()
 
 				GLTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-				if (this->mode.bpp == 16 && glVersion > GL_VER_1_1)
+				if (this->mode.bpp == 16 && !config.bpp32Hooked && glVersion > GL_VER_1_1)
 					GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
 				else
 					GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, maxTexSize, maxTexSize, GL_NONE, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -226,7 +225,7 @@ VOID OpenDraw::RenderOld()
 		GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		this->viewport.refresh = TRUE;
 
-		VOID* frameBuffer = AlignedAlloc(maxTexSize * maxTexSize * (this->mode.bpp == 16 && glVersion > GL_VER_1_1 ? sizeof(WORD) : sizeof(DWORD)));
+		VOID* frameBuffer = AlignedAlloc(maxTexSize * maxTexSize * (this->mode.bpp == 16 && !config.bpp32Hooked && glVersion > GL_VER_1_1 ? sizeof(WORD) : sizeof(DWORD)));
 		{
 			FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 			{
@@ -237,7 +236,7 @@ VOID OpenDraw::RenderOld()
 				do
 				{
 					OpenDrawSurface* surface = this->attachedSurface;
-					if (this->attachedSurface)
+					if (surface)
 					{
 						if (WGLSwapInterval)
 						{
@@ -292,7 +291,7 @@ VOID OpenDraw::RenderOld()
 									GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilter);
 								}
 
-								if (this->mode.bpp != 16)
+								if (this->mode.bpp != 16 || config.bpp32Hooked)
 									GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, surface->indexBuffer);
 								else
 								{
@@ -332,7 +331,7 @@ VOID OpenDraw::RenderOld()
 									GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilter);
 								}
 
-								if (this->mode.bpp != 16)
+								if (this->mode.bpp != 16 || config.bpp32Hooked)
 								{
 									DWORD* source = (DWORD*)surface->indexBuffer + frame->rect.y * this->mode.width + frame->rect.x;
 									DWORD* dest = (DWORD*)frameBuffer;
@@ -396,7 +395,7 @@ VOID OpenDraw::RenderOld()
 									current = current / 10;
 								} while (current);
 
-								if (this->mode.bpp != 16)
+								if (this->mode.bpp != 16 || config.bpp32Hooked)
 								{
 									DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
 									DWORD dcount = digCount;
@@ -590,7 +589,7 @@ VOID OpenDraw::RenderOld()
 							{
 								EmptyClipboard();
 
-								DWORD dataSize = this->mode.width * this->mode.height * sizeof(WORD);
+								DWORD dataSize = this->mode.width * this->mode.height * (this->mode.bpp != 16 || config.bpp32Hooked ? 3 : 2);
 								HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, sizeof(BITMAPV5HEADER) + dataSize);
 								{
 									VOID* data = GlobalLock(hMemory);
@@ -601,15 +600,37 @@ VOID OpenDraw::RenderOld()
 										bmi->bV5Width = this->mode.width;
 										bmi->bV5Height = -*(LONG*)&this->mode.height;
 										bmi->bV5Planes = 1;
-										bmi->bV5BitCount = 16;
-										bmi->bV5Compression = BI_BITFIELDS;
 										bmi->bV5XPelsPerMeter = 1;
 										bmi->bV5YPelsPerMeter = 1;
-										bmi->bV5RedMask = 0xF800;
-										bmi->bV5GreenMask = 0x07E0;
-										bmi->bV5BlueMask = 0x001F;
 
-										MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), surface->indexBuffer, dataSize);
+										if (this->mode.bpp != 16 || config.bpp32Hooked)
+										{
+											bmi->bV5BitCount = 24;
+											bmi->bV5Compression = BI_RGB;
+
+											DWORD* src = (DWORD*)surface->indexBuffer;
+											BYTE* dst = (BYTE*)data + sizeof(BITMAPV5HEADER);
+
+											DWORD count = this->mode.width * this->mode.height;
+											do
+											{
+												*dst++ = LOBYTE(*src >> 16);
+												*dst++ = LOBYTE(*src >> 8);
+												*dst++ = LOBYTE(*src);
+
+												++src;
+											} while (--count);
+										}
+										else
+										{
+											bmi->bV5BitCount = 16;
+											bmi->bV5Compression = BI_BITFIELDS;
+											bmi->bV5RedMask = 0xF800;
+											bmi->bV5GreenMask = 0x07E0;
+											bmi->bV5BlueMask = 0x001F;
+
+											MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), surface->indexBuffer, dataSize);
+										}
 									}
 									GlobalUnlock(hMemory);
 
@@ -713,7 +734,7 @@ VOID OpenDraw::RenderMid()
 					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 
-					if (this->mode.bpp != 16)
+					if (this->mode.bpp != 16 || config.bpp32Hooked)
 						GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 					else
 						GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
@@ -721,7 +742,7 @@ VOID OpenDraw::RenderMid()
 					GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 					this->viewport.refresh = TRUE;
 
-					VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)));
+					VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 && !config.bpp32Hooked ? sizeof(WORD) : sizeof(DWORD)));
 					{
 						FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 						{
@@ -786,7 +807,7 @@ VOID OpenDraw::RenderMid()
 
 									// NEXT UNCHANGED
 									{
-										if (this->mode.bpp != 16)
+										if (this->mode.bpp != 16 || config.bpp32Hooked)
 											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, surface->indexBuffer);
 										else
 											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, surface->indexBuffer);
@@ -803,7 +824,7 @@ VOID OpenDraw::RenderMid()
 												current = current / 10;
 											} while (current);
 
-											if (this->mode.bpp != 16)
+											if (this->mode.bpp != 16 || config.bpp32Hooked)
 											{
 												DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
 												DWORD dcount = digCount;
@@ -918,7 +939,7 @@ VOID OpenDraw::RenderMid()
 										{
 											EmptyClipboard();
 
-											DWORD dataSize = this->mode.width * this->mode.height * sizeof(WORD);
+											DWORD dataSize = this->mode.width * this->mode.height * (this->mode.bpp != 16 || config.bpp32Hooked ? 3 : 2);
 											HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, sizeof(BITMAPV5HEADER) + dataSize);
 											{
 												VOID* data = GlobalLock(hMemory);
@@ -929,15 +950,37 @@ VOID OpenDraw::RenderMid()
 													bmi->bV5Width = this->mode.width;
 													bmi->bV5Height = -*(LONG*)&this->mode.height;
 													bmi->bV5Planes = 1;
-													bmi->bV5BitCount = 16;
-													bmi->bV5Compression = BI_BITFIELDS;
 													bmi->bV5XPelsPerMeter = 1;
 													bmi->bV5YPelsPerMeter = 1;
-													bmi->bV5RedMask = 0xF800;
-													bmi->bV5GreenMask = 0x07E0;
-													bmi->bV5BlueMask = 0x001F;
 
-													MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), surface->indexBuffer, dataSize);
+													if (this->mode.bpp != 16 || config.bpp32Hooked)
+													{
+														bmi->bV5BitCount = 24;
+														bmi->bV5Compression = BI_RGB;
+
+														DWORD* src = (DWORD*)surface->indexBuffer;
+														BYTE* dst = (BYTE*)data + sizeof(BITMAPV5HEADER);
+
+														DWORD count = this->mode.width * this->mode.height;
+														do
+														{
+															*dst++ = LOBYTE(*src >> 16);
+															*dst++ = LOBYTE(*src >> 8);
+															*dst++ = LOBYTE(*src);
+
+															++src;
+														} while (--count);
+													}
+													else
+													{
+														bmi->bV5BitCount = 16;
+														bmi->bV5Compression = BI_BITFIELDS;
+														bmi->bV5RedMask = 0xF800;
+														bmi->bV5GreenMask = 0x07E0;
+														bmi->bV5BlueMask = 0x001F;
+
+														MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), surface->indexBuffer, dataSize);
+													}
 												}
 												GlobalUnlock(hMemory);
 
@@ -1080,7 +1123,7 @@ VOID OpenDraw::RenderNew()
 							GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 							GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 
-							if (this->mode.bpp != 16)
+							if (this->mode.bpp != 16 || config.bpp32Hooked)
 								GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 							else
 								GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
@@ -1094,7 +1137,7 @@ VOID OpenDraw::RenderNew()
 									GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 									this->viewport.refresh = TRUE;
 
-									VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 ? sizeof(WORD) : sizeof(DWORD)));
+									VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 && !config.bpp32Hooked ? sizeof(WORD) : sizeof(DWORD)));
 									{
 										FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 										{
@@ -1288,7 +1331,7 @@ VOID OpenDraw::RenderNew()
 
 													// NEXT UNCHANGED
 													{
-														if (this->mode.bpp != 16)
+														if (this->mode.bpp != 16 || config.bpp32Hooked)
 															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, surface->indexBuffer);
 														else
 															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, surface->indexBuffer);
@@ -1305,7 +1348,7 @@ VOID OpenDraw::RenderNew()
 																current = current / 10;
 															} while (current);
 
-															if (this->mode.bpp != 16)
+															if (this->mode.bpp != 16 || config.bpp32Hooked)
 															{
 																DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
 																DWORD dcount = digCount;
@@ -1454,12 +1497,12 @@ VOID OpenDraw::RenderNew()
 																			bmiHeader->biWidth = LOWORD(viewSize);
 																			bmiHeader->biHeight = HIWORD(viewSize);
 																			bmiHeader->biPlanes = 1;
-																			bmiHeader->biBitCount = 24;
-																			bmiHeader->biCompression = BI_RGB;
 																			bmiHeader->biXPelsPerMeter = 1;
 																			bmiHeader->biYPelsPerMeter = 1;
+																			bmiHeader->biBitCount = 24;
+																			bmiHeader->biCompression = BI_RGB;
 
-																			VOID* pixels = (BITMAPINFOHEADER*)((BYTE*)data + sizeof(BITMAPINFOHEADER));
+																			VOID* pixels = (BYTE*)data + sizeof(BITMAPINFOHEADER);
 																			GLGetTexImage(GL_TEXTURE_2D, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixels);
 																		}
 																		GlobalUnlock(hMemory);
@@ -1484,26 +1527,48 @@ VOID OpenDraw::RenderNew()
 															{
 																EmptyClipboard();
 
-																DWORD dataSize = this->mode.width * this->mode.height * sizeof(WORD);
+																DWORD dataSize = this->mode.width * this->mode.height * (this->mode.bpp != 16 || config.bpp32Hooked ? 3 : 2);
 																HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, sizeof(BITMAPV5HEADER) + dataSize);
 																{
 																	VOID* data = GlobalLock(hMemory);
 																	{
 																		BITMAPV5HEADER* bmi = (BITMAPV5HEADER*)data;
-																		MemoryZero(bmi, sizeof(BITMAPINFOHEADER));
+																		MemoryZero(bmi, sizeof(BITMAPV5HEADER));
 																		bmi->bV5Size = sizeof(BITMAPV5HEADER);
 																		bmi->bV5Width = this->mode.width;
 																		bmi->bV5Height = -*(LONG*)&this->mode.height;
 																		bmi->bV5Planes = 1;
-																		bmi->bV5BitCount = 16;
-																		bmi->bV5Compression = BI_BITFIELDS;
 																		bmi->bV5XPelsPerMeter = 1;
 																		bmi->bV5YPelsPerMeter = 1;
-																		bmi->bV5RedMask = 0xF800;
-																		bmi->bV5GreenMask = 0x07E0;
-																		bmi->bV5BlueMask = 0x001F;
 
-																		MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), surface->indexBuffer, dataSize);
+																		if (this->mode.bpp != 16 || config.bpp32Hooked)
+																		{
+																			bmi->bV5BitCount = 24;
+																			bmi->bV5Compression = BI_RGB;
+
+																			DWORD* src = (DWORD*)surface->indexBuffer;
+																			BYTE* dst = (BYTE*)data + sizeof(BITMAPV5HEADER);
+
+																			DWORD count = this->mode.width * this->mode.height;
+																			do
+																			{
+																				*dst++ = LOBYTE(*src >> 16);
+																				*dst++ = LOBYTE(*src >> 8);
+																				*dst++ = LOBYTE(*src);
+
+																				++src;
+																			} while (--count);
+																		}
+																		else
+																		{
+																			bmi->bV5BitCount = 16;
+																			bmi->bV5Compression = BI_BITFIELDS;
+																			bmi->bV5RedMask = 0xF800;
+																			bmi->bV5GreenMask = 0x07E0;
+																			bmi->bV5BlueMask = 0x001F;
+
+																			MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), surface->indexBuffer, dataSize);
+																		}
 																	}
 																	GlobalUnlock(hMemory);
 
@@ -1779,16 +1844,16 @@ VOID OpenDraw::SetWindowedMode()
 		rect->bottom = rect->top + this->mode.height;
 		AdjustWindowRect(rect, WS_WINDOWED, TRUE);
 
-		if (rect->right - rect->left > monWidth)
+		if (rect->left < 0)
 		{
+			rect->right -= rect->left;
 			rect->left = 0;
-			rect->right = monWidth;
 		}
 
-		if (rect->bottom - rect->top > monHeight)
+		if (rect->top < 0)
 		{
+			rect->bottom -= rect->top;
 			rect->top = 0;
-			rect->bottom = monHeight;
 		}
 
 		this->windowPlacement.ptMinPosition.x = this->windowPlacement.ptMinPosition.y = -1;
@@ -1851,34 +1916,34 @@ HRESULT __stdcall OpenDraw::CreateSurface(LPDDSURFACEDESC2 lpDDSurfaceDesc, IDra
 	// 4103 - DDSD_PIXELFORMAT | DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 2112 - DDSCAPS_SYSTEMMEMORY | DDSCAPS_OFFSCREENPLAIN
 	// 7 - DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 64 - DDSCAPS_OFFSCREENPLAIN
 	// 7 - DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 2112 - DDSCAPS_SYSTEMMEMORY | DDSCAPS_OFFSCREENPLAIN
-	// 4103 - DDSD_PIXELFORMAT | DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 268451904 - DDSCAPS_LOCALVIDMEM | DDSCAPS_VIDEOMEMORY | DDSCAPS_OFFSCREENPLAIN
+	// 4103 - DDSD_PIXELFORMAT | DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 64 - // 268451904 - DDSCAPS_LOCALVIDMEM | DDSCAPS_VIDEOMEMORY | DDSCAPS_OFFSCREENPLAIN
+	// 4103 - DDSD_PIXELFORMAT | DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 64 - // 0
+	// 6159 - DDSD_PIXELFORMAT | DDSD_LPSURFACE | DDSD_PITCH | DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS // 2112 - DDSCAPS_SYSTEMMEMORY | DDSCAPS_OFFSCREENPLAIN
+
+	VOID* buffer = NULL;
+	if (lpDDSurfaceDesc->dwFlags & DDSD_LPSURFACE)
+		buffer = lpDDSurfaceDesc->lpSurface;
 
 	OpenDrawSurface* surface;
 
 	if (lpDDSurfaceDesc->dwFlags == (DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS))
 	{
-		surface = new OpenDrawSurface((IDrawUnknown**)&this->surfaceEntries, this, 1, &lpDDSurfaceDesc->ddsCaps);
+		surface = new OpenDrawSurface((IDrawUnknown**)&this->surfaceEntries, this, &lpDDSurfaceDesc->ddsCaps);
 		surface->AddRef();
-		surface->CreateBuffer(lpDDSurfaceDesc->dwWidth, lpDDSurfaceDesc->dwHeight, this->mode.bpp);
+		surface->CreateBuffer(lpDDSurfaceDesc->dwWidth, lpDDSurfaceDesc->dwHeight, this->mode.bpp, buffer);
 		this->attachedSurface->attachedSurface = surface;
 	}
 	else
 	{
-		BOOL isPrimary = lpDDSurfaceDesc->ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE;
-		surface = new OpenDrawSurface((IDrawUnknown**)&this->surfaceEntries, this, !isPrimary, &lpDDSurfaceDesc->ddsCaps);
+		surface = new OpenDrawSurface((IDrawUnknown**)&this->surfaceEntries, this, &lpDDSurfaceDesc->ddsCaps);
 
-		if (isPrimary)
+		if (lpDDSurfaceDesc->ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE)
 			this->attachedSurface = surface;
 
 		if (lpDDSurfaceDesc->dwFlags & (DDSD_WIDTH | DDSD_HEIGHT))
-		{
-			if (lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT)
-				surface->CreateBuffer(lpDDSurfaceDesc->dwWidth, lpDDSurfaceDesc->dwHeight, lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount);
-			else
-				surface->CreateBuffer(lpDDSurfaceDesc->dwWidth, lpDDSurfaceDesc->dwHeight, this->mode.bpp);
-		}
+			surface->CreateBuffer(lpDDSurfaceDesc->dwWidth, lpDDSurfaceDesc->dwHeight, (lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT) ? lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount : this->mode.bpp, buffer);
 		else
-			surface->CreateBuffer(this->mode.width, this->mode.height, this->mode.bpp);
+			surface->CreateBuffer(this->mode.width, this->mode.height, this->mode.bpp, buffer);
 	}
 
 	*lplpDDSurface = surface;

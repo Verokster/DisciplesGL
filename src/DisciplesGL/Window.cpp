@@ -614,15 +614,7 @@ namespace Window
 		{
 			if (!(HIWORD(lParam) & KF_ALTDOWN))
 			{
-				if (wParam == VK_F1)
-				{
-					if (!config.windowedMode)
-						WindowProc(hWnd, WM_COMMAND, IDM_RES_FULL_SCREEN, NULL);
-
-					WindowProc(hWnd, WM_COMMAND, IDM_HELP_ABOUT, NULL);
-					return NULL;
-				}
-				else if (config.keys.fpsCounter && config.keys.fpsCounter + VK_F1 - 1 == wParam)
+				if (config.keys.fpsCounter && config.keys.fpsCounter + VK_F1 - 1 == wParam)
 				{
 					switch (fpsState)
 					{

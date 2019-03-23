@@ -26,5 +26,63 @@
 
 namespace Hooks
 {
+	struct AddressSpace
+	{
+		DWORD check;
+		DWORD memory_1;
+		DWORD memory_2;
+		DWORD memory_3;
+		DWORD memory_4;
+		DWORD memory_5;
+		DWORD pixel;
+
+		DWORD fillColor;
+		DWORD minimapGround;
+		DWORD minimapObjects;
+		DWORD clearGround;
+		DWORD mapGround;
+		DWORD waterBorders;
+
+		DWORD symbol;
+		DWORD faces;
+		DWORD buildings;
+		DWORD horLine;
+		DWORD verLine;
+
+		DWORD line_1;
+		DWORD line_2;
+		DWORD unknown_1;
+		DWORD unknown_2;
+	};
+
+	struct BlendData
+	{
+		DWORD* srcData;
+		DWORD* dstData;
+		DWORD length;
+		VOID* mskData;
+	};
+
+	struct BlitObject
+	{
+		BYTE isTrueColor;
+		VOID* data;
+		RECT rect;
+		LONG pitch;
+		DWORD color;
+	};
+
+	struct OffsetLength
+	{
+		LONG offset;
+		LONG length;
+	};
+
+	struct PixObject
+	{
+		BYTE exists;
+		DWORD color;
+	};
+
 	BOOL Load();
 }

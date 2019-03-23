@@ -349,20 +349,16 @@ namespace GL
 	{
 		ResetPixelFormatDescription(pfd);
 
-		INT bpp;
+		INT bpp = 0;
 		HDC hDc = GetDC(NULL);
 		if (hDc)
 		{
 			bpp = GetDeviceCaps(hDc, BITSPIXEL);
 			ReleaseDC(NULL, hDc);
 		}
-		else
-			bpp = 0;
 
 		pfd->dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE | PFD_STEREO_DONTCARE | PFD_SWAP_EXCHANGE;
-		pfd->iPixelType = PFD_TYPE_RGBA;
 		pfd->cColorBits = (bpp == 16 || bpp == 24) ? (BYTE)bpp : 32;
-		pfd->iLayerType = PFD_MAIN_PLANE;
 	}
 
 	INT __fastcall PreparePixelFormat(PIXELFORMATDESCRIPTOR* pfd)
@@ -389,7 +385,7 @@ namespace GL
 			HDC hDc = GetDC(hWnd);
 			if (hDc)
 			{
-				res = ChoosePixelFormat(hDc, pfd);
+				res = ::ChoosePixelFormat(hDc, pfd);
 				if (res && ::SetPixelFormat(hDc, res, pfd))
 				{
 					HGLRC hRc = WGLCreateContext(hDc);

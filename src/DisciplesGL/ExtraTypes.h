@@ -142,6 +142,7 @@ struct ConfigItems
 	HMENU menu;
 	HICON icon;
 	HFONT font;
+	BOOL bpp32Hooked;
 
 	struct {
 		BOOL aspect;

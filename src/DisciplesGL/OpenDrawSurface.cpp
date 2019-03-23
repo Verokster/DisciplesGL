@@ -26,8 +26,9 @@
 #include "OpenDrawSurface.h"
 #include "OpenDraw.h"
 #include "Main.h"
+#include "Config.h"
 
-OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, DWORD index, LPDDSCAPS2 lpCaps)
+OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, LPDDSCAPS2 lpCaps)
 {
 	this->refCount = 1;
 	this->list = list;
@@ -40,15 +41,16 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, DWORD inde
 	this->attachedClipper = NULL;
 	this->attachedSurface = NULL;
 
-	this->index = index;
 	this->indexBuffer = NULL;
+	this->isCreated = FALSE;
 	this->caps = *lpCaps;
 
 	this->mode.width = 0;
 	this->mode.height = 0;
 	this->mode.bpp = 0;
 
-	this->colorKey = 0;
+	this->colorKey.dwColorSpaceLowValue = 0;
+	this->colorKey.dwColorSpaceHighValue = 0;
 }
 
 OpenDrawSurface::~OpenDrawSurface()
@@ -70,24 +72,40 @@ OpenDrawSurface::~OpenDrawSurface()
 
 VOID OpenDrawSurface::ReleaseBuffer()
 {
-	if (this->indexBuffer)
-		AlignedFree(this->indexBuffer);
+	if (this->isCreated)
+	{
+		this->isCreated = FALSE;
+
+		if (this->indexBuffer)
+		{
+			AlignedFree(this->indexBuffer);
+			this->indexBuffer = NULL;
+		}
+	}
 }
 
-VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp)
+VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* buffer)
 {
 	this->ReleaseBuffer();
+
 	this->mode.width = width;
 	this->mode.height = height;
 	this->mode.bpp = bpp;
 
 	bpp >>= 3;
-	if (bpp == 1 && !this->index)
+	if (bpp == sizeof(BYTE) && (this->caps.dwCaps & DDSCAPS_PRIMARYSURFACE) || bpp == sizeof(WORD) && config.bpp32Hooked)
 		bpp = sizeof(DWORD);
 
-	DWORD size = width * height * bpp;
-	this->indexBuffer = AlignedAlloc(size);
-	MemoryZero(this->indexBuffer, size);
+	if (buffer)
+		this->indexBuffer = buffer;
+	else
+	{
+		DWORD size = width * height * bpp;
+		this->indexBuffer = AlignedAlloc(size);
+		MemoryZero(this->indexBuffer, size);
+
+		this->isCreated = TRUE;
+	}
 }
 
 VOID OpenDrawSurface::Flush()
@@ -113,7 +131,7 @@ VOID OpenDrawSurface::Flush()
 		} while (--copyHeight);
 	}
 	else
-		MemoryCopy(this->indexBuffer, this->attachedSurface->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp >> 3));
+		MemoryCopy(this->indexBuffer, this->attachedSurface->indexBuffer, this->mode.width * this->mode.height * (config.bpp32Hooked ? sizeof(DWORD) : sizeof(WORD)));
 
 	SetEvent(this->ddraw->hDrawEvent);
 	Sleep(0);
@@ -126,6 +144,13 @@ ULONG __stdcall OpenDrawSurface::Release()
 
 	delete this;
 	return 0;
+}
+
+HRESULT __stdcall OpenDrawSurface::GetDDInterface(LPVOID* lplpDD)
+{
+	this->ddraw->AddRef();
+	*lplpDD = this->ddraw;
+	return DD_OK;
 }
 
 HRESULT __stdcall OpenDrawSurface::GetPixelFormat(LPDDPIXELFORMAT lpDDPixelFormat)
@@ -201,8 +226,8 @@ HRESULT __stdcall OpenDrawSurface::GetAttachedSurface(LPDDSCAPS2 lpDDSCaps, IDra
 {
 	if (!this->attachedSurface)
 	{
-		this->attachedSurface = new OpenDrawSurface((IDrawUnknown**)&this->ddraw->surfaceEntries, this->ddraw, 1, lpDDSCaps);
-		this->attachedSurface->CreateBuffer(this->mode.width, this->mode.height, this->mode.bpp);
+		this->attachedSurface = new OpenDrawSurface((IDrawUnknown**)&this->ddraw->surfaceEntries, this->ddraw, lpDDSCaps);
+		this->attachedSurface->CreateBuffer(this->mode.width, this->mode.height, this->mode.bpp, NULL);
 	}
 
 	this->attachedSurface->AddRef();
@@ -251,7 +276,17 @@ HRESULT __stdcall OpenDrawSurface::GetPalette(IDrawPalette** lplpDDPalette)
 HRESULT __stdcall OpenDrawSurface::SetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDColorKey)
 {
 	// 8 - DDCKEY_SRCBLT 
-	this->colorKey = lpDDColorKey ? lpDDColorKey->dwColorSpaceLowValue : 0;
+	if (lpDDColorKey)
+	{
+		DWORD colorKey = lpDDColorKey->dwColorSpaceLowValue;
+		this->colorKey.dwColorSpaceLowValue = colorKey;
+		this->colorKey.dwColorSpaceHighValue = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
+	}
+	else
+	{
+		this->colorKey.dwColorSpaceLowValue = 0;
+		this->colorKey.dwColorSpaceHighValue = 0;
+	}
 
 	return DD_OK;
 }
@@ -259,8 +294,8 @@ HRESULT __stdcall OpenDrawSurface::SetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDC
 HRESULT __stdcall OpenDrawSurface::GetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDColorKey)
 {
 	// 8 - DDCKEY_SRCBLT 
-	lpDDColorKey->dwColorSpaceLowValue = this->colorKey;
-	lpDDColorKey->dwColorSpaceHighValue = this->colorKey;
+	lpDDColorKey->dwColorSpaceLowValue = this->colorKey.dwColorSpaceLowValue;
+	lpDDColorKey->dwColorSpaceHighValue = this->colorKey.dwColorSpaceLowValue;
 
 	return DD_OK;
 }
@@ -269,10 +304,10 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 {
 	// 16778240 - DDBLT_WAIT | DDBLT_COLORFILL
 	if (dwFlags & DDBLT_COLORFILL)
-		MemoryZero(this->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp >> 3));
+		MemoryZero(this->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp == 8 ? 1 : (config.bpp32Hooked ? sizeof(DWORD) : sizeof(WORD))));
 	else
 	{
-		if (!this->index && lpDDSrcSurface == this->attachedSurface)
+		if ((this->caps.dwCaps & DDSCAPS_PRIMARYSURFACE) && lpDDSrcSurface == this->attachedSurface)
 			this->Flush();
 		else
 		{
@@ -335,15 +370,30 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 			INT width = lpSrcRect->right - lpSrcRect->left;
 			INT height = lpSrcRect->bottom - lpSrcRect->top;
 
-			WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-			WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
-
-			do
+			if (config.bpp32Hooked)
 			{
-				MemoryCopy(destination, source, width << 1);
-				source += sWidth;
-				destination += dWidth;
-			} while (--height);
+				DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
+				DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+
+				do
+				{
+					MemoryCopy(destination, source, width << 2);
+					source += sWidth;
+					destination += dWidth;
+				} while (--height);
+			}
+			else
+			{
+				WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
+				WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+
+				do
+				{
+					MemoryCopy(destination, source, width << 1);
+					source += sWidth;
+					destination += dWidth;
+				} while (--height);
+			}
 		}
 	}
 
@@ -412,37 +462,76 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 	INT width = lpSrcRect->right - lpSrcRect->left;
 	INT height = lpSrcRect->bottom - lpSrcRect->top;
 
-	WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-	WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
-
-	if (surface->colorKey)
+	if (config.bpp32Hooked)
 	{
-		do
-		{
-			WORD* src = source;
-			WORD* dest = destination;
-			source += sWidth;
-			destination += dWidth;
+		DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
+		DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
 
-			DWORD count = width;
+		DWORD colorKey = surface->colorKey.dwColorSpaceHighValue;
+		if (colorKey)
+		{
 			do
 			{
-				if (*src != LOWORD(surface->colorKey))
-					*dest = *src;
+				DWORD* src = source;
+				DWORD* dest = destination;
+				source += sWidth;
+				destination += dWidth;
 
-				++src;
-				++dest;
-			} while (--count);
+				DWORD count = width;
+				do
+				{
+					if ((*src & 0xF8FCF8) != colorKey)
+						*dest = *src;
+
+					++src;
+					++dest;
+				} while (--count);
+			} while (--height);
+		}
+		else if (this->mode.width == surface->mode.width && this->mode.width == width)
+			MemoryCopy(destination, source, width * height * sizeof(DWORD));
+		else do
+		{
+			MemoryCopy(destination, source, width * sizeof(DWORD));
+			source += sWidth;
+			destination += dWidth;
 		} while (--height);
 	}
-	else if (this->mode.width == surface->mode.width && this->mode.width == width)
-		MemoryCopy(destination, source, (width * height) << 1);
-	else do
+	else
 	{
-		MemoryCopy(destination, source, width << 1);
-		source += sWidth;
-		destination += dWidth;
-	} while (--height);
+		WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
+		WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+
+		WORD colorKey = LOWORD(surface->colorKey.dwColorSpaceLowValue);
+		if (colorKey)
+		{
+			do
+			{
+				WORD* src = source;
+				WORD* dest = destination;
+				source += sWidth;
+				destination += dWidth;
+
+				DWORD count = width;
+				do
+				{
+					if (*src != colorKey)
+						*dest = *src;
+
+					++src;
+					++dest;
+				} while (--count);
+			} while (--height);
+		}
+		else if (this->mode.width == surface->mode.width && this->mode.width == width)
+			MemoryCopy(destination, source, width * height * sizeof(WORD));
+		else do
+		{
+			MemoryCopy(destination, source, width * sizeof(WORD));
+			source += sWidth;
+			destination += dWidth;
+		} while (--height);
+	}
 
 	return DD_OK;
 }
