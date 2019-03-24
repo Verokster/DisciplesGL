@@ -318,11 +318,12 @@ namespace Hooks
 		}
 
 		HWND hWnd = CreateWindowEx(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
-		
-		if (isMain && config.windowedMode)
+		if (isMain)
 		{
 			hWndMain = hWnd;
-			SetMenu(hWnd, config.menu);
+
+			if (config.windowedMode)
+				SetMenu(hWnd, config.menu);
 		}
 
 		return hWnd;
@@ -903,35 +904,35 @@ namespace Hooks
 		dstData += dstPitch * dstPos->y + dstPos->x;
 
 		DWORD height = size->cy;
-		do
+		while (height--)
 		{
 			DWORD* src = srcData;
 			DWORD* dst = dstData;
 
 			DWORD width = size->cx;
-			do
+			while (width--)
 			{
 				DWORD cs = *src++;
 				DWORD cd = *dst;
 
-				DWORD r = (cd & 0xFF) + (cs & 0xFF);
-				if (r > 0xFF)
-					r = 0xFF;
+				DWORD r = (cd & 0x0000FF) + (cs & 0x0000FF);
+				if (r > 0x0000FF)
+					r = 0x0000FF;
 
-				DWORD g = (cd & 0xFF00) + (cs & 0xFF00);
-				if (g > 0xFF00)
-					g = 0xFF00;
+				DWORD g = (cd & 0x00FF00) + (cs & 0x00FF00);
+				if (g > 0x00FF00)
+					g = 0x00FF00;
 
 				DWORD b = (cd & 0xFF0000) + (cs & 0xFF0000);
 				if (b > 0xFF0000)
 					b = 0xFF0000;
 
 				*dst++ = r | g | b;
-			} while (--width);
+			}
 
 			srcData += srcPitch;
 			dstData += dstPitch;
-		} while (--height);
+		}
 	}
 
 	VOID __stdcall Pixel_Sub(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE *size)
@@ -943,35 +944,35 @@ namespace Hooks
 		dstData += dstPitch * dstPos->y + dstPos->x;
 
 		DWORD height = size->cy;
-		do
+		while (height--)
 		{
 			DWORD* src = srcData;
 			DWORD* dst = dstData;
 
 			DWORD width = size->cx;
-			do
+			while (width--)
 			{
 				DWORD cs = *src++;
 				DWORD cd = *dst;
 
-				INT r = (cd & 0xFF) - (cs & 0xFF);
+				INT r = (cd & 0x0000FF) - (cs & 0x0000FF);
 				if (r < 0)
 					r = 0;
 
-				INT g = (cd & 0xFF00) - (cs & 0xFF00);
-				if (g > 0)
+				INT g = (cd & 0x00FF00) - (cs & 0x00FF00);
+				if (g < 0)
 					g = 0;
 
 				INT b = (cd & 0xFF0000) - (cs & 0xFF0000);
-				if (b > 0)
+				if (b < 0)
 					b = 0;
 
 				*dst++ = r | g | b;
-			} while (--width);
+			}
 
 			srcData += srcPitch;
 			dstData += dstPitch;
-		} while (--height);
+		}
 	}
 
 	VOID __stdcall Pixel_BlitColorKey(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE *size, BYTE flag, DWORD colorKey)
@@ -1981,6 +1982,8 @@ namespace Hooks
 			DWORD hookCount = sizeof(addressArray) / sizeof(AddressSpace);
 			do
 			{
+				//break;
+
 				DWORD check;
 				if (ReadDWord(hookSpace->check + 1, &check) && check == WS_POPUP)
 				{
