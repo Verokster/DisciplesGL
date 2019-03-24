@@ -489,6 +489,24 @@ namespace Window
 				EndPaint(hWnd, &paint);
 				return NULL;
 			}
+
+			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+		}
+
+		case WM_WINDOWPOSCHANGED:
+		{
+			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+			if (ddraw)
+			{
+				RECT rect;
+				GetClientRect(hWnd, &rect);
+				ddraw->viewport.width = rect.right;
+				ddraw->viewport.height = rect.bottom;
+				ddraw->viewport.refresh = TRUE;
+				SetEvent(ddraw->hDrawEvent);
+			}
+
+			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
 
 		case WM_MOVE:
@@ -513,6 +531,8 @@ namespace Window
 				}
 				else
 					SetWindowPos(ddraw->hDraw, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+			
+				SetEvent(ddraw->hDrawEvent);
 			}
 
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);

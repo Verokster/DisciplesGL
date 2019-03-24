@@ -309,13 +309,21 @@ namespace Hooks
 			nHeight = rect.bottom - rect.top;
 
 			X = (GetSystemMetrics(SM_CXSCREEN) - nWidth) >> 1;
+			if (X < 0)
+				X = 0;
+
 			Y = (GetSystemMetrics(SM_CYSCREEN) - nHeight) >> 1;
+			if (Y < 0)
+				Y = 0;
 		}
 
 		HWND hWnd = CreateWindowEx(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 		
-		if (isMain)
+		if (isMain && config.windowedMode)
+		{
 			hWndMain = hWnd;
+			SetMenu(hWnd, config.menu);
+		}
 
 		return hWnd;
 	}
@@ -348,14 +356,6 @@ namespace Hooks
 		}
 
 		return SetWindowLong(hWnd, nIndex, dwNewLong);
-	}
-
-	BOOL __stdcall ShowWindowHook(HWND hWnd, INT nCmdShow)
-	{
-		if (hWnd == hWndMain && config.windowedMode)
-			SetMenu(hWnd, config.menu);
-
-		return ShowWindow(hWnd, nCmdShow);
 	}
 
 	HWND __stdcall GetForegroundWindowHook()
@@ -1938,7 +1938,6 @@ namespace Hooks
 				PatchFunction(&file, "RegisterClassA", RegisterClassHook);
 
 				PatchFunction(&file, "SetWindowLongA", SetWindowLongHook);
-				PatchFunction(&file, "ShowWindow", ShowWindowHook);
 
 				PatchFunction(&file, "MessageBoxA", MessageBoxHook);
 

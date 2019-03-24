@@ -1834,27 +1834,23 @@ VOID OpenDraw::SetWindowedMode()
 		this->windowPlacement.length = sizeof(WINDOWPLACEMENT);
 		GetWindowPlacement(hWnd, &this->windowPlacement);
 
-		INT monWidth = GetSystemMetrics(SM_CXSCREEN);
-		INT monHeight = GetSystemMetrics(SM_CYSCREEN);
+		RECT rect = { 0, 0, (LONG)config.mode->width, (LONG)config.mode->height };
+		AdjustWindowRect(&rect, WS_WINDOWED, TRUE);
 
-		RECT* rect = &this->windowPlacement.rcNormalPosition;
-		rect->left = (monWidth - this->mode.width) >> 1;
-		rect->top = (monHeight - this->mode.height) >> 1;
-		rect->right = rect->left + this->mode.width;
-		rect->bottom = rect->top + this->mode.height;
-		AdjustWindowRect(rect, WS_WINDOWED, TRUE);
+		LONG nWidth = rect.right - rect.left;
+		LONG nHeight = rect.bottom - rect.top;
 
-		if (rect->left < 0)
-		{
-			rect->right -= rect->left;
-			rect->left = 0;
-		}
+		RECT* rc = &this->windowPlacement.rcNormalPosition;
+		rc->left = (GetSystemMetrics(SM_CXSCREEN) - nWidth) >> 1;
+		if (rc->left < 0)
+			rc->left = 0;
 
-		if (rect->top < 0)
-		{
-			rect->bottom -= rect->top;
-			rect->top = 0;
-		}
+		rc->top = (GetSystemMetrics(SM_CYSCREEN) - nHeight) >> 1;
+		if (rc->top < 0)
+			rc->top = 0;
+		
+		rc->right = rc->left + nWidth;
+		rc->bottom = rc->top + nHeight;
 
 		this->windowPlacement.ptMinPosition.x = this->windowPlacement.ptMinPosition.y = -1;
 		this->windowPlacement.ptMaxPosition.x = this->windowPlacement.ptMaxPosition.y = -1;
