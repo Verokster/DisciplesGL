@@ -46,6 +46,8 @@ public:
 	OpenDrawSurface* attachedSurface;
 
 	VOID* indexBuffer;
+	VOID* secondaryBuffer;
+	DWORD bufferIndex;
 
 	OpenDrawSurface(IDrawUnknown**, OpenDraw*, LPDDSCAPS2);
 	~OpenDrawSurface();

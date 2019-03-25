@@ -279,6 +279,15 @@ VOID OpenDraw::RenderOld()
 							glFilter = config.image.filter == FilterNearest ? GL_NEAREST : GL_LINEAR;
 						}
 
+						VOID* currentBuffer;
+						if (config.version)
+							currentBuffer = surface->indexBuffer;
+						else
+						{
+							surface->bufferIndex = surface->bufferIndex ? 0 : 1;
+							currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
+						}
+
 						DWORD count = frameCount;
 						frame = frames;
 						while (count--)
@@ -292,14 +301,14 @@ VOID OpenDraw::RenderOld()
 								}
 
 								if (this->mode.bpp != 16 || config.bpp32Hooked)
-									GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, surface->indexBuffer);
+									GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, currentBuffer);
 								else
 								{
 									if (glVersion > GL_VER_1_1)
-										GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, surface->indexBuffer);
+										GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, currentBuffer);
 									else
 									{
-										WORD* source = (WORD*)surface->indexBuffer;
+										WORD* source = (WORD*)currentBuffer;
 										DWORD* dest = (DWORD*)frameBuffer;
 										DWORD copyWidth = this->mode.width;
 										DWORD copyHeight = this->mode.height;
@@ -333,7 +342,7 @@ VOID OpenDraw::RenderOld()
 
 								if (this->mode.bpp != 16 || config.bpp32Hooked)
 								{
-									DWORD* source = (DWORD*)surface->indexBuffer + frame->rect.y * this->mode.width + frame->rect.x;
+									DWORD* source = (DWORD*)currentBuffer + frame->rect.y * this->mode.width + frame->rect.x;
 									DWORD* dest = (DWORD*)frameBuffer;
 									DWORD copyHeight = frame->rect.height;
 									do
@@ -349,7 +358,7 @@ VOID OpenDraw::RenderOld()
 								{
 									if (glVersion > GL_VER_1_1)
 									{
-										WORD* source = (WORD*)surface->indexBuffer + frame->rect.x * this->mode.width + frame->rect.x;
+										WORD* source = (WORD*)currentBuffer + frame->rect.x * this->mode.width + frame->rect.x;
 										WORD* dest = (WORD*)frameBuffer;
 										DWORD copyHeight = frame->rect.height;
 										do
@@ -363,7 +372,7 @@ VOID OpenDraw::RenderOld()
 									}
 									else
 									{
-										WORD* source = (WORD*)surface->indexBuffer + frame->rect.x * this->mode.width + frame->rect.x;
+										WORD* source = (WORD*)currentBuffer + frame->rect.x * this->mode.width + frame->rect.x;
 										DWORD* dest = (DWORD*)frameBuffer;
 										DWORD copyHeight = frame->rect.height;
 										do
@@ -405,7 +414,7 @@ VOID OpenDraw::RenderOld()
 
 										for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 										{
-											DWORD* idx = (DWORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+											DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 												FPS_X + FPS_WIDTH * (dcount - 1);
 
 											DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -429,7 +438,7 @@ VOID OpenDraw::RenderOld()
 									{
 										for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 										{
-											DWORD* idx = (DWORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+											DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 												FPS_X + FPS_WIDTH * (dcount - 1);
 
 											DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -458,7 +467,7 @@ VOID OpenDraw::RenderOld()
 
 											for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 											{
-												WORD* idx = (WORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+												WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 													FPS_X + FPS_WIDTH * (dcount - 1);
 
 												WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -482,7 +491,7 @@ VOID OpenDraw::RenderOld()
 										{
 											for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 											{
-												WORD* idx = (WORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+												WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 													FPS_X + FPS_WIDTH * (dcount - 1);
 
 												WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -509,7 +518,7 @@ VOID OpenDraw::RenderOld()
 
 											for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 											{
-												WORD* idx = (WORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+												WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 													FPS_X + FPS_WIDTH * (dcount - 1);
 
 												DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -541,7 +550,7 @@ VOID OpenDraw::RenderOld()
 										{
 											for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 											{
-												WORD* idx = (WORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+												WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 													FPS_X + FPS_WIDTH * (dcount - 1);
 
 												DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -608,7 +617,7 @@ VOID OpenDraw::RenderOld()
 											bmi->bV5BitCount = 24;
 											bmi->bV5Compression = BI_RGB;
 
-											DWORD* src = (DWORD*)surface->indexBuffer;
+											DWORD* src = (DWORD*)currentBuffer;
 											BYTE* dst = (BYTE*)data + sizeof(BITMAPV5HEADER);
 
 											DWORD count = this->mode.width * this->mode.height;
@@ -629,7 +638,7 @@ VOID OpenDraw::RenderOld()
 											bmi->bV5GreenMask = 0x07E0;
 											bmi->bV5BlueMask = 0x001F;
 
-											MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), surface->indexBuffer, dataSize);
+											MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), currentBuffer, dataSize);
 										}
 									}
 									GlobalUnlock(hMemory);
@@ -805,12 +814,21 @@ VOID OpenDraw::RenderMid()
 										GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 									}
 
+									VOID* currentBuffer;
+									if (config.version)
+										currentBuffer = surface->indexBuffer;
+									else
+									{
+										surface->bufferIndex = surface->bufferIndex ? 0 : 1;
+										currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
+									}
+
 									// NEXT UNCHANGED
 									{
 										if (this->mode.bpp != 16 || config.bpp32Hooked)
-											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, surface->indexBuffer);
+											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, currentBuffer);
 										else
-											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, surface->indexBuffer);
+											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, currentBuffer);
 
 										// Update FPS
 										if (fpsState && !this->isTakeSnapshot)
@@ -834,7 +852,7 @@ VOID OpenDraw::RenderMid()
 
 													for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 													{
-														DWORD* idx = (DWORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+														DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 															FPS_X + FPS_WIDTH * (dcount - 1);
 
 														DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -858,7 +876,7 @@ VOID OpenDraw::RenderMid()
 												{
 													for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 													{
-														DWORD* idx = (DWORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+														DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 															FPS_X + FPS_WIDTH * (dcount - 1);
 
 														DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -885,7 +903,7 @@ VOID OpenDraw::RenderMid()
 
 													for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 													{
-														WORD* idx = (WORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+														WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 															FPS_X + FPS_WIDTH * (dcount - 1);
 
 														WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -909,7 +927,7 @@ VOID OpenDraw::RenderMid()
 												{
 													for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 													{
-														WORD* idx = (WORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+														WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 															FPS_X + FPS_WIDTH * (dcount - 1);
 
 														WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -958,7 +976,7 @@ VOID OpenDraw::RenderMid()
 														bmi->bV5BitCount = 24;
 														bmi->bV5Compression = BI_RGB;
 
-														DWORD* src = (DWORD*)surface->indexBuffer;
+														DWORD* src = (DWORD*)currentBuffer;
 														BYTE* dst = (BYTE*)data + sizeof(BITMAPV5HEADER);
 
 														DWORD count = this->mode.width * this->mode.height;
@@ -979,7 +997,7 @@ VOID OpenDraw::RenderMid()
 														bmi->bV5GreenMask = 0x07E0;
 														bmi->bV5BlueMask = 0x001F;
 
-														MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), surface->indexBuffer, dataSize);
+														MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), currentBuffer, dataSize);
 													}
 												}
 												GlobalUnlock(hMemory);
@@ -1329,12 +1347,21 @@ VOID OpenDraw::RenderNew()
 														}
 													}
 
+													VOID* currentBuffer;
+													if (config.version)
+														currentBuffer = surface->indexBuffer;
+													else
+													{
+														surface->bufferIndex = surface->bufferIndex ? 0 : 1;
+														currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
+													}
+
 													// NEXT UNCHANGED
 													{
 														if (this->mode.bpp != 16 || config.bpp32Hooked)
-															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, surface->indexBuffer);
+															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, currentBuffer);
 														else
-															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, surface->indexBuffer);
+															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, currentBuffer);
 
 														// Update FPS
 														if (fpsState && !this->isTakeSnapshot)
@@ -1358,7 +1385,7 @@ VOID OpenDraw::RenderNew()
 
 																	for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 																	{
-																		DWORD* idx = (DWORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+																		DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 																			FPS_X + FPS_WIDTH * (dcount - 1);
 
 																		DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -1382,7 +1409,7 @@ VOID OpenDraw::RenderNew()
 																{
 																	for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 																	{
-																		DWORD* idx = (DWORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+																		DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 																			FPS_X + FPS_WIDTH * (dcount - 1);
 
 																		DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -1409,7 +1436,7 @@ VOID OpenDraw::RenderNew()
 
 																	for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 																	{
-																		WORD* idx = (WORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+																		WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 																			FPS_X + FPS_WIDTH * (dcount - 1);
 
 																		WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -1433,7 +1460,7 @@ VOID OpenDraw::RenderNew()
 																{
 																	for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 																	{
-																		WORD* idx = (WORD*)surface->indexBuffer + (FPS_Y + y) * this->mode.width +
+																		WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
 																			FPS_X + FPS_WIDTH * (dcount - 1);
 
 																		WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
@@ -1546,7 +1573,7 @@ VOID OpenDraw::RenderNew()
 																			bmi->bV5BitCount = 24;
 																			bmi->bV5Compression = BI_RGB;
 
-																			DWORD* src = (DWORD*)surface->indexBuffer;
+																			DWORD* src = (DWORD*)currentBuffer;
 																			BYTE* dst = (BYTE*)data + sizeof(BITMAPV5HEADER);
 
 																			DWORD count = this->mode.width * this->mode.height;
@@ -1567,7 +1594,7 @@ VOID OpenDraw::RenderNew()
 																			bmi->bV5GreenMask = 0x07E0;
 																			bmi->bV5BlueMask = 0x001F;
 
-																			MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), surface->indexBuffer, dataSize);
+																			MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), currentBuffer, dataSize);
 																		}
 																	}
 																	GlobalUnlock(hMemory);

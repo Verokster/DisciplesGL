@@ -701,16 +701,15 @@ namespace Hooks
 		do
 		{
 			BYTE* src = srcData;
-			DWORD* dst = dstData;
+			BYTE* dst = (BYTE*)dstData;
 
 			DWORD width = rect->right - rect->left;
 			do
 			{
-				BYTE red = *src++;
-				BYTE green = *src++;
-				BYTE blue = *src++;
-
-				*dst++ = red | (green << 8) | (blue << 16);
+				*dst++ = *src++;
+				*dst++ = *src++;
+				*dst++ = *src++;
+				++dst;
 			} while (--width);
 
 			srcData += srcPitch;
@@ -718,7 +717,7 @@ namespace Hooks
 		} while (--height);
 	}
 
-	VOID __stdcall Pixel_RGB_Swap(BYTE* data, LONG pitch, SIZE *size)
+	VOID __stdcall Pixel_RGB_Swap(BYTE* data, LONG pitch, SIZE* size)
 	{
 		/*DWORD height = size->cy;
 		while (height--)
@@ -862,7 +861,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall Pixel_BlitBlendAvarage(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE *size, BYTE flag, DWORD colorKey)
+	VOID __stdcall Pixel_BlitBlendAvarage(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size, BYTE flag, DWORD colorKey)
 	{
 		if (!flag || flag == 0xFF)
 			return;
@@ -987,6 +986,8 @@ namespace Hooks
 		srcData += srcPitch * srcPos->y + srcPos->x;
 		dstData += dstPitch * dstPos->y + dstPos->x;
 
+		BOOL check = (~dstPos->y ^ dstPos->x) & 1;
+
 		DWORD height = size->cy;
 		while (height--)
 		{
@@ -994,17 +995,27 @@ namespace Hooks
 			DWORD* dst = dstData;
 
 			DWORD width = size->cx;
+			if (check)
+			{
+				++src;
+				++dst;
+				--width;
+			}
+
+			width = (width + 1) >> 1;
 			while (width--)
 			{
 				if ((*src & COLORKEY_AND) != colorKey)
 					*dst = *src;
 
-				++src;
-				++dst;
+				src += 2;
+				dst += 2;
 			}
 
 			srcData += srcPitch;
 			dstData += dstPitch;
+
+			check = !check;
 		}
 	}
 
@@ -1016,6 +1027,8 @@ namespace Hooks
 		srcData += srcPitch * srcPos->y + srcPos->x;
 		dstData += dstPitch * dstPos->y + dstPos->x;
 
+		BOOL check = (~dstPos->y ^ dstPos->x) & 1;
+
 		DWORD height = size->cy;
 		while (height--)
 		{
@@ -1023,25 +1036,32 @@ namespace Hooks
 			DWORD* dst = dstData;
 
 			DWORD width = size->cx;
-			while (width--)
+			if (check)
 			{
-				if (*src)
-					*dst = *src;
-
 				++src;
 				++dst;
+				--width;
+			}
+
+			width = (width + 1) >> 1;
+			while (width--)
+			{
+				if (*src & COLORKEY_AND)
+					*dst = *src;
+
+				src += 2;
+				dst += 2;
 			}
 
 			srcData += srcPitch;
 			dstData += dstPitch;
+
+			check = !check;
 		}
 	}
 
-	VOID __stdcall Pixel_DoubleLighter(DWORD* data, LONG pitch, SIZE* size, DWORD colorKey, BOOL flag)
+	VOID __stdcall Pixel_DoubleLighter(DWORD* data, LONG pitch, SIZE* size, DWORD colorKey, BYTE flag)
 	{
-		if (!flag)
-			return;
-
 		colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
 		pitch >>= 1;
 
@@ -1055,22 +1075,31 @@ namespace Hooks
 			{
 				if ((*ptr & COLORKEY_AND) == colorKey)
 					*ptr = 0;
-				/*else if (*ptr)
+				else if (flag)
 				{
-					DWORD r = (*ptr & 0xFF) << 1;
-					if (r > 0xFF)
-						r = 0xFF;
+					DWORD r = *ptr & 0xFF;
+					DWORD g = (*ptr >> 8) & 0xFF;
+					DWORD b = (*ptr >> 16) & 0xFF;
 
-					DWORD g = (*ptr & 0xFF00) << 1;
-					if (g > 0xFF00)
-						g = 0xFF00;
+					if (r + g + b > 56)
+					{
+						r <<= 1;
+						if (r > 0xFF)
+							r = 0xFF;
 
-					DWORD b = (*ptr & 0xFF0000) << 1;
-					if (b > 0xFF0000)
-						b = 0xFF0000;
+						g <<= 1;
+						if (g > 0xFF)
+							g = 0xFF;
 
-					*ptr = r | g | b;
-				}*/
+						b <<= 1;
+						if (b > 0xFF)
+							b = 0xFF;
+
+						*ptr = r | (g << 8) | (b << 16);
+					}
+					else
+						*ptr = 0;
+				}
 
 				++ptr;
 			}
@@ -1142,7 +1171,7 @@ namespace Hooks
 							do
 							{
 								if ((*src & COLORKEY_AND) != colorKey)
-									*dst = _byteswap_ulong(_rotl(*src, 8));
+									*dst = *src;
 
 								++src;
 								++dst;
@@ -1189,7 +1218,7 @@ namespace Hooks
 							do
 							{
 								if ((*src & COLORKEY_AND) != colorKey)
-									*dst = _byteswap_ulong(_rotl(*src, 8));
+									*dst = _byteswap_ulong(_rotl(*src, 8)); // swap for map objects
 
 								++src;
 								++dst;
@@ -1982,8 +2011,6 @@ namespace Hooks
 			DWORD hookCount = sizeof(addressArray) / sizeof(AddressSpace);
 			do
 			{
-				//break;
-
 				DWORD check;
 				if (ReadDWord(hookSpace->check + 1, &check) && check == WS_POPUP)
 				{

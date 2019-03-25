@@ -42,6 +42,8 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, LPDDSCAPS2
 	this->attachedSurface = NULL;
 
 	this->indexBuffer = NULL;
+	this->secondaryBuffer = NULL;
+	this->bufferIndex = 0;
 	this->isCreated = FALSE;
 	this->caps = *lpCaps;
 
@@ -81,6 +83,14 @@ VOID OpenDrawSurface::ReleaseBuffer()
 			AlignedFree(this->indexBuffer);
 			this->indexBuffer = NULL;
 		}
+
+		if (this->secondaryBuffer)
+		{
+			AlignedFree(this->secondaryBuffer);
+			this->secondaryBuffer = NULL;
+		}
+
+		this->bufferIndex = 0;
 	}
 }
 
@@ -92,20 +102,36 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 	this->mode.height = height;
 	this->mode.bpp = bpp;
 
-	bpp >>= 3;
-	if (bpp == sizeof(BYTE) && (this->caps.dwCaps & DDSCAPS_PRIMARYSURFACE) || bpp == sizeof(WORD) && config.bpp32Hooked)
-		bpp = sizeof(DWORD);
-
 	if (buffer)
+	{
 		this->indexBuffer = buffer;
+		this->secondaryBuffer = NULL;
+	}
 	else
 	{
+		bpp >>= 3;
+		if (bpp == sizeof(BYTE) && (this->caps.dwCaps & DDSCAPS_PRIMARYSURFACE) || bpp == sizeof(WORD) && config.bpp32Hooked)
+			bpp = sizeof(DWORD);
+
 		DWORD size = width * height * bpp;
+		if (this->caps.dwCaps & DDSCAPS_PRIMARYSURFACE)
+			size <<= 1;
+
 		this->indexBuffer = AlignedAlloc(size);
 		MemoryZero(this->indexBuffer, size);
 
+		if (!config.version && this->caps.dwCaps & DDSCAPS_PRIMARYSURFACE)
+		{
+			this->secondaryBuffer = AlignedAlloc(size);
+			MemoryZero(this->secondaryBuffer, size);
+		}
+		else
+			this->secondaryBuffer = NULL;
+
 		this->isCreated = TRUE;
 	}
+
+	this->bufferIndex = 0;
 }
 
 VOID OpenDrawSurface::Flush()
@@ -131,7 +157,22 @@ VOID OpenDrawSurface::Flush()
 		} while (--copyHeight);
 	}
 	else
-		MemoryCopy(this->indexBuffer, this->attachedSurface->indexBuffer, this->mode.width * this->mode.height * (config.bpp32Hooked ? sizeof(DWORD) : sizeof(WORD)));
+	{
+		VOID* buffer;
+
+		if (!this->bufferIndex)
+		{
+			buffer = this->indexBuffer;
+			this->indexBuffer = this->attachedSurface->indexBuffer;
+		}
+		else
+		{
+			buffer = this->secondaryBuffer;
+			this->secondaryBuffer = this->attachedSurface->indexBuffer;
+		}
+
+		this->attachedSurface->indexBuffer = buffer;
+	}
 
 	SetEvent(this->ddraw->hDrawEvent);
 	Sleep(0);
@@ -474,9 +515,7 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			{
 				DWORD* src = source;
 				DWORD* dest = destination;
-				source += sWidth;
-				destination += dWidth;
-
+				
 				DWORD count = width;
 				do
 				{
@@ -486,13 +525,16 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 					++src;
 					++dest;
 				} while (--count);
+
+				source += sWidth;
+				destination += dWidth;
 			} while (--height);
 		}
 		else if (this->mode.width == surface->mode.width && this->mode.width == width)
-			MemoryCopy(destination, source, width * height * sizeof(DWORD));
+			MemoryCopy(destination, source, width * height << 2);
 		else do
 		{
-			MemoryCopy(destination, source, width * sizeof(DWORD));
+			MemoryCopy(destination, source, width << 2);
 			source += sWidth;
 			destination += dWidth;
 		} while (--height);
@@ -509,9 +551,7 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			{
 				WORD* src = source;
 				WORD* dest = destination;
-				source += sWidth;
-				destination += dWidth;
-
+				
 				DWORD count = width;
 				do
 				{
@@ -521,13 +561,16 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 					++src;
 					++dest;
 				} while (--count);
+
+				source += sWidth;
+				destination += dWidth;
 			} while (--height);
 		}
 		else if (this->mode.width == surface->mode.width && this->mode.width == width)
-			MemoryCopy(destination, source, width * height * sizeof(WORD));
+			MemoryCopy(destination, source, width * height << 1);
 		else do
 		{
-			MemoryCopy(destination, source, width * sizeof(WORD));
+			MemoryCopy(destination, source, width << 1);
 			source += sWidth;
 			destination += dWidth;
 		} while (--height);
