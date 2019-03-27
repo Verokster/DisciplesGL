@@ -65,38 +65,31 @@ namespace Config
 			}
 		}
 
-		if (config.version && !Config::Get(CONFIG_DISCIPLE, "DDraw", 1) || !config.version && Config::Get(CONFIG_DISCIPLE, "UseD3D", 0))
-			return FALSE;
-
-		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(IDR_MENU));
-		config.font = (HFONT)CreateFont(16, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET,
-			OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-			DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
-
-		config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", 0);
-
-		if (config.version)
-			config.mode = modesList;
-		else
-		{
-			DWORD modeIdx = Config::Get(CONFIG_DISCIPLE, "DisplaySize", 0);
-			if (modeIdx > 2)
-				modeIdx = 0;
-			config.mode = &modesList[modeIdx + 1];
-		}
-
 		config.isExist = !(BOOL)Config::Get(CONFIG_WRAPPER, "ReInit", TRUE);
 		Config::Set(CONFIG_WRAPPER, "ReInit", FALSE);
 
 		if (!config.isExist)
 		{
+			if (config.version)
+			{
+				Config::Set(CONFIG_DISCIPLE, "DDraw", TRUE);
+				Config::Set(CONFIG_DISCIPLE, "InWindow", TRUE);
+			}
+			else
+			{
+				Config::Set(CONFIG_DISCIPLE, "UseD3D", FALSE);
+				Config::Set(CONFIG_DISCIPLE, "DisplayMode", TRUE);
+			}
+
+			config.windowedMode = TRUE;
+
 			config.image.aspect = TRUE;
 			Config::Set(CONFIG_WRAPPER, "ImageAspect", config.image.aspect);
 
 			config.image.vSync = TRUE;
 			Config::Set(CONFIG_WRAPPER, "ImageVSync", config.image.vSync);
 
-			config.image.filter = FilterLinear;
+			config.image.filter = FilterCubic;
 			Config::Set(CONFIG_WRAPPER, "ImageFilter", *(INT*)&config.image.filter);
 
 			config.image.scaleNx.value = 2;
@@ -136,13 +129,18 @@ namespace Config
 		}
 		else
 		{
+			if (config.version && !Config::Get(CONFIG_DISCIPLE, "DDraw", TRUE) || !config.version && Config::Get(CONFIG_DISCIPLE, "UseD3D", FALSE))
+				return FALSE;
+
+			config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", TRUE);
+
 			config.image.aspect = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageAspect", TRUE);
 			config.image.vSync = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageVSync", TRUE);
 
-			INT value = Config::Get(CONFIG_WRAPPER, "ImageFilter", FilterLinear);
+			INT value = Config::Get(CONFIG_WRAPPER, "ImageFilter", FilterCubic);
 			config.image.filter = *(ImageFilter*)&value;
 			if (config.image.filter < FilterNearest || config.image.filter > FilterScaleNx)
-				config.image.filter = FilterLinear;
+				config.image.filter = FilterCubic;
 
 			value = Config::Get(CONFIG_WRAPPER, "ImageScaleNx", 2);
 			config.image.scaleNx = *(FilterType*)&value;
@@ -220,6 +218,21 @@ namespace Config
 				if (config.keys.vSync > 1 && config.keys.vSync > 24)
 					config.keys.vSync = 0;
 			}
+		}
+
+		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(IDR_MENU));
+		config.font = (HFONT)CreateFont(16, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET,
+			OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+			DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
+
+		if (config.version)
+			config.mode = modesList;
+		else
+		{
+			DWORD modeIdx = Config::Get(CONFIG_DISCIPLE, "DisplaySize", 0);
+			if (modeIdx > 2)
+				modeIdx = 0;
+			config.mode = &modesList[modeIdx + 1];
 		}
 
 		CHAR buffer[256];

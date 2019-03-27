@@ -37,7 +37,7 @@ namespace Hooks
 	INT baseOffset;
 
 	AddressSpace addressArray[] = {
-		// Dark Prophecy return - v1.00
+		// Dark Prophecy return - v1.10
 		0x00557B85, 0x005ADFCC, 0x0059A30B, 0x005AECAF, 0x006622BE, 0x0066242E, 0x006D3728,
 		0x00552876, 0x0066378C, 0x00552A0C, 0x006CD194, 0x005A98B0, 0x005A97B0,
 		0x0051E67B, 0x005A10A1, 0x006CCD00, 0x005261BF, 0x00526258,
@@ -654,7 +654,7 @@ namespace Hooks
 		if (srcData && dstData && (VOID*)srcData != (VOID*)dstData &&
 			rect->left >= 0 && rect->left < rect->right && rect->top >= 0 && rect->top < rect->bottom)
 		{
-			srcPitch >>=  1;
+			srcPitch >>= 1;
 			if (rect->right <= srcPitch && rect->right <= dstPitch / 3)
 			{
 				srcData += rect->top * srcPitch + rect->left * 2;
@@ -2063,9 +2063,7 @@ namespace Hooks
 
 					// Increase memory
 					{
-						BYTE value;
-						if (ReadByte(hookSpace->memory_1 + 2, &value))
-							PatchByte(hookSpace->memory_1 + 2, value << 1);
+						PatchByte(hookSpace->memory_1 + 2, 0xC);
 
 						PatchHook(hookSpace->memory_2, hook_005A6311);
 						back_005A6316 = hookSpace->memory_2 + 5 + baseOffset;

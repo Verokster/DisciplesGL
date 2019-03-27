@@ -43,13 +43,16 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, LPDDSCAPS2
 
 	this->indexBuffer = NULL;
 	this->secondaryBuffer = NULL;
-	this->bufferIndex = 0;
+	this->bufferIndex = FALSE;
 	this->isCreated = FALSE;
 	this->caps = *lpCaps;
 
 	this->mode.width = 0;
 	this->mode.height = 0;
 	this->mode.bpp = 0;
+
+	this->drawEnabled = TRUE;
+	this->drawIndex = 0;
 
 	this->colorKey.dwColorSpaceLowValue = 0;
 	this->colorKey.dwColorSpaceHighValue = 0;
@@ -90,7 +93,7 @@ VOID OpenDrawSurface::ReleaseBuffer()
 			this->secondaryBuffer = NULL;
 		}
 
-		this->bufferIndex = 0;
+		this->bufferIndex = FALSE;
 	}
 }
 
@@ -131,50 +134,52 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 		this->isCreated = TRUE;
 	}
 
-	this->bufferIndex = 0;
+	this->bufferIndex = FALSE;
 }
 
 VOID OpenDrawSurface::Flush()
 {
+	OpenDrawSurface* surface = this->attachedSurface;
+
 	if (this->mode.bpp == 8)
 	{
-		BYTE* source = (BYTE*)this->attachedSurface->indexBuffer;
-		DWORD* destination = (DWORD*)this->indexBuffer;
+		BYTE* src = (BYTE*)surface->indexBuffer;
+		DWORD* dest = (DWORD*)this->indexBuffer;
 
-		DWORD copyHeight = this->mode.height;
+		DWORD count = this->mode.width * this->mode.height;
 		do
-		{
-			BYTE* src = source;
-			source += this->mode.width;
+			*dest++ = this->attachedPalette->entries[*src++];
+		while (--count);
 
-			DWORD* dest = destination;
-			destination += this->mode.width;
-
-			DWORD copyWidth = this->mode.width;
-			do
-				*dest++ = this->attachedPalette->entries[*src++];
-			while (--copyWidth);
-		} while (--copyHeight);
+		SetEvent(this->ddraw->hDrawEvent);
 	}
 	else
 	{
-		VOID* buffer;
-
-		if (!this->bufferIndex)
+		if (surface->drawEnabled && this->drawIndex < 1)
 		{
-			buffer = this->indexBuffer;
-			this->indexBuffer = this->attachedSurface->indexBuffer;
-		}
-		else
-		{
-			buffer = this->secondaryBuffer;
-			this->secondaryBuffer = this->attachedSurface->indexBuffer;
+			++this->drawIndex;
+
+			BOOL index = this->bufferIndex;
+
+			VOID** lpBuffer = !index ? &this->indexBuffer : &this->secondaryBuffer;
+			VOID* buffer = *lpBuffer;
+			*lpBuffer = surface->indexBuffer;
+
+			if (index != this->bufferIndex)
+			{
+				*lpBuffer = buffer;
+				lpBuffer = index ? &this->indexBuffer : &this->secondaryBuffer;
+				buffer = *lpBuffer;
+			}
+
+			surface->indexBuffer = buffer;
+
+			SetEvent(this->ddraw->hDrawEvent);
 		}
 
-		this->attachedSurface->indexBuffer = buffer;
+		surface->drawEnabled = this->drawIndex < 1;
 	}
 
-	SetEvent(this->ddraw->hDrawEvent);
 	Sleep(0);
 }
 
@@ -345,96 +350,96 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 {
 	// 16778240 - DDBLT_WAIT | DDBLT_COLORFILL
 	if (dwFlags & DDBLT_COLORFILL)
-		MemoryZero(this->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp == 8 ? 1 : (config.bpp32Hooked ? sizeof(DWORD) : sizeof(WORD))));
-	else
 	{
-		if ((this->caps.dwCaps & DDSCAPS_PRIMARYSURFACE) && lpDDSrcSurface == this->attachedSurface)
-			this->Flush();
+		if (this->drawEnabled)
+			MemoryZero(this->indexBuffer, this->mode.width * this->mode.height * (this->mode.bpp == 8 ? 1 : (config.bpp32Hooked ? sizeof(DWORD) : sizeof(WORD))));
+	}
+	else if ((this->caps.dwCaps & DDSCAPS_PRIMARYSURFACE) && lpDDSrcSurface == this->attachedSurface)
+		this->Flush();
+	else if (this->drawEnabled)
+	{
+		OpenDrawSurface* surface = (OpenDrawSurface*)lpDDSrcSurface;
+
+		RECT src;
+		if (!lpSrcRect)
+		{
+			src.left = 0;
+			src.top = 0;
+			src.right = surface->mode.width;
+			src.bottom = surface->mode.height;
+			lpSrcRect = &src;
+		}
+
+		RECT dst;
+		if (!lpDestRect)
+		{
+			dst.left = 0;
+			dst.top = 0;
+			dst.right = this->mode.width;
+			dst.bottom = this->mode.height;
+			lpDestRect = &dst;
+		}
+
+		DWORD sWidth;
+		if (surface->attachedClipper)
+		{
+			RECT clip;
+			GetClientRect(surface->attachedClipper->hWnd, &clip);
+			ClientToScreen(surface->attachedClipper->hWnd, (POINT*)&clip.left);
+
+			lpSrcRect->left -= clip.left;
+			lpSrcRect->top -= clip.top;
+			lpSrcRect->right -= clip.left;
+			lpSrcRect->bottom -= clip.top;
+
+			sWidth = this->ddraw->mode.width;
+		}
+		else
+			sWidth = surface->mode.width;
+
+		DWORD dWidth;
+		if (this->attachedClipper)
+		{
+			RECT clip;
+			GetClientRect(this->attachedClipper->hWnd, &clip);
+			ClientToScreen(this->attachedClipper->hWnd, (POINT*)&clip.left);
+
+			lpDestRect->left -= clip.left;
+			lpDestRect->top -= clip.top;
+			lpDestRect->right -= clip.left;
+			lpDestRect->bottom -= clip.top;
+
+			dWidth = this->ddraw->mode.width;
+		}
+		else
+			dWidth = this->mode.width;
+
+		INT width = lpSrcRect->right - lpSrcRect->left;
+		INT height = lpSrcRect->bottom - lpSrcRect->top;
+
+		if (config.bpp32Hooked)
+		{
+			DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
+			DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+
+			do
+			{
+				MemoryCopy(destination, source, width << 2);
+				source += sWidth;
+				destination += dWidth;
+			} while (--height);
+		}
 		else
 		{
-			OpenDrawSurface* surface = (OpenDrawSurface*)lpDDSrcSurface;
+			WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
+			WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
 
-			RECT src;
-			if (!lpSrcRect)
+			do
 			{
-				src.left = 0;
-				src.top = 0;
-				src.right = surface->mode.width;
-				src.bottom = surface->mode.height;
-				lpSrcRect = &src;
-			}
-
-			RECT dst;
-			if (!lpDestRect)
-			{
-				dst.left = 0;
-				dst.top = 0;
-				dst.right = this->mode.width;
-				dst.bottom = this->mode.height;
-				lpDestRect = &dst;
-			}
-
-			DWORD sWidth;
-			if (surface->attachedClipper)
-			{
-				RECT clip;
-				GetClientRect(surface->attachedClipper->hWnd, &clip);
-				ClientToScreen(surface->attachedClipper->hWnd, (POINT*)&clip.left);
-
-				lpSrcRect->left -= clip.left;
-				lpSrcRect->top -= clip.top;
-				lpSrcRect->right -= clip.left;
-				lpSrcRect->bottom -= clip.top;
-
-				sWidth = this->ddraw->mode.width;
-			}
-			else
-				sWidth = surface->mode.width;
-
-			DWORD dWidth;
-			if (this->attachedClipper)
-			{
-				RECT clip;
-				GetClientRect(this->attachedClipper->hWnd, &clip);
-				ClientToScreen(this->attachedClipper->hWnd, (POINT*)&clip.left);
-
-				lpDestRect->left -= clip.left;
-				lpDestRect->top -= clip.top;
-				lpDestRect->right -= clip.left;
-				lpDestRect->bottom -= clip.top;
-
-				dWidth = this->ddraw->mode.width;
-			}
-			else
-				dWidth = this->mode.width;
-
-			INT width = lpSrcRect->right - lpSrcRect->left;
-			INT height = lpSrcRect->bottom - lpSrcRect->top;
-
-			if (config.bpp32Hooked)
-			{
-				DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-				DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
-
-				do
-				{
-					MemoryCopy(destination, source, width << 2);
-					source += sWidth;
-					destination += dWidth;
-				} while (--height);
-			}
-			else
-			{
-				WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-				WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
-
-				do
-				{
-					MemoryCopy(destination, source, width << 1);
-					source += sWidth;
-					destination += dWidth;
-				} while (--height);
-			}
+				MemoryCopy(destination, source, width << 1);
+				source += sWidth;
+				destination += dWidth;
+			} while (--height);
 		}
 	}
 
@@ -443,137 +448,140 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 
 HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* lpDDSrcSurface, LPRECT lpSrcRect, DWORD dwTrans)
 {
-	// 17 - DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
-	OpenDrawSurface* surface = (OpenDrawSurface*)lpDDSrcSurface;
-
-	RECT src;
-	if (!lpSrcRect)
+	if (this->drawEnabled)
 	{
-		src.left = 0;
-		src.top = 0;
-		src.right = surface->mode.width;
-		src.bottom = surface->mode.height;
-		lpSrcRect = &src;
-	}
+		// 17 - DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
+		OpenDrawSurface* surface = (OpenDrawSurface*)lpDDSrcSurface;
 
-	LPRECT lpDestRect;
-	RECT dest;
-	{
-		dest.left = dwX;
-		dest.top = dwY;
-		dest.right = dwX + lpSrcRect->right - lpSrcRect->left;
-		dest.bottom = dwY + lpSrcRect->bottom - lpSrcRect->top;
-		lpDestRect = &dest;
-	}
-
-	DWORD sWidth;
-	if (surface->attachedClipper)
-	{
-		RECT clip;
-		GetClientRect(surface->attachedClipper->hWnd, &clip);
-		ClientToScreen(surface->attachedClipper->hWnd, (POINT*)&clip.left);
-
-		lpSrcRect->left -= clip.left;
-		lpSrcRect->top -= clip.top;
-		lpSrcRect->right -= clip.left;
-		lpSrcRect->bottom -= clip.top;
-
-		sWidth = this->ddraw->mode.width;
-	}
-	else
-		sWidth = surface->mode.width;
-
-	DWORD dWidth;
-	if (this->attachedClipper)
-	{
-		RECT clip;
-		GetClientRect(this->attachedClipper->hWnd, &clip);
-		ClientToScreen(this->attachedClipper->hWnd, (POINT*)&clip.left);
-
-		lpDestRect->left -= clip.left;
-		lpDestRect->top -= clip.top;
-		lpDestRect->right -= clip.left;
-		lpDestRect->bottom -= clip.top;
-
-		dWidth = this->ddraw->mode.width;
-	}
-	else
-		dWidth = this->mode.width;
-
-	INT width = lpSrcRect->right - lpSrcRect->left;
-	INT height = lpSrcRect->bottom - lpSrcRect->top;
-
-	if (config.bpp32Hooked)
-	{
-		DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-		DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
-
-		DWORD colorKey = surface->colorKey.dwColorSpaceHighValue;
-		if (colorKey)
+		RECT src;
+		if (!lpSrcRect)
 		{
-			do
+			src.left = 0;
+			src.top = 0;
+			src.right = surface->mode.width;
+			src.bottom = surface->mode.height;
+			lpSrcRect = &src;
+		}
+
+		LPRECT lpDestRect;
+		RECT dest;
+		{
+			dest.left = dwX;
+			dest.top = dwY;
+			dest.right = dwX + lpSrcRect->right - lpSrcRect->left;
+			dest.bottom = dwY + lpSrcRect->bottom - lpSrcRect->top;
+			lpDestRect = &dest;
+		}
+
+		DWORD sWidth;
+		if (surface->attachedClipper)
+		{
+			RECT clip;
+			GetClientRect(surface->attachedClipper->hWnd, &clip);
+			ClientToScreen(surface->attachedClipper->hWnd, (POINT*)&clip.left);
+
+			lpSrcRect->left -= clip.left;
+			lpSrcRect->top -= clip.top;
+			lpSrcRect->right -= clip.left;
+			lpSrcRect->bottom -= clip.top;
+
+			sWidth = this->ddraw->mode.width;
+		}
+		else
+			sWidth = surface->mode.width;
+
+		DWORD dWidth;
+		if (this->attachedClipper)
+		{
+			RECT clip;
+			GetClientRect(this->attachedClipper->hWnd, &clip);
+			ClientToScreen(this->attachedClipper->hWnd, (POINT*)&clip.left);
+
+			lpDestRect->left -= clip.left;
+			lpDestRect->top -= clip.top;
+			lpDestRect->right -= clip.left;
+			lpDestRect->bottom -= clip.top;
+
+			dWidth = this->ddraw->mode.width;
+		}
+		else
+			dWidth = this->mode.width;
+
+		INT width = lpSrcRect->right - lpSrcRect->left;
+		INT height = lpSrcRect->bottom - lpSrcRect->top;
+
+		if (config.bpp32Hooked)
+		{
+			DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
+			DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+
+			DWORD colorKey = surface->colorKey.dwColorSpaceHighValue;
+			if (colorKey)
 			{
-				DWORD* src = source;
-				DWORD* dest = destination;
-				
-				DWORD count = width;
 				do
 				{
-					if ((*src & 0xF8FCF8) != colorKey)
-						*dest = *src;
+					DWORD* src = source;
+					DWORD* dest = destination;
 
-					++src;
-					++dest;
-				} while (--count);
+					DWORD count = width;
+					do
+					{
+						if ((*src & 0xF8FCF8) != colorKey)
+							*dest = *src;
 
+						++src;
+						++dest;
+					} while (--count);
+
+					source += sWidth;
+					destination += dWidth;
+				} while (--height);
+			}
+			else if (this->mode.width == surface->mode.width && this->mode.width == width)
+				MemoryCopy(destination, source, width * height << 2);
+			else do
+			{
+				MemoryCopy(destination, source, width << 2);
 				source += sWidth;
 				destination += dWidth;
 			} while (--height);
 		}
-		else if (this->mode.width == surface->mode.width && this->mode.width == width)
-			MemoryCopy(destination, source, width * height << 2);
-		else do
+		else
 		{
-			MemoryCopy(destination, source, width << 2);
-			source += sWidth;
-			destination += dWidth;
-		} while (--height);
-	}
-	else
-	{
-		WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-		WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+			WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
+			WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
 
-		WORD colorKey = LOWORD(surface->colorKey.dwColorSpaceLowValue);
-		if (colorKey)
-		{
-			do
+			WORD colorKey = LOWORD(surface->colorKey.dwColorSpaceLowValue);
+			if (colorKey)
 			{
-				WORD* src = source;
-				WORD* dest = destination;
-				
-				DWORD count = width;
 				do
 				{
-					if (*src != colorKey)
-						*dest = *src;
+					WORD* src = source;
+					WORD* dest = destination;
 
-					++src;
-					++dest;
-				} while (--count);
+					DWORD count = width;
+					do
+					{
+						if (*src != colorKey)
+							*dest = *src;
 
+						++src;
+						++dest;
+					} while (--count);
+
+					source += sWidth;
+					destination += dWidth;
+				} while (--height);
+			}
+			else if (this->mode.width == surface->mode.width && this->mode.width == width)
+				MemoryCopy(destination, source, width * height << 1);
+			else do
+			{
+				MemoryCopy(destination, source, width << 1);
 				source += sWidth;
 				destination += dWidth;
 			} while (--height);
 		}
-		else if (this->mode.width == surface->mode.width && this->mode.width == width)
-			MemoryCopy(destination, source, width * height << 1);
-		else do
-		{
-			MemoryCopy(destination, source, width << 1);
-			source += sWidth;
-			destination += dWidth;
-		} while (--height);
 	}
 
 	return DD_OK;

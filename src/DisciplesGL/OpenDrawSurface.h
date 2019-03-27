@@ -36,6 +36,7 @@ private:
 	DDSCAPS2 caps;
 	BOOL isCreated;
 	DDCOLORKEY colorKey;
+	BOOL drawEnabled;
 
 public:
 	OpenDraw* ddraw;
@@ -47,7 +48,8 @@ public:
 
 	VOID* indexBuffer;
 	VOID* secondaryBuffer;
-	DWORD bufferIndex;
+	BOOL bufferIndex;
+	DWORD drawIndex;
 
 	OpenDrawSurface(IDrawUnknown**, OpenDraw*, LPDDSCAPS2);
 	~OpenDrawSurface();

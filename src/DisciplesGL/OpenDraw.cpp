@@ -233,11 +233,28 @@ VOID OpenDraw::RenderOld()
 				if (WGLSwapInterval)
 					WGLSwapInterval(0);
 
-				do
+				while (!this->isFinish)
 				{
+					if (fpsState != FpsBenchmark || !config.version)
+						WaitForSingleObject(this->hDrawEvent, INFINITE);
+					else
+						Sleep(0);
+
 					OpenDrawSurface* surface = this->attachedSurface;
 					if (surface)
 					{
+						VOID* currentBuffer;
+						if (config.version)
+							currentBuffer = surface->indexBuffer;
+						else
+						{
+							surface->bufferIndex = !surface->bufferIndex;
+							currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
+						
+							if (surface->drawIndex)
+								--surface->drawIndex;
+						}
+
 						if (WGLSwapInterval)
 						{
 							if (!isVSync)
@@ -277,15 +294,6 @@ VOID OpenDraw::RenderOld()
 						{
 							this->isStateChanged = FALSE;
 							glFilter = config.image.filter == FilterNearest ? GL_NEAREST : GL_LINEAR;
-						}
-
-						VOID* currentBuffer;
-						if (config.version)
-							currentBuffer = surface->indexBuffer;
-						else
-						{
-							surface->bufferIndex = surface->bufferIndex ? 0 : 1;
-							currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
 						}
 
 						DWORD count = frameCount;
@@ -652,14 +660,10 @@ VOID OpenDraw::RenderOld()
 						}
 
 						SwapBuffers(this->hDc);
-						if (fpsState != FpsBenchmark)
-							WaitForSingleObject(this->hDrawEvent, INFINITE);
-						else
-							Sleep(0);
 						if (isVSync)
 							GLFinish();
 					}
-				} while (!this->isFinish);
+				}
 			}
 			delete fpsCounter;
 		}
@@ -761,11 +765,28 @@ VOID OpenDraw::RenderMid()
 							if (WGLSwapInterval)
 								WGLSwapInterval(0);
 
-							do
+							while (!this->isFinish)
 							{
+								if (fpsState != FpsBenchmark || !config.version)
+									WaitForSingleObject(this->hDrawEvent, INFINITE);
+								else
+									Sleep(0);
+
 								OpenDrawSurface* surface = this->attachedSurface;
 								if (surface)
 								{
+									VOID* currentBuffer;
+									if (config.version)
+										currentBuffer = surface->indexBuffer;
+									else
+									{
+										surface->bufferIndex = !surface->bufferIndex;
+										currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
+									
+										if (surface->drawIndex)
+											--surface->drawIndex;
+									}
+
 									if (WGLSwapInterval)
 									{
 										if (!isVSync)
@@ -812,15 +833,6 @@ VOID OpenDraw::RenderMid()
 										filter = frameFilter == FilterLinear ? GL_LINEAR : GL_NEAREST;
 										GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 										GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-									}
-
-									VOID* currentBuffer;
-									if (config.version)
-										currentBuffer = surface->indexBuffer;
-									else
-									{
-										surface->bufferIndex = surface->bufferIndex ? 0 : 1;
-										currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
 									}
 
 									// NEXT UNCHANGED
@@ -1012,14 +1024,10 @@ VOID OpenDraw::RenderMid()
 
 									// Swap
 									SwapBuffers(this->hDc);
-									if (fpsState != FpsBenchmark)
-										WaitForSingleObject(this->hDrawEvent, INFINITE);
-									else
-										Sleep(0);
 									if (isVSync)
 										GLFinish();
 								}
-							} while (!this->isFinish);
+							}
 						}
 						delete fpsCounter;
 					}
@@ -1165,11 +1173,28 @@ VOID OpenDraw::RenderNew()
 											if (WGLSwapInterval)
 												WGLSwapInterval(0);
 
-											do
+											while (!this->isFinish)
 											{
+												if (fpsState != FpsBenchmark || !config.version)
+													WaitForSingleObject(this->hDrawEvent, INFINITE);
+												else
+													Sleep(0);
+
 												OpenDrawSurface* surface = this->attachedSurface;
 												if (surface)
 												{
+													VOID* currentBuffer;
+													if (config.version)
+														currentBuffer = surface->indexBuffer;
+													else
+													{
+														surface->bufferIndex = !surface->bufferIndex;
+														currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
+														
+														if (surface->drawIndex)
+															--surface->drawIndex;
+													}
+
 													if (WGLSwapInterval)
 													{
 														if (!isVSync)
@@ -1345,15 +1370,6 @@ VOID OpenDraw::RenderNew()
 															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 														}
-													}
-
-													VOID* currentBuffer;
-													if (config.version)
-														currentBuffer = surface->indexBuffer;
-													else
-													{
-														surface->bufferIndex = surface->bufferIndex ? 0 : 1;
-														currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
 													}
 
 													// NEXT UNCHANGED
@@ -1610,14 +1626,10 @@ VOID OpenDraw::RenderNew()
 
 													// Swap
 													SwapBuffers(this->hDc);
-													if (fpsState != FpsBenchmark)
-														WaitForSingleObject(this->hDrawEvent, INFINITE);
-													else
-														Sleep(0);
 													if (isVSync)
 														GLFinish();
 												}
-											} while (!this->isFinish);
+											}
 										}
 										delete fpsCounter;
 									}
@@ -1657,7 +1669,6 @@ VOID OpenDraw::RenderNew()
 	{
 		if (shaderProgram->id)
 			GLDeleteProgram(shaderProgram->id);
-
 	} while (--count);
 }
 
@@ -1875,7 +1886,7 @@ VOID OpenDraw::SetWindowedMode()
 		rc->top = (GetSystemMetrics(SM_CYSCREEN) - nHeight) >> 1;
 		if (rc->top < 0)
 			rc->top = 0;
-		
+
 		rc->right = rc->left + nWidth;
 		rc->bottom = rc->top + nHeight;
 
