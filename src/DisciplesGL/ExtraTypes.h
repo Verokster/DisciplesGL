@@ -83,6 +83,12 @@ struct FilterType
 	WORD type;
 };
 
+struct Resolution
+{
+	WORD width;
+	WORD height;
+};
+
 struct DisplayMode
 {
 	DWORD width;
@@ -110,39 +116,33 @@ struct ShaderProgram
 	} texSize;
 };
 
-struct TrackInfo
-{
-	TrackInfo* last;
-	DWORD position;
-	CHAR* group;
-	CHAR* path;
-};
-
-struct VideoInfo
-{
-	CHAR* fileName;
-	CHAR* altName;
-	BYTE isBink;
-	BYTE flags[11];
-};
-
-struct VideoFile
-{
-	CHAR name[40];
-	DWORD stride;
-};
-
 struct ConfigItems
 {
 	BOOL version;
 	BOOL windowedMode;
 	DisplayMode* mode;
+	Resolution resolution;
 	
 	HCURSOR cursor;
 	HMENU menu;
 	HICON icon;
 	HFONT font;
+	BOOL hd;
 	BOOL bpp32Hooked;
+	BOOL resHooked;
+	BOOL isBorder;
+	BOOL showBackBorder;
+	BOOL zoomable;
+	BOOL zoomImage;
+	BOOL menuZoomImage;
+	BOOL gameBorders;
+	BOOL singleWindow;
+
+	struct {
+		DWORD index;
+		DOUBLE value;
+		BOOL enabled;
+	} speed;
 
 	struct {
 		BOOL aspect;
@@ -161,6 +161,9 @@ struct ConfigItems
 		BYTE windowedMode;
 		BYTE aspectRatio;
 		BYTE vSync;
+		BYTE showBorders;
+		BYTE zoomImage;
+		BYTE speedToggle;
 	} keys;
 
 	BOOL isExist;
@@ -173,4 +176,24 @@ struct MappedFile
 	HANDLE hFile;
 	HANDLE hMap;
 	VOID* address;
+};
+
+enum SurfaceType
+{
+	SurfacePrimary,
+	SurfaceSecondary,
+	SurfaceOther
+};
+
+struct MenuItemData
+{
+	HMENU hParent;
+	INT index;
+	UINT childId;
+};
+
+struct ResourceStream
+{
+	VOID* data;
+	DWORD position;
 };

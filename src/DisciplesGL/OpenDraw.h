@@ -42,7 +42,6 @@ public:
 	HDC hDc;
 	HWND hWnd;
 
-	DisplayMode mode;
 	WINDOWPLACEMENT windowPlacement;
 
 	HANDLE hDrawThread;
@@ -57,7 +56,7 @@ public:
 	OpenDraw(IDrawUnknown**);
 	~OpenDraw();
 
-	BOOL CheckView();
+	BOOL CheckView(BOOL);
 	VOID __fastcall ScaleMouse(LPPOINT);
 
 	VOID SetFullscreenMode();
@@ -69,6 +68,7 @@ public:
 	VOID RenderOld();
 	VOID RenderMid();
 	VOID RenderNew();
+	VOID TakeSnapshot(VOID*, DWORD, DWORD);
 
 	// Inherited via  IDraw
 	HRESULT __stdcall OpenDraw::QueryInterface(REFIID, LPVOID*) override;

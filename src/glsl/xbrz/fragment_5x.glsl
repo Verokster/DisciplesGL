@@ -29,15 +29,9 @@
 precision mediump float;
 
 uniform sampler2D tex01;
+uniform sampler2D tex02;
 uniform vec2 texSize;
 
-in vec4 t1;
-in vec4 t2;
-in vec4 t3;
-in vec4 t4;
-in vec4 t5;
-in vec4 t6;
-in vec4 t7;
 in vec2 fTexCoord;
 
 out vec4 fragColor;
@@ -52,13 +46,11 @@ out vec4 fragColor;
 
 const float two_third = 2.0 / 3.0;
 
-float reduce(const vec3 color)
-{
+float reduce(const vec3 color) {
 	return dot(color, vec3(65536.0, 256.0, 1.0));
 }
 
-float DistYCbCr(const vec3 pixA, const vec3 pixB)
-{
+float DistYCbCr(const vec3 pixA, const vec3 pixB) {
 	const vec3 w = vec3(0.2627, 0.6780, 0.0593);
 	const float scaleB = 0.5 / (1.0 - w.b);
 	const float scaleR = 0.5 / (1.0 - w.r);
@@ -70,40 +62,44 @@ float DistYCbCr(const vec3 pixA, const vec3 pixB)
 	return sqrt( ((LUMINANCE_WEIGHT * Y) * (LUMINANCE_WEIGHT * Y)) + (Cb * Cb) + (Cr * Cr) );
 }
 
-bool IsPixEqual(const vec3 pixA, const vec3 pixB)
-{
+bool IsPixEqual(const vec3 pixA, const vec3 pixB) {
 	return (DistYCbCr(pixA, pixB) < EQUAL_COLOR_TOLERANCE);
 }
 
-bool IsBlendingNeeded(const ivec4 blend)
-{
+bool IsBlendingNeeded(const ivec4 blend) {
 	return any(notEqual(blend, ivec4(BLEND_NONE)));
 }
 
-void main()
-{
+void main() {
+	if (texture(tex01, fTexCoord) == texture(tex02, fTexCoord))
+		discard;
+
+	vec2 texel = floor(fTexCoord * texSize) + 0.5;
+
+	#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize).rgb
+
 	vec3 src[25];
-	src[21] = texture(tex01, t1.xw).rgb;
-	src[22] = texture(tex01, t1.yw).rgb;
-	src[23] = texture(tex01, t1.zw).rgb;
-	src[ 6] = texture(tex01, t2.xw).rgb;
-	src[ 7] = texture(tex01, t2.yw).rgb;
-	src[ 8] = texture(tex01, t2.zw).rgb;
-	src[ 5] = texture(tex01, t3.xw).rgb;
-	src[ 0] = texture(tex01, t3.yw).rgb;
-	src[ 1] = texture(tex01, t3.zw).rgb;
-	src[ 4] = texture(tex01, t4.xw).rgb;
-	src[ 3] = texture(tex01, t4.yw).rgb;
-	src[ 2] = texture(tex01, t4.zw).rgb;
-	src[15] = texture(tex01, t5.xw).rgb;
-	src[14] = texture(tex01, t5.yw).rgb;
-	src[13] = texture(tex01, t5.zw).rgb;
-	src[19] = texture(tex01, t6.xy).rgb;
-	src[18] = texture(tex01, t6.xz).rgb;
-	src[17] = texture(tex01, t6.xw).rgb;
-	src[ 9] = texture(tex01, t7.xy).rgb;
-	src[10] = texture(tex01, t7.xz).rgb;
-	src[11] = texture(tex01, t7.xw).rgb;
+	src[21] = TEX(-1.0, -2.0);
+	src[22] = TEX( 0.0, -2.0);
+	src[23] = TEX( 1.0, -2.0);
+	src[ 6] = TEX(-1.0, -1.0);
+	src[ 7] = TEX( 0.0, -1.0);
+	src[ 8] = TEX( 1.0, -1.0);
+	src[ 5] = TEX(-1.0,  0.0);
+	src[ 0] = TEX( 0.0,  0.0);
+	src[ 1] = TEX( 1.0,  0.0);
+	src[ 4] = TEX(-1.0,  1.0);
+	src[ 3] = TEX( 0.0,  1.0);
+	src[ 2] = TEX( 1.0,  1.0);
+	src[15] = TEX(-1.0,  2.0);
+	src[14] = TEX( 0.0,  2.0);
+	src[13] = TEX( 1.0,  2.0);
+	src[19] = TEX(-2.0, -1.0);
+	src[18] = TEX(-2.0,  0.0);
+	src[17] = TEX(-2.0,  1.0);
+	src[ 9] = TEX( 2.0, -1.0);
+	src[10] = TEX( 2.0,  0.0);
+	src[11] = TEX( 2.0,  1.0);
 	
 	float v[9];
 	v[0] = reduce(src[0]);
@@ -276,7 +272,7 @@ void main()
 		dst[12] = mix(dst[12], blendPix, (needBlend && doLineBlend && haveSteepLine) ? 0.250 : 0.000);			
 	}
 	
-	vec2 f = fract(fTexCoord);
+	vec2 f = fract(fTexCoord * texSize);
 	vec3 res = mix( mix( dst[20], mix( mix(dst[21], dst[22], step(0.40, f.x)), mix(dst[23], dst[24], step(0.80, f.x)), step(0.60, f.x)), step(0.20, f.x) ),
 							mix( mix( mix( dst[19], mix( mix(dst[ 6], dst[ 7], step(0.40, f.x)), mix(dst[ 8], dst[ 9], step(0.80, f.x)), step(0.60, f.x)), step(0.20, f.x) ),
 									  mix( dst[18], mix( mix(dst[ 5], dst[ 0], step(0.40, f.x)), mix(dst[ 1], dst[10], step(0.80, f.x)), step(0.60, f.x)), step(0.20, f.x) ), step(0.40, f.y)),

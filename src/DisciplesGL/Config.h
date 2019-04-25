@@ -28,10 +28,13 @@
 
 #define CONFIG_WRAPPER "Wrapper"
 #define CONFIG_DISCIPLE "Disciple"
+#define CONFIG_SETTINGS "Settings"
 #define CONFIG_KEYS "FunktionKeys"
 
 extern ConfigItems config;
 extern DisplayMode modesList[4];
+extern const Resolution resolutionsList[27];
+extern const BYTE speedList[21];
 
 namespace Config
 {

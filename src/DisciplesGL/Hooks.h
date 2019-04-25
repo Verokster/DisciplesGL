@@ -26,14 +26,28 @@
 
 namespace Hooks
 {
-	struct AddressSpace
+	struct AddressSpaceV1
 	{
 		DWORD check;
+		DWORD value;
+		DWORD scroll_speed;
+		DWORD scroll_nop;
+		DWORD scroll_hook;
+	};
+
+	struct AddressSpaceV2
+	{
+		DWORD check_1;
+		DWORD value_1;
+		DWORD check_2;
+		DWORD value_2;
+
 		DWORD memory_1;
 		DWORD memory_2;
 		DWORD memory_3;
 		DWORD memory_4;
 		DWORD memory_5;
+		DWORD memory_6;
 		DWORD pixel;
 
 		DWORD fillColor;
@@ -53,6 +67,48 @@ namespace Hooks
 		DWORD line_2;
 		DWORD unknown_1;
 		DWORD unknown_2;
+
+		DWORD res_hook;
+		DWORD res_back;
+		DWORD res_restriction_jmp;
+		DWORD res_restriction_nop;
+
+		DWORD border_nop;
+		DWORD border_hook;
+
+		DWORD blit_size;
+		DWORD blit_patch_1;
+		DWORD blit_patch_2;
+
+		DWORD mini_rect_jmp;
+		DWORD mini_rect_patch;
+
+		DWORD right_curve;
+
+		DWORD snapshot_size;
+		DWORD snapshot_rect;
+		DWORD snapshot_nop1;
+		DWORD snapshot_hook;
+		DWORD snapshot_nop2;
+
+		DWORD maxSize_1;
+		DWORD maxSize_2;
+		DWORD maxSize_3;
+
+		DWORD png_create_read_struct;
+		DWORD png_create_info_struct;
+		DWORD png_set_read_fn;
+		DWORD png_destroy_read_struct;
+		DWORD png_read_info;
+		DWORD png_read_image;
+
+		DWORD scroll_speed;
+		DWORD scroll_check;
+		DWORD scroll_nop_1;
+		DWORD scroll_nop_2;
+		DWORD scroll_hook;
+
+		DWORD dblclick_hook;
 	};
 
 	struct BlendData

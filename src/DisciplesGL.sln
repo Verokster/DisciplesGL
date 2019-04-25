@@ -57,6 +57,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xsal", "xsal", "{C7909C56-3
 		glsl\xsal\vertex.glsl = glsl\xsal\vertex.glsl
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bitmaps", "Bitmaps", "{97633516-F438-4749-8B2A-E86AAADD2E2A}"
+	ProjectSection(SolutionItems) = preProject
+		bmp\back.bmp = bmp\back.bmp
+		bmp\border.bmp = bmp\border.bmp
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug 1|Win32 = Debug 1|Win32

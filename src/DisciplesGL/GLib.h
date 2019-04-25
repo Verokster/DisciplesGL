@@ -111,6 +111,7 @@ typedef BOOL(__stdcall *WGLDELETECONTEXT)(HGLRC glContext);
 typedef HGLRC(__stdcall *WGLCREATECONTEXTATTRIBSARB)(HDC hDC, HGLRC hshareContext, const DWORD *attribList);
 typedef BOOL(__stdcall *WGLCHOOSEPIXELFORMATARB) (HDC hDC, const INT* piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, INT *piFormats, UINT *nNumFormats);
 typedef BOOL(__stdcall *WGLCHOOSEPIXELFORMAT) (HDC hDC, const INT* piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, INT *piFormats, UINT *nNumFormats);
+typedef const CHAR* (__stdcall* WGLGETEXTENSIONSSTRING)();
 typedef BOOL(__stdcall *WGLSWAPINTERVAL)(INT interval);
 
 typedef const GLubyte* (__stdcall *GLGETSTRING)(GLenum name);
@@ -146,7 +147,6 @@ typedef VOID(__stdcall *GLGENBUFFERS)(GLsizei n, GLuint* buffers);
 typedef VOID(__stdcall *GLDELETEBUFFERS)(GLsizei n, const GLuint* buffers);
 typedef VOID(__stdcall *GLBINDBUFFER)(GLenum target, GLuint buffer);
 typedef VOID(__stdcall *GLBUFFERDATA)(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
-typedef VOID(__stdcall *GLBUFFERSUBDATA)(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid * data);
 typedef VOID(__stdcall *GLDRAWARRAYS)(GLenum mode, GLint first, GLsizei count);
 
 typedef VOID(__stdcall *GLENABLEVERTEXATTRIBARRAY)(GLuint index);
@@ -188,12 +188,14 @@ typedef VOID(__stdcall *GLBINDRENDERBUFFER)(GLenum target, GLuint renderbuffer);
 typedef VOID(__stdcall *GLRENDERBUFFERSTORAGE)(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
 typedef VOID(__stdcall *GLFRAMEBUFFERRENDERBUFFER)(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
 
+
 extern WGLGETPROCADDRESS WGLGetProcAddress;
 extern WGLMAKECURRENT WGLMakeCurrent;
 extern WGLCREATECONTEXT WGLCreateContext;
 extern WGLDELETECONTEXT WGLDeleteContext;
 extern WGLCREATECONTEXTATTRIBSARB WGLCreateContextAttribs;
 extern WGLCHOOSEPIXELFORMAT WGLChoosePixelFormat;
+extern WGLGETEXTENSIONSSTRING WGLGetExtensionsString;
 extern WGLSWAPINTERVAL WGLSwapInterval;
 
 extern GLGETSTRING GLGetString;
@@ -229,7 +231,6 @@ extern GLGENBUFFERS GLGenBuffers;
 extern GLDELETEBUFFERS GLDeleteBuffers;
 extern GLBINDBUFFER GLBindBuffer;
 extern GLBUFFERDATA GLBufferData;
-extern GLBUFFERSUBDATA GLBufferSubData;
 extern GLDRAWARRAYS GLDrawArrays;
 
 extern GLENABLEVERTEXATTRIBARRAY GLEnableVertexAttribArray;

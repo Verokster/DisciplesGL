@@ -29,29 +29,34 @@
 precision mediump float;
 
 uniform sampler2D tex01;
+uniform sampler2D tex02;
 uniform vec2 texSize;
 
-in vec4 t1;
-in vec4 t2;
 in vec2 fTexCoord;
 
 out vec4 fragColor;
 
-bool eq(vec3 A, vec3 B){
+bool eq(vec3 A, vec3 B) {
 	return (A==B);
 }
 
-bool neq(vec3 A, vec3 B){
+bool neq(vec3 A, vec3 B) {
 	return (A!=B);
 }
 
-void main()
-{
-	vec3 B = texture(tex01, t1.xy).xyz;
-	vec3 D = texture(tex01, t1.zw).xyz;
-	vec3 E = texture(tex01, fTexCoord).xyz;
-	vec3 F = texture(tex01, t2.xy).xyz;
-	vec3 H = texture(tex01, t2.zw).xyz;
+void main() {
+	if (texture(tex01, fTexCoord) == texture(tex02, fTexCoord))
+		discard;
+
+	vec2 texel = floor(fTexCoord * texSize) + 0.5;
+
+	#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize).rgb
+
+	vec3 B = TEX( 0.0, -1.0);
+	vec3 D = TEX(-1.0,  0.0);
+	vec3 E = TEX( 0.0,  0.0);
+	vec3 F = TEX( 1.0,  0.0);
+	vec3 H = TEX( 0.0,  1.0);
 
 	vec3 E0 = eq(B,D) ? B : E;
 	vec3 E1 = eq(B,F) ? B : E;

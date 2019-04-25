@@ -42,57 +42,60 @@ uniform vec2 texSize;
 
 COMPAT_IN vec2 fTexCoord;
 
-void weights(out vec4 x, out vec4 y, vec2 t)
-{
-   vec2 t2 = t * t;
-   vec2 t3 = t2 * t;
+void weights(out vec4 x, out vec4 y, vec2 t) {
+	vec2 t2 = t * t;
+	vec2 t3 = t2 * t;
 
-   vec4 xs = vec4(1.0, t.x, t2.x, t3.x);
-   vec4 ys = vec4(1.0, t.y, t2.y, t3.y);
+	vec4 xs = vec4(1.0, t.x, t2.x, t3.x);
+	vec4 ys = vec4(1.0, t.y, t2.y, t3.y);
 
-   const vec4 p0 = vec4(+0.0, -0.5, +1.0, -0.5);
-   const vec4 p1 = vec4(+1.0,  0.0, -2.5, +1.5);
-   const vec4 p2 = vec4(+0.0, +0.5, +2.0, -1.5);
-   const vec4 p3 = vec4(+0.0,  0.0, -0.5, +0.5);
+	const vec4 p0 = vec4(+0.0, -0.5, +1.0, -0.5);
+	const vec4 p1 = vec4(+1.0,  0.0, -2.5, +1.5);
+	const vec4 p2 = vec4(+0.0, +0.5, +2.0, -1.5);
+	const vec4 p3 = vec4(+0.0,  0.0, -0.5, +0.5);
 
-   x = vec4(dot(xs, p0), dot(xs, p1), dot(xs, p2), dot(xs, p3));
-   y = vec4(dot(ys, p0), dot(ys, p1), dot(ys, p2), dot(ys, p3));
+	x = vec4(dot(xs, p0), dot(xs, p1), dot(xs, p2), dot(xs, p3));
+	y = vec4(dot(ys, p0), dot(ys, p1), dot(ys, p2), dot(ys, p3));
 }
 
-void main()
-{
-	vec2 texel = floor(fTexCoord);
+void main() {
+	vec2 uv = fTexCoord * texSize - 0.5;
+	vec2 texel = floor(uv);
 	
-	#define TEX(x, y) COMPAT_TEXTURE(tex01, (texel + 0.5 + vec2(x, y)) / texSize).rgb
+	#define TEX(x, y) COMPAT_TEXTURE(tex01, (texel + vec2(x, y)) / texSize).rgb
 
 	vec4 x;
 	vec4 y;
-	vec2 phase = fTexCoord - texel;
+	vec2 phase = uv - texel;
 	weights(x, y, phase);
 
 	vec4 row = x * y.x;
-	vec3 color = TEX(-1, -1) * row.x;
-	color += TEX(+0.0, -1.0) * row.y;
-	color += TEX(+1.0, -1.0) * row.z;
-	color += TEX(+2.0, -1.0) * row.w;
+	vec3 color =
+		TEX(-0.5, -0.5) * row.x +
+		TEX(+0.5, -0.5) * row.y +
+		TEX(+1.5, -0.5) * row.z +
+		TEX(+2.5, -0.5) * row.w;
 
 	row = x * y.y;
-	color += TEX(-1.0, +0.0) * row.x;
-	color += TEX(+0.0, +0.0) * row.y;
-	color += TEX(+1.0, +0.0) * row.z;
-	color += TEX(+2.0, +0.0) * row.w;
+	color +=
+		TEX(-0.5, +0.5) * row.x +
+		TEX(+0.5, +0.5) * row.y +
+		TEX(+1.5, +0.5) * row.z +
+		TEX(+2.5, +0.5) * row.w;
 
 	row = x * y.z;
-	color += TEX(-1.0, +1.0) * row.x;
-	color += TEX(+0.0, +1.0) * row.y;
-	color += TEX(+1.0, +1.0) * row.z;
-	color += TEX(+2.0, +1.0) * row.w;
+	color +=
+		TEX(-0.5, +1.5) * row.x +
+		TEX(+0.5, +1.5) * row.y +
+		TEX(+1.5, +1.5) * row.z +
+		TEX(+2.5, +1.5) * row.w;
 
 	row = x * y.w;
-	color += TEX(-1.0, +2.0) * row.x;
-	color += TEX(+0.0, +2.0) * row.y;
-	color += TEX(+1.0, +2.0) * row.z;
-	color += TEX(+2.0, +2.0) * row.w;
+	color +=
+		TEX(-1.5, +2.5) * row.x +
+		TEX(+0.5, +2.5) * row.y +
+		TEX(+1.5, +2.5) * row.z +
+		TEX(+2.5, +2.5) * row.w;
 
 	FRAG_COLOR = vec4(color, 1.0);
 } 

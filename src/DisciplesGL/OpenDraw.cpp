@@ -55,6 +55,7 @@ VOID __fastcall UseShaderProgram(ShaderProgram* program, DWORD texSize)
 		GLUseProgram(program->id);
 		GLUniformMatrix4fv(GLGetUniformLocation(program->id, "mvp"), 1, GL_FALSE, program->mvp);
 		GLUniform1i(GLGetUniformLocation(program->id, "tex01"), 0);
+		GLUniform1i(GLGetUniformLocation(program->id, "tex02"), 1);
 
 		program->texSize.location = GLGetUniformLocation(program->id, "texSize");
 		if (program->texSize.location >= 0)
@@ -70,9 +71,105 @@ VOID __fastcall UseShaderProgram(ShaderProgram* program, DWORD texSize)
 		if (program->texSize.location >= 0 && program->texSize.value != texSize)
 		{
 			program->texSize.value = texSize;
-			FLOAT val = (FLOAT)texSize;
 			GLUniform2f(program->texSize.location, (FLOAT)LOWORD(texSize), (FLOAT)HIWORD(texSize));
 		}
+	}
+}
+
+VOID OpenDraw::TakeSnapshot(VOID* buffer, DWORD frameWidth, DWORD frameHeight)
+{
+	this->isTakeSnapshot = FALSE;
+
+	if (OpenClipboard(NULL))
+	{
+		EmptyClipboard();
+
+		BOOL isTrueColor = config.mode->bpp != 16 || config.bpp32Hooked;
+
+		DWORD pitch = frameWidth * (isTrueColor ? 3 : 2);
+		if (pitch & 3)
+			pitch = (pitch & 0xFFFFFFFC) + 4;
+
+		DWORD infoSize = sizeof(BITMAPINFOHEADER);
+		if (!isTrueColor)
+			infoSize += sizeof(DWORD) * 3;
+
+		DWORD dataSize = pitch * frameHeight;
+		HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, infoSize + dataSize);
+		{
+			VOID* data = GlobalLock(hMemory);
+			{
+				BITMAPV4HEADER* bmiHeader = (BITMAPV4HEADER*)data;
+				bmiHeader->bV4Size = sizeof(BITMAPINFOHEADER);
+				bmiHeader->bV4Width = frameWidth;
+				bmiHeader->bV4Height = frameHeight;
+				bmiHeader->bV4Planes = 1;
+				bmiHeader->bV4SizeImage = dataSize;
+				bmiHeader->bV4XPelsPerMeter = 1;
+				bmiHeader->bV4YPelsPerMeter = 1;
+				bmiHeader->bV4ClrUsed = 0;
+				bmiHeader->bV4ClrImportant = 0;
+
+				if (isTrueColor)
+				{
+					bmiHeader->bV4BitCount = 24;
+					bmiHeader->bV4V4Compression = BI_RGB;
+
+					DWORD* src = (DWORD*)buffer;
+					BYTE* dstData = (BYTE*)data + infoSize + dataSize - pitch;
+
+					DWORD height = frameHeight;
+					do
+					{
+						BYTE* dst = dstData;
+
+						DWORD width = frameWidth;
+						do
+						{
+							DWORD color = _byteswap_ulong(*src++);
+							BYTE* px = (BYTE*)&color;
+
+							*dst++ = *++px;
+							*dst++ = *++px;
+							*dst++ = *++px;
+						} while (--width);
+
+						dstData -= pitch;
+					} while (--height);
+				}
+				else
+				{
+					bmiHeader->bV4BitCount = 16;
+					bmiHeader->bV4V4Compression = BI_BITFIELDS;
+					bmiHeader->bV4RedMask = 0xF800;
+					bmiHeader->bV4GreenMask = 0x07E0;
+					bmiHeader->bV4BlueMask = 0x001F;
+
+					WORD* src = (WORD*)buffer;
+					BYTE* dstData = (BYTE*)data + infoSize + dataSize - pitch;
+
+					DWORD height = frameHeight;
+					do
+					{
+						BYTE* dst = dstData;
+
+						DWORD width = frameWidth;
+						do
+						{
+							*(WORD*)dst = *src++;
+							dst += 2;
+						} while (--width);
+
+						dstData -= pitch;
+					} while (--height);
+				}
+			}
+			GlobalUnlock(hMemory);
+			SetClipboardData(CF_DIB, hMemory);
+		}
+		GlobalFree(hMemory);
+
+		CloseClipboard();
 	}
 }
 
@@ -86,23 +183,23 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 		INT glPixelFormat = GL::PreparePixelFormat(&pfd);
 		if (!glPixelFormat)
 		{
-			glPixelFormat = ChoosePixelFormat(ddraw->hDc, &pfd);
+			glPixelFormat = ::ChoosePixelFormat(ddraw->hDc, &pfd);
 			if (!glPixelFormat)
-				Main::ShowError("ChoosePixelFormat failed", __FILE__, __LINE__);
+				Main::ShowError(IDS_ERROR_CHOOSE_PF, __FILE__, __LINE__);
 			else if (pfd.dwFlags & PFD_NEED_PALETTE)
-				Main::ShowError("Needs palette", __FILE__, __LINE__);
+				Main::ShowError(IDS_ERROR_NEED_PALETTE, __FILE__, __LINE__);
 		}
 
-		if (!SetPixelFormat(ddraw->hDc, glPixelFormat, &pfd))
-			Main::ShowError("SetPixelFormat failed", __FILE__, __LINE__);
+		if (!::SetPixelFormat(ddraw->hDc, glPixelFormat, &pfd))
+			Main::ShowError(IDS_ERROR_SET_PF, __FILE__, __LINE__);
 
 		GL::ResetPixelFormatDescription(&pfd);
-		if (DescribePixelFormat(ddraw->hDc, glPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd) == NULL)
-			Main::ShowError("DescribePixelFormat failed", __FILE__, __LINE__);
+		if (::DescribePixelFormat(ddraw->hDc, glPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd) == NULL)
+			Main::ShowError(IDS_ERROR_DESCRIBE_PF, __FILE__, __LINE__);
 
 		if ((pfd.iPixelType != PFD_TYPE_RGBA) ||
-			(pfd.cRedBits < 5) || (pfd.cGreenBits < 5) || (pfd.cBlueBits < 5))
-			Main::ShowError("Bad pixel type", __FILE__, __LINE__);
+			(pfd.cRedBits < 5) || (pfd.cGreenBits < 6) || (pfd.cBlueBits < 5))
+			Main::ShowError(IDS_ERROR_BAD_PF, __FILE__, __LINE__);
 
 		HGLRC hRc = WGLCreateContext(ddraw->hDc);
 		if (hRc)
@@ -112,7 +209,7 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 				GL::CreateContextAttribs(ddraw->hDc, &hRc);
 				if (glVersion >= GL_VER_2_0)
 				{
-					DWORD maxSize = ddraw->mode.width > ddraw->mode.height ? ddraw->mode.width : ddraw->mode.height;
+					DWORD maxSize = config.mode->width > config.mode->height ? config.mode->width : config.mode->height;
 
 					DWORD maxTexSize = 1;
 					while (maxTexSize < maxSize)
@@ -147,6 +244,8 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 
 VOID OpenDraw::RenderOld()
 {
+	BOOL isTrueColor = config.mode->bpp != 16 || config.bpp32Hooked;
+
 	if (config.image.filter > FilterLinear)
 		config.image.filter = FilterLinear;
 
@@ -155,7 +254,7 @@ VOID OpenDraw::RenderOld()
 	if (glMaxTexSize < 256)
 		glMaxTexSize = 256;
 
-	DWORD size = this->mode.width > this->mode.height ? this->mode.width : this->mode.height;
+	DWORD size = config.mode->width > config.mode->height ? config.mode->width : config.mode->height;
 	DWORD maxAllow = 1;
 	while (maxAllow < size)
 		maxAllow <<= 1;
@@ -163,21 +262,55 @@ VOID OpenDraw::RenderOld()
 	DWORD maxTexSize = maxAllow < glMaxTexSize ? maxAllow : glMaxTexSize;
 	DWORD glFilter = config.image.filter == FilterNearest ? GL_NEAREST : GL_LINEAR;
 
-	DWORD framePerWidth = this->mode.width / maxTexSize + (this->mode.width % maxTexSize ? 1 : 0);
-	DWORD framePerHeight = this->mode.height / maxTexSize + (this->mode.height % maxTexSize ? 1 : 0);
+	DWORD framePerWidth = config.mode->width / maxTexSize + (config.mode->width % maxTexSize ? 1 : 0);
+	DWORD framePerHeight = config.mode->height / maxTexSize + (config.mode->height % maxTexSize ? 1 : 0);
 	DWORD frameCount = framePerWidth * framePerHeight;
+
+	FLOAT tw, th;
+	DWORD zWidth, zHeight;
+
+	if (frameCount == 1)
+	{
+		FLOAT k = (FLOAT)config.mode->width / config.mode->height;
+		if (k >= 4.0f / 3.0f)
+		{
+			th = GAME_HEIGHT_FLOAT / maxTexSize;
+			tw = th * k;
+
+			zWidth = DWORD(GAME_HEIGHT_FLOAT * k);
+			zHeight = GAME_HEIGHT;
+		}
+		else
+		{
+			k = (FLOAT)config.mode->height / config.mode->width;
+
+			tw = GAME_WIDTH_FLOAT / maxTexSize;
+			th = tw * config.mode->height / config.mode->width;
+
+			zWidth = GAME_WIDTH;
+			zHeight = DWORD(GAME_WIDTH_FLOAT * config.mode->height / config.mode->width);
+		}
+	}
+	else if (config.zoomable)
+	{
+		config.zoomable = FALSE;
+		config.menuZoomImage = FALSE;
+		config.zoomImage = FALSE;
+		Window::CheckMenu(this->hWnd);
+	}
+
 	Frame* frames = (Frame*)MemoryAlloc(frameCount * sizeof(Frame));
 	{
 		Frame* frame = frames;
-		for (DWORD y = 0; y < this->mode.height; y += maxTexSize)
+		for (DWORD y = 0; y < config.mode->height; y += maxTexSize)
 		{
-			DWORD height = this->mode.height - y;
+			DWORD height = config.mode->height - y;
 			if (height > maxTexSize)
 				height = maxTexSize;
 
-			for (DWORD x = 0; x < this->mode.width; x += maxTexSize, ++frame)
+			for (DWORD x = 0; x < config.mode->width; x += maxTexSize, ++frame)
 			{
-				DWORD width = this->mode.width - x;
+				DWORD width = config.mode->width - x;
 				if (width > maxTexSize)
 					width = maxTexSize;
 
@@ -208,7 +341,7 @@ VOID OpenDraw::RenderOld()
 
 				GLTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-				if (this->mode.bpp == 16 && !config.bpp32Hooked && glVersion > GL_VER_1_1)
+				if (!isTrueColor && glVersion > GL_VER_1_1)
 					GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
 				else
 					GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, maxTexSize, maxTexSize, GL_NONE, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -217,7 +350,7 @@ VOID OpenDraw::RenderOld()
 
 		GLMatrixMode(GL_PROJECTION);
 		GLLoadIdentity();
-		GLOrtho(0.0, (GLdouble)this->mode.width, (GLdouble)this->mode.height, 0.0, 0.0, 1.0);
+		GLOrtho(0.0, (GLdouble)config.mode->width, (GLdouble)config.mode->height, 0.0, 0.0, 1.0);
 		GLMatrixMode(GL_MODELVIEW);
 		GLLoadIdentity();
 
@@ -225,24 +358,20 @@ VOID OpenDraw::RenderOld()
 		GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		this->viewport.refresh = TRUE;
 
-		VOID* frameBuffer = AlignedAlloc(maxTexSize * maxTexSize * (this->mode.bpp == 16 && !config.bpp32Hooked && glVersion > GL_VER_1_1 ? sizeof(WORD) : sizeof(DWORD)));
+		VOID* frameBuffer = AlignedAlloc(maxTexSize * maxTexSize * (!isTrueColor && glVersion > GL_VER_1_1 ? sizeof(WORD) : sizeof(DWORD)));
 		{
 			FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 			{
-				BOOL isVSync = FALSE;
+				BOOL isVSync = config.image.vSync;
 				if (WGLSwapInterval)
-					WGLSwapInterval(0);
+					WGLSwapInterval(isVSync);
 
 				while (!this->isFinish)
 				{
-					if (fpsState != FpsBenchmark || !config.version)
-						WaitForSingleObject(this->hDrawEvent, INFINITE);
-					else
-						Sleep(0);
-
-					OpenDrawSurface* surface = this->attachedSurface;
+					OpenDrawSurface * surface = this->attachedSurface;
 					if (surface)
 					{
+						BOOL isZoomed = surface->isZoomed[surface->bufferIndex];
 						VOID* currentBuffer;
 						if (config.version)
 							currentBuffer = surface->indexBuffer;
@@ -250,43 +379,22 @@ VOID OpenDraw::RenderOld()
 						{
 							surface->bufferIndex = !surface->bufferIndex;
 							currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
-						
+
 							if (surface->drawIndex)
 								--surface->drawIndex;
 						}
 
-						if (WGLSwapInterval)
+						if (isVSync != config.image.vSync)
 						{
-							if (!isVSync)
-							{
-								if (config.image.vSync)
-								{
-									isVSync = TRUE;
-									WGLSwapInterval(1);
-								}
-							}
-							else
-							{
-								if (!config.image.vSync)
-								{
-									isVSync = FALSE;
-									WGLSwapInterval(0);
-								}
-							}
+							isVSync = config.image.vSync;
+							if (WGLSwapInterval)
+								WGLSwapInterval(isVSync);
 						}
 
 						if (fpsState)
-						{
-							if (isFpsChanged)
-							{
-								isFpsChanged = FALSE;
-								fpsCounter->Reset();
-							}
-
 							fpsCounter->Calculate();
-						}
 
-						if (this->CheckView())
+						if (this->CheckView(TRUE))
 							GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
 						glFilter = 0;
@@ -294,6 +402,18 @@ VOID OpenDraw::RenderOld()
 						{
 							this->isStateChanged = FALSE;
 							glFilter = config.image.filter == FilterNearest ? GL_NEAREST : GL_LINEAR;
+						}
+
+						DWORD frameWidth, frameHeight;
+						if (isZoomed)
+						{
+							frameWidth = zWidth;
+							frameHeight = zHeight;
+						}
+						else
+						{
+							frameWidth = config.mode->width;
+							frameHeight = config.mode->height;
 						}
 
 						DWORD count = frameCount;
@@ -308,22 +428,22 @@ VOID OpenDraw::RenderOld()
 									GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilter);
 								}
 
-								if (this->mode.bpp != 16 || config.bpp32Hooked)
-									GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, currentBuffer);
+								if (isTrueColor)
+									GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameWidth, frameHeight, GL_RGBA, GL_UNSIGNED_BYTE, currentBuffer);
 								else
 								{
 									if (glVersion > GL_VER_1_1)
-										GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, currentBuffer);
+										GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameWidth, frameHeight, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, currentBuffer);
 									else
 									{
 										WORD* source = (WORD*)currentBuffer;
 										DWORD* dest = (DWORD*)frameBuffer;
-										DWORD copyWidth = this->mode.width;
-										DWORD copyHeight = this->mode.height;
+										DWORD copyWidth = frameWidth;
+										DWORD copyHeight = frameHeight;
 										do
 										{
 											WORD* src = source;
-											source += this->mode.width;
+											source += frameWidth;
 
 											DWORD count = copyWidth;
 											do
@@ -333,10 +453,9 @@ VOID OpenDraw::RenderOld()
 											} while (--count);
 										} while (--copyHeight);
 
-										GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
+										GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameWidth, frameHeight, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
 									}
 								}
-
 							}
 							else
 							{
@@ -348,45 +467,45 @@ VOID OpenDraw::RenderOld()
 									GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilter);
 								}
 
-								if (this->mode.bpp != 16 || config.bpp32Hooked)
+								if (isTrueColor)
 								{
-									DWORD* source = (DWORD*)currentBuffer + frame->rect.y * this->mode.width + frame->rect.x;
+									DWORD* source = (DWORD*)currentBuffer + frame->rect.y * frameWidth + frame->rect.x;
 									DWORD* dest = (DWORD*)frameBuffer;
 									DWORD copyHeight = frame->rect.height;
 									do
 									{
 										MemoryCopy(dest, source, frame->rect.width << 2);
-										source += this->mode.width;
+										source += frameWidth;
 										dest += frame->rect.width;
 									} while (--copyHeight);
 
-									GLTexSubImage2D(GL_TEXTURE_2D, 0, frame->rect.x, frame->rect.y, frame->rect.width, frame->rect.height, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
+									GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frame->rect.width, frame->rect.height, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
 								}
 								else
 								{
 									if (glVersion > GL_VER_1_1)
 									{
-										WORD* source = (WORD*)currentBuffer + frame->rect.x * this->mode.width + frame->rect.x;
+										WORD* source = (WORD*)currentBuffer + frame->rect.y * frameWidth + frame->rect.x;
 										WORD* dest = (WORD*)frameBuffer;
 										DWORD copyHeight = frame->rect.height;
 										do
 										{
 											MemoryCopy(dest, source, frame->rect.width << 1);
-											source += this->mode.width;
+											source += frameWidth;
 											dest += frame->rect.width;
 										} while (--copyHeight);
 
-										GLTexSubImage2D(GL_TEXTURE_2D, 0, frame->rect.x, frame->rect.y, frame->rect.width, frame->rect.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frameBuffer);
+										GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frame->rect.width, frame->rect.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frameBuffer);
 									}
 									else
 									{
-										WORD* source = (WORD*)currentBuffer + frame->rect.x * this->mode.width + frame->rect.x;
+										WORD* source = (WORD*)currentBuffer + frame->rect.y * frameWidth + frame->rect.x;
 										DWORD* dest = (DWORD*)frameBuffer;
 										DWORD copyHeight = frame->rect.height;
 										do
 										{
 											WORD* src = source;
-											source += this->mode.width;
+											source += frameWidth;
 
 											DWORD count = frame->rect.width;
 											do
@@ -396,272 +515,59 @@ VOID OpenDraw::RenderOld()
 											} while (--count);
 										} while (--copyHeight);
 
-										GLTexSubImage2D(GL_TEXTURE_2D, 0, frame->rect.x, frame->rect.y, frame->rect.width, frame->rect.height, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
+										GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frame->rect.width, frame->rect.height, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
 									}
 								}
 							}
 
-							if (fpsState && frame == frames)
-							{
-								DWORD fps = fpsCounter->value;
-								DWORD digCount = 0;
-								DWORD current = fps;
-								do
-								{
-									++digCount;
-									current = current / 10;
-								} while (current);
-
-								if (this->mode.bpp != 16 || config.bpp32Hooked)
-								{
-									DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
-									DWORD dcount = digCount;
-									do
-									{
-										WORD* lpDig = (WORD*)counters[fps % 10];
-
-										for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-										{
-											DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-												FPS_X + FPS_WIDTH * (dcount - 1);
-
-											DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
-												FPS_WIDTH * (dcount - 1);
-
-											WORD check = *lpDig++;
-											DWORD width = FPS_WIDTH;
-											do
-											{
-												*pix++ = (check & 1) ? fpsColor : *idx;
-												++idx;
-												check >>= 1;
-											} while (--width);
-										}
-
-										fps = fps / 10;
-									} while (--dcount);
-
-									dcount = 4;
-									while (dcount != digCount)
-									{
-										for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-										{
-											DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-												FPS_X + FPS_WIDTH * (dcount - 1);
-
-											DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
-												FPS_WIDTH * (dcount - 1);
-
-											DWORD width = FPS_WIDTH;
-											do
-												*pix++ = *idx++;
-											while (--width);
-										}
-
-										--dcount;
-									}
-
-									GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
-								}
-								else
-								{
-									if (glVersion > GL_VER_1_1)
-									{
-										WORD fpsColor = fpsState == FpsBenchmark ? 0xFFE0 : 0xFFFF;
-										DWORD dcount = digCount;
-										do
-										{
-											WORD* lpDig = (WORD*)counters[fps % 10];
-
-											for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-											{
-												WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-													FPS_X + FPS_WIDTH * (dcount - 1);
-
-												WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
-													FPS_WIDTH * (dcount - 1);
-
-												WORD check = *lpDig++;
-												DWORD width = FPS_WIDTH;
-												do
-												{
-													*pix++ = (check & 1) ? fpsColor : *idx;
-													++idx;
-													check >>= 1;
-												} while (--width);
-											}
-
-											fps = fps / 10;
-										} while (--dcount);
-
-										dcount = 4;
-										while (dcount != digCount)
-										{
-											for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-											{
-												WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-													FPS_X + FPS_WIDTH * (dcount - 1);
-
-												WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
-													FPS_WIDTH * (dcount - 1);
-
-												DWORD width = FPS_WIDTH;
-												do
-													*pix++ = *idx++;
-												while (--width);
-											}
-
-											--dcount;
-										}
-
-										GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frameBuffer);
-									}
-									else
-									{
-										DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
-										DWORD dcount = digCount;
-										do
-										{
-											WORD* lpDig = (WORD*)counters[fps % 10];
-
-											for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-											{
-												WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-													FPS_X + FPS_WIDTH * (dcount - 1);
-
-												DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
-													FPS_WIDTH * (dcount - 1);
-
-												WORD check = *lpDig++;
-												DWORD width = FPS_WIDTH;
-												do
-												{
-													if (check & 1)
-														*pix = fpsColor;
-													else
-													{
-														WORD px = *idx;
-														*pix = ((px & 0xF800) >> 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 19);
-													}
-
-													++pix;
-													++idx;
-													check >>= 1;
-												} while (--width);
-											}
-
-											fps = fps / 10;
-										} while (--dcount);
-
-										dcount = 4;
-										while (dcount != digCount)
-										{
-											for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-											{
-												WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-													FPS_X + FPS_WIDTH * (dcount - 1);
-
-												DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
-													FPS_WIDTH * (dcount - 1);
-
-												DWORD width = FPS_WIDTH;
-												do
-												{
-													WORD px = *idx++;
-													*pix++ = ((px & 0xF800) >> 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 19);
-												} while (--width);
-											}
-
-											--dcount;
-										}
-
-										GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
-									}
-								}
-							}
+							if (fpsState && !this->isTakeSnapshot && frame == frames)
+								fpsCounter->Draw(currentBuffer, frameBuffer, frameWidth, frameHeight);
 
 							GLBegin(GL_TRIANGLE_FAN);
 							{
-								GLTexCoord2f(0.0f, 0.0f);
-								GLVertex2s((SHORT)frame->point.x, (SHORT)frame->point.y);
+								if (!isZoomed)
+								{
+									GLTexCoord2f(0.0f, 0.0f);
+									GLVertex2s((SHORT)frame->point.x, (SHORT)frame->point.y);
 
-								GLTexCoord2f(frame->tSize.width, 0.0f);
-								GLVertex2s(frame->vSize.width, (SHORT)frame->point.y);
+									GLTexCoord2f(frame->tSize.width, 0.0f);
+									GLVertex2s((SHORT)frame->vSize.width, (SHORT)frame->point.y);
 
-								GLTexCoord2f(frame->tSize.width, frame->tSize.height);
-								GLVertex2s(frame->vSize.width, frame->vSize.height);
+									GLTexCoord2f(frame->tSize.width, frame->tSize.height);
+									GLVertex2s((SHORT)frame->vSize.width, (SHORT)frame->vSize.height);
 
-								GLTexCoord2f(0.0f, frame->tSize.height);
-								GLVertex2s((SHORT)frame->point.x, frame->vSize.height);
+									GLTexCoord2f(0.0f, frame->tSize.height);
+									GLVertex2s((SHORT)frame->point.x, (SHORT)frame->vSize.height);
+								}
+								else
+								{
+									GLTexCoord2f(0.0f, 0.0f);
+									GLVertex2s((SHORT)frame->point.x, (SHORT)frame->point.y);
+
+									GLTexCoord2f(tw, 0.0f);
+									GLVertex2s((SHORT)frame->vSize.width, (SHORT)frame->point.y);
+
+									GLTexCoord2f(tw, th);
+									GLVertex2s((SHORT)frame->vSize.width, (SHORT)frame->vSize.height);
+
+									GLTexCoord2f(0.0f, th);
+									GLVertex2s((SHORT)frame->point.x, (SHORT)frame->vSize.height);
+								}
 							}
 							GLEnd();
 							++frame;
 						}
 
 						if (this->isTakeSnapshot)
-						{
-							this->isTakeSnapshot = FALSE;
-
-							if (OpenClipboard(NULL))
-							{
-								EmptyClipboard();
-
-								DWORD dataSize = this->mode.width * this->mode.height * (this->mode.bpp != 16 || config.bpp32Hooked ? 3 : 2);
-								HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, sizeof(BITMAPV5HEADER) + dataSize);
-								{
-									VOID* data = GlobalLock(hMemory);
-									{
-										BITMAPV5HEADER* bmi = (BITMAPV5HEADER*)data;
-										MemoryZero(bmi, sizeof(BITMAPINFOHEADER));
-										bmi->bV5Size = sizeof(BITMAPV5HEADER);
-										bmi->bV5Width = this->mode.width;
-										bmi->bV5Height = -*(LONG*)&this->mode.height;
-										bmi->bV5Planes = 1;
-										bmi->bV5XPelsPerMeter = 1;
-										bmi->bV5YPelsPerMeter = 1;
-
-										if (this->mode.bpp != 16 || config.bpp32Hooked)
-										{
-											bmi->bV5BitCount = 24;
-											bmi->bV5Compression = BI_RGB;
-
-											DWORD* src = (DWORD*)currentBuffer;
-											BYTE* dst = (BYTE*)data + sizeof(BITMAPV5HEADER);
-
-											DWORD count = this->mode.width * this->mode.height;
-											do
-											{
-												*dst++ = LOBYTE(*src >> 16);
-												*dst++ = LOBYTE(*src >> 8);
-												*dst++ = LOBYTE(*src);
-
-												++src;
-											} while (--count);
-										}
-										else
-										{
-											bmi->bV5BitCount = 16;
-											bmi->bV5Compression = BI_BITFIELDS;
-											bmi->bV5RedMask = 0xF800;
-											bmi->bV5GreenMask = 0x07E0;
-											bmi->bV5BlueMask = 0x001F;
-
-											MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), currentBuffer, dataSize);
-										}
-									}
-									GlobalUnlock(hMemory);
-
-									SetClipboardData(CF_DIBV5, hMemory);
-								}
-								GlobalFree(hMemory);
-
-								CloseClipboard();
-							}
-						}
+							this->TakeSnapshot(currentBuffer, frameWidth, frameHeight);
 
 						SwapBuffers(this->hDc);
-						if (isVSync)
-							GLFinish();
+						GLFinish();
+
+						if (fpsState != FpsBenchmark || !config.version)
+							WaitForSingleObject(this->hDrawEvent, INFINITE);
+						else
+							Sleep(0);
 					}
 				}
 			}
@@ -682,27 +588,55 @@ VOID OpenDraw::RenderOld()
 
 VOID OpenDraw::RenderMid()
 {
+	BOOL isTrueColor = config.mode->bpp != 16 || config.bpp32Hooked;
+
 	if (config.image.filter > FilterCubic)
 		config.image.filter = FilterLinear;
 
-	DWORD maxSize = this->mode.width > this->mode.height ? this->mode.width : this->mode.height;
+	DWORD maxSize = config.mode->width > config.mode->height ? config.mode->width : config.mode->height;
 	DWORD maxTexSize = 1;
 	while (maxTexSize < maxSize) maxTexSize <<= 1;
-	FLOAT texWidth = this->mode.width == maxTexSize ? 1.0f : (FLOAT)this->mode.width / maxTexSize;
-	FLOAT texHeight = this->mode.height == maxTexSize ? 1.0f : (FLOAT)this->mode.height / maxTexSize;
+	FLOAT texWidth = config.mode->width == maxTexSize ? 1.0f : (FLOAT)config.mode->width / maxTexSize;
+	FLOAT texHeight = config.mode->height == maxTexSize ? 1.0f : (FLOAT)config.mode->height / maxTexSize;
 
 	DWORD texSize = (maxTexSize & 0xFFFF) | (maxTexSize << 16);
 
-	FLOAT buffer[4][4] = {
+	FLOAT tw, th;
+	DWORD zWidth, zHeight;
+
+	FLOAT k = (FLOAT)config.mode->width / config.mode->height;
+	if (k >= 4.0f / 3.0f)
+	{
+		th = GAME_HEIGHT_FLOAT / maxTexSize;
+		tw = th * k;
+
+		zWidth = DWORD(GAME_HEIGHT_FLOAT * k);
+		zHeight = GAME_HEIGHT;
+	}
+	else
+	{
+		tw = GAME_WIDTH_FLOAT / maxTexSize;
+		th = tw * config.mode->height / config.mode->width;
+
+		zWidth = GAME_WIDTH;
+		zHeight = DWORD(GAME_WIDTH_FLOAT * config.mode->height / config.mode->width);
+	}
+
+	FLOAT buffer[8][4] = {
 		{ 0.0f, 0.0f, 0.0f, 0.0f },
-		{ (FLOAT)this->mode.width, 0.0f, texWidth, 0.0f },
-		{ (FLOAT)this->mode.width, (FLOAT)this->mode.height, texWidth, texHeight },
-		{ 0.0f, (FLOAT)this->mode.height, 0.0f, texHeight }
+		{ (FLOAT)config.mode->width, 0.0f, texWidth, 0.0f },
+		{ (FLOAT)config.mode->width, (FLOAT)config.mode->height, texWidth, texHeight },
+		{ 0.0f, (FLOAT)config.mode->height, 0.0f, texHeight },
+
+		{ 0.0f, 0.0f, 0.0f, 0.0f },
+		{ (FLOAT)config.mode->width, 0.0f, tw, 0.0f },
+		{ (FLOAT)config.mode->width, (FLOAT)config.mode->height, tw, th },
+		{ 0.0f, (FLOAT)config.mode->height, 0.0f, th },
 	};
 
 	FLOAT mvpMatrix[4][4] = {
-		{ FLOAT(2.0f / this->mode.width), 0.0f, 0.0f, 0.0f },
-		{ 0.0f, FLOAT(-2.0f / this->mode.height), 0.0f, 0.0f },
+		{ FLOAT(2.0f / config.mode->width), 0.0f, 0.0f, 0.0f },
+		{ 0.0f, FLOAT(-2.0f / config.mode->height), 0.0f, 0.0f },
 		{ 0.0f, 0.0f, 2.0f, 0.0f },
 		{ -1.0f, 1.0f, -1.0f, 1.0f }
 	};
@@ -740,14 +674,14 @@ VOID OpenDraw::RenderMid()
 					GLActiveTexture(GL_TEXTURE0);
 
 					GLBindTexture(GL_TEXTURE_2D, textureId);
-					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glCapsClampToEdge);
-					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glCapsClampToEdge);
+					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 					GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 
-					if (this->mode.bpp != 16 || config.bpp32Hooked)
+					if (isTrueColor)
 						GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 					else
 						GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
@@ -755,26 +689,22 @@ VOID OpenDraw::RenderMid()
 					GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 					this->viewport.refresh = TRUE;
 
-					VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 && !config.bpp32Hooked ? sizeof(WORD) : sizeof(DWORD)));
+					VOID* frameBuffer = AlignedAlloc(config.mode->width * config.mode->height * (isTrueColor ? sizeof(DWORD) : sizeof(WORD)));
 					{
 						FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 						{
 							this->isStateChanged = TRUE;
 
-							BOOL isVSync = FALSE;
+							BOOL isVSync = config.image.vSync;
 							if (WGLSwapInterval)
-								WGLSwapInterval(0);
+								WGLSwapInterval(isVSync);
 
 							while (!this->isFinish)
 							{
-								if (fpsState != FpsBenchmark || !config.version)
-									WaitForSingleObject(this->hDrawEvent, INFINITE);
-								else
-									Sleep(0);
-
-								OpenDrawSurface* surface = this->attachedSurface;
+								OpenDrawSurface * surface = this->attachedSurface;
 								if (surface)
 								{
+									BOOL isZoomed = surface->isZoomed[surface->bufferIndex];
 									VOID* currentBuffer;
 									if (config.version)
 										currentBuffer = surface->indexBuffer;
@@ -782,43 +712,22 @@ VOID OpenDraw::RenderMid()
 									{
 										surface->bufferIndex = !surface->bufferIndex;
 										currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
-									
+
 										if (surface->drawIndex)
 											--surface->drawIndex;
 									}
 
-									if (WGLSwapInterval)
+									if (isVSync != config.image.vSync)
 									{
-										if (!isVSync)
-										{
-											if (config.image.vSync)
-											{
-												isVSync = TRUE;
-												WGLSwapInterval(1);
-											}
-										}
-										else
-										{
-											if (!config.image.vSync)
-											{
-												isVSync = FALSE;
-												WGLSwapInterval(0);
-											}
-										}
+										isVSync = config.image.vSync;
+										if (WGLSwapInterval)
+											WGLSwapInterval(isVSync);
 									}
 
 									if (fpsState)
-									{
-										if (isFpsChanged)
-										{
-											isFpsChanged = FALSE;
-											fpsCounter->Reset();
-										}
-
 										fpsCounter->Calculate();
-									}
 
-									if (this->CheckView())
+									if (this->CheckView(TRUE))
 										GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
 									if (this->isStateChanged)
@@ -835,197 +744,42 @@ VOID OpenDraw::RenderMid()
 										GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 									}
 
+									DWORD frameWidth, frameHeight;
+									if (isZoomed)
+									{
+										frameWidth = zWidth;
+										frameHeight = zHeight;
+									}
+									else
+									{
+										frameWidth = config.mode->width;
+										frameHeight = config.mode->height;
+									}
+
 									// NEXT UNCHANGED
 									{
-										if (this->mode.bpp != 16 || config.bpp32Hooked)
-											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, currentBuffer);
+										if (isTrueColor)
+											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameWidth, frameHeight, GL_RGBA, GL_UNSIGNED_BYTE, currentBuffer);
 										else
-											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, currentBuffer);
+											GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameWidth, frameHeight, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, currentBuffer);
 
 										// Update FPS
 										if (fpsState && !this->isTakeSnapshot)
-										{
-											DWORD fps = fpsCounter->value;
-											DWORD digCount = 0;
-											DWORD current = fps;
-											do
-											{
-												++digCount;
-												current = current / 10;
-											} while (current);
+											fpsCounter->Draw(currentBuffer, frameBuffer, frameWidth, frameHeight);
 
-											if (this->mode.bpp != 16 || config.bpp32Hooked)
-											{
-												DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
-												DWORD dcount = digCount;
-												do
-												{
-													WORD* lpDig = (WORD*)counters[fps % 10];
-
-													for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-													{
-														DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-															FPS_X + FPS_WIDTH * (dcount - 1);
-
-														DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
-															FPS_WIDTH * (dcount - 1);
-
-														WORD check = *lpDig++;
-														DWORD width = FPS_WIDTH;
-														do
-														{
-															*pix++ = (check & 1) ? fpsColor : *idx;
-															++idx;
-															check >>= 1;
-														} while (--width);
-													}
-
-													fps = fps / 10;
-												} while (--dcount);
-
-												dcount = 4;
-												while (dcount != digCount)
-												{
-													for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-													{
-														DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-															FPS_X + FPS_WIDTH * (dcount - 1);
-
-														DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
-															FPS_WIDTH * (dcount - 1);
-
-														DWORD width = FPS_WIDTH;
-														do
-															*pix++ = *idx++;
-														while (--width);
-													}
-
-													--dcount;
-												}
-
-												GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
-											}
-											else
-											{
-												WORD fpsColor = fpsState == FpsBenchmark ? 0xFFE0 : 0xFFFF;
-												DWORD dcount = digCount;
-												do
-												{
-													WORD* lpDig = (WORD*)counters[fps % 10];
-
-													for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-													{
-														WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-															FPS_X + FPS_WIDTH * (dcount - 1);
-
-														WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
-															FPS_WIDTH * (dcount - 1);
-
-														WORD check = *lpDig++;
-														DWORD width = FPS_WIDTH;
-														do
-														{
-															*pix++ = (check & 1) ? fpsColor : *idx;
-															++idx;
-															check >>= 1;
-														} while (--width);
-													}
-
-													fps = fps / 10;
-												} while (--dcount);
-
-												dcount = 4;
-												while (dcount != digCount)
-												{
-													for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-													{
-														WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-															FPS_X + FPS_WIDTH * (dcount - 1);
-
-														WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
-															FPS_WIDTH * (dcount - 1);
-
-														DWORD width = FPS_WIDTH;
-														do
-															*pix++ = *idx++;
-														while (--width);
-													}
-
-													--dcount;
-												}
-
-												GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frameBuffer);
-											}
-										}
-
-										GLDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+										GLDrawArrays(GL_TRIANGLE_FAN, isZoomed ? 4 : 0, 4);
 									}
 
 									if (this->isTakeSnapshot)
-									{
-										this->isTakeSnapshot = FALSE;
+										this->TakeSnapshot(currentBuffer, frameWidth, frameHeight);
 
-										if (OpenClipboard(NULL))
-										{
-											EmptyClipboard();
-
-											DWORD dataSize = this->mode.width * this->mode.height * (this->mode.bpp != 16 || config.bpp32Hooked ? 3 : 2);
-											HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, sizeof(BITMAPV5HEADER) + dataSize);
-											{
-												VOID* data = GlobalLock(hMemory);
-												{
-													BITMAPV5HEADER* bmi = (BITMAPV5HEADER*)data;
-													MemoryZero(bmi, sizeof(BITMAPINFOHEADER));
-													bmi->bV5Size = sizeof(BITMAPV5HEADER);
-													bmi->bV5Width = this->mode.width;
-													bmi->bV5Height = -*(LONG*)&this->mode.height;
-													bmi->bV5Planes = 1;
-													bmi->bV5XPelsPerMeter = 1;
-													bmi->bV5YPelsPerMeter = 1;
-
-													if (this->mode.bpp != 16 || config.bpp32Hooked)
-													{
-														bmi->bV5BitCount = 24;
-														bmi->bV5Compression = BI_RGB;
-
-														DWORD* src = (DWORD*)currentBuffer;
-														BYTE* dst = (BYTE*)data + sizeof(BITMAPV5HEADER);
-
-														DWORD count = this->mode.width * this->mode.height;
-														do
-														{
-															*dst++ = LOBYTE(*src >> 16);
-															*dst++ = LOBYTE(*src >> 8);
-															*dst++ = LOBYTE(*src);
-
-															++src;
-														} while (--count);
-													}
-													else
-													{
-														bmi->bV5BitCount = 16;
-														bmi->bV5Compression = BI_BITFIELDS;
-														bmi->bV5RedMask = 0xF800;
-														bmi->bV5GreenMask = 0x07E0;
-														bmi->bV5BlueMask = 0x001F;
-
-														MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), currentBuffer, dataSize);
-													}
-												}
-												GlobalUnlock(hMemory);
-
-												SetClipboardData(CF_DIBV5, hMemory);
-											}
-											GlobalFree(hMemory);
-
-											CloseClipboard();
-										}
-									}
-
-									// Swap
 									SwapBuffers(this->hDc);
-									if (isVSync)
-										GLFinish();
+									GLFinish();
+
+									if (fpsState != FpsBenchmark || !config.version)
+										WaitForSingleObject(this->hDrawEvent, INFINITE);
+									else
+										Sleep(0);
 								}
 							}
 						}
@@ -1053,28 +807,64 @@ VOID OpenDraw::RenderMid()
 
 VOID OpenDraw::RenderNew()
 {
-	DWORD maxSize = this->mode.width > this->mode.height ? this->mode.width : this->mode.height;
+	BOOL isTrueColor = config.mode->bpp != 16 || config.bpp32Hooked;
+
+	DWORD maxSize = config.mode->width > config.mode->height ? config.mode->width : config.mode->height;
 	DWORD maxTexSize = 1;
 	while (maxTexSize < maxSize) maxTexSize <<= 1;
-	FLOAT texWidth = this->mode.width == maxTexSize ? 1.0f : (FLOAT)this->mode.width / maxTexSize;
-	FLOAT texHeight = this->mode.height == maxTexSize ? 1.0f : (FLOAT)this->mode.height / maxTexSize;
+	FLOAT texWidth = config.mode->width == maxTexSize ? 1.0f : (FLOAT)config.mode->width / maxTexSize;
+	FLOAT texHeight = config.mode->height == maxTexSize ? 1.0f : (FLOAT)config.mode->height / maxTexSize;
 
 	DWORD texSize = (maxTexSize & 0xFFFF) | (maxTexSize << 16);
 
-	FLOAT buffer[8][4] = {
+	FLOAT tw, th, tk;
+	DWORD zWidth, zHeight;
+
+	FLOAT k = (FLOAT)config.mode->width / config.mode->height;
+	if (k >= 4.0f / 3.0f)
+	{
+		tk = GAME_HEIGHT_FLOAT / config.mode->height;
+		th = GAME_HEIGHT_FLOAT / maxTexSize;
+		tw = th * k;
+
+		zWidth = DWORD(GAME_HEIGHT_FLOAT * k);
+		zHeight = GAME_HEIGHT;
+	}
+	else
+	{
+		tk = GAME_WIDTH_FLOAT / config.mode->width;
+		tw = GAME_WIDTH_FLOAT / maxTexSize;
+		th = tw * config.mode->height / config.mode->width;
+
+		zWidth = GAME_WIDTH;
+		zHeight = DWORD(GAME_WIDTH_FLOAT * config.mode->height / config.mode->width);
+	}
+
+	FLOAT buffer[16][4] = {
 		{ 0.0f, 0.0f, 0.0f, 0.0f },
-		{ (FLOAT)this->mode.width, 0.0f, texWidth, 0.0f },
-		{ (FLOAT)this->mode.width, (FLOAT)this->mode.height, texWidth, texHeight },
-		{ 0.0f, (FLOAT)this->mode.height, 0.0f, texHeight },
+		{ (FLOAT)config.mode->width, 0.0f, texWidth, 0.0f },
+		{ (FLOAT)config.mode->width, (FLOAT)config.mode->height, texWidth, texHeight },
+		{ 0.0f, (FLOAT)config.mode->height, 0.0f, texHeight },
+
+		{ 0.0f, 0.0f, 0.0f, 0.0f },
+		{ (FLOAT)config.mode->width, 0.0f, tw, 0.0f },
+		{ (FLOAT)config.mode->width, (FLOAT)config.mode->height, tw, th },
+		{ 0.0f, (FLOAT)config.mode->height, 0.0f, th },
+
 		{ 0.0f, 0.0f, 0.0f, 1.0f },
-		{ (FLOAT)this->mode.width, 0.0f, 1.0f, 1.0f },
-		{ (FLOAT)this->mode.width, (FLOAT)this->mode.height, 1.0f, 0.0f },
-		{ 0.0f, (FLOAT)this->mode.height, 0.0f, 0.0f }
+		{ (FLOAT)config.mode->width, 0.0f, 1.0f, 1.0f },
+		{ (FLOAT)config.mode->width, (FLOAT)config.mode->height, 1.0f, 0.0f },
+		{ 0.0f, (FLOAT)config.mode->height, 0.0f, 0.0f },
+
+		{ 0.0f, 0.0f, 0.0f, tk },
+		{ (FLOAT)config.mode->width, 0.0f, tk, tk },
+		{ (FLOAT)config.mode->width, (FLOAT)config.mode->height, tk, 0.0f },
+		{ 0.0f, (FLOAT)config.mode->height, 0.0f, 0.0f }
 	};
 
 	FLOAT mvpMatrix[4][4] = {
-		{ FLOAT(2.0f / this->mode.width), 0.0f, 0.0f, 0.0f },
-		{ 0.0f, FLOAT(-2.0f / this->mode.height), 0.0f, 0.0f },
+		{ FLOAT(2.0f / config.mode->width), 0.0f, 0.0f, 0.0f },
+		{ 0.0f, FLOAT(-2.0f / config.mode->height), 0.0f, 0.0f },
 		{ 0.0f, 0.0f, 2.0f, 0.0f },
 		{ -1.0f, 1.0f, -1.0f, 1.0f }
 	};
@@ -1135,24 +925,27 @@ VOID OpenDraw::RenderNew()
 						GLEnableVertexAttribArray(attrLoc);
 						GLVertexAttribPointer(attrLoc, 2, GL_FLOAT, GL_FALSE, 16, (GLvoid*)8);
 
-						GLuint textureId;
-						GLGenTextures(1, &textureId);
+						GLuint textureId[2];
+						GLGenTextures(2, textureId);
 						{
-							DWORD filter = config.image.filter == FilterLinear ? GL_LINEAR : GL_NEAREST;
-							GLActiveTexture(GL_TEXTURE0);
+							DWORD idx = 2;
+							while (idx--)
+							{
+								GLActiveTexture(GL_TEXTURE0 + idx);
+								GLBindTexture(GL_TEXTURE_2D, textureId[idx]);
 
-							GLBindTexture(GL_TEXTURE_2D, textureId);
-							GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glCapsClampToEdge);
-							GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glCapsClampToEdge);
-							GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-							GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-							GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-							GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+								GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+								GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+								GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+								GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+								GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+								GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-							if (this->mode.bpp != 16 || config.bpp32Hooked)
-								GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-							else
-								GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
+								if (isTrueColor)
+									GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+								else
+									GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, maxTexSize, maxTexSize, GL_NONE, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
+							}
 
 							GLuint fboId;
 							GLGenFramebuffers(1, &fboId);
@@ -1163,26 +956,24 @@ VOID OpenDraw::RenderNew()
 									GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 									this->viewport.refresh = TRUE;
 
-									VOID* frameBuffer = AlignedAlloc(this->mode.width * this->mode.height * (this->mode.bpp == 16 && !config.bpp32Hooked ? sizeof(WORD) : sizeof(DWORD)));
+									VOID* frameBuffer = AlignedAlloc(config.mode->width * config.mode->height * (isTrueColor ? sizeof(DWORD) : sizeof(WORD)));
 									{
 										FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 										{
+											BOOL activeIndex = TRUE;
+											BOOL oldZoomed = FALSE;
 											this->isStateChanged = TRUE;
 
-											BOOL isVSync = FALSE;
+											BOOL isVSync = config.image.vSync;
 											if (WGLSwapInterval)
-												WGLSwapInterval(0);
+												WGLSwapInterval(isVSync);
 
 											while (!this->isFinish)
 											{
-												if (fpsState != FpsBenchmark || !config.version)
-													WaitForSingleObject(this->hDrawEvent, INFINITE);
-												else
-													Sleep(0);
-
 												OpenDrawSurface* surface = this->attachedSurface;
 												if (surface)
 												{
+													BOOL isZoomed = surface->isZoomed[surface->bufferIndex];
 													VOID* currentBuffer;
 													if (config.version)
 														currentBuffer = surface->indexBuffer;
@@ -1190,43 +981,40 @@ VOID OpenDraw::RenderNew()
 													{
 														surface->bufferIndex = !surface->bufferIndex;
 														currentBuffer = surface->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer;
-														
+
 														if (surface->drawIndex)
 															--surface->drawIndex;
 													}
 
-													if (WGLSwapInterval)
+													if (isVSync != config.image.vSync)
 													{
-														if (!isVSync)
-														{
-															if (config.image.vSync)
-															{
-																isVSync = TRUE;
-																WGLSwapInterval(1);
-															}
-														}
-														else
-														{
-															if (!config.image.vSync)
-															{
-																isVSync = FALSE;
-																WGLSwapInterval(0);
-															}
-														}
+														isVSync = config.image.vSync;
+														if (WGLSwapInterval)
+															WGLSwapInterval(isVSync);
 													}
 
 													if (this->isStateChanged)
 														this->viewport.refresh = TRUE;
 
-													if (fpsState)
+													if (oldZoomed != isZoomed)
 													{
-														if (isFpsChanged)
-														{
-															isFpsChanged = FALSE;
-															fpsCounter->Reset();
-														}
+														oldZoomed = isZoomed;
+														this->viewport.refresh = TRUE;
+													}
 
+													if (fpsState)
 														fpsCounter->Calculate();
+
+													DWORD frameWidth, frameHeight;
+													if (isZoomed)
+													{
+														frameWidth = zWidth;
+														frameHeight = zHeight;
+													}
+													else
+													{
+														frameWidth = config.mode->width;
+														frameHeight = config.mode->height;
 													}
 
 													ImageFilter frameFilter = config.image.filter;
@@ -1308,7 +1096,7 @@ VOID OpenDraw::RenderNew()
 
 															UseShaderProgram(filterProgram, texSize);
 
-															DWORD newSize = ((this->mode.width * scaleValue) & 0xFFFF) | ((this->mode.height * scaleValue) << 16);
+															DWORD newSize = MAKELONG(config.mode->width * scaleValue, config.mode->height * scaleValue);
 															if (newSize != viewSize)
 															{
 																if (!viewSize)
@@ -1321,8 +1109,8 @@ VOID OpenDraw::RenderNew()
 
 																// Gen texture
 																GLBindTexture(GL_TEXTURE_2D, tboId);
-																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glCapsClampToEdge);
-																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glCapsClampToEdge);
+																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1339,16 +1127,34 @@ VOID OpenDraw::RenderNew()
 															}
 														}
 
-														GLViewport(0, 0, LOWORD(viewSize), HIWORD(viewSize));
-														this->CheckView();
+														if (isZoomed)
+															GLViewport(0, 0, DWORD(tk * LOWORD(viewSize)), DWORD(tk * HIWORD(viewSize)));
+														else
+															GLViewport(0, 0, LOWORD(viewSize), HIWORD(viewSize));
 
-														GLBindTexture(GL_TEXTURE_2D, textureId);
-														GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-														GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+														GLActiveTexture(GL_TEXTURE1);
+														GLBindTexture(GL_TEXTURE_2D, textureId[activeIndex]);
+														GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+														GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+														if (this->CheckView(FALSE))
+														{
+															MemoryZero(frameBuffer, frameWidth * frameHeight * (isTrueColor ? sizeof(DWORD) : sizeof(WORD)));
+															if (isTrueColor)
+																GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameWidth, frameHeight, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
+															else
+																GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameWidth, frameHeight, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frameBuffer);
+														}
+
+														activeIndex = !activeIndex;
+														GLActiveTexture(GL_TEXTURE0);
+														GLBindTexture(GL_TEXTURE_2D, textureId[activeIndex]);
+														GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+														GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 													}
 													else
 													{
-														if (this->CheckView())
+														if (this->CheckView(TRUE))
 															GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
 														if (this->isStateChanged)
@@ -1365,8 +1171,8 @@ VOID OpenDraw::RenderNew()
 																viewSize = 0;
 															}
 
-															GLBindTexture(GL_TEXTURE_2D, textureId);
-															filter = frameFilter == FilterLinear ? GL_LINEAR : GL_NEAREST;
+															GLBindTexture(GL_TEXTURE_2D, *textureId);
+															DWORD filter = frameFilter == FilterLinear ? GL_LINEAR : GL_NEAREST;
 															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 														}
@@ -1374,136 +1180,24 @@ VOID OpenDraw::RenderNew()
 
 													// NEXT UNCHANGED
 													{
-														if (this->mode.bpp != 16 || config.bpp32Hooked)
-															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGBA, GL_UNSIGNED_BYTE, currentBuffer);
+														if (isTrueColor)
+															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameWidth, frameHeight, GL_RGBA, GL_UNSIGNED_BYTE, currentBuffer);
 														else
-															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mode.width, this->mode.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, currentBuffer);
+															GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameWidth, frameHeight, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, currentBuffer);
 
 														// Update FPS
 														if (fpsState && !this->isTakeSnapshot)
-														{
-															DWORD fps = fpsCounter->value;
-															DWORD digCount = 0;
-															DWORD current = fps;
-															do
-															{
-																++digCount;
-																current = current / 10;
-															} while (current);
-
-															if (this->mode.bpp != 16 || config.bpp32Hooked)
-															{
-																DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
-																DWORD dcount = digCount;
-																do
-																{
-																	WORD* lpDig = (WORD*)counters[fps % 10];
-
-																	for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-																	{
-																		DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-																			FPS_X + FPS_WIDTH * (dcount - 1);
-
-																		DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
-																			FPS_WIDTH * (dcount - 1);
-
-																		WORD check = *lpDig++;
-																		DWORD width = FPS_WIDTH;
-																		do
-																		{
-																			*pix++ = (check & 1) ? fpsColor : *idx;
-																			++idx;
-																			check >>= 1;
-																		} while (--width);
-																	}
-
-																	fps = fps / 10;
-																} while (--dcount);
-
-																dcount = 4;
-																while (dcount != digCount)
-																{
-																	for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-																	{
-																		DWORD* idx = (DWORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-																			FPS_X + FPS_WIDTH * (dcount - 1);
-
-																		DWORD* pix = (DWORD*)frameBuffer + y * FPS_WIDTH * 4 +
-																			FPS_WIDTH * (dcount - 1);
-
-																		DWORD width = FPS_WIDTH;
-																		do
-																			*pix++ = *idx++;
-																		while (--width);
-																	}
-
-																	--dcount;
-																}
-
-																GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
-															}
-															else
-															{
-																WORD fpsColor = fpsState == FpsBenchmark ? 0xFFE0 : 0xFFFF;
-																DWORD dcount = digCount;
-																do
-																{
-																	WORD* lpDig = (WORD*)counters[fps % 10];
-
-																	for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-																	{
-																		WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-																			FPS_X + FPS_WIDTH * (dcount - 1);
-
-																		WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
-																			FPS_WIDTH * (dcount - 1);
-
-																		WORD check = *lpDig++;
-																		DWORD width = FPS_WIDTH;
-																		do
-																		{
-																			*pix++ = (check & 1) ? fpsColor : *idx;
-																			++idx;
-																			check >>= 1;
-																		} while (--width);
-																	}
-
-																	fps = fps / 10;
-																} while (--dcount);
-
-																dcount = 4;
-																while (dcount != digCount)
-																{
-																	for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-																	{
-																		WORD* idx = (WORD*)currentBuffer + (FPS_Y + y) * this->mode.width +
-																			FPS_X + FPS_WIDTH * (dcount - 1);
-
-																		WORD* pix = (WORD*)frameBuffer + y * FPS_WIDTH * 4 +
-																			FPS_WIDTH * (dcount - 1);
-
-																		DWORD width = FPS_WIDTH;
-																		do
-																			*pix++ = *idx++;
-																		while (--width);
-																	}
-
-																	--dcount;
-																}
-
-																GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frameBuffer);
-															}
-														}
+															fpsCounter->Draw(currentBuffer, frameBuffer, frameWidth, frameHeight);
 
 														// Draw into FBO texture
-														GLDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+														GLDrawArrays(GL_TRIANGLE_FAN, isZoomed ? 4 : 0, 4);
 													}
 
 													// Draw from FBO
 													if (frameFilter == FilterXRBZ || frameFilter == FilterScaleHQ ||
 														frameFilter == FilterXSal || frameFilter == FilterEagle || frameFilter == FilterScaleNx)
 													{
-														//GLFinish();
+														GLFinish();
 														GLBindFramebuffer(GL_DRAW_FRAMEBUFFER, NULL);
 
 														UseShaderProgram(filterProgram2, viewSize);
@@ -1513,11 +1207,11 @@ VOID OpenDraw::RenderNew()
 															GLClear(GL_COLOR_BUFFER_BIT);
 															GLBindTexture(GL_TEXTURE_2D, tboId);
 
-															filter = filterProgram2 == &shaders.linear ? GL_LINEAR : GL_NEAREST;
+															DWORD filter = filterProgram2 == &shaders.linear ? GL_LINEAR : GL_NEAREST;
 															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 
-															GLDrawArrays(GL_TRIANGLE_FAN, 4, 4);
+															GLDrawArrays(GL_TRIANGLE_FAN, isZoomed ? 12 : 8, 4);
 
 															if (this->isTakeSnapshot)
 															{
@@ -1529,27 +1223,66 @@ VOID OpenDraw::RenderNew()
 																{
 																	EmptyClipboard();
 
-																	DWORD dataSize = LOWORD(viewSize) * HIWORD(viewSize) * 3;
+																	DWORD viewWidth = LOWORD(viewSize);
+																	DWORD viewHeight = HIWORD(viewSize);
+																	if (isZoomed)
+																	{
+																		viewWidth = DWORD(tk * viewWidth);
+																		viewHeight = DWORD(tk * viewHeight);
+																	}
+
+																	DWORD pitch = viewWidth * 3;
+																	if (pitch & 3)
+																		pitch = (pitch & 0xFFFFFFFC) + 4;
+
+																	DWORD dataSize = pitch * viewHeight;
 																	HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + dataSize);
 																	{
 																		VOID* data = GlobalLock(hMemory);
 																		{
 																			BITMAPINFOHEADER* bmiHeader = (BITMAPINFOHEADER*)data;
-																			MemoryZero(bmiHeader, sizeof(BITMAPINFOHEADER));
 																			bmiHeader->biSize = sizeof(BITMAPINFOHEADER);
-																			bmiHeader->biWidth = LOWORD(viewSize);
-																			bmiHeader->biHeight = HIWORD(viewSize);
+																			bmiHeader->biWidth = viewWidth;
+																			bmiHeader->biHeight = viewHeight;
 																			bmiHeader->biPlanes = 1;
-																			bmiHeader->biXPelsPerMeter = 1;
-																			bmiHeader->biYPelsPerMeter = 1;
 																			bmiHeader->biBitCount = 24;
 																			bmiHeader->biCompression = BI_RGB;
+																			bmiHeader->biSizeImage = dataSize;
+																			bmiHeader->biXPelsPerMeter = 1;
+																			bmiHeader->biYPelsPerMeter = 1;
+																			bmiHeader->biClrUsed = 0;
+																			bmiHeader->biClrImportant = 0;
 
 																			VOID* pixels = (BYTE*)data + sizeof(BITMAPINFOHEADER);
-																			GLGetTexImage(GL_TEXTURE_2D, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixels);
+
+																			if (!isZoomed)
+																				GLGetTexImage(GL_TEXTURE_2D, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixels);
+																			else
+																			{
+																				DWORD bufferPitch = LOWORD(viewSize) * 3;
+																				if (bufferPitch & 3)
+																					bufferPitch = (bufferPitch & 0xFFFFFFFC) + 4;
+
+																				DWORD bufferSize = bufferPitch * HIWORD(viewSize);
+																				VOID* buffer = MemoryAlloc(bufferSize);
+																				{
+																					GLGetTexImage(GL_TEXTURE_2D, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
+
+																					BYTE* srcData = (BYTE*)buffer;
+																					BYTE* dstData = (BYTE*)pixels;
+
+																					do
+																					{
+																						MemoryCopy(dstData, srcData, pitch);
+
+																						srcData += bufferPitch;
+																						dstData += pitch;
+																					} while (--viewHeight);
+																				}
+																				MemoryFree(buffer);
+																			}
 																		}
 																		GlobalUnlock(hMemory);
-
 																		SetClipboardData(CF_DIB, hMemory);
 																	}
 																	GlobalFree(hMemory);
@@ -1560,74 +1293,16 @@ VOID OpenDraw::RenderNew()
 														}
 														UseShaderProgram(filterProgram, texSize);
 													}
-													else
-													{
-														if (isTakeSnapshot)
-														{
-															this->isTakeSnapshot = FALSE;
+													else if (this->isTakeSnapshot)
+														this->TakeSnapshot(currentBuffer, frameWidth, frameHeight);
 
-															if (OpenClipboard(NULL))
-															{
-																EmptyClipboard();
-
-																DWORD dataSize = this->mode.width * this->mode.height * (this->mode.bpp != 16 || config.bpp32Hooked ? 3 : 2);
-																HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, sizeof(BITMAPV5HEADER) + dataSize);
-																{
-																	VOID* data = GlobalLock(hMemory);
-																	{
-																		BITMAPV5HEADER* bmi = (BITMAPV5HEADER*)data;
-																		MemoryZero(bmi, sizeof(BITMAPV5HEADER));
-																		bmi->bV5Size = sizeof(BITMAPV5HEADER);
-																		bmi->bV5Width = this->mode.width;
-																		bmi->bV5Height = -*(LONG*)&this->mode.height;
-																		bmi->bV5Planes = 1;
-																		bmi->bV5XPelsPerMeter = 1;
-																		bmi->bV5YPelsPerMeter = 1;
-
-																		if (this->mode.bpp != 16 || config.bpp32Hooked)
-																		{
-																			bmi->bV5BitCount = 24;
-																			bmi->bV5Compression = BI_RGB;
-
-																			DWORD* src = (DWORD*)currentBuffer;
-																			BYTE* dst = (BYTE*)data + sizeof(BITMAPV5HEADER);
-
-																			DWORD count = this->mode.width * this->mode.height;
-																			do
-																			{
-																				*dst++ = LOBYTE(*src >> 16);
-																				*dst++ = LOBYTE(*src >> 8);
-																				*dst++ = LOBYTE(*src);
-
-																				++src;
-																			} while (--count);
-																		}
-																		else
-																		{
-																			bmi->bV5BitCount = 16;
-																			bmi->bV5Compression = BI_BITFIELDS;
-																			bmi->bV5RedMask = 0xF800;
-																			bmi->bV5GreenMask = 0x07E0;
-																			bmi->bV5BlueMask = 0x001F;
-
-																			MemoryCopy((BYTE*)data + sizeof(BITMAPV5HEADER), currentBuffer, dataSize);
-																		}
-																	}
-																	GlobalUnlock(hMemory);
-
-																	SetClipboardData(CF_DIBV5, hMemory);
-																}
-																GlobalFree(hMemory);
-
-																CloseClipboard();
-															}
-														}
-													}
-
-													// Swap
 													SwapBuffers(this->hDc);
-													if (isVSync)
-														GLFinish();
+													GLFinish();
+
+													if (fpsState != FpsBenchmark || !config.version)
+														WaitForSingleObject(this->hDrawEvent, INFINITE);
+													else
+														Sleep(0);
 												}
 											}
 										}
@@ -1644,7 +1319,7 @@ VOID OpenDraw::RenderNew()
 							}
 							GLDeleteFramebuffers(1, &fboId);
 						}
-						GLDeleteTextures(1, &textureId);
+						GLDeleteTextures(2, textureId);
 					}
 					GLBindBuffer(GL_ARRAY_BUFFER, NULL);
 				}
@@ -1683,39 +1358,45 @@ VOID OpenDraw::RenderStart()
 	RECT rect;
 	GetClientRect(this->hWnd, &rect);
 
-	if (!config.windowedMode)
-	{
-		this->hDraw = CreateWindowEx(
-			WS_EX_CONTROLPARENT | WS_EX_TOPMOST,
-			WC_DRAW,
-			NULL,
-			WS_VISIBLE | WS_POPUP,
-			rect.left, rect.top,
-			rect.right - rect.left, rect.bottom - rect.top,
-			this->hWnd,
-			NULL,
-			hDllModule,
-			NULL);
-	}
+	if (config.singleWindow)
+		this->hDraw = this->hWnd;
 	else
 	{
-		this->hDraw = CreateWindowEx(
-			WS_EX_CONTROLPARENT,
-			WC_DRAW,
-			NULL,
-			WS_VISIBLE | WS_CHILD,
-			rect.left, rect.top,
-			rect.right - rect.left, rect.bottom - rect.top,
-			this->hWnd,
-			NULL,
-			hDllModule,
-			NULL);
+		if (!config.windowedMode)
+		{
+			this->hDraw = CreateWindowEx(
+				WS_EX_CONTROLPARENT | WS_EX_TOPMOST,
+				WC_DRAW,
+				NULL,
+				WS_VISIBLE | WS_POPUP,
+				rect.left, rect.top,
+				rect.right - rect.left, rect.bottom - rect.top,
+				this->hWnd,
+				NULL,
+				hDllModule,
+				NULL);
+		}
+		else
+		{
+			this->hDraw = CreateWindowEx(
+				WS_EX_CONTROLPARENT,
+				WC_DRAW,
+				NULL,
+				WS_VISIBLE | WS_CHILD,
+				rect.left, rect.top,
+				rect.right - rect.left, rect.bottom - rect.top,
+				this->hWnd,
+				NULL,
+				hDllModule,
+				NULL);
+		}
+
+		Window::SetCapturePanel(this->hDraw);
+
+		SetClassLongPtr(this->hDraw, GCLP_HBRBACKGROUND, NULL);
+		RedrawWindow(this->hDraw, NULL, NULL, RDW_INVALIDATE);
 	}
 
-	Window::SetCapturePanel(this->hDraw);
-
-	SetClassLongPtr(this->hDraw, GCLP_HBRBACKGROUND, NULL);
-	RedrawWindow(this->hDraw, NULL, NULL, RDW_INVALIDATE);
 	SetClassLongPtr(this->hWnd, GCLP_HBRBACKGROUND, NULL);
 	RedrawWindow(this->hWnd, NULL, NULL, RDW_INVALIDATE);
 
@@ -1741,12 +1422,16 @@ VOID OpenDraw::RenderStop()
 	CloseHandle(this->hDrawThread);
 	this->hDrawThread = NULL;
 
-	BOOL wasFull = GetWindowLong(this->hDraw, GWL_STYLE) & WS_POPUP;
-	if (DestroyWindow(this->hDraw))
-		this->hDraw = NULL;
+	if (!config.singleWindow)
+	{
+		BOOL wasFull = GetWindowLong(this->hDraw, GWL_STYLE) & WS_POPUP;
 
-	if (wasFull)
-		GL::ResetContext();
+		if (DestroyWindow(this->hDraw))
+			this->hDraw = NULL;
+
+		if (wasFull)
+			GL::ResetContext();
+	}
 
 	ClipCursor(NULL);
 
@@ -1754,7 +1439,7 @@ VOID OpenDraw::RenderStop()
 	Window::CheckMenu(this->hWnd);
 }
 
-BOOL OpenDraw::CheckView()
+BOOL OpenDraw::CheckView(BOOL isDouble)
 {
 	if (this->viewport.refresh)
 	{
@@ -1762,21 +1447,21 @@ BOOL OpenDraw::CheckView()
 		this->viewport.rectangle.width = this->viewport.width;
 		this->viewport.rectangle.height = this->viewport.height;
 
-		this->viewport.clipFactor.x = this->viewport.viewFactor.x = (FLOAT)this->viewport.width / this->mode.width;
-		this->viewport.clipFactor.y = this->viewport.viewFactor.y = (FLOAT)this->viewport.height / this->mode.height;
+		this->viewport.clipFactor.x = this->viewport.viewFactor.x = (FLOAT)this->viewport.width / config.mode->width;
+		this->viewport.clipFactor.y = this->viewport.viewFactor.y = (FLOAT)this->viewport.height / config.mode->height;
 
 		if (config.image.aspect && this->viewport.viewFactor.x != this->viewport.viewFactor.y)
 		{
 			if (this->viewport.viewFactor.x > this->viewport.viewFactor.y)
 			{
-				FLOAT fw = this->viewport.viewFactor.y * this->mode.width;
+				FLOAT fw = this->viewport.viewFactor.y * config.mode->width;
 				this->viewport.rectangle.width = (INT)MathRound(fw);
 				this->viewport.rectangle.x = (INT)MathRound(((FLOAT)this->viewport.width - fw) / 2.0f);
 				this->viewport.clipFactor.x = this->viewport.viewFactor.y;
 			}
 			else
 			{
-				FLOAT fh = this->viewport.viewFactor.x * this->mode.height;
+				FLOAT fh = this->viewport.viewFactor.x * config.mode->height;
 				this->viewport.rectangle.height = (INT)MathRound(fh);
 				this->viewport.rectangle.y = (INT)MathRound(((FLOAT)this->viewport.height - fh) / 2.0f);
 				this->viewport.clipFactor.y = this->viewport.viewFactor.x;
@@ -1804,7 +1489,7 @@ BOOL OpenDraw::CheckView()
 		this->clearStage = 0;
 	}
 
-	if (++this->clearStage <= 2)
+	if (this->clearStage++ <= *(DWORD*)&isDouble)
 		GLClear(GL_COLOR_BUFFER_BIT);
 
 	if (this->viewport.refresh)
@@ -1818,8 +1503,35 @@ BOOL OpenDraw::CheckView()
 
 VOID OpenDraw::ScaleMouse(LPPOINT p)
 {
-	p->x = (LONG)((FLOAT)((p->x - this->viewport.rectangle.x) * this->mode.width) / this->viewport.rectangle.width);
-	p->y = (LONG)((FLOAT)((p->y - this->viewport.rectangle.y) * this->mode.height) / this->viewport.rectangle.height);
+	if (!config.zoomImage || !config.isBorder)
+	{
+		p->x = LONG((FLOAT)((p->x - this->viewport.rectangle.x) * config.mode->width) / this->viewport.rectangle.width);
+		p->y = LONG((FLOAT)((p->y - this->viewport.rectangle.y) * config.mode->height) / this->viewport.rectangle.height);
+	}
+	else
+	{
+		LONG x, y;
+		FLOAT k = (FLOAT)config.mode->width / config.mode->height;
+		if (k >= 4.0f / 3.0f)
+		{
+			y = GAME_HEIGHT;
+			x = LONG(k * y);
+
+			k = GAME_HEIGHT_FLOAT / config.mode->height;
+		}
+		else
+		{
+			k = (FLOAT)config.mode->height / config.mode->width;
+
+			x = GAME_WIDTH;
+			y = LONG(k * x);
+
+			k = GAME_WIDTH_FLOAT / config.mode->width;
+		}
+
+		p->x = LONG((FLOAT)((p->x - this->viewport.rectangle.x) * config.mode->width) / this->viewport.rectangle.width * k) + ((config.mode->width - x) >> 1);
+		p->y = LONG((FLOAT)((p->y - this->viewport.rectangle.y) * config.mode->height) / this->viewport.rectangle.height * k) + ((config.mode->height - y) >> 1);
+	}
 }
 
 OpenDraw::OpenDraw(IDrawUnknown** list)
@@ -1838,8 +1550,6 @@ OpenDraw::OpenDraw(IDrawUnknown** list)
 	this->hWnd = NULL;
 	this->hDraw = NULL;
 	this->hDc = NULL;
-
-	this->mode = *config.mode;
 
 	this->isTakeSnapshot = FALSE;
 	this->isFinish = TRUE;
@@ -1933,9 +1643,9 @@ HRESULT __stdcall OpenDraw::SetCooperativeLevel(HWND hWnd, DWORD dwFlags)
 
 HRESULT __stdcall OpenDraw::SetDisplayMode(DWORD dwWidth, DWORD dwHeight, DWORD dwBPP, DWORD dwRefreshRate, DWORD dwFlags)
 {
-	this->mode.width = dwWidth;
-	this->mode.height = dwHeight;
-	this->mode.bpp = dwBPP;
+	config.mode->width = dwWidth;
+	config.mode->height = dwHeight;
+	config.mode->bpp = dwBPP;
 
 	this->SetFullscreenMode();
 	this->RenderStart();
@@ -1962,22 +1672,22 @@ HRESULT __stdcall OpenDraw::CreateSurface(LPDDSURFACEDESC2 lpDDSurfaceDesc, IDra
 
 	if (lpDDSurfaceDesc->dwFlags == (DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS))
 	{
-		surface = new OpenDrawSurface((IDrawUnknown**)&this->surfaceEntries, this, &lpDDSurfaceDesc->ddsCaps);
+		surface = new OpenDrawSurface((IDrawUnknown**)&this->surfaceEntries, this, SurfaceSecondary);
 		surface->AddRef();
-		surface->CreateBuffer(lpDDSurfaceDesc->dwWidth, lpDDSurfaceDesc->dwHeight, this->mode.bpp, buffer);
+		surface->CreateBuffer(lpDDSurfaceDesc->dwWidth, lpDDSurfaceDesc->dwHeight, config.mode->bpp, buffer);
 		this->attachedSurface->attachedSurface = surface;
 	}
 	else
 	{
-		surface = new OpenDrawSurface((IDrawUnknown**)&this->surfaceEntries, this, &lpDDSurfaceDesc->ddsCaps);
+		surface = new OpenDrawSurface((IDrawUnknown**)&this->surfaceEntries, this, (lpDDSurfaceDesc->ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE) ? SurfacePrimary : SurfaceOther);
 
-		if (lpDDSurfaceDesc->ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE)
+		if (surface->type == SurfacePrimary)
 			this->attachedSurface = surface;
 
 		if (lpDDSurfaceDesc->dwFlags & (DDSD_WIDTH | DDSD_HEIGHT))
-			surface->CreateBuffer(lpDDSurfaceDesc->dwWidth, lpDDSurfaceDesc->dwHeight, (lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT) ? lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount : this->mode.bpp, buffer);
+			surface->CreateBuffer(lpDDSurfaceDesc->dwWidth, lpDDSurfaceDesc->dwHeight, (lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT) ? lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount : config.mode->bpp, buffer);
 		else
-			surface->CreateBuffer(this->mode.width, this->mode.height, this->mode.bpp, buffer);
+			surface->CreateBuffer(config.mode->width, config.mode->height, config.mode->bpp, buffer);
 	}
 
 	*lplpDDSurface = surface;
@@ -2017,9 +1727,9 @@ HRESULT __stdcall OpenDraw::EnumDisplayModes(DWORD dwFlags, LPDDSURFACEDESC2 lpD
 
 HRESULT __stdcall OpenDraw::GetDisplayMode(LPDDSURFACEDESC2 lpDDSurfaceDesc)
 {
-	lpDDSurfaceDesc->dwWidth = this->mode.width;
-	lpDDSurfaceDesc->dwHeight = this->mode.height;
-	lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount = this->mode.bpp;
+	lpDDSurfaceDesc->dwWidth = config.mode->width;
+	lpDDSurfaceDesc->dwHeight = config.mode->height;
+	lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount = config.mode->bpp;
 	lpDDSurfaceDesc->ddpfPixelFormat.dwFlags = DDPF_PALETTEINDEXED8;
 	return DD_OK;
 }

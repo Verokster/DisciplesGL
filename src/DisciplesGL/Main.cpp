@@ -64,6 +64,13 @@ namespace Main
 		return NULL;
 	}
 
+	VOID __fastcall ShowError(UINT id, CHAR* file, DWORD line)
+	{
+		CHAR message[256];
+		LoadString(hDllModule, id, message, sizeof(message));
+		ShowError(message, file, line);
+	}
+
 	VOID __fastcall ShowError(CHAR* message, CHAR* file, DWORD line)
 	{
 		CHAR dest[400];
@@ -79,6 +86,25 @@ namespace Main
 			DeactivateActCtxC(0, cookie);
 
 		Exit(EXIT_FAILURE);
+	}
+
+	VOID __fastcall ShowInfo(UINT id)
+	{
+		CHAR message[256];
+		LoadString(hDllModule, id, message, sizeof(message));
+		ShowInfo(message);
+	}
+
+	VOID __fastcall ShowInfo(CHAR* message)
+	{
+		ULONG_PTR cookie = NULL;
+		if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
+			cookie = NULL;
+
+		MessageBox(NULL, message, "Information", MB_OK | MB_ICONASTERISK);
+
+		if (cookie)
+			DeactivateActCtxC(0, cookie);
 	}
 
 #ifdef _DEBUG

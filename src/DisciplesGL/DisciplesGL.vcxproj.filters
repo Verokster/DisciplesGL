@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
@@ -51,6 +51,9 @@
     </ClCompile>
     <ClCompile Include="IDrawUnknown.cpp">
       <Filter>Source Files\Draw\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="PngLib.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +110,9 @@
     </ClInclude>
     <ClInclude Include="IDrawUnknown.h">
       <Filter>Header Files\Draw\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="PngLib.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

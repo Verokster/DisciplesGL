@@ -30,13 +30,79 @@ ConfigItems config;
 
 DisplayMode modesList[] = {
 	640, 480, 8,
-	800, 600, 16,
+	GAME_WIDTH, GAME_HEIGHT, 16,
 	1024, 768, 16,
 	1280, 1024, 16
 };
 
+const Resolution resolutionsList[] = {
+	640, 480,
+	GAME_WIDTH, GAME_HEIGHT,
+	1024, 600,
+	1024, 768,
+	1152, 864,
+	1280, 720,
+	1280, 768,
+	1280, 800,
+	1280, 960,
+	1280, 1024,
+	1360, 768,
+	1366, 768,
+	1400, 1050,
+	1440, 900,
+	1440, 1080,
+	1536, 864,
+	1600, 900,
+	1600, 1200,
+	1680, 1050,
+	1920, 1080,
+	1920, 1200,
+	1920, 1440,
+	2048, 1536,
+	2560, 1440,
+	2560, 1600,
+	3840, 2160,
+	7680, 4320
+};
+
+const BYTE speedList[] = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 };
+
 namespace Config
 {
+	BOOL __fastcall GetMenuByChildID(HMENU hParent, INT index, MenuItemData* mData)
+	{
+		HMENU hMenu = GetSubMenu(hParent, index);
+
+		INT count = GetMenuItemCount(hMenu);
+		for (INT i = 0; i < count; ++i)
+		{
+			UINT id = GetMenuItemID(hMenu, i);
+			if (id == mData->childId)
+			{
+				mData->hParent = hParent;
+				mData->index = index;
+
+				return TRUE;
+			}
+			else if (GetMenuByChildID(hMenu, i, mData))
+				return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	BOOL __fastcall GetMenuByChildID(HMENU hMenu, MenuItemData* mData)
+	{
+		INT count = GetMenuItemCount(hMenu);
+		for (INT i = 0; i < count; ++i)
+		{
+			if (GetMenuByChildID(hMenu, i, mData))
+				return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	BOOL __fastcall Load()
 	{
 		HMODULE hModule = GetModuleHandle(NULL);
@@ -70,18 +136,28 @@ namespace Config
 
 		if (!config.isExist)
 		{
+			config.windowedMode = TRUE;
+
 			if (config.version)
 			{
 				Config::Set(CONFIG_DISCIPLE, "DDraw", TRUE);
-				Config::Set(CONFIG_DISCIPLE, "InWindow", TRUE);
+				Config::Set(CONFIG_DISCIPLE, "InWindow", config.windowedMode);
 			}
 			else
 			{
 				Config::Set(CONFIG_DISCIPLE, "UseD3D", FALSE);
-				Config::Set(CONFIG_DISCIPLE, "DisplayMode", TRUE);
+				Config::Set(CONFIG_DISCIPLE, "DisplayMode", config.windowedMode);
 			}
 
-			config.windowedMode = TRUE;
+			if (!config.version)
+			{
+				config.hd = 1;
+				Config::Set(CONFIG_WRAPPER, "HD", config.hd);
+			}
+
+			INT speed = Config::Get(CONFIG_SETTINGS, "ScrollSpeed", 0);
+			if (speed < 16)
+				Config::Set(CONFIG_SETTINGS, "ScrollSpeed", 16);
 
 			config.image.aspect = TRUE;
 			Config::Set(CONFIG_WRAPPER, "ImageAspect", config.image.aspect);
@@ -112,6 +188,12 @@ namespace Config
 			config.image.xBRz.type = 0;
 			Config::Set(CONFIG_WRAPPER, "ImageXBRZ", *(INT*)&config.image.xBRz);
 
+			if (!config.version)
+			{
+				config.showBackBorder = TRUE;
+				Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.showBackBorder);
+			}
+
 			config.keys.fpsCounter = 2;
 			Config::Set(CONFIG_KEYS, "FpsCounter", config.keys.fpsCounter);
 
@@ -121,11 +203,29 @@ namespace Config
 			config.keys.windowedMode = 4;
 			Config::Set(CONFIG_KEYS, "WindowedMode", config.keys.windowedMode);
 
-			config.keys.aspectRatio = 5;
+			config.keys.aspectRatio = 0;
 			Config::Set(CONFIG_KEYS, "AspectRatio", config.keys.aspectRatio);
 
 			config.keys.vSync = 0;
 			Config::Set(CONFIG_KEYS, "VSync", "");
+
+			if (!config.version)
+			{
+				config.keys.showBorders = 0;
+				Config::Set(CONFIG_KEYS, "ShowBorders", "");
+
+				config.keys.zoomImage = 0;
+				Config::Set(CONFIG_KEYS, "ZoomImage", "");
+			}
+
+			config.keys.speedToggle = 5;
+			Config::Set(CONFIG_KEYS, "SpeedToggle", config.keys.speedToggle);
+
+			config.speed.index = 5;
+			config.speed.value = 0.1f * speedList[config.speed.index];
+			config.speed.enabled = FALSE;
+			Config::Set(CONFIG_WRAPPER, "GameSpeed", config.speed.index);
+			Config::Set(CONFIG_WRAPPER, "SpeedEnabled", config.speed.enabled);
 		}
 		else
 		{
@@ -134,6 +234,9 @@ namespace Config
 
 			config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", TRUE);
 
+			if (!config.version)
+				config.hd = Config::Get(CONFIG_WRAPPER, "HD", TRUE);
+			
 			config.image.aspect = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageAspect", TRUE);
 			config.image.vSync = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageVSync", TRUE);
 
@@ -177,6 +280,9 @@ namespace Config
 			if (config.image.xBRz.type & 0xFE)
 				config.image.xBRz.type = 0;
 
+			if (!config.version)
+				config.showBackBorder = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+
 			// F1 - reserved for "About"
 			CHAR buffer[20];
 			if (Config::Get(CONFIG_KEYS, "FpsCounter", "", buffer, sizeof(buffer)))
@@ -218,9 +324,44 @@ namespace Config
 				if (config.keys.vSync > 1 && config.keys.vSync > 24)
 					config.keys.vSync = 0;
 			}
+
+			if (!config.version)
+			{
+				if (Config::Get(CONFIG_KEYS, "ShowBorders", "", buffer, sizeof(buffer)))
+				{
+					value = Config::Get(CONFIG_KEYS, "ShowBorders", 0);
+					config.keys.showBorders = LOBYTE(value);
+					if (config.keys.showBorders > 1 && config.keys.showBorders > 24)
+						config.keys.showBorders = 0;
+				}
+
+				if (Config::Get(CONFIG_KEYS, "ZoomImage", "", buffer, sizeof(buffer)))
+				{
+					value = Config::Get(CONFIG_KEYS, "ZoomImage", 0);
+					config.keys.zoomImage = LOBYTE(value);
+					if (config.keys.zoomImage > 1 && config.keys.zoomImage > 24)
+						config.keys.zoomImage = 0;
+				}
+			}
+
+			if (Config::Get(CONFIG_KEYS, "SpeedToggle", "", buffer, sizeof(buffer)))
+			{
+				value = Config::Get(CONFIG_KEYS, "SpeedToggle", 0);
+				config.keys.speedToggle = LOBYTE(value);
+				if (config.keys.speedToggle > 1 && config.keys.speedToggle > 24)
+					config.keys.speedToggle = 0;
+			}
+
+			value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
+			config.speed.index = *(DWORD*)&value;
+			if (config.speed.index >= sizeof(speedList) / sizeof(BYTE))
+				config.speed.index = 5;
+			config.speed.value = 0.1f * speedList[config.speed.index];
+
+			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", FALSE);
 		}
 
-		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(IDR_MENU));
+		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));
 		config.font = (HFONT)CreateFont(16, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET,
 			OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
 			DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
@@ -235,6 +376,20 @@ namespace Config
 			config.mode = &modesList[modeIdx + 1];
 		}
 
+		config.resolution.width = LOWORD(config.mode->width);
+		config.resolution.height = LOWORD(config.mode->height);
+
+		HMODULE hLibrary = LoadLibrary("NTDLL.dll");
+		if (hLibrary)
+		{
+			if (GetProcAddress(hLibrary, "wine_get_version"))
+				config.singleWindow = TRUE;
+			FreeLibrary(hLibrary);
+		}
+
+		if (!config.singleWindow)
+			config.singleWindow = Config::Get(CONFIG_WRAPPER, "SingleWindow", FALSE);
+
 		CHAR buffer[256];
 		MENUITEMINFO info;
 		MemoryZero(&info, sizeof(MENUITEMINFO));
@@ -243,25 +398,55 @@ namespace Config
 		info.fType = MFT_STRING;
 		info.dwTypeData = buffer;
 
-		info.cch = sizeof(buffer);
-		if (config.keys.windowedMode && GetMenuItemInfo(config.menu, IDM_RES_FULL_SCREEN, FALSE, &info))
+		if (config.keys.windowedMode && (info.cch = sizeof(buffer), GetMenuItemInfo(config.menu, IDM_RES_FULL_SCREEN, FALSE, &info)))
 		{
 			StrPrint(buffer, "%sF%d", buffer, config.keys.windowedMode);
 			SetMenuItemInfo(config.menu, IDM_RES_FULL_SCREEN, FALSE, &info);
 		}
 
-		info.cch = sizeof(buffer);
-		if (config.keys.aspectRatio && GetMenuItemInfo(config.menu, IDM_ASPECT_RATIO, FALSE, &info))
+		if (config.keys.aspectRatio && (info.cch = sizeof(buffer), GetMenuItemInfo(config.menu, IDM_ASPECT_RATIO, FALSE, &info)))
 		{
 			StrPrint(buffer, "%sF%d", buffer, config.keys.aspectRatio);
 			SetMenuItemInfo(config.menu, IDM_ASPECT_RATIO, FALSE, &info);
 		}
 
-		info.cch = sizeof(buffer);
-		if (config.keys.vSync && GetMenuItemInfo(config.menu, IDM_VSYNC, FALSE, &info))
+		if (config.keys.vSync && (info.cch = sizeof(buffer), GetMenuItemInfo(config.menu, IDM_VSYNC, FALSE, &info)))
 		{
 			StrPrint(buffer, "%sF%d", buffer, config.keys.vSync);
 			SetMenuItemInfo(config.menu, IDM_VSYNC, FALSE, &info);
+		}
+
+		if (config.keys.showBorders && (info.cch = sizeof(buffer), GetMenuItemInfo(config.menu, IDM_RES_BORDERS, FALSE, &info)))
+		{
+			StrPrint(buffer, "%sF%d", buffer, config.keys.showBorders);
+			SetMenuItemInfo(config.menu, IDM_RES_BORDERS, FALSE, &info);
+		}
+
+		if (config.keys.zoomImage && (info.cch = sizeof(buffer), GetMenuItemInfo(config.menu, IDM_RES_STRETCH, FALSE, &info)))
+		{
+			StrPrint(buffer, "%sF%d", buffer, config.keys.zoomImage);
+			SetMenuItemInfo(config.menu, IDM_RES_STRETCH, FALSE, &info);
+		}
+
+		MenuItemData mData;
+		if (config.keys.imageFilter)
+		{
+			mData.childId = IDM_FILT_OFF;
+			if (GetMenuByChildID(config.menu, &mData) && (info.cch = sizeof(buffer), GetMenuItemInfo(mData.hParent, mData.index, TRUE, &info)))
+			{
+				StrPrint(buffer, "%sF%d", buffer, config.keys.imageFilter);
+				SetMenuItemInfo(mData.hParent, mData.index, TRUE, &info);
+			}
+		}
+
+		if (config.keys.speedToggle)
+		{
+			mData.childId = IDM_SPEED_1_0;
+			if (GetMenuByChildID(config.menu, &mData) && (info.cch = sizeof(buffer), GetMenuItemInfo(mData.hParent, mData.index, TRUE, &info)))
+			{
+				StrPrint(buffer, "%sF%d", buffer, config.keys.speedToggle);
+				SetMenuItemInfo(mData.hParent, mData.index, TRUE, &info);
+			}
 		}
 
 		return TRUE;

@@ -1,8 +1,4 @@
 /*
-	xSal vertex shader
-	based on libretro xSal shader
-	https://github.com/libretro/glsl-shaders/tree/master/xsal/shaders
-
 	MIT License
 
 	Copyright (c) 2019 Oleksiy Ryabchun
@@ -26,16 +22,22 @@
 	SOFTWARE.
 */
 
-precision mediump float;
+#include "stdafx.h"
+#include "PngLib.h"
 
-uniform mat4 mvp;
+PNG_CREATE_READ_STRUCT pnglib_create_read_struct;
+PNG_CREATE_INFO_STRUCT pnglib_create_info_struct;
+PNG_SET_READ_FN pnglib_set_read_fn;
+PNG_DESTROY_READ_STRUCT pnglib_destroy_read_struct;
+PNG_READ_INFO pnglib_read_info;
+PNG_READ_IMAGE pnglib_read_image;
 
-in vec2 vCoord;
-in vec2 vTexCoord;
-
-out vec2 fTexCoord;
-
-void main() {
-	gl_Position = mvp * vec4(vCoord, 0.0, 1.0);
-	fTexCoord = vTexCoord;
+namespace PngLib
+{
+	VOID __cdecl ReadDataFromInputStream(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead)
+	{
+		ResourceStream* lpStream = (ResourceStream*)png_ptr->io_ptr;
+		MemoryCopy(outBytes, (BYTE*)lpStream->data + lpStream->position, byteCountToRead);
+		lpStream->position += byteCountToRead;
+	}
 }

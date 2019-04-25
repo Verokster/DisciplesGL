@@ -24,6 +24,7 @@
 
 #pragma once
 #define WIN32_LEAN_AND_MEAN
+//#define WINVER 0x0400
 
 #include "windows.h"
 #include "mmreg.h"
@@ -45,7 +46,7 @@ extern RELEASEACTCTX ReleaseActCtxC;
 extern ACTIVATEACTCTX ActivateActCtxC;
 extern DEACTIVATEACTCTX DeactivateActCtxC;
 
-extern "C" _CRTIMP int __cdecl sprintf(char *, const char *, ...);
+extern "C" _CRTIMP int __cdecl sprintf(char*, const char*, ...);
 
 #define MemoryAlloc(size) malloc(size)
 #define MemoryFree(block) free(block)
@@ -68,6 +69,12 @@ extern "C" _CRTIMP int __cdecl sprintf(char *, const char *, ...);
 DOUBLE __fastcall MathRound(DOUBLE);
 VOID* __fastcall AlignedAlloc(size_t size);
 VOID __fastcall AlignedFree(VOID* block);
+
+#define GAME_WIDTH 800
+#define GAME_HEIGHT 600
+
+#define GAME_WIDTH_FLOAT 800.0f
+#define GAME_HEIGHT_FLOAT 600.0f
 
 extern HMODULE hDllModule;
 extern HANDLE hActCtx;

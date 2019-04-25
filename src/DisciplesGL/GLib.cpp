@@ -24,6 +24,7 @@
 
 #include "stdafx.h"
 #include "Main.h"
+#include "Resource.h"
 #include "GLib.h"
 
 #define PREFIX_GL "gl"
@@ -35,6 +36,7 @@ WGLCREATECONTEXT WGLCreateContext;
 WGLDELETECONTEXT WGLDeleteContext;
 WGLCREATECONTEXTATTRIBSARB WGLCreateContextAttribs;
 WGLCHOOSEPIXELFORMAT WGLChoosePixelFormat;
+WGLGETEXTENSIONSSTRING WGLGetExtensionsString;
 WGLSWAPINTERVAL WGLSwapInterval;
 
 GLGETSTRING GLGetString;
@@ -70,7 +72,6 @@ GLGENBUFFERS GLGenBuffers;
 GLDELETEBUFFERS GLDeleteBuffers;
 GLBINDBUFFER GLBindBuffer;
 GLBUFFERDATA GLBufferData;
-GLBUFFERSUBDATA GLBufferSubData;
 GLDRAWARRAYS GLDrawArrays;
 
 GLENABLEVERTEXATTRIBARRAY GLEnableVertexAttribArray;
@@ -187,9 +188,9 @@ namespace GL
 		{
 			DWORD errorCode = GetLastError();
 			if (errorCode == ERROR_INVALID_VERSION_ARB)
-				Main::ShowError("Invalid ARB version", __FILE__, __LINE__);
+				Main::ShowError(IDS_ERROR_ARB_VERSION, __FILE__, __LINE__);
 			else if (errorCode == ERROR_INVALID_PROFILE_ARB)
-				Main::ShowError("Invalid ARB profile", __FILE__, __LINE__);
+				Main::ShowError(IDS_ERROR_ARB_PROFILE, __FILE__, __LINE__);
 		}
 
 		return FALSE;
@@ -206,7 +207,13 @@ namespace GL
 				GetContext(hDc, hRc, 1, 4, TRUE);
 		}
 
-		LoadFunction(buffer, "wgl", "SwapInterval", (PROC*)&WGLSwapInterval, "EXT");
+		LoadFunction(buffer, PREFIX_WGL, "GetExtensionsString", (PROC*)&WGLGetExtensionsString, "EXT");
+		if (WGLGetExtensionsString)
+		{
+			CHAR* extensions = (CHAR*)WGLGetExtensionsString();
+			if (StrStr(extensions, "WGL_EXT_swap_control"))
+				LoadFunction(buffer, PREFIX_WGL, "SwapInterval", (PROC*)&WGLSwapInterval, "EXT");
+		}
 
 		LoadFunction(buffer, PREFIX_GL, "GetString", (PROC*)&GLGetString);
 		LoadFunction(buffer, PREFIX_GL, "TexCoord2f", (PROC*)&GLTexCoord2f);
@@ -241,7 +248,6 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "DeleteBuffers", (PROC*)&GLDeleteBuffers);
 		LoadFunction(buffer, PREFIX_GL, "BindBuffer", (PROC*)&GLBindBuffer);
 		LoadFunction(buffer, PREFIX_GL, "BufferData", (PROC*)&GLBufferData);
-		LoadFunction(buffer, PREFIX_GL, "BufferSubData", (PROC*)&GLBufferSubData);
 		LoadFunction(buffer, PREFIX_GL, "DrawArrays", (PROC*)&GLDrawArrays);
 
 		LoadFunction(buffer, PREFIX_GL, "EnableVertexAttribArray", (PROC*)&GLEnableVertexAttribArray);
@@ -431,41 +437,20 @@ namespace GL
 		return res;
 	}
 
-	VOID __fastcall SetPixelFormat(HDC hDc)
-	{
-		PIXELFORMATDESCRIPTOR pfd;
-		INT glPixelFormat = GL::PreparePixelFormat(&pfd);
-		if (!glPixelFormat)
-		{
-			glPixelFormat = ::ChoosePixelFormat(hDc, &pfd);
-			if (!glPixelFormat)
-				Main::ShowError("ChoosePixelFormat failed", __FILE__, __LINE__);
-		}
-
-		if (!::SetPixelFormat(hDc, glPixelFormat, &pfd))
-			Main::ShowError("SetPixelFormat failed", __FILE__, __LINE__);
-
-		GL::ResetPixelFormatDescription(&pfd);
-		if (!::DescribePixelFormat(hDc, glPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd))
-			Main::ShowError("DescribePixelFormat failed", __FILE__, __LINE__);
-
-		if (pfd.iPixelType != PFD_TYPE_RGBA || pfd.cRedBits < 5 || pfd.cGreenBits < 5 || pfd.cBlueBits < 5)
-			Main::ShowError("Bad pixel type", __FILE__, __LINE__);
-	}
-
 	GLuint __fastcall CompileShaderSource(DWORD name, const CHAR* version, GLenum type)
 	{
+		HGLOBAL hResourceData;
+		LPVOID pData = NULL;
 		HRSRC hResource = FindResource(hDllModule, MAKEINTRESOURCE(name), RT_RCDATA);
-		if (!hResource)
-			Main::ShowError("FindResource failed", __FILE__, __LINE__);
+		if (hResource)
+		{
+			hResourceData = LoadResource(hDllModule, hResource);
+			if (hResourceData)
+				pData = LockResource(hResourceData);
+		}
 
-		HGLOBAL hResourceData = LoadResource(hDllModule, hResource);
-		if (!hResourceData)
-			Main::ShowError("LoadResource failed", __FILE__, __LINE__);
-
-		LPVOID pData = LockResource(hResourceData);
 		if (!pData)
-			Main::ShowError("LockResource failed", __FILE__, __LINE__);
+			Main::ShowError(IDS_ERROR_LOAD_RESOURCE, __FILE__, __LINE__);
 
 		GLuint shader = GLCreateShader(type);
 
@@ -491,10 +476,10 @@ namespace GL
 			GLGetShaderiv(shader, GL_INFO_LOG_LENGTH, &result);
 
 			if (!result)
-				Main::ShowError("Compile shader failed", __FILE__, __LINE__);
+				Main::ShowError(IDS_ERROR_COMPILE_SHADER, __FILE__, __LINE__);
 			else
 			{
-				CHAR data[512];
+				CHAR data[1024];
 				GLGetShaderInfoLog(shader, sizeof(data), &result, data);
 				Main::ShowError(data, __FILE__, __LINE__);
 			}

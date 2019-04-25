@@ -33,7 +33,6 @@ class OpenDraw;
 class OpenDrawSurface : public IDrawSurface7
 {
 private:
-	DDSCAPS2 caps;
 	BOOL isCreated;
 	DDCOLORKEY colorKey;
 	BOOL drawEnabled;
@@ -50,8 +49,11 @@ public:
 	VOID* secondaryBuffer;
 	BOOL bufferIndex;
 	DWORD drawIndex;
+	BOOL isZoomed[2];
 
-	OpenDrawSurface(IDrawUnknown**, OpenDraw*, LPDDSCAPS2);
+	SurfaceType type;
+
+	OpenDrawSurface(IDrawUnknown**, OpenDraw*, SurfaceType);
 	~OpenDrawSurface();
 
 	VOID CreateBuffer(DWORD, DWORD, DWORD, VOID*);

@@ -29,34 +29,40 @@
 precision mediump float;
 
 uniform sampler2D tex01;
+uniform sampler2D tex02;
 uniform vec2 texSize;
 
-in vec4 t1;
-in vec4 t2;
-in vec4 t3;
 in vec2 fTexCoord;
 
 out vec4 fragColor;
 
-bool eq(vec3 A, vec3 B){
+bool eq(vec3 A, vec3 B) {
 	return (A==B);
 }
 
-bool neq(vec3 A, vec3 B){
+bool neq(vec3 A, vec3 B) {
 	return (A!=B);
 }
 
-void main()
-{
-	vec3 A = texture(tex01, t1.xw).xyz;
-	vec3 B = texture(tex01, t1.yw).xyz;
-	vec3 C = texture(tex01, t1.zw).xyz;
-	vec3 D = texture(tex01, t2.xw).xyz;
-	vec3 E = texture(tex01, t2.yw).xyz;
-	vec3 F = texture(tex01, t2.zw).xyz;
-	vec3 G = texture(tex01, t3.xw).xyz;
-	vec3 H = texture(tex01, t3.yw).xyz;
-	vec3 I = texture(tex01, t3.zw).xyz;
+void main() {
+	if (texture(tex01, fTexCoord) == texture(tex02, fTexCoord))
+		discard;
+
+	vec2 texel = floor(fTexCoord * texSize) + 0.5;
+
+	#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize).rgb
+
+	vec3 A = TEX(-1.0, -1.0);
+	vec3 B = TEX( 0.0, -1.0);
+	vec3 C = TEX( 1.0, -1.0);
+
+	vec3 D = TEX(-1.0,  0.0);
+	vec3 E = TEX( 0.0,  0.0);
+	vec3 F = TEX( 1.0,  0.0);
+
+	vec3 G = TEX(-1.0,  1.0);
+	vec3 H = TEX( 0.0,  1.0);
+	vec3 I = TEX( 1.0,  1.0);
 
 	bool eqBD = eq(B,D), eqBF = eq(B,F), eqHD = eq(H,D), eqHF = eq(H,F), neqEA = neq(E,A), neqEC = neq(E,C), neqEG = neq(E,G), neqEI = neq(E,I); 
 

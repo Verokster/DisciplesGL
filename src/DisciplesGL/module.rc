@@ -15,26 +15,78 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Manifest
 //
 
-IDM_MANIFEST            RT_MANIFEST             "module.manifest"
+IDM_MANIFEST				RT_MANIFEST				"module.manifest"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE
+BEGIN
+	IDS_ERROR_CHOOSE_PF				"ChoosePixelFormat failed"
+	IDS_ERROR_SET_PF				"SetPixelFormat failed"
+	IDS_ERROR_DESCRIBE_PF			"DescribePixelFormat failed"
+	IDS_ERROR_NEED_PALETTE			"Needs palette"
+	IDS_ERROR_BAD_PF				"Bad pixel type"
+	IDS_ERROR_ARB_VERSION			"Invalid ARB version"
+	IDS_ERROR_ARB_PROFILE			"Invalid ARB profile"
+	IDS_ERROR_LOAD_RESOURCE			"Load resource failed"
+	IDS_ERROR_COMPILE_SHADER		"Compile shader failed"
+	IDS_INFO_RESTART				"In order for the changes to take effect, please restart the game"
+END
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_MENU MENU
+IDR_MENU MENU DISCARDABLE
 BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Quit",							IDM_FILE_QUIT
-    END
-    POPUP "&Display"
-    BEGIN
-        MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
-        POPUP "&Filtering\a"
-        BEGIN
-            MENUITEM "&Off",						IDM_FILT_OFF
-            MENUITEM "Bi&linear",					IDM_FILT_LINEAR
+	POPUP "&File"
+	BEGIN
+		MENUITEM "&Quit",							IDM_FILE_QUIT
+	END
+	POPUP "&Display"
+	BEGIN
+		MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
+		POPUP "&Resolution"
+		BEGIN
+			MENUITEM "640 x 408\a(4x3)",			IDM_RES_640_480
+			MENUITEM "800 x 600\a(4x3)",			IDM_RES_800_600
+			MENUITEM "1024 x 600\a(16x9)",			IDM_RES_1024_600
+			MENUITEM "1024 x 768\a(4x3)",			IDM_RES_1024_768
+			MENUITEM "1152 x 864\a(4x3)",			IDM_RES_1152_864
+			MENUITEM "1280 x 720\a(16x9)",			IDM_RES_1280_720
+			MENUITEM "1280 x 768\a(5x3)",			IDM_RES_1280_768
+			MENUITEM "1280 x 800\a(16x10)",			IDM_RES_1280_800
+			MENUITEM "1280 x 960\a(4x3)",			IDM_RES_1280_960
+			MENUITEM "1280 x 1024\a(5x4)",			IDM_RES_1280_1024
+			MENUITEM "1360 x 768\a(16x9)",			IDM_RES_1360_768
+			MENUITEM "1366 x 768\a(16x9)",			IDM_RES_1366_768
+			MENUITEM "1400 x 1050\a(4x3)",			IDM_RES_1400_1050
+			MENUITEM "1440 x 900\a(16x10)",			IDM_RES_1440_900
+			MENUITEM "1440 x 1080\a(4x3)",			IDM_RES_1440_1080
+			MENUITEM "1536 x 864\a(16x9)",			IDM_RES_1536_864
+			MENUITEM "1600 x 900\a(16x9)",			IDM_RES_1600_900
+			MENUITEM "1600 x 1200\a(4x3)",			IDM_RES_1600_1200
+			MENUITEM "1680 x 1050\a(16x10)",		IDM_RES_1680_1050
+			MENUITEM "1920 x 1080\a(16x9)",			IDM_RES_1920_1080
+			MENUITEM "1920 x 1200\a(16x10)",		IDM_RES_1920_1200
+			MENUITEM "1920 x 1440\a(4x3)",			IDM_RES_1920_1440
+			MENUITEM "2048 x 1536\a(4x3)",			IDM_RES_2048_1536
+			MENUITEM "2560 x 1440\a(16x9)",			IDM_RES_2560_1440
+			MENUITEM "2560 x 1600\a(16x10)",		IDM_RES_2560_1600
+			MENUITEM "3840 x 2160\a(16x9)",			IDM_RES_3840_2160
+			MENUITEM "7680 x 4320\a(16x9)",		    IDM_RES_7680_4320
+			MENUITEM SEPARATOR
+			MENUITEM "&Zoom Image\a",				IDM_RES_STRETCH
+			MENUITEM "Show &Borders\a",             IDM_RES_BORDERS
+		END
+		POPUP "&Filtering\a"
+		BEGIN
+			MENUITEM "&Off",						IDM_FILT_OFF
+			MENUITEM "Bi&linear",					IDM_FILT_LINEAR
 			MENUITEM "Bi&cubic",					IDM_FILT_CUBIC
 			MENUITEM SEPARATOR
 			POPUP "&ScaleNx"
@@ -78,14 +130,147 @@ BEGIN
 				MENUITEM "x5",						IDM_FILT_XRBZ_5X
 				MENUITEM "x6",						IDM_FILT_XRBZ_6X
 			END
-        END
-        MENUITEM "Keep &Aspect Ratio\a",			IDM_ASPECT_RATIO
-        MENUITEM "Enable &VSync\a",					IDM_VSYNC
-    END
-    POPUP "&Help"
-    BEGIN
-		MENUITEM "&About...\a",						IDM_HELP_ABOUT
-    END
+		END
+		MENUITEM "Keep &Aspect Ratio\a",			IDM_ASPECT_RATIO
+		MENUITEM "Enable &VSync\a",					IDM_VSYNC
+	END
+	POPUP "&Options"
+	BEGIN
+		POPUP "Game &Speed\a"
+		BEGIN
+			MENUITEM "1.0x",						IDM_SPEED_1_0
+			MENUITEM "1.1x",						IDM_SPEED_1_1
+			MENUITEM "1.2x",						IDM_SPEED_1_2
+			MENUITEM "1.3x",						IDM_SPEED_1_3
+			MENUITEM "1.4x",						IDM_SPEED_1_4
+			MENUITEM "1.5x",						IDM_SPEED_1_5
+			MENUITEM "1.6x",						IDM_SPEED_1_6
+			MENUITEM "1.7x",						IDM_SPEED_1_7
+			MENUITEM "1.8x",						IDM_SPEED_1_8
+			MENUITEM "1.9x",						IDM_SPEED_1_9
+			MENUITEM "2.0x",						IDM_SPEED_2_0
+			MENUITEM "2.1x",						IDM_SPEED_2_1
+			MENUITEM "2.2x",						IDM_SPEED_2_2
+			MENUITEM "2.3x",						IDM_SPEED_2_3
+			MENUITEM "2.4x",						IDM_SPEED_2_4
+			MENUITEM "2.5x",						IDM_SPEED_2_5
+			MENUITEM "2.6x",						IDM_SPEED_2_6
+			MENUITEM "2.7x",						IDM_SPEED_2_7
+			MENUITEM "2.8x",						IDM_SPEED_2_8
+			MENUITEM "2.9x",						IDM_SPEED_2_9
+			MENUITEM "3.0x",						IDM_SPEED_3_0
+		END
+	END
+	POPUP "&Help"
+	BEGIN
+		MENUITEM "About &Application...\a",			IDM_HELP_ABOUT_APPLICATION
+		MENUITEM "About &Wrapper...\a",				IDM_HELP_ABOUT_WRAPPER
+	END
+END
+
+IDR_MENU_OLD MENU DISCARDABLE
+BEGIN
+	POPUP "&File"
+	BEGIN
+		MENUITEM "&Quit",							IDM_FILE_QUIT
+	END
+	POPUP "&Display"
+	BEGIN
+		MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
+		POPUP "&Resolution"
+		BEGIN
+			MENUITEM "640 x 408\a(4x3)",			IDM_RES_640_480
+			MENUITEM "800 x 600\a(4x3)",			IDM_RES_800_600
+			MENUITEM "1024 x 600\a(16x9)",			IDM_RES_1024_600
+			MENUITEM "1024 x 768\a(4x3)",			IDM_RES_1024_768
+			MENUITEM "1152 x 864\a(4x3)",			IDM_RES_1152_864
+			MENUITEM "1280 x 720\a(16x9)",			IDM_RES_1280_720
+			MENUITEM "1280 x 800\a(16x10)",			IDM_RES_1280_800
+			MENUITEM "1280 x 960\a(4x3)",			IDM_RES_1280_960
+			MENUITEM "1280 x 1024\a(5x4)",			IDM_RES_1280_1024
+			MENUITEM "1366 x 768\a(16x9)",			IDM_RES_1366_768
+			MENUITEM "1400 x 1050\a(4x3)",			IDM_RES_1400_1050
+			MENUITEM "1440 x 900\a(16x10)",			IDM_RES_1440_900
+			MENUITEM "1440 x 1080\a(4x3)",			IDM_RES_1440_1080
+			MENUITEM "1600 x 900\a(16x9)",			IDM_RES_1600_900
+			MENUITEM "1600 x 1200\a(4x3)",			IDM_RES_1600_1200
+			MENUITEM SEPARATOR
+			MENUITEM "&Zoom Image\a",				IDM_RES_STRETCH
+			MENUITEM "Show &Borders\a",             IDM_RES_BORDERS
+		END
+		POPUP "&Filtering\a"
+		BEGIN
+			MENUITEM "&Off",						IDM_FILT_OFF
+			MENUITEM "Bi&linear",					IDM_FILT_LINEAR
+			MENUITEM "Bi&cubic",					IDM_FILT_CUBIC
+			MENUITEM SEPARATOR
+			POPUP "&ScaleNx"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_SCALENX_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_SCALENX_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_SCALENX_2X
+				MENUITEM "x3",						IDM_FILT_SCALENX_3X
+			END
+			POPUP "Super &Eagle"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_EAGLE_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_EAGLE_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_EAGLE_2X
+			END
+			POPUP "2x&SaI"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_XSAL_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_XSAL_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_XSAL_2X
+			END
+			POPUP "Scale&HQ"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_SCALEHQ_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_SCALEHQ_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_SCALEHQ_2X
+				MENUITEM "x4",						IDM_FILT_SCALEHQ_4X
+			END
+			POPUP "&xBRz"
+			BEGIN
+				MENUITEM "+ Bi&linear",				IDM_FILT_XRBZ_LINEAR
+				MENUITEM "+ Bi&cubic",				IDM_FILT_XRBZ_CUBIC
+				MENUITEM SEPARATOR
+				MENUITEM "x2",						IDM_FILT_XRBZ_2X
+				MENUITEM "x3",						IDM_FILT_XRBZ_3X
+				MENUITEM "x4",						IDM_FILT_XRBZ_4X
+				MENUITEM "x5",						IDM_FILT_XRBZ_5X
+				MENUITEM "x6",						IDM_FILT_XRBZ_6X
+			END
+		END
+		MENUITEM "Keep &Aspect Ratio\a",			IDM_ASPECT_RATIO
+		MENUITEM "Enable &VSync\a",					IDM_VSYNC
+	END
+	POPUP "&Options"
+	BEGIN
+		POPUP "Game &Speed\a"
+		BEGIN
+			MENUITEM "1.0x",						IDM_SPEED_1_0
+			MENUITEM "1.1x",						IDM_SPEED_1_1
+			MENUITEM "1.2x",						IDM_SPEED_1_2
+			MENUITEM "1.3x",						IDM_SPEED_1_3
+			MENUITEM "1.4x",						IDM_SPEED_1_4
+			MENUITEM "1.5x",						IDM_SPEED_1_5
+			MENUITEM "1.6x",						IDM_SPEED_1_6
+			MENUITEM "1.7x",						IDM_SPEED_1_7
+			MENUITEM "1.8x",						IDM_SPEED_1_8
+			MENUITEM "1.9x",						IDM_SPEED_1_9
+			MENUITEM "2.0x",						IDM_SPEED_2_0
+		END
+	END
+	POPUP "&Help"
+	BEGIN
+		MENUITEM "About &Application...\a",			IDM_HELP_ABOUT_APPLICATION
+		MENUITEM "About &Wrapper...\a",				IDM_HELP_ABOUT_WRAPPER
+	END
 END
 
 /////////////////////////////////////////////////////////////////////////////
@@ -93,16 +278,39 @@ END
 // Dialog
 //
 
-IDD_ABOUT DIALOGEX 22, 17, 162, 90
+IDD_ABOUT_APPLICATION DIALOGEX DISCARDABLE 22,17,162,74
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
 FONT 8, "System", 0, 0, 0x1
 BEGIN
-    CTEXT           "Disciples I && II\nOpenGL Wrapper",1002,0,6,162,18
-    CTEXT           "Version 1.10   Build 207",IDC_STATIC,0,30,162,8
-    CTEXT           "Copyright © 2019 Verok",1006,0,48,162,8
-	DEFPUSHBUTTON   "OK",IDC_BTN_OK,65,72,32,14,WS_GROUP
-	CONTROL         "verokster@gmail.com",IDC_LNK_EMAIL,"SysLink",WS_TABSTOP,48,57,72,12
-	ICON            "",IDC_STATIC,8,17,20,20
+	CTEXT			"",IDC_TITLE,0,6,162,18
+	CTEXT			"Version %d.%d.%d.%d",IDC_VERSION,0,22,162,8
+	CTEXT			"",IDC_COPYRIGHT,0,38,162,8
+	DEFPUSHBUTTON	"OK",IDC_BTN_OK,65,56,32,14,WS_GROUP
+	ICON			"",IDC_STATIC,8,17,20,20
+END
+
+IDD_ABOUT_WRAPPER DIALOGEX DISCARDABLE 22,17,162,90
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
+FONT 8, "System", 0, 0, 0x1
+BEGIN
+	CTEXT			"Disciples I && II\nOpenGL Wrapper",IDC_STATIC,0,6,162,18
+	CTEXT			"Version %d.%d%d   Build %d",IDC_VERSION,0,30,162,8
+	CTEXT			"Copyright © 2019 Verok",IDC_STATIC,0,48,162,8
+	DEFPUSHBUTTON	"OK",IDC_BTN_OK,65,72,32,14,WS_GROUP
+	CONTROL			"verokster@gmail.com",IDC_LNK_EMAIL,"SysLink",WS_TABSTOP,48,57,72,12
+	ICON			"",IDC_STATIC,8,17,20,20
+END
+
+IDD_ABOUT_WRAPPER_OLD DIALOGEX DISCARDABLE 22,17,162,90
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
+FONT 8, "System", 0, 0, 0x1
+BEGIN
+	CTEXT			"Disciples I && II\nOpenGL Wrapper",IDC_STATIC,0,6,162,18
+	CTEXT			"Version %d.%d%d   Build %d",IDC_VERSION,0,30,162,8
+	CTEXT			"Copyright © 2019 Verok",IDC_STATIC,0,48,162,8
+	DEFPUSHBUTTON	"OK",IDC_BTN_OK,65,72,32,14,WS_GROUP
+	CTEXT			"verokster@gmail.com",IDC_STATIC,48,57,72,12
+	ICON			"",IDC_STATIC,8,17,20,20
 END
 
 /////////////////////////////////////////////////////////////////////////////
@@ -110,34 +318,29 @@ END
 // RCDATA
 //
 
-IDR_LINEAR_VERTEX			RCDATA                  "..\\glsl\\linear\\vertex.glsl"
-IDR_LINEAR_FRAGMENT			RCDATA                  "..\\glsl\\linear\\fragment.glsl"
+IDR_LINEAR_VERTEX			RCDATA		DISCARDABLE			"..\\glsl\\linear\\vertex.glsl"
+IDR_LINEAR_FRAGMENT			RCDATA		DISCARDABLE			"..\\glsl\\linear\\fragment.glsl"
 
-IDR_CUBIC_VERTEX			RCDATA                  "..\\glsl\\cubic\\vertex.glsl"
-IDR_CUBIC_FRAGMENT			RCDATA                  "..\\glsl\\cubic\\fragment.glsl"
+IDR_CUBIC_FRAGMENT			RCDATA		DISCARDABLE			"..\\glsl\\cubic\\fragment.glsl"
 
-IDR_XSAL_VERTEX				RCDATA                  "..\\glsl\\xsal\\vertex.glsl"
-IDR_XSAL_FRAGMENT			RCDATA                  "..\\glsl\\xsal\\fragment.glsl"
+IDR_XBRZ_FRAGMENT_2X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_2x.glsl"
+IDR_XBRZ_FRAGMENT_3X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_3x.glsl"
+IDR_XBRZ_FRAGMENT_4X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_4x.glsl"
+IDR_XBRZ_FRAGMENT_5X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_5x.glsl"
+IDR_XBRZ_FRAGMENT_6X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_6x.glsl"
 
-IDR_EAGLE_VERTEX			RCDATA                  "..\\glsl\\eagle\\vertex.glsl"
-IDR_EAGLE_FRAGMENT			RCDATA                  "..\\glsl\\eagle\\fragment.glsl"
+IDR_XSAL_FRAGMENT			RCDATA		DISCARDABLE			"..\\glsl\\xsal\\fragment.glsl"
 
-IDR_XBRZ_VERTEX				RCDATA                  "..\\glsl\\xbrz\\vertex.glsl"
-IDR_XBRZ_FRAGMENT_2X		RCDATA                  "..\\glsl\\xbrz\\fragment_2x.glsl"
-IDR_XBRZ_FRAGMENT_3X		RCDATA                  "..\\glsl\\xbrz\\fragment_3x.glsl"
-IDR_XBRZ_FRAGMENT_4X		RCDATA                  "..\\glsl\\xbrz\\fragment_4x.glsl"
-IDR_XBRZ_FRAGMENT_5X		RCDATA                  "..\\glsl\\xbrz\\fragment_5x.glsl"
-IDR_XBRZ_FRAGMENT_6X		RCDATA                  "..\\glsl\\xbrz\\fragment_6x.glsl"
+IDR_EAGLE_FRAGMENT			RCDATA		DISCARDABLE			"..\\glsl\\eagle\\fragment.glsl"
 
-IDR_SCALEHQ_VERTEX_2X		RCDATA                  "..\\glsl\\scalehq\\vertex_2x.glsl"
-IDR_SCALEHQ_FRAGMENT_2X		RCDATA                  "..\\glsl\\scalehq\\fragment_2x.glsl"
-IDR_SCALEHQ_VERTEX_4X		RCDATA                  "..\\glsl\\scalehq\\vertex_4x.glsl"
-IDR_SCALEHQ_FRAGMENT_4X		RCDATA                  "..\\glsl\\scalehq\\fragment_4x.glsl"
+IDR_SCALEHQ_FRAGMENT_2X		RCDATA		DISCARDABLE			"..\\glsl\\scalehq\\fragment_2x.glsl"
+IDR_SCALEHQ_FRAGMENT_4X		RCDATA		DISCARDABLE			"..\\glsl\\scalehq\\fragment_4x.glsl"
 
-IDR_SCALENX_VERTEX_2X		RCDATA                  "..\\glsl\\scalenx\\vertex_2x.glsl"
-IDR_SCALENX_FRAGMENT_2X		RCDATA                  "..\\glsl\\scalenx\\fragment_2x.glsl"
-IDR_SCALENX_VERTEX_3X		RCDATA                  "..\\glsl\\scalenx\\vertex_3x.glsl"
-IDR_SCALENX_FRAGMENT_3X		RCDATA                  "..\\glsl\\scalenx\\fragment_3x.glsl"
+IDR_SCALENX_FRAGMENT_2X		RCDATA		DISCARDABLE			"..\\glsl\\scalenx\\fragment_2x.glsl"
+IDR_SCALENX_FRAGMENT_3X		RCDATA		DISCARDABLE			"..\\glsl\\scalenx\\fragment_3x.glsl"
+
+IDR_BACK					RCDATA		DISCARDABLE			"..\\bmp\\back16.png"
+IDR_BORDER					RCDATA		DISCARDABLE			"..\\bmp\\border.png"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -145,8 +348,8 @@ IDR_SCALENX_FRAGMENT_3X		RCDATA                  "..\\glsl\\scalenx\\fragment_3x
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,3,27,207
- PRODUCTVERSION 1,1,0,0
+ FILEVERSION 2019,4,25,612
+ PRODUCTVERSION 1,2,7,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -157,22 +360,22 @@ VS_VERSION_INFO VERSIONINFO
  FILETYPE VFT_DLL
  FILESUBTYPE VFT2_UNKNOWN
 BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"
-        BEGIN
-            VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-            VALUE "FileVersion", "2019.03.27.207"
-            VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
-            VALUE "OriginalFilename", "C4DLL.dll"
-            VALUE "ProductVersion", "1.1.0"
-            VALUE "ProductName", "DisciplesGL"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
-    END
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904b0"
+		BEGIN
+			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
+			VALUE "FileVersion", "2019.04.25.612"
+			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
+			VALUE "OriginalFilename", "C4DLL.dll"
+			VALUE "ProductVersion", "1.2.7"
+			VALUE "ProductName", "DisciplesGL"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x409, 1200
+	END
 END
 
 #endif    // English (United States) resources

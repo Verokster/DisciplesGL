@@ -29,11 +29,9 @@
 precision mediump float;
 
 uniform sampler2D tex01;
+uniform sampler2D tex02;
+uniform vec2 texSize;
 
-in vec4 t1;
-in vec4 t2;
-in vec4 t3;
-in vec4 t4;
 in vec2 fTexCoord;
 
 out vec4 fragColor;
@@ -46,18 +44,30 @@ out vec4 fragColor;
 
 vec3 dt = vec3(1.0);
 
-void main()
-{
-	vec3 c00 = texture(tex01, t1.xy).xyz; 
-	vec3 c10 = texture(tex01, t1.zw).xyz; 
-	vec3 c20 = texture(tex01, t2.xy).xyz; 
-	vec3 c01 = texture(tex01, t4.zw).xyz; 
-	vec3 c11 = texture(tex01, fTexCoord).xyz; 
-	vec3 c21 = texture(tex01, t2.zw).xyz; 
-	vec3 c02 = texture(tex01, t4.xy).xyz; 
-	vec3 c12 = texture(tex01, t3.zw).xyz; 
-	vec3 c22 = texture(tex01, t3.xy).xyz; 
+void main() {
+	if (texture(tex01, fTexCoord) == texture(tex02, fTexCoord))
+		discard;
 
+	vec3 c11 = texture(tex01, (floor(fTexCoord * texSize) + 0.5) / texSize).rgb; 
+
+	vec2 texel;
+
+	#define TEX2(x, y) texture(tex01, (texel + vec2(x, y)) / texSize).rgb
+
+	texel = floor(fTexCoord * texSize - 0.5) + 0.5;
+	vec3 c00 = TEX2(0.0, 0.0);
+	vec3 c02 = TEX2(0.0, 1.0);
+	vec3 c20 = TEX2(1.0, 0.0);
+	vec3 c22 = TEX2(1.0, 1.0);
+
+	texel = floor(fTexCoord * texSize - vec2(0.0, 0.5)) + 0.5;
+	vec3 c10 = TEX2(0.0, 0.0); 
+	vec3 c12 = TEX2(0.0, 1.0); 
+
+	texel = floor(fTexCoord * texSize - vec2(0.5, 0.0)) + 0.5;
+	vec3 c01 = TEX2(0.0, 0.0); 
+	vec3 c21 = TEX2(1.0, 0.0); 
+	
 	float md1 = dot(abs(c00 - c22), dt);
 	float md2 = dot(abs(c02 - c20), dt);
 

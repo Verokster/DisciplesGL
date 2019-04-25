@@ -303,6 +303,61 @@ namespace Window
 			CheckMenuItem(hMenu, IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
 			break;
 		}
+
+		// Resolutions
+		DWORD count = sizeof(resolutionsList) / sizeof(Resolution);
+		const Resolution* resItem = resolutionsList;
+		DWORD id = IDM_RES_640_480;
+		while (count--)
+		{
+			BOOL enabled;
+			if (config.version)
+				enabled = id == IDM_RES_640_480;
+			else if (!config.resHooked)
+				enabled = id == IDM_RES_800_600 || id == IDM_RES_1024_768 || id == IDM_RES_1280_1024;
+			else
+				enabled = id != IDM_RES_640_480;
+
+			EnableMenuItem(hMenu, id, MF_BYCOMMAND | (enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(hMenu, id, MF_BYCOMMAND | (resItem->width == config.resolution.width && resItem->height == config.resolution.height ? MF_CHECKED : MF_UNCHECKED));
+
+			++resItem;
+			++id;
+		}
+
+		if (config.version)
+		{
+			EnableMenuItem(hMenu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+			CheckMenuItem(hMenu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_UNCHECKED);
+
+			EnableMenuItem(hMenu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+			CheckMenuItem(hMenu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_UNCHECKED);
+		}
+		else if (!config.resHooked || !config.zoomable)
+		{
+			EnableMenuItem(hMenu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_ENABLED);
+			CheckMenuItem(hMenu, IDM_RES_BORDERS, MF_BYCOMMAND | (config.showBackBorder ? MF_CHECKED : MF_UNCHECKED));
+
+			EnableMenuItem(hMenu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+			CheckMenuItem(hMenu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_UNCHECKED);
+		}
+		else
+		{
+			EnableMenuItem(hMenu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_ENABLED);
+			CheckMenuItem(hMenu, IDM_RES_BORDERS, MF_BYCOMMAND | (config.showBackBorder ? MF_CHECKED : MF_UNCHECKED));
+
+			EnableMenuItem(hMenu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_ENABLED);
+			CheckMenuItem(hMenu, IDM_RES_STRETCH, MF_BYCOMMAND | (config.menuZoomImage ? MF_CHECKED : MF_UNCHECKED));
+		}
+
+		// Game Speed
+		count = IDM_SPEED_3_0 - IDM_SPEED_1_0 + 1;
+		id = IDM_SPEED_1_0;
+		while (count--)
+		{
+			CheckMenuItem(hMenu, id, MF_BYCOMMAND | (config.speed.enabled && id - IDM_SPEED_1_0 == config.speed.index || !config.speed.enabled && id == IDM_SPEED_1_0 ? MF_CHECKED : MF_UNCHECKED));
+			++id;
+		}
 	}
 
 	VOID __fastcall CheckMenu(HWND hWnd)
@@ -421,7 +476,7 @@ namespace Window
 		return CallNextHookEx(OldKeysHook, nCode, wParam, lParam);
 	}
 
-	LRESULT __stdcall AboutProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	LRESULT __stdcall AboutApplicationProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (uMsg)
 		{
@@ -430,11 +485,130 @@ namespace Window
 			SetWindowLong(hDlg, GWL_EXSTYLE, NULL);
 			EnumChildWindows(hDlg, EnumChildProc, NULL);
 
-			CHAR email[50];
-			GetDlgItemText(hDlg, IDC_LNK_EMAIL, email, sizeof(email) - 1);
-			CHAR anchor[256];
-			StrPrint(anchor, "<A HREF=\"mailto:%s\">%s</A>", email, email);
-			SetDlgItemText(hDlg, IDC_LNK_EMAIL, anchor);
+			CHAR path[MAX_PATH];
+			CHAR temp[100];
+
+			GetModuleFileName(NULL, path, sizeof(path));
+
+			DWORD hSize;
+			DWORD verSize = GetFileVersionInfoSize(path, &hSize);
+
+			if (verSize)
+			{
+				CHAR* verData = (CHAR*)MemoryAlloc(verSize);
+				{
+					if (GetFileVersionInfo(path, hSize, verSize, verData))
+					{
+						VOID* buffer;
+						UINT size;
+						if (VerQueryValue(verData, "\\", &buffer, &size) && size)
+						{
+							VS_FIXEDFILEINFO* verInfo = (VS_FIXEDFILEINFO*)buffer;
+
+							GetDlgItemText(hDlg, IDC_VERSION, temp, sizeof(temp));
+							StrPrint(path, temp, HIWORD(verInfo->dwProductVersionMS), LOWORD(verInfo->dwProductVersionMS), HIWORD(verInfo->dwProductVersionLS), LOWORD(verInfo->dwProductVersionLS));
+							SetDlgItemText(hDlg, IDC_VERSION, path);
+						}
+
+						DWORD* lpTranslate;
+						if (VerQueryValue(verData, "\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &size) && size)
+						{
+							BOOL isTitle = FALSE;
+							BOOL isCopyright = FALSE;
+
+							DWORD count = size / sizeof(UINT);
+							{
+								DWORD* translate = lpTranslate;
+								while (count && (!isTitle || !isCopyright))
+								{
+									if (!isTitle && StrPrint(path, "\\StringFileInfo\\%04x%04x\\%s", LOWORD(*translate), HIWORD(*translate), "FileDescription") &&
+										VerQueryValue(verData, path, &buffer, &size) && size)
+									{
+										SetDlgItemText(hDlg, IDC_TITLE, (CHAR*)buffer);
+										isTitle = TRUE;
+									}
+
+									if (!isCopyright && StrPrint(path, "\\StringFileInfo\\%04x%04x\\%s", LOWORD(*translate), HIWORD(*translate), "LegalCopyright") &&
+										VerQueryValue(verData, path, &buffer, &size) && size)
+									{
+										SetDlgItemText(hDlg, IDC_COPYRIGHT, (CHAR*)buffer);
+										isCopyright = TRUE;
+									}
+
+									++translate;
+									--count;
+								}
+							}
+						}
+					}
+				}
+				MemoryFree(verData);
+			}
+
+			GetDlgItemText(hDlg, IDC_LNK_EMAIL, temp, sizeof(temp));
+			StrPrint(path, "<A HREF=\"mailto:%s\">%s</A>", temp, temp);
+			SetDlgItemText(hDlg, IDC_LNK_EMAIL, path);
+
+			break;
+		}
+
+		case WM_COMMAND:
+		{
+			if (wParam == IDC_BTN_OK)
+				EndDialog(hDlg, TRUE);
+			break;
+		}
+
+		default:
+			break;
+		}
+
+		return DefWindowProc(hDlg, uMsg, wParam, lParam);
+	}
+
+	LRESULT __stdcall AboutWrapperProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		switch (uMsg)
+		{
+		case WM_INITDIALOG:
+		{
+			SetWindowLong(hDlg, GWL_EXSTYLE, NULL);
+			EnumChildWindows(hDlg, EnumChildProc, NULL);
+
+			CHAR path[MAX_PATH];
+			CHAR temp[100];
+
+			GetModuleFileName(hDllModule, path, sizeof(path));
+
+			DWORD hSize;
+			DWORD verSize = GetFileVersionInfoSize(path, &hSize);
+
+			if (verSize)
+			{
+				CHAR* verData = (CHAR*)MemoryAlloc(verSize);
+				{
+					if (GetFileVersionInfo(path, hSize, verSize, verData))
+					{
+						VOID* buffer;
+						UINT size;
+						if (VerQueryValue(verData, "\\", &buffer, &size) && size)
+						{
+							VS_FIXEDFILEINFO* verInfo = (VS_FIXEDFILEINFO*)buffer;
+							
+							GetDlgItemText(hDlg, IDC_VERSION, temp, sizeof(temp));
+							StrPrint(path, temp, HIWORD(verInfo->dwProductVersionMS), LOWORD(verInfo->dwProductVersionMS), HIWORD(verInfo->dwProductVersionLS), LOWORD(verInfo->dwFileVersionLS));
+							SetDlgItemText(hDlg, IDC_VERSION, path);
+						}
+					}
+				}
+				MemoryFree(verData);
+			}
+
+			if (GetDlgItemText(hDlg, IDC_LNK_EMAIL, temp, sizeof(temp)))
+			{
+				StrPrint(path, "<A HREF=\"mailto:%s\">%s</A>", temp, temp);
+				SetDlgItemText(hDlg, IDC_LNK_EMAIL, path);
+			}
 
 			break;
 		}
@@ -512,26 +686,29 @@ namespace Window
 		case WM_MOVE:
 		{
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-			if (ddraw && ddraw->hDraw)
+			if (ddraw)
 			{
-				DWORD stye = GetWindowLong(ddraw->hDraw, GWL_STYLE);
-				if (stye & WS_POPUP)
+				if (ddraw->hDraw && !config.singleWindow)
 				{
-					POINT point = { LOWORD(lParam), HIWORD(lParam) };
-					ScreenToClient(hWnd, &point);
+					DWORD stye = GetWindowLong(ddraw->hDraw, GWL_STYLE);
+					if (stye & WS_POPUP)
+					{
+						POINT point = { LOWORD(lParam), HIWORD(lParam) };
+						ScreenToClient(hWnd, &point);
 
-					RECT rect;
-					rect.left = point.x - LOWORD(lParam);
-					rect.top = point.y - HIWORD(lParam);
-					rect.right = rect.left + 256;
-					rect.bottom = rect.left + 256;
+						RECT rect;
+						rect.left = point.x - LOWORD(lParam);
+						rect.top = point.y - HIWORD(lParam);
+						rect.right = rect.left + 256;
+						rect.bottom = rect.left + 256;
 
-					AdjustWindowRect(&rect, stye, FALSE);
-					SetWindowPos(ddraw->hDraw, NULL, rect.left, rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+						AdjustWindowRect(&rect, stye, FALSE);
+						SetWindowPos(ddraw->hDraw, NULL, rect.left, rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+					}
+					else
+						SetWindowPos(ddraw->hDraw, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
 				}
-				else
-					SetWindowPos(ddraw->hDraw, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
-			
+
 				SetEvent(ddraw->hDrawEvent);
 			}
 
@@ -543,7 +720,7 @@ namespace Window
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 			if (ddraw)
 			{
-				if (ddraw->hDraw)
+				if (ddraw->hDraw && !config.singleWindow)
 					SetWindowPos(ddraw->hDraw, NULL, 0, 0, LOWORD(lParam), HIWORD(lParam), SWP_NOZORDER | SWP_NOMOVE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
 
 				ddraw->viewport.width = LOWORD(lParam);
@@ -678,8 +855,8 @@ namespace Window
 				}
 				else if (config.keys.aspectRatio && config.keys.aspectRatio + VK_F1 - 1 == wParam)
 				{
-					 WindowProc(hWnd, WM_COMMAND, IDM_ASPECT_RATIO, NULL);
-					 return NULL;
+					WindowProc(hWnd, WM_COMMAND, IDM_ASPECT_RATIO, NULL);
+					return NULL;
 				}
 				else if (config.keys.vSync && config.keys.vSync + VK_F1 - 1 == wParam)
 				{
@@ -689,6 +866,23 @@ namespace Window
 				else if (config.keys.windowedMode && config.keys.windowedMode + VK_F1 - 1 == wParam)
 				{
 					return WindowProc(hWnd, WM_COMMAND, IDM_RES_FULL_SCREEN, NULL);
+					return NULL;
+				}
+				else if (config.keys.showBorders && config.keys.showBorders + VK_F1 - 1 == wParam)
+				{
+					return WindowProc(hWnd, WM_COMMAND, IDM_RES_BORDERS, NULL);
+					return NULL;
+				}
+				else if (config.keys.zoomImage && config.keys.zoomImage + VK_F1 - 1 == wParam)
+				{
+					return WindowProc(hWnd, WM_COMMAND, IDM_RES_STRETCH, NULL);
+					return NULL;
+				}
+				else if (config.keys.speedToggle && config.keys.speedToggle + VK_F1 - 1 == wParam)
+				{
+					config.speed.enabled = !config.speed.enabled;
+					Config::Set(CONFIG_WRAPPER, "SpeedEnabled", *(INT*)&config.speed.enabled);
+					CheckMenu(hWnd);
 					return NULL;
 				}
 			}
@@ -726,14 +920,27 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_HELP_ABOUT:
+			case IDM_HELP_ABOUT_APPLICATION:
+			case IDM_HELP_ABOUT_WRAPPER:
 			{
-				INT_PTR res;
 				ULONG_PTR cookie = NULL;
 				if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
 					cookie = NULL;
 
-				res = DialogBoxParam(hDllModule, MAKEINTRESOURCE(IDD_ABOUT), hWnd, (DLGPROC)AboutProc, NULL);
+				LPCSTR id;
+				DLGPROC proc;
+				if (wParam == IDM_HELP_ABOUT_APPLICATION)
+				{
+					id = MAKEINTRESOURCE(IDD_ABOUT_APPLICATION);
+					proc = (DLGPROC)AboutApplicationProc;
+				}
+				else
+				{
+					id = MAKEINTRESOURCE(cookie ? IDD_ABOUT_WRAPPER : IDD_ABOUT_WRAPPER_OLD);
+					proc = (DLGPROC)AboutWrapperProc;
+				}
+
+				DialogBoxParam(hDllModule, id, hWnd, proc, NULL);
 
 				if (cookie)
 					DeactivateActCtxC(0, cookie);
@@ -940,8 +1147,110 @@ namespace Window
 				return NULL;
 			}
 
+			case IDM_RES_BORDERS:
+			{
+				if (!config.version)
+				{
+					config.showBackBorder = !config.showBackBorder;
+					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.showBackBorder);
+
+					CheckMenu(hWnd);
+
+					if (config.resHooked)
+					{
+						OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+						if (ddraw)
+							SetEvent(ddraw->hDrawEvent);
+					}
+					else
+						Main::ShowInfo(IDS_INFO_RESTART);
+
+					return NULL;
+				}
+				else
+					return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+			}
+
+			case IDM_RES_STRETCH:
+			{
+				if (config.resHooked && config.zoomable)
+				{
+					config.menuZoomImage = !config.menuZoomImage;
+					Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.menuZoomImage);
+					CheckMenu(hWnd);
+
+					if (config.mode->width > GAME_WIDTH && config.mode->height > GAME_HEIGHT)
+						config.zoomImage = config.menuZoomImage;
+
+					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+					if (ddraw)
+						SetEvent(ddraw->hDrawEvent);
+
+					return NULL;
+				}
+				else
+					return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+			}
+
 			default:
-				return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+				if (wParam >= IDM_RES_640_480 && wParam < IDM_RES_640_480 + sizeof(resolutionsList) / sizeof(Resolution))
+				{
+					DWORD idx = wParam - IDM_RES_640_480;
+					const Resolution* resItem = &resolutionsList[idx];
+
+					if (resItem->width != config.resolution.width || resItem->height != config.resolution.height)
+					{
+						config.resolution = *resItem;
+
+						if (config.resHooked)
+						{
+							Config::Set(CONFIG_WRAPPER, "DisplayWidth", (INT)config.resolution.width);
+							Config::Set(CONFIG_WRAPPER, "DisplayHeight", (INT)config.resolution.height);
+						}
+						else
+						{
+							INT mode;
+							if (config.resolution.width == 1280)
+								mode = 2;
+							else if (config.resolution.width == 1024)
+								mode = 1;
+							else
+								mode = 0;
+
+							Config::Set(CONFIG_DISCIPLE, "DisplaySize", mode);
+						}
+
+						Main::ShowInfo(IDS_INFO_RESTART);
+
+						CheckMenu(hWnd);
+					}
+
+					return NULL;
+				}
+				else if (wParam >= IDM_SPEED_1_0 && wParam <= IDM_SPEED_3_0)
+				{
+					DWORD index = wParam - IDM_SPEED_1_0;
+					if (index != config.speed.index || !config.speed.enabled)
+					{
+						if (index)
+						{
+							config.speed.index = index;
+							config.speed.value = 0.1f * speedList[index];
+							config.speed.enabled = TRUE;
+							Config::Set(CONFIG_WRAPPER, "GameSpeed", *(INT*)&index);
+						}
+						else
+							config.speed.enabled = FALSE;
+
+						Config::Set(CONFIG_WRAPPER, "SpeedEnabled", *(INT*)&config.speed.enabled);
+
+						CheckMenu(hWnd);
+					}
+
+					return NULL;
+				}
+				else
+					return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 			}
 		}
 

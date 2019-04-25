@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug 1|Win32">
       <Configuration>Debug 1</Configuration>
@@ -15,27 +15,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{62a3e190-3331-4f08-9a9f-24315d6a805e}</ProjectGuid>
     <RootNamespace>Disciples2GL</RootNamespace>
     <ProjectName>DisciplesGL</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 1|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -68,15 +68,18 @@
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 1|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2|Win32'">
     <Midl>
@@ -90,14 +93,10 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Thrash.Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AssemblerListingLocation>
-      </AssemblerListingLocation>
       <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -107,19 +106,17 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <ModuleDefinitionFile>$(ProjectDir)\module.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)module.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <MapExports>true</MapExports>
       <BaseAddress>0x60000000</BaseAddress>
-      <TargetMachine>MachineX86</TargetMachine>
       <SectionAlignment>
       </SectionAlignment>
       <AssemblyDebug>true</AssemblyDebug>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;ole32.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
-      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4dll-R$(TargetExt)</OutputFile>
+      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4DLL-R$(TargetExt)</OutputFile>
       <StackReserveSize>
       </StackReserveSize>
       <EntryPointSymbol>DllMain</EntryPointSymbol>
@@ -142,14 +139,10 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Thrash.Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AssemblerListingLocation>
-      </AssemblerListingLocation>
       <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -159,19 +152,18 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <ModuleDefinitionFile>$(ProjectDir)\module.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)module.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <MapExports>true</MapExports>
       <BaseAddress>0x60000000</BaseAddress>
-      <TargetMachine>MachineX86</TargetMachine>
       <SectionAlignment>
       </SectionAlignment>
       <AssemblyDebug>true</AssemblyDebug>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;ole32.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
-      <OutputFile>D:\Games\Disciples\Exe\C4dll-R$(TargetExt)</OutputFile>
+      <OutputFile>D:\Games\Disciples\Exe\C4DLL-R$(TargetExt)</OutputFile>
       <StackReserveSize>
       </StackReserveSize>
       <EntryPointSymbol>DllMain</EntryPointSymbol>
@@ -193,8 +185,6 @@
       </HeaderFileName>
     </Midl>
     <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
@@ -215,14 +205,13 @@
     </ClCompile>
     <ResourceCompile />
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;ole32.lib;crt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AssemblyDebug>false</AssemblyDebug>
       <BaseAddress>0x60000000</BaseAddress>
-      <MergeSections>.text=.rdata</MergeSections>
       <SectionAlignment>4096</SectionAlignment>
-      <ModuleDefinitionFile>$(ProjectDir)\module.def</ModuleDefinitionFile>
-      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4dll-R$(TargetExt)</OutputFile>
+      <ModuleDefinitionFile>$(ProjectDir)module.def</ModuleDefinitionFile>
+      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4DLL-R$(TargetExt)</OutputFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <LinkErrorReporting>NoErrorReport</LinkErrorReporting>
       <CLRSupportLastError>Disabled</CLRSupportLastError>
@@ -253,6 +242,7 @@
     <ClCompile Include="FpsCounter.cpp" />
     <ClCompile Include="GLib.cpp" />
     <ClCompile Include="Hooks.cpp" />
+    <ClCompile Include="PngLib.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 2|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 1|Win32'">Create</PrecompiledHeader>
@@ -276,6 +266,7 @@
     <ClInclude Include="GLib.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="PngLib.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Window.h" />

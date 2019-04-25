@@ -1,8 +1,4 @@
 /*
-	xBRZ vertex shader
-	based on libretro xBRZ shader
-	https://github.com/libretro/glsl-shaders/tree/master/xbrz/shaders
-
 	MIT License
 
 	Copyright (c) 2019 Oleksiy Ryabchun
@@ -26,35 +22,25 @@
 	SOFTWARE.
 */
 
-precision mediump float;
+#pragma once
 
-uniform mat4 mvp;
-uniform sampler2D tex01;
-uniform vec2 texSize;
+#include "png.h"
 
-in vec2 vCoord;
-in vec2 vTexCoord;
+typedef png_structp(__cdecl *PNG_CREATE_READ_STRUCT)(png_const_charp user_png_ver, png_voidp error_ptr, png_error_ptr error_fn, png_error_ptr warn_fn);
+typedef png_infop(__cdecl *PNG_CREATE_INFO_STRUCT)(png_structp png_ptr);
+typedef VOID(__cdecl *PNG_SET_READ_FN)(png_structp png_ptr, png_voidp io_ptr, png_rw_ptr read_data_fn);
+typedef VOID(__cdecl *PNG_DESTROY_READ_STRUCT)(png_structpp png_ptr_ptr, png_infopp info_ptr_ptr, png_infopp end_info_ptr_ptr);
+typedef VOID(__cdecl *PNG_READ_INFO)(png_structp png_ptr, png_infop info_ptr);
+typedef VOID(__cdecl *PNG_READ_IMAGE)(png_structp png_ptr, png_bytepp image);
 
-out vec4 t1;
-out vec4 t2;
-out vec4 t3;
-out vec4 t4;
-out vec4 t5;
-out vec4 t6;
-out vec4 t7;
-out vec2 fTexCoord;
+extern PNG_CREATE_READ_STRUCT pnglib_create_read_struct;
+extern PNG_CREATE_INFO_STRUCT pnglib_create_info_struct;
+extern PNG_SET_READ_FN pnglib_set_read_fn;
+extern PNG_DESTROY_READ_STRUCT pnglib_destroy_read_struct;
+extern PNG_READ_INFO pnglib_read_info;
+extern PNG_READ_IMAGE pnglib_read_image;
 
-void main() {
-	gl_Position = mvp * vec4(vCoord, 0.0, 1.0);
-	
-	vec2 d = 1.0 / texSize;
-	t1 = vTexCoord.xxxy + vec4(-d.x, 0.0, d.x,-2.0 * d.y);
-	t2 = vTexCoord.xxxy + vec4(-d.x, 0.0, d.x,-d.y);
-	t3 = vTexCoord.xxxy + vec4(-d.x, 0.0, d.x, 0.0);
-	t4 = vTexCoord.xxxy + vec4(-d.x, 0.0, d.x, d.y);
-	t5 = vTexCoord.xxxy + vec4(-d.x, 0.0, d.x, 2.0 * d.y);
-	t6 = vTexCoord.xyyy + vec4(-2.0 * d.x,-d.y, 0.0, d.y);
-	t7 = vTexCoord.xyyy + vec4( 2.0 * d.x,-d.y, 0.0, d.y);
-	
-	fTexCoord = vTexCoord * texSize;
+namespace PngLib
+{
+	VOID __cdecl ReadDataFromInputStream(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead);
 }

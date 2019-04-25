@@ -29,13 +29,9 @@
 precision mediump float;
 
 uniform sampler2D tex01;
+uniform sampler2D tex02;
+uniform vec2 texSize;
 
-in vec4 t1;
-in vec4 t2;
-in vec4 t3;
-in vec4 t4;
-in vec4 t5;
-in vec4 t6;
 in vec2 fTexCoord;
 
 out vec4 fragColor;
@@ -48,21 +44,36 @@ out vec4 fragColor;
 
 vec3 dt = vec3(1.0);
 
-void main()
-{
-	vec3 c  = texture(tex01, fTexCoord).xyz;
-	vec3 i1 = texture(tex01, t1.xy).xyz; 
-	vec3 i2 = texture(tex01, t2.xy).xyz; 
-	vec3 i3 = texture(tex01, t3.xy).xyz; 
-	vec3 i4 = texture(tex01, t4.xy).xyz; 
-	vec3 o1 = texture(tex01, t5.xy).xyz; 
-	vec3 o3 = texture(tex01, t6.xy).xyz; 
-	vec3 o2 = texture(tex01, t5.zw).xyz;
-	vec3 o4 = texture(tex01, t6.zw).xyz;
-	vec3 s1 = texture(tex01, t1.zw).xyz; 
-	vec3 s2 = texture(tex01, t2.zw).xyz; 
-	vec3 s3 = texture(tex01, t3.zw).xyz; 
-	vec3 s4 = texture(tex01, t4.zw).xyz; 
+void main() {
+	if (texture(tex01, fTexCoord) == texture(tex02, fTexCoord))
+		discard;
+
+	#define TEX(x, y) texture(tex01, (floor(fTexCoord * texSize + vec2(x, y)) + 0.5) / texSize).rgb
+
+	vec3 c  = TEX( 0.0,   0.0);
+
+	vec3 i1 = TEX(-0.25, -0.25); 
+	vec3 i2 = TEX( 0.25, -0.25); 
+	vec3 i3 = TEX( 0.25,  0.25); 
+	vec3 i4 = TEX(-0.25,  0.25); 
+
+	vec2 texel;
+
+	#define TEX2(x, y) texture(tex01, (texel + vec2(x, y)) / texSize).rgb
+
+	texel = floor(fTexCoord * texSize - 0.5) + 0.5;
+	vec3 o1 = TEX2(0.0, 0.0); 
+	vec3 o3 = TEX2(1.0, 1.0); 
+	vec3 o2 = TEX2(1.0, 0.0);
+	vec3 o4 = TEX2(0.0, 1.0);
+
+	texel = floor(fTexCoord * texSize - vec2(0.0, 0.5)) + 0.5;
+	vec3 s1 = TEX2(0.0, 0.0); 
+	vec3 s3 = TEX2(0.0, 1.0);
+
+	texel = floor(fTexCoord * texSize - vec2(0.5, 0.0)) + 0.5;
+	vec3 s2 = TEX2(1.0, 0.0); 
+	vec3 s4 = TEX2(0.0, 0.0);
 
 	float ko1=dot(abs(o1-c),dt);
 	float ko2=dot(abs(o2-c),dt);
