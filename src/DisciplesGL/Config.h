@@ -33,7 +33,7 @@
 
 extern ConfigItems config;
 extern DisplayMode modesList[4];
-extern const Resolution resolutionsList[27];
+extern const Resolution resolutionsList[28];
 extern const BYTE speedList[21];
 
 namespace Config

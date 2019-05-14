@@ -137,6 +137,7 @@ struct ConfigItems
 	BOOL menuZoomImage;
 	BOOL gameBorders;
 	BOOL singleWindow;
+	BOOL alwaysActive;
 
 	struct {
 		DWORD index;
@@ -164,6 +165,7 @@ struct ConfigItems
 		BYTE showBorders;
 		BYTE zoomImage;
 		BYTE speedToggle;
+		BYTE alwaysActive;
 	} keys;
 
 	BOOL isExist;

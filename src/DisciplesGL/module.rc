@@ -52,8 +52,9 @@ BEGIN
 		MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
 		POPUP "&Resolution"
 		BEGIN
-			MENUITEM "640 x 408\a(4x3)",			IDM_RES_640_480
+			MENUITEM "640 x 480\a(4x3)",			IDM_RES_640_480
 			MENUITEM "800 x 600\a(4x3)",			IDM_RES_800_600
+			MENUITEM "960 x 768\a(5x4)",			IDM_RES_960_768
 			MENUITEM "1024 x 600\a(16x9)",			IDM_RES_1024_600
 			MENUITEM "1024 x 768\a(4x3)",			IDM_RES_1024_768
 			MENUITEM "1152 x 864\a(4x3)",			IDM_RES_1152_864
@@ -160,6 +161,7 @@ BEGIN
 			MENUITEM "2.9x",						IDM_SPEED_2_9
 			MENUITEM "3.0x",						IDM_SPEED_3_0
 		END
+		MENUITEM "Always &Active\a",				IDM_ALWAYS_ACTIVE
 	END
 	POPUP "&Help"
 	BEGIN
@@ -179,7 +181,7 @@ BEGIN
 		MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
 		POPUP "&Resolution"
 		BEGIN
-			MENUITEM "640 x 408\a(4x3)",			IDM_RES_640_480
+			MENUITEM "640 x 480\a(4x3)",			IDM_RES_640_480
 			MENUITEM "800 x 600\a(4x3)",			IDM_RES_800_600
 			MENUITEM "1024 x 600\a(16x9)",			IDM_RES_1024_600
 			MENUITEM "1024 x 768\a(4x3)",			IDM_RES_1024_768
@@ -265,6 +267,7 @@ BEGIN
 			MENUITEM "1.9x",						IDM_SPEED_1_9
 			MENUITEM "2.0x",						IDM_SPEED_2_0
 		END
+		MENUITEM "Always &Active\a",				IDM_ALWAYS_ACTIVE
 	END
 	POPUP "&Help"
 	BEGIN
@@ -339,7 +342,7 @@ IDR_SCALEHQ_FRAGMENT_4X		RCDATA		DISCARDABLE			"..\\glsl\\scalehq\\fragment_4x.g
 IDR_SCALENX_FRAGMENT_2X		RCDATA		DISCARDABLE			"..\\glsl\\scalenx\\fragment_2x.glsl"
 IDR_SCALENX_FRAGMENT_3X		RCDATA		DISCARDABLE			"..\\glsl\\scalenx\\fragment_3x.glsl"
 
-IDR_BACK					RCDATA		DISCARDABLE			"..\\bmp\\back16.png"
+IDR_BACK					RCDATA		DISCARDABLE			"..\\bmp\\back.png"
 IDR_BORDER					RCDATA		DISCARDABLE			"..\\bmp\\border.png"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -348,7 +351,7 @@ IDR_BORDER					RCDATA		DISCARDABLE			"..\\bmp\\border.png"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,4,25,612
+ FILEVERSION 2019,5,14,618
  PRODUCTVERSION 1,2,7,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -365,7 +368,7 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2019.04.25.612"
+			VALUE "FileVersion", "2019.05.14.618"
 			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4DLL.dll"
 			VALUE "ProductVersion", "1.2.7"

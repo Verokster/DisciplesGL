@@ -790,14 +790,9 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 		DWORD sWidth;
 		if (surface->attachedClipper)
 		{
-			RECT clip;
-			GetClientRect(surface->attachedClipper->hWnd, &clip);
-			ClientToScreen(surface->attachedClipper->hWnd, (POINT*)&clip.left);
-
-			lpSrcRect->left -= clip.left;
-			lpSrcRect->top -= clip.top;
-			lpSrcRect->right -= clip.left;
-			lpSrcRect->bottom -= clip.top;
+			POINT offset = { 0, 0 };
+			ClientToScreen(surface->attachedClipper->hWnd, &offset);
+			OffsetRect(lpSrcRect, -offset.x, -offset.y);
 
 			sWidth = config.mode->width;
 		}
@@ -807,14 +802,9 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 		DWORD dWidth;
 		if (this->attachedClipper)
 		{
-			RECT clip;
-			GetClientRect(this->attachedClipper->hWnd, &clip);
-			ClientToScreen(this->attachedClipper->hWnd, (POINT*)&clip.left);
-
-			lpDestRect->left -= clip.left;
-			lpDestRect->top -= clip.top;
-			lpDestRect->right -= clip.left;
-			lpDestRect->bottom -= clip.top;
+			POINT offset = { 0, 0 };
+			ClientToScreen(this->attachedClipper->hWnd, &offset);
+			OffsetRect(lpDestRect, -offset.x, -offset.y);
 
 			dWidth = config.mode->width;
 		}
@@ -888,7 +878,7 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 				} while (--height);
 			}
 			else if (width == this->mode.width && width == surface->mode.width)
-				MemoryCopy(destination, source, width * sizeof(WORD));
+				MemoryCopy(destination, source, width * height * sizeof(WORD));
 			else do
 			{
 				MemoryCopy(destination, source, width * sizeof(WORD));

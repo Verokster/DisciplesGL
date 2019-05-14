@@ -47,13 +47,11 @@ out vec4 fragColor;
 const float one_third = 1.0 / 3.0;
 const float two_third = 2.0 / 3.0;
 
-float reduce(const vec3 color)
-{
+float reduce(const vec3 color) {
 	return dot(color, vec3(65536.0, 256.0, 1.0));
 }
 
-float DistYCbCr(const vec3 pixA, const vec3 pixB)
-{
+float DistYCbCr(const vec3 pixA, const vec3 pixB) {
 	const vec3 w = vec3(0.2627, 0.6780, 0.0593);
 	const float scaleB = 0.5 / (1.0 - w.b);
 	const float scaleR = 0.5 / (1.0 - w.r);
@@ -65,13 +63,11 @@ float DistYCbCr(const vec3 pixA, const vec3 pixB)
 	return sqrt( ((LUMINANCE_WEIGHT * Y) * (LUMINANCE_WEIGHT * Y)) + (Cb * Cb) + (Cr * Cr) );
 }
 
-bool IsPixEqual(const vec3 pixA, const vec3 pixB)
-{
+bool IsPixEqual(const vec3 pixA, const vec3 pixB) {
 	return (DistYCbCr(pixA, pixB) < EQUAL_COLOR_TOLERANCE);
 }
 
-bool IsBlendingNeeded(const ivec4 blend)
-{
+bool IsBlendingNeeded(const ivec4 blend) {
 	return any(notEqual(blend, ivec4(BLEND_NONE)));
 }
 

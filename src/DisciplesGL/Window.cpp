@@ -358,6 +358,8 @@ namespace Window
 			CheckMenuItem(hMenu, id, MF_BYCOMMAND | (config.speed.enabled && id - IDM_SPEED_1_0 == config.speed.index || !config.speed.enabled && id == IDM_SPEED_1_0 ? MF_CHECKED : MF_UNCHECKED));
 			++id;
 		}
+
+		CheckMenuItem(hMenu, IDM_ALWAYS_ACTIVE, MF_BYCOMMAND | (config.alwaysActive ? MF_CHECKED : MF_UNCHECKED));
 	}
 
 	VOID __fastcall CheckMenu(HWND hWnd)
@@ -763,15 +765,9 @@ namespace Window
 					else
 						ddraw->RenderStop();
 				}
+			}
 
-				return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
-			}
-			else
-			{
-				if (!(BOOL)wParam)
-					return NULL;
-				return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
-			}
+			return !config.alwaysActive ? CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam) : NULL;
 		}
 
 		case WM_SETCURSOR:
@@ -883,6 +879,11 @@ namespace Window
 					config.speed.enabled = !config.speed.enabled;
 					Config::Set(CONFIG_WRAPPER, "SpeedEnabled", *(INT*)&config.speed.enabled);
 					CheckMenu(hWnd);
+					return NULL;
+				}
+				else if (config.keys.alwaysActive && config.keys.alwaysActive + VK_F1 - 1 == wParam)
+				{
+					return WindowProc(hWnd, WM_COMMAND, IDM_ALWAYS_ACTIVE, NULL);
 					return NULL;
 				}
 			}
@@ -1190,6 +1191,14 @@ namespace Window
 				}
 				else
 					return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+			}
+
+			case IDM_ALWAYS_ACTIVE:
+			{
+				config.alwaysActive = !config.alwaysActive;
+				Config::Set(CONFIG_DISCIPLE, "AlwaysActive", config.alwaysActive);
+				CheckMenu(hWnd);
+				return NULL;
 			}
 
 			default:

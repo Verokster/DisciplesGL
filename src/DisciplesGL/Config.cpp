@@ -38,6 +38,7 @@ DisplayMode modesList[] = {
 const Resolution resolutionsList[] = {
 	640, 480,
 	GAME_WIDTH, GAME_HEIGHT,
+	960, 768,
 	1024, 600,
 	1024, 768,
 	1152, 864,
@@ -155,10 +156,6 @@ namespace Config
 				Config::Set(CONFIG_WRAPPER, "HD", config.hd);
 			}
 
-			INT speed = Config::Get(CONFIG_SETTINGS, "ScrollSpeed", 0);
-			if (speed < 16)
-				Config::Set(CONFIG_SETTINGS, "ScrollSpeed", 16);
-
 			config.image.aspect = TRUE;
 			Config::Set(CONFIG_WRAPPER, "ImageAspect", config.image.aspect);
 
@@ -169,23 +166,18 @@ namespace Config
 			Config::Set(CONFIG_WRAPPER, "ImageFilter", *(INT*)&config.image.filter);
 
 			config.image.scaleNx.value = 2;
-			config.image.scaleNx.type = 0;
 			Config::Set(CONFIG_WRAPPER, "ImageScaleNx", *(INT*)&config.image.scaleNx);
 
 			config.image.xSal.value = 2;
-			config.image.xSal.type = 0;
 			Config::Set(CONFIG_WRAPPER, "ImageXSal", *(INT*)&config.image.xSal);
 
 			config.image.eagle.value = 2;
-			config.image.eagle.type = 0;
 			Config::Set(CONFIG_WRAPPER, "ImageEagle", *(INT*)&config.image.eagle);
 
 			config.image.scaleHQ.value = 2;
-			config.image.scaleHQ.type = 0;
 			Config::Set(CONFIG_WRAPPER, "ImageScaleHQ", *(INT*)&config.image.scaleHQ);
 
 			config.image.xBRz.value = 2;
-			config.image.xBRz.type = 0;
 			Config::Set(CONFIG_WRAPPER, "ImageXBRZ", *(INT*)&config.image.xBRz);
 
 			if (!config.version)
@@ -203,29 +195,26 @@ namespace Config
 			config.keys.windowedMode = 4;
 			Config::Set(CONFIG_KEYS, "WindowedMode", config.keys.windowedMode);
 
-			config.keys.aspectRatio = 0;
-			Config::Set(CONFIG_KEYS, "AspectRatio", config.keys.aspectRatio);
-
-			config.keys.vSync = 0;
+			Config::Set(CONFIG_KEYS, "AspectRatio", "");
 			Config::Set(CONFIG_KEYS, "VSync", "");
 
 			if (!config.version)
 			{
-				config.keys.showBorders = 0;
 				Config::Set(CONFIG_KEYS, "ShowBorders", "");
-
-				config.keys.zoomImage = 0;
 				Config::Set(CONFIG_KEYS, "ZoomImage", "");
 			}
 
 			config.keys.speedToggle = 5;
 			Config::Set(CONFIG_KEYS, "SpeedToggle", config.keys.speedToggle);
 
+			Config::Set(CONFIG_KEYS, "AlwaysActive", "");
+
 			config.speed.index = 5;
 			config.speed.value = 0.1f * speedList[config.speed.index];
-			config.speed.enabled = FALSE;
 			Config::Set(CONFIG_WRAPPER, "GameSpeed", config.speed.index);
 			Config::Set(CONFIG_WRAPPER, "SpeedEnabled", config.speed.enabled);
+
+			Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
 		}
 		else
 		{
@@ -352,6 +341,14 @@ namespace Config
 					config.keys.speedToggle = 0;
 			}
 
+			if (Config::Get(CONFIG_KEYS, "AlwaysActive", "", buffer, sizeof(buffer)))
+			{
+				value = Config::Get(CONFIG_KEYS, "AlwaysActive", 0);
+				config.keys.alwaysActive = LOBYTE(value);
+				if (config.keys.alwaysActive > 1 && config.keys.alwaysActive > 24)
+					config.keys.alwaysActive = 0;
+			}
+
 			value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
 			config.speed.index = *(DWORD*)&value;
 			if (config.speed.index >= sizeof(speedList) / sizeof(BYTE))
@@ -359,6 +356,8 @@ namespace Config
 			config.speed.value = 0.1f * speedList[config.speed.index];
 
 			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", FALSE);
+
+			config.alwaysActive = Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
 		}
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));
@@ -426,6 +425,12 @@ namespace Config
 		{
 			StrPrint(buffer, "%sF%d", buffer, config.keys.zoomImage);
 			SetMenuItemInfo(config.menu, IDM_RES_STRETCH, FALSE, &info);
+		}
+
+		if (config.keys.alwaysActive && (info.cch = sizeof(buffer), GetMenuItemInfo(config.menu, IDM_ALWAYS_ACTIVE, FALSE, &info)))
+		{
+			StrPrint(buffer, "%sF%d", buffer, config.keys.alwaysActive);
+			SetMenuItemInfo(config.menu, IDM_ALWAYS_ACTIVE, FALSE, &info);
 		}
 
 		MenuItemData mData;

@@ -42,7 +42,7 @@ uniform vec2 texSize;
 
 COMPAT_IN vec2 fTexCoord;
 
-void weights(out vec4 x, out vec4 y, vec2 t) {
+void weights(vec2 t, out vec4 x, out vec4 y) {
 	vec2 t2 = t * t;
 	vec2 t3 = t2 * t;
 
@@ -62,40 +62,13 @@ void main() {
 	vec2 uv = fTexCoord * texSize - 0.5;
 	vec2 texel = floor(uv);
 	
-	#define TEX(x, y) COMPAT_TEXTURE(tex01, (texel + vec2(x, y)) / texSize).rgb
+	vec4 x, y;
+	weights(uv - texel, x, y);
 
-	vec4 x;
-	vec4 y;
-	vec2 phase = uv - texel;
-	weights(x, y, phase);
-
-	vec4 row = x * y.x;
-	vec3 color =
-		TEX(-0.5, -0.5) * row.x +
-		TEX(+0.5, -0.5) * row.y +
-		TEX(+1.5, -0.5) * row.z +
-		TEX(+2.5, -0.5) * row.w;
-
-	row = x * y.y;
-	color +=
-		TEX(-0.5, +0.5) * row.x +
-		TEX(+0.5, +0.5) * row.y +
-		TEX(+1.5, +0.5) * row.z +
-		TEX(+2.5, +0.5) * row.w;
-
-	row = x * y.z;
-	color +=
-		TEX(-0.5, +1.5) * row.x +
-		TEX(+0.5, +1.5) * row.y +
-		TEX(+1.5, +1.5) * row.z +
-		TEX(+2.5, +1.5) * row.w;
-
-	row = x * y.w;
-	color +=
-		TEX(-1.5, +2.5) * row.x +
-		TEX(+0.5, +2.5) * row.y +
-		TEX(+1.5, +2.5) * row.z +
-		TEX(+2.5, +2.5) * row.w;
+	texel -= 0.5;
+	vec3 color = vec3(0.0);
+	for(int j = 0; j < 4; ++j) for(int i = 0; i < 4; ++i)
+		color += x[i] * y[j] * COMPAT_TEXTURE(tex01, (texel + ivec2(i, j)) / texSize).rgb;
 
 	FRAG_COLOR = vec4(color, 1.0);
 } 
