@@ -351,7 +351,7 @@ IDR_BORDER					RCDATA		DISCARDABLE			"..\\bmp\\border.png"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,5,14,618
+ FILEVERSION 2019,5,17,619
  PRODUCTVERSION 1,2,7,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -368,7 +368,7 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2019.05.14.618"
+			VALUE "FileVersion", "2019.05.17.619"
 			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4DLL.dll"
 			VALUE "ProductVersion", "1.2.7"

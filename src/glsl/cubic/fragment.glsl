@@ -68,7 +68,7 @@ void main() {
 	texel -= 0.5;
 	vec3 color = vec3(0.0);
 	for(int j = 0; j < 4; ++j) for(int i = 0; i < 4; ++i)
-		color += x[i] * y[j] * COMPAT_TEXTURE(tex01, (texel + ivec2(i, j)) / texSize).rgb;
+		color += x[i] * y[j] * COMPAT_TEXTURE(tex01, (texel + vec2(i, j)) / texSize).rgb;
 
 	FRAG_COLOR = vec4(color, 1.0);
 } 
