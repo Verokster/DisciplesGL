@@ -177,6 +177,7 @@
 #define IDM_SPEED_3_0					(IDM_SPEED_2_0 + 10)
 
 #define IDM_ALWAYS_ACTIVE				191
+#define IDM_PATCH_CPU					192
 
 // Next default values for new objects
 // 

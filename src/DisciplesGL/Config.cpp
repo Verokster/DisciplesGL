@@ -207,14 +207,13 @@ namespace Config
 			config.keys.speedToggle = 5;
 			Config::Set(CONFIG_KEYS, "SpeedToggle", config.keys.speedToggle);
 
-			Config::Set(CONFIG_KEYS, "AlwaysActive", "");
-
 			config.speed.index = 5;
 			config.speed.value = 0.1f * speedList[config.speed.index];
 			Config::Set(CONFIG_WRAPPER, "GameSpeed", config.speed.index);
 			Config::Set(CONFIG_WRAPPER, "SpeedEnabled", config.speed.enabled);
 
 			Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
+			Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
 		}
 		else
 		{
@@ -341,14 +340,6 @@ namespace Config
 					config.keys.speedToggle = 0;
 			}
 
-			if (Config::Get(CONFIG_KEYS, "AlwaysActive", "", buffer, sizeof(buffer)))
-			{
-				value = Config::Get(CONFIG_KEYS, "AlwaysActive", 0);
-				config.keys.alwaysActive = LOBYTE(value);
-				if (config.keys.alwaysActive > 1 && config.keys.alwaysActive > 24)
-					config.keys.alwaysActive = 0;
-			}
-
 			value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
 			config.speed.index = *(DWORD*)&value;
 			if (config.speed.index >= sizeof(speedList) / sizeof(BYTE))
@@ -358,6 +349,7 @@ namespace Config
 			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", FALSE);
 
 			config.alwaysActive = Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
+			config.coldCPU = Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
 		}
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));
@@ -425,12 +417,6 @@ namespace Config
 		{
 			StrPrint(buffer, "%sF%d", buffer, config.keys.zoomImage);
 			SetMenuItemInfo(config.menu, IDM_RES_STRETCH, FALSE, &info);
-		}
-
-		if (config.keys.alwaysActive && (info.cch = sizeof(buffer), GetMenuItemInfo(config.menu, IDM_ALWAYS_ACTIVE, FALSE, &info)))
-		{
-			StrPrint(buffer, "%sF%d", buffer, config.keys.alwaysActive);
-			SetMenuItemInfo(config.menu, IDM_ALWAYS_ACTIVE, FALSE, &info);
 		}
 
 		MenuItemData mData;

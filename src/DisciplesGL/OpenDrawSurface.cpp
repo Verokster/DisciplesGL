@@ -239,7 +239,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 															else
 															{
 																while (copyWidth--)
-																	* dst++ = palette[*src++];
+																	*dst++ = palette[*src++];
 															}
 
 															srcData += info_ptr->rowbytes;
@@ -372,7 +372,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 													else
 													{
 														while (copyWidth--)
-															* dst++ = palette[*src++];
+															*dst++ = palette[*src++];
 													}
 
 													srcData += info_ptr->rowbytes;
@@ -519,7 +519,7 @@ HRESULT __stdcall OpenDrawSurface::GetPixelFormat(LPDDPIXELFORMAT lpDDPixelForma
 
 HRESULT __stdcall OpenDrawSurface::Lock(LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurfaceDesc, DWORD dwFlags, HANDLE hEvent)
 {
-	// 2049 - DDLOCK_NOSYSLOCK | DDLOCK_WAIT 
+	// 2049 - DDLOCK_NOSYSLOCK | DDLOCK_WAIT
 	this->GetSurfaceDesc(lpDDSurfaceDesc);
 
 	return DD_OK;
@@ -621,7 +621,7 @@ HRESULT __stdcall OpenDrawSurface::GetPalette(IDrawPalette** lplpDDPalette)
 
 HRESULT __stdcall OpenDrawSurface::SetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDColorKey)
 {
-	// 8 - DDCKEY_SRCBLT 
+	// 8 - DDCKEY_SRCBLT
 	if (lpDDColorKey)
 	{
 		DWORD colorKey = lpDDColorKey->dwColorSpaceLowValue;
@@ -639,7 +639,7 @@ HRESULT __stdcall OpenDrawSurface::SetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDC
 
 HRESULT __stdcall OpenDrawSurface::GetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDColorKey)
 {
-	// 8 - DDCKEY_SRCBLT 
+	// 8 - DDCKEY_SRCBLT
 	lpDDColorKey->dwColorSpaceLowValue = this->colorKey.dwColorSpaceLowValue;
 	lpDDColorKey->dwColorSpaceHighValue = this->colorKey.dwColorSpaceLowValue;
 
@@ -697,14 +697,9 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 		DWORD sWidth;
 		if (surface->attachedClipper)
 		{
-			RECT clip;
-			GetClientRect(surface->attachedClipper->hWnd, &clip);
-			ClientToScreen(surface->attachedClipper->hWnd, (POINT*)&clip.left);
-
-			lpSrcRect->left -= clip.left;
-			lpSrcRect->top -= clip.top;
-			lpSrcRect->right -= clip.left;
-			lpSrcRect->bottom -= clip.top;
+			POINT offset = { 0, 0 };
+			ClientToScreen(surface->attachedClipper->hWnd, &offset);
+			OffsetRect(lpSrcRect, -offset.x, -offset.y);
 
 			sWidth = config.mode->width;
 		}
@@ -714,14 +709,9 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 		DWORD dWidth;
 		if (this->attachedClipper)
 		{
-			RECT clip;
-			GetClientRect(this->attachedClipper->hWnd, &clip);
-			ClientToScreen(this->attachedClipper->hWnd, (POINT*)&clip.left);
-
-			lpDestRect->left -= clip.left;
-			lpDestRect->top -= clip.top;
-			lpDestRect->right -= clip.left;
-			lpDestRect->bottom -= clip.top;
+			POINT offset = { 0, 0 };
+			ClientToScreen(this->attachedClipper->hWnd, &offset);
+			OffsetRect(lpDestRect, -offset.x, -offset.y);
 
 			dWidth = config.mode->width;
 		}
@@ -843,12 +833,13 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			}
 			else if (width == this->mode.width && width == surface->mode.width)
 				MemoryCopy(destination, source, width * height * sizeof(DWORD));
-			else do
-			{
-				MemoryCopy(destination, source, width * sizeof(DWORD));
-				source += sWidth;
-				destination += dWidth;
-			} while (--height);
+			else
+				do
+				{
+					MemoryCopy(destination, source, width * sizeof(DWORD));
+					source += sWidth;
+					destination += dWidth;
+				} while (--height);
 		}
 		else
 		{
@@ -879,12 +870,13 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			}
 			else if (width == this->mode.width && width == surface->mode.width)
 				MemoryCopy(destination, source, width * height * sizeof(WORD));
-			else do
-			{
-				MemoryCopy(destination, source, width * sizeof(WORD));
-				source += sWidth;
-				destination += dWidth;
-			} while (--height);
+			else
+				do
+				{
+					MemoryCopy(destination, source, width * sizeof(WORD));
+					source += sWidth;
+					destination += dWidth;
+				} while (--height);
 		}
 	}
 

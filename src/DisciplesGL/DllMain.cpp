@@ -23,6 +23,7 @@
 */
 
 #include "stdafx.h"
+//#include "timeapi.h"
 #include "Hooks.h"
 #include "GLib.h"
 #include "Main.h"
@@ -71,6 +72,9 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 				actCtx.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
 				hActCtx = CreateActCtxC(&actCtx);
 			}
+
+			//if (config.coldCPU)
+				//timeBeginPeriod(1);
 		}
 		else
 			hDllModule = NULL;
@@ -82,6 +86,9 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	{
 		if (hDllModule)
 		{
+			//if (config.coldCPU)
+				//timeEndPeriod(1);
+
 			if (hActCtx && hActCtx != INVALID_HANDLE_VALUE)
 				ReleaseActCtxC(hActCtx);
 

@@ -275,6 +275,7 @@
     <ResourceCompile Include="module.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".clang-format" />
     <None Include="module.def" />
   </ItemGroup>
   <ItemGroup>

@@ -148,6 +148,9 @@
     <None Include="module.def">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include=".clang-format">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="module.rc">

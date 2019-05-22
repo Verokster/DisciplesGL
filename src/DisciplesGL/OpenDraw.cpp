@@ -1369,8 +1369,8 @@ VOID OpenDraw::RenderStart()
 				WC_DRAW,
 				NULL,
 				WS_VISIBLE | WS_POPUP,
-				rect.left, rect.top,
-				rect.right - rect.left, rect.bottom - rect.top,
+				0, 0,
+				rect.right, rect.bottom,
 				this->hWnd,
 				NULL,
 				hDllModule,
@@ -1383,8 +1383,8 @@ VOID OpenDraw::RenderStart()
 				WC_DRAW,
 				NULL,
 				WS_VISIBLE | WS_CHILD,
-				rect.left, rect.top,
-				rect.right - rect.left, rect.bottom - rect.top,
+				0, 0,
+				rect.right, rect.bottom,
 				this->hWnd,
 				NULL,
 				hDllModule,
@@ -1400,8 +1400,8 @@ VOID OpenDraw::RenderStart()
 	SetClassLongPtr(this->hWnd, GCLP_HBRBACKGROUND, NULL);
 	RedrawWindow(this->hWnd, NULL, NULL, RDW_INVALIDATE);
 
-	this->viewport.width = rect.right - rect.left;
-	this->viewport.height = rect.bottom - rect.top;
+	this->viewport.width = rect.right;
+	this->viewport.height = rect.bottom;
 	this->viewport.refresh = TRUE;
 
 	DWORD threadId;

@@ -23,6 +23,7 @@
 */
 
 #include "stdafx.h"
+#include "timeapi.h"
 #include "Window.h"
 #include "CommCtrl.h"
 #include "Windowsx.h"
@@ -360,6 +361,7 @@ namespace Window
 		}
 
 		CheckMenuItem(hMenu, IDM_ALWAYS_ACTIVE, MF_BYCOMMAND | (config.alwaysActive ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem(hMenu, IDM_PATCH_CPU, MF_BYCOMMAND | (config.coldCPU ? MF_CHECKED : MF_UNCHECKED));
 	}
 
 	VOID __fastcall CheckMenu(HWND hWnd)
@@ -881,11 +883,6 @@ namespace Window
 					CheckMenu(hWnd);
 					return NULL;
 				}
-				else if (config.keys.alwaysActive && config.keys.alwaysActive + VK_F1 - 1 == wParam)
-				{
-					return WindowProc(hWnd, WM_COMMAND, IDM_ALWAYS_ACTIVE, NULL);
-					return NULL;
-				}
 			}
 
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
@@ -1196,8 +1193,21 @@ namespace Window
 			case IDM_ALWAYS_ACTIVE:
 			{
 				config.alwaysActive = !config.alwaysActive;
-				Config::Set(CONFIG_DISCIPLE, "AlwaysActive", config.alwaysActive);
+				Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
 				CheckMenu(hWnd);
+				return NULL;
+			}
+
+			case IDM_PATCH_CPU:
+			{
+				config.coldCPU = !config.coldCPU;
+				if (config.coldCPU)
+					timeBeginPeriod(1);
+				else
+					timeEndPeriod(1);
+
+				Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
+				Window::CheckMenu(hWnd);
 				return NULL;
 			}
 
