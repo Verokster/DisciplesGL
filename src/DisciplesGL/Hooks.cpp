@@ -589,18 +589,7 @@ DWORD __fastcall PatchFunction(MappedFile* file,
 // ===============================================================
 HWND hWndMain;
 
-HWND __stdcall CreateWindowExHook(DWORD dwExStyle,
-	LPCSTR lpClassName,
-	LPCSTR lpWindowName,
-	DWORD dwStyle,
-	INT X,
-	INT Y,
-	INT nWidth,
-	INT nHeight,
-	HWND hWndParent,
-	HMENU hMenu,
-	HINSTANCE hInstance,
-	LPVOID lpParam)
+HWND __stdcall CreateWindowExHook(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, INT X, INT Y, INT nWidth, INT nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
 {
 	BOOL isMain = !StrCompare(lpClassName, "MQ_UIManager");
 	if (isMain)
@@ -621,8 +610,7 @@ HWND __stdcall CreateWindowExHook(DWORD dwExStyle,
 			Y = 0;
 	}
 
-	HWND hWnd = CreateWindowEx(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y,
-		nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+	HWND hWnd = CreateWindowEx(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 	if (isMain)
 	{
 		hWndMain = hWnd;
@@ -671,10 +659,7 @@ HWND __stdcall GetForegroundWindowHook()
 	return ddraw ? ddraw->hWnd : hWnd;
 }
 
-INT __stdcall MessageBoxHook(HWND hWnd,
-	LPCSTR lpText,
-	LPCSTR lpCaption,
-	UINT uType)
+INT __stdcall MessageBoxHook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)
 {
 	INT res;
 	ULONG_PTR cookie = NULL;
@@ -948,14 +933,9 @@ INT __stdcall GetDeviceCapsHook(HDC hdc, INT index)
 	return GetDeviceCaps(hdc, index);
 }
 
-const IID CLSID_DirectDraw = { 0xD7B70EE0, 0x4340, 0x11CF, 0xB0, 0x63, 0x00,
-	0x20, 0xAF, 0xC2, 0xCD, 0x35 };
+const IID CLSID_DirectDraw = { 0xD7B70EE0, 0x4340, 0x11CF, 0xB0, 0x63, 0x00, 0x20, 0xAF, 0xC2, 0xCD, 0x35 };
 
-HRESULT __stdcall CoCreateInstanceHook(REFCLSID rclsid,
-	LPUNKNOWN pUnkOuter,
-	DWORD dwClsContext,
-	REFIID riid,
-	LPVOID* ppv)
+HRESULT __stdcall CoCreateInstanceHook(REFCLSID rclsid, LPUNKNOWN pUnkOuter, DWORD dwClsContext, REFIID riid, LPVOID* ppv)
 {
 	if (!MemoryCompare((VOID*)&rclsid, &CLSID_DirectDraw, sizeof(IID)))
 		return Main::DrawCreateEx(NULL, ppv, riid, NULL);

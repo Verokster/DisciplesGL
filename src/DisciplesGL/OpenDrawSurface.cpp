@@ -415,6 +415,7 @@ VOID OpenDrawSurface::Flush()
 		while (--count);
 
 		SetEvent(this->ddraw->hDrawEvent);
+		Sleep(0);
 	}
 	else
 	{
@@ -475,12 +476,11 @@ VOID OpenDrawSurface::Flush()
 			}
 
 			SetEvent(this->ddraw->hDrawEvent);
+			Sleep(0);
 		}
 
 		surface->drawEnabled = this->drawIndex < 1;
 	}
-
-	Sleep(0);
 }
 
 ULONG __stdcall OpenDrawSurface::Release()
