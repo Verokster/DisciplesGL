@@ -60,6 +60,7 @@ struct Viewport
 	BOOL refresh;
 	INT width;
 	INT height;
+	INT offset;
 	Rect rectangle;
 	POINTFLOAT viewFactor;
 	POINTFLOAT clipFactor;
@@ -139,6 +140,7 @@ struct ConfigItems
 	BOOL singleWindow;
 	BOOL alwaysActive;
     BOOL coldCPU;
+	BOOL borderlessMode;
 
 	struct {
 		DWORD index;

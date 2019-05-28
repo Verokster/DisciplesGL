@@ -179,6 +179,9 @@
 #define IDM_ALWAYS_ACTIVE				191
 #define IDM_PATCH_CPU					192
 
+#define IDM_MODE_BORDERLESS				193
+#define IDM_MODE_EXCLUSIVE				194
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED

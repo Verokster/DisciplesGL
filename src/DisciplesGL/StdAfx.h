@@ -75,6 +75,7 @@ VOID __fastcall AlignedFree(VOID* block);
 
 #define GAME_WIDTH_FLOAT 800.0f
 #define GAME_HEIGHT_FLOAT 600.0f
+#define BORDERLESS_OFFSET 1
 
 extern HMODULE hDllModule;
 extern HANDLE hActCtx;

@@ -207,6 +207,8 @@ namespace Config
 			config.keys.speedToggle = 5;
 			Config::Set(CONFIG_KEYS, "SpeedToggle", config.keys.speedToggle);
 
+			Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderlessMode);
+
 			config.speed.index = 5;
 			config.speed.value = 0.1f * speedList[config.speed.index];
 			Config::Set(CONFIG_WRAPPER, "GameSpeed", config.speed.index);
@@ -339,6 +341,8 @@ namespace Config
 				if (config.keys.speedToggle > 1 && config.keys.speedToggle > 24)
 					config.keys.speedToggle = 0;
 			}
+
+			config.borderlessMode = Config::Get(CONFIG_WRAPPER, "BorderlessMode", FALSE);
 
 			value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
 			config.speed.index = *(DWORD*)&value;

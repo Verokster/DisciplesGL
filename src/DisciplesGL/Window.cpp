@@ -351,6 +351,9 @@ namespace Window
 			CheckMenuItem(hMenu, IDM_RES_STRETCH, MF_BYCOMMAND | (config.menuZoomImage ? MF_CHECKED : MF_UNCHECKED));
 		}
 
+		CheckMenuItem(hMenu, IDM_MODE_BORDERLESS, MF_BYCOMMAND | (config.borderlessMode ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem(hMenu, IDM_MODE_EXCLUSIVE, MF_BYCOMMAND | (!config.borderlessMode ? MF_CHECKED : MF_UNCHECKED));
+
 		// Game Speed
 		count = IDM_SPEED_3_0 - IDM_SPEED_1_0 + 1;
 		id = IDM_SPEED_1_0;
@@ -679,7 +682,7 @@ namespace Window
 				RECT rect;
 				GetClientRect(hWnd, &rect);
 				ddraw->viewport.width = rect.right;
-				ddraw->viewport.height = rect.bottom;
+				ddraw->viewport.height = rect.bottom - ddraw->viewport.offset;
 				ddraw->viewport.refresh = TRUE;
 				SetEvent(ddraw->hDrawEvent);
 			}
@@ -728,7 +731,7 @@ namespace Window
 					SetWindowPos(ddraw->hDraw, NULL, 0, 0, LOWORD(lParam), HIWORD(lParam), SWP_NOZORDER | SWP_NOMOVE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
 
 				ddraw->viewport.width = LOWORD(lParam);
-				ddraw->viewport.height = HIWORD(lParam);
+				ddraw->viewport.height = HIWORD(lParam) - ddraw->viewport.offset;
 				ddraw->viewport.refresh = TRUE;
 				SetEvent(ddraw->hDrawEvent);
 			}
@@ -744,6 +747,8 @@ namespace Window
 			AdjustWindowRect(&min, style, config.windowedMode);
 
 			RECT max = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
+			if (!config.windowedMode && config.borderlessMode)
+				max.bottom += BORDERLESS_OFFSET;
 			AdjustWindowRect(&max, style, config.windowedMode);
 
 			MINMAXINFO* mmi = (MINMAXINFO*)lParam;
@@ -757,7 +762,7 @@ namespace Window
 
 		case WM_ACTIVATEAPP:
 		{
-			if (!config.windowedMode)
+			if (!config.windowedMode && (!config.borderlessMode || !config.alwaysActive))
 			{
 				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 				if (ddraw)
@@ -1188,6 +1193,22 @@ namespace Window
 				}
 				else
 					return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+			}
+
+			case IDM_MODE_BORDERLESS:
+			{
+				config.borderlessMode = TRUE;
+				Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderlessMode);
+				CheckMenu(hWnd);
+				return NULL;
+			}
+
+			case IDM_MODE_EXCLUSIVE:
+			{
+				config.borderlessMode = FALSE;
+				Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderlessMode);
+				CheckMenu(hWnd);
+				return NULL;
 			}
 
 			case IDM_ALWAYS_ACTIVE:

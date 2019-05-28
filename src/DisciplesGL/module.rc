@@ -137,6 +137,11 @@ BEGIN
 	END
 	POPUP "&Options"
 	BEGIN
+		POPUP "&Full Screen Mode\a"
+		BEGIN
+			MENUITEM "&Borderless",					IDM_MODE_BORDERLESS
+			MENUITEM "&Exclusive",					IDM_MODE_EXCLUSIVE
+		END
 		POPUP "Game &Speed\a"
 		BEGIN
 			MENUITEM "1.0x",						IDM_SPEED_1_0
@@ -254,6 +259,11 @@ BEGIN
 	END
 	POPUP "&Options"
 	BEGIN
+		POPUP "&Full Screen Mode\a"
+		BEGIN
+			MENUITEM "&Borderless",					IDM_MODE_BORDERLESS
+			MENUITEM "&Exclusive",					IDM_MODE_EXCLUSIVE
+		END
 		POPUP "Game &Speed\a"
 		BEGIN
 			MENUITEM "1.0x",						IDM_SPEED_1_0
@@ -353,8 +363,8 @@ IDR_BORDER					RCDATA		DISCARDABLE			"..\\bmp\\border.png"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,5,23,626
- PRODUCTVERSION 1,2,8,0
+ FILEVERSION 2019,5,28,634
+ PRODUCTVERSION 1,2,9,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -370,10 +380,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2019.05.23.626"
+			VALUE "FileVersion", "2019.05.28.634"
 			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4DLL.dll"
-			VALUE "ProductVersion", "1.2.8"
+			VALUE "ProductVersion", "1.2.9"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

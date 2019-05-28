@@ -725,6 +725,9 @@ BOOL __stdcall GetCursorPosHookV1(LPPOINT lpPoint)
 		RECT rect;
 		if (GetClientRect(hWndMain, &rect) && ClientToScreen(hWndMain, (LPPOINT)&rect))
 		{
+			if (!config.windowedMode && config.borderlessMode)
+				rect.bottom -= BORDERLESS_OFFSET;
+
 			FLOAT fx = (FLOAT)config.mode->width / rect.right;
 			FLOAT fy = (FLOAT)config.mode->height / rect.bottom;
 
@@ -772,6 +775,9 @@ BOOL __stdcall GetCursorPosHookV2(LPPOINT lpPoint)
 		RECT rect;
 		if (GetClientRect(hWndMain, &rect) && ClientToScreen(hWndMain, (LPPOINT)&rect))
 		{
+			if (!config.windowedMode && config.borderlessMode)
+				rect.bottom -= BORDERLESS_OFFSET;
+
 			FLOAT fx = (FLOAT)config.mode->width / rect.right;
 			FLOAT fy = (FLOAT)config.mode->height / rect.bottom;
 
@@ -865,6 +871,9 @@ BOOL __stdcall SetCursorPosHook(INT X, INT Y)
 	RECT rect;
 	if (GetClientRect(hWndMain, &rect) && ClientToScreen(hWndMain, (LPPOINT)&rect))
 	{
+		if (!config.windowedMode && config.borderlessMode)
+			rect.bottom -= BORDERLESS_OFFSET;
+
 		FLOAT fx = (FLOAT)rect.right / config.mode->width;
 		FLOAT fy = (FLOAT)rect.bottom / config.mode->height;
 

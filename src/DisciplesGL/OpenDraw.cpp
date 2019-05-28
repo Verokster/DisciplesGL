@@ -395,7 +395,7 @@ VOID OpenDraw::RenderOld()
 							fpsCounter->Calculate();
 
 						if (this->CheckView(TRUE))
-							GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height);
+							GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
 						glFilter = 0;
 						if (this->isStateChanged)
@@ -728,7 +728,7 @@ VOID OpenDraw::RenderMid()
 										fpsCounter->Calculate();
 
 									if (this->CheckView(TRUE))
-										GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height);
+										GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
 									if (this->isStateChanged)
 									{
@@ -1155,7 +1155,7 @@ VOID OpenDraw::RenderNew()
 													else
 													{
 														if (this->CheckView(TRUE))
-															GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height);
+															GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
 														if (this->isStateChanged)
 														{
@@ -1202,7 +1202,7 @@ VOID OpenDraw::RenderNew()
 
 														UseShaderProgram(filterProgram2, viewSize);
 														{
-															GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height);
+															GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
 															GLClear(GL_COLOR_BUFFER_BIT);
 															GLBindTexture(GL_TEXTURE_2D, tboId);
@@ -1362,7 +1362,7 @@ VOID OpenDraw::RenderStart()
 		this->hDraw = this->hWnd;
 	else
 	{
-		if (!config.windowedMode)
+		if (!config.windowedMode && !config.borderlessMode)
 		{
 			this->hDraw = CreateWindowEx(
 				WS_EX_CONTROLPARENT | WS_EX_TOPMOST,
@@ -1401,7 +1401,7 @@ VOID OpenDraw::RenderStart()
 	RedrawWindow(this->hWnd, NULL, NULL, RDW_INVALIDATE);
 
 	this->viewport.width = rect.right;
-	this->viewport.height = rect.bottom;
+	this->viewport.height = rect.bottom - this->viewport.offset;
 	this->viewport.refresh = TRUE;
 
 	DWORD threadId;
@@ -1475,7 +1475,7 @@ BOOL OpenDraw::CheckView(BOOL isDouble)
 
 			clipRect.left = this->viewport.rectangle.x;
 			clipRect.right = clipRect.left + this->viewport.rectangle.width;
-			clipRect.bottom = clipRect.bottom - this->viewport.rectangle.y;
+			clipRect.bottom -= this->viewport.rectangle.y + this->viewport.offset;
 			clipRect.top = clipRect.bottom - this->viewport.rectangle.height;
 
 			ClientToScreen(this->hWnd, (POINT*)&clipRect.left);
@@ -1569,10 +1569,11 @@ VOID OpenDraw::SetFullscreenMode()
 	if (config.windowedMode)
 		GetWindowPlacement(hWnd, &this->windowPlacement);
 
+	this->viewport.offset = config.borderlessMode ? BORDERLESS_OFFSET : 0;
 	SetMenu(hWnd, NULL);
 
 	SetWindowLong(this->hWnd, GWL_STYLE, WS_FULLSCREEN);
-	SetWindowPos(this->hWnd, NULL, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL);
+	SetWindowPos(this->hWnd, NULL, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) + this->viewport.offset, NULL);
 }
 
 VOID OpenDraw::SetWindowedMode()
@@ -1607,6 +1608,7 @@ VOID OpenDraw::SetWindowedMode()
 		this->windowPlacement.showCmd = SW_SHOWNORMAL;
 	}
 
+	this->viewport.offset = 0;
 	SetMenu(hWnd, config.menu);
 
 	SetWindowLong(this->hWnd, GWL_STYLE, WS_WINDOWED);
