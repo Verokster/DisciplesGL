@@ -197,8 +197,7 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 		if (::DescribePixelFormat(ddraw->hDc, glPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd) == NULL)
 			Main::ShowError(IDS_ERROR_DESCRIBE_PF, __FILE__, __LINE__);
 
-		if ((pfd.iPixelType != PFD_TYPE_RGBA) ||
-			(pfd.cRedBits < 5) || (pfd.cGreenBits < 6) || (pfd.cBlueBits < 5))
+		if ((pfd.iPixelType != PFD_TYPE_RGBA) || (pfd.cRedBits < 5) || (pfd.cGreenBits < 6) || (pfd.cBlueBits < 5))
 			Main::ShowError(IDS_ERROR_BAD_PF, __FILE__, __LINE__);
 
 		HGLRC hRc = WGLCreateContext(ddraw->hDc);
@@ -368,7 +367,7 @@ VOID OpenDraw::RenderOld()
 
 				while (!this->isFinish)
 				{
-					OpenDrawSurface * surface = this->attachedSurface;
+					OpenDrawSurface* surface = this->attachedSurface;
 					if (surface)
 					{
 						BOOL isZoomed = surface->isZoomed[surface->bufferIndex];
@@ -595,7 +594,8 @@ VOID OpenDraw::RenderMid()
 
 	DWORD maxSize = config.mode->width > config.mode->height ? config.mode->width : config.mode->height;
 	DWORD maxTexSize = 1;
-	while (maxTexSize < maxSize) maxTexSize <<= 1;
+	while (maxTexSize < maxSize)
+		maxTexSize <<= 1;
 	FLOAT texWidth = config.mode->width == maxTexSize ? 1.0f : (FLOAT)config.mode->width / maxTexSize;
 	FLOAT texHeight = config.mode->height == maxTexSize ? 1.0f : (FLOAT)config.mode->height / maxTexSize;
 
@@ -701,7 +701,7 @@ VOID OpenDraw::RenderMid()
 
 							while (!this->isFinish)
 							{
-								OpenDrawSurface * surface = this->attachedSurface;
+								OpenDrawSurface* surface = this->attachedSurface;
 								if (surface)
 								{
 									BOOL isZoomed = surface->isZoomed[surface->bufferIndex];
@@ -811,7 +811,8 @@ VOID OpenDraw::RenderNew()
 
 	DWORD maxSize = config.mode->width > config.mode->height ? config.mode->width : config.mode->height;
 	DWORD maxTexSize = 1;
-	while (maxTexSize < maxSize) maxTexSize <<= 1;
+	while (maxTexSize < maxSize)
+		maxTexSize <<= 1;
 	FLOAT texWidth = config.mode->width == maxTexSize ? 1.0f : (FLOAT)config.mode->width / maxTexSize;
 	FLOAT texHeight = config.mode->height == maxTexSize ? 1.0f : (FLOAT)config.mode->height / maxTexSize;
 
@@ -1018,8 +1019,7 @@ VOID OpenDraw::RenderNew()
 													}
 
 													ImageFilter frameFilter = config.image.filter;
-													if (frameFilter == FilterXRBZ || frameFilter == FilterScaleHQ ||
-														frameFilter == FilterXSal || frameFilter == FilterEagle || frameFilter == FilterScaleNx)
+													if (frameFilter == FilterXRBZ || frameFilter == FilterScaleHQ || frameFilter == FilterXSal || frameFilter == FilterEagle || frameFilter == FilterScaleNx)
 													{
 														GLBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboId);
 
@@ -1194,8 +1194,7 @@ VOID OpenDraw::RenderNew()
 													}
 
 													// Draw from FBO
-													if (frameFilter == FilterXRBZ || frameFilter == FilterScaleHQ ||
-														frameFilter == FilterXSal || frameFilter == FilterEagle || frameFilter == FilterScaleNx)
+													if (frameFilter == FilterXRBZ || frameFilter == FilterScaleHQ || frameFilter == FilterXSal || frameFilter == FilterEagle || frameFilter == FilterScaleNx)
 													{
 														GLFinish();
 														GLBindFramebuffer(GL_DRAW_FRAMEBUFFER, NULL);
@@ -1422,16 +1421,13 @@ VOID OpenDraw::RenderStop()
 	CloseHandle(this->hDrawThread);
 	this->hDrawThread = NULL;
 
+	BOOL wasFull = GetWindowLong(this->hDraw, GWL_STYLE) & WS_POPUP;
 	if (!config.singleWindow)
-	{
-		BOOL wasFull = GetWindowLong(this->hDraw, GWL_STYLE) & WS_POPUP;
+		DestroyWindow(this->hDraw);
 
-		if (DestroyWindow(this->hDraw))
-			this->hDraw = NULL;
-
-		if (wasFull)
-			GL::ResetContext();
-	}
+	this->hDraw = NULL;
+	if (wasFull)
+		GL::ResetPixelFormat();
 
 	ClipCursor(NULL);
 

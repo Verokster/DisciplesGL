@@ -282,6 +282,6 @@ namespace GL
 	VOID __fastcall ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd);
 	VOID __fastcall PreparePixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd);
 	INT __fastcall PreparePixelFormat(PIXELFORMATDESCRIPTOR* pfd);
+	VOID __fastcall ResetPixelFormat();
 	GLuint __fastcall CompileShaderSource(DWORD name, const CHAR* version, GLenum type);
-	VOID __fastcall ResetContext();
 }

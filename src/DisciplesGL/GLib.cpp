@@ -437,6 +437,39 @@ namespace GL
 		return res;
 	}
 
+	VOID __fastcall ResetPixelFormat()
+	{
+		PIXELFORMATDESCRIPTOR pfd;
+		PreparePixelFormatDescription(&pfd);
+
+		HWND hWnd = CreateWindowEx(
+			WS_EX_APPWINDOW,
+			WC_DRAW,
+			NULL,
+			WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+			0, 0,
+			1, 1,
+			NULL,
+			NULL,
+			hDllModule,
+			NULL);
+
+		if (hWnd)
+		{
+			HDC hDc = GetDC(hWnd);
+			if (hDc)
+			{
+				INT res = ::ChoosePixelFormat(hDc, &pfd);
+				if (res)
+					::SetPixelFormat(hDc, res, &pfd);
+
+				ReleaseDC(hWnd, hDc);
+			}
+
+			DestroyWindow(hWnd);
+		}
+	}
+
 	GLuint __fastcall CompileShaderSource(DWORD name, const CHAR* version, GLenum type)
 	{
 		HGLOBAL hResourceData;
@@ -486,24 +519,6 @@ namespace GL
 		}
 
 		return shader;
-	}
-
-	DWORD __stdcall ResetThread(LPVOID lpParameter)
-	{
-		PIXELFORMATDESCRIPTOR pfd;
-		GL::PreparePixelFormat(&pfd);
-
-		return NULL;
-	}
-
-	VOID __fastcall ResetContext()
-	{
-		HANDLE hThread = CreateThread(NULL, NULL, ResetThread, NULL, NORMAL_PRIORITY_CLASS, NULL);
-		if (hThread)
-		{
-			WaitForSingleObject(hThread, INFINITE);
-			CloseHandle(hThread);
-		}
 	}
 #pragma optimize("", on)
 }

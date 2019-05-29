@@ -216,6 +216,9 @@ namespace Config
 
 			Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
 			Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
+
+			config.singleWindow = TRUE;
+			Config::Set(CONFIG_WRAPPER, "SingleWindow", config.singleWindow);
 		}
 		else
 		{
@@ -342,7 +345,7 @@ namespace Config
 					config.keys.speedToggle = 0;
 			}
 
-			config.borderlessMode = Config::Get(CONFIG_WRAPPER, "BorderlessMode", FALSE);
+			config.borderlessMode = (BOOL)Config::Get(CONFIG_WRAPPER, "BorderlessMode", FALSE);
 
 			value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
 			config.speed.index = *(DWORD*)&value;
@@ -352,8 +355,9 @@ namespace Config
 
 			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", FALSE);
 
-			config.alwaysActive = Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
-			config.coldCPU = Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
+			config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
+			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
+			config.singleWindow = (BOOL)Config::Get(CONFIG_WRAPPER, "SingleWindow", TRUE);
 		}
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));
@@ -373,17 +377,6 @@ namespace Config
 
 		config.resolution.width = LOWORD(config.mode->width);
 		config.resolution.height = LOWORD(config.mode->height);
-
-		HMODULE hLibrary = LoadLibrary("NTDLL.dll");
-		if (hLibrary)
-		{
-			if (GetProcAddress(hLibrary, "wine_get_version"))
-				config.singleWindow = TRUE;
-			FreeLibrary(hLibrary);
-		}
-
-		if (!config.singleWindow)
-			config.singleWindow = Config::Get(CONFIG_WRAPPER, "SingleWindow", FALSE);
 
 		CHAR buffer[256];
 		MENUITEMINFO info;
