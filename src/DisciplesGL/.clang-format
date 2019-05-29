@@ -5,6 +5,7 @@ PointerAlignment: Left
 UseTab: ForContinuationAndIndentation
 TabWidth: 4
 SortIncludes: false
+NamespaceIndentation: All
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterEnum: true

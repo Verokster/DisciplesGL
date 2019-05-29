@@ -200,10 +200,10 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 		if ((pfd.iPixelType != PFD_TYPE_RGBA) || (pfd.cRedBits < 5) || (pfd.cGreenBits < 6) || (pfd.cBlueBits < 5))
 			Main::ShowError(IDS_ERROR_BAD_PF, __FILE__, __LINE__);
 
-		HGLRC hRc = WGLCreateContext(ddraw->hDc);
+		HGLRC hRc = wglCreateContext(ddraw->hDc);
 		if (hRc)
 		{
-			if (WGLMakeCurrent(ddraw->hDc, hRc))
+			if (wglMakeCurrent(ddraw->hDc, hRc))
 			{
 				GL::CreateContextAttribs(ddraw->hDc, &hRc);
 				if (glVersion >= GL_VER_2_0)
@@ -228,10 +228,10 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 				else
 					ddraw->RenderOld();
 
-				WGLMakeCurrent(ddraw->hDc, NULL);
+				wglMakeCurrent(ddraw->hDc, NULL);
 			}
 
-			WGLDeleteContext(hRc);
+			wglDeleteContext(hRc);
 		}
 
 		::ReleaseDC(ddraw->hDraw, ddraw->hDc);
@@ -1352,7 +1352,6 @@ VOID OpenDraw::RenderStart()
 		return;
 
 	this->isFinish = FALSE;
-	GL::Load();
 
 	RECT rect;
 	GetClientRect(this->hWnd, &rect);

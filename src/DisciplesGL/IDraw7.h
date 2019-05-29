@@ -29,8 +29,7 @@
 #include "IDrawClipper.h"
 #include "IDrawSurface7.h"
 
-class IDraw7 : public IDrawUnknown
-{
+class IDraw7 : public IDrawUnknown {
 	// Inherited via IDirectDraw7
 	virtual HRESULT __stdcall Compact();
 	virtual HRESULT __stdcall CreateClipper(DWORD, IDrawClipper**, IUnknown*);
@@ -60,4 +59,3 @@ class IDraw7 : public IDrawUnknown
 	virtual HRESULT __stdcall StartModeTest(LPSIZE, DWORD, DWORD);
 	virtual HRESULT __stdcall EvaluateMode(DWORD, DWORD*);
 };
-

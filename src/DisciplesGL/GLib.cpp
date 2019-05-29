@@ -30,10 +30,6 @@
 #define PREFIX_GL "gl"
 #define PREFIX_WGL "wgl"
 
-WGLGETPROCADDRESS WGLGetProcAddress;
-WGLMAKECURRENT WGLMakeCurrent;
-WGLCREATECONTEXT WGLCreateContext;
-WGLDELETECONTEXT WGLDeleteContext;
 WGLCREATECONTEXTATTRIBSARB WGLCreateContextAttribs;
 WGLCHOOSEPIXELFORMAT WGLChoosePixelFormat;
 WGLGETEXTENSIONSSTRING WGLGetExtensionsString;
@@ -120,28 +116,6 @@ DWORD glCapsClampToEdge;
 namespace GL
 {
 #pragma optimize("s", on)
-	BOOL __fastcall Load()
-	{
-		if (!hGLModule)
-			hGLModule = LoadLibrary("OPENGL32.dll");
-
-		if (!hGLModule)
-			return FALSE;
-
-		WGLGetProcAddress = (WGLGETPROCADDRESS)GetProcAddress(hGLModule, "wglGetProcAddress");
-		WGLMakeCurrent = (WGLMAKECURRENT)GetProcAddress(hGLModule, "wglMakeCurrent");
-		WGLCreateContext = (WGLCREATECONTEXT)GetProcAddress(hGLModule, "wglCreateContext");
-		WGLDeleteContext = (WGLDELETECONTEXT)GetProcAddress(hGLModule, "wglDeleteContext");
-
-		return TRUE;
-	}
-
-	VOID __fastcall Free()
-	{
-		if (hGLModule && FreeLibrary(hGLModule))
-			hGLModule = NULL;
-	}
-
 	VOID __fastcall LoadFunction(CHAR* buffer, const CHAR* prefix, const CHAR* name, PROC* func, const CHAR* sufix = NULL)
 	{
 		if (*func)
@@ -153,11 +127,15 @@ namespace GL
 		if (sufix)
 			StrCat(buffer, sufix);
 
-		if (WGLGetProcAddress)
-			*func = WGLGetProcAddress(buffer);
+		if (wglGetProcAddress)
+			*func = wglGetProcAddress(buffer);
 
 		if ((INT)*func >= -1 && (INT)*func <= 3)
+		{
+			if (!hGLModule)
+				hGLModule = GetModuleHandle("OPENGL32.dll");
 			*func = GetProcAddress(hGLModule, buffer);
+		}
 
 		if (!sufix)
 		{
@@ -178,8 +156,8 @@ namespace GL
 		HGLRC hRc = WGLCreateContextAttribs(hDc, NULL, wglAttributes);
 		if (hRc)
 		{
-			WGLMakeCurrent(hDc, hRc);
-			WGLDeleteContext(*lpHRc);
+			wglMakeCurrent(hDc, hRc);
+			wglDeleteContext(*lpHRc);
 			*lpHRc = hRc;
 
 			return TRUE;
@@ -383,8 +361,7 @@ namespace GL
 			NULL,
 			NULL,
 			hDllModule,
-			NULL
-		);
+			NULL);
 
 		if (hWnd)
 		{
@@ -394,10 +371,10 @@ namespace GL
 				res = ::ChoosePixelFormat(hDc, pfd);
 				if (res && ::SetPixelFormat(hDc, res, pfd))
 				{
-					HGLRC hRc = WGLCreateContext(hDc);
+					HGLRC hRc = wglCreateContext(hDc);
 					if (hRc)
 					{
-						if (WGLMakeCurrent(hDc, hRc))
+						if (wglMakeCurrent(hDc, hRc))
 						{
 							CHAR buffer[32];
 							LoadFunction(buffer, PREFIX_WGL, "ChoosePixelFormat", (PROC*)&WGLChoosePixelFormat, "ARB");
@@ -421,10 +398,10 @@ namespace GL
 									res = piFormats[0];
 							}
 
-							WGLMakeCurrent(hDc, NULL);
+							wglMakeCurrent(hDc, NULL);
 						}
 
-						WGLDeleteContext(hRc);
+						wglDeleteContext(hRc);
 					}
 				}
 

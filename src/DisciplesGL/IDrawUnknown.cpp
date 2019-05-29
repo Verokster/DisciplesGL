@@ -39,17 +39,18 @@ VOID IDrawUnknown::operator delete(VOID* p)
 			MemoryFree(p);
 			return;
 		}
-		else while (entry->last)
-		{
-			if (entry->last == item)
+		else
+			while (entry->last)
 			{
-				entry->last = item->last;
-				MemoryFree(p);
-				return;
-			}
+				if (entry->last == item)
+				{
+					entry->last = item->last;
+					MemoryFree(p);
+					return;
+				}
 
-			entry = entry->last;
-		}
+				entry = entry->last;
+			}
 	}
 }
 

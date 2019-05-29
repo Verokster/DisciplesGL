@@ -72,42 +72,150 @@ extern "C"
 	VOID __stdcall _expr4true(DWORD);
 }
 
-VOID _declspec(naked) __stdcall ex_c4ltoa45() { _asm { JMP _c4ltoa45 } }
-VOID _declspec(naked) __stdcall ex_c4dtoa45() { _asm { JMP _c4dtoa45 } }
-VOID _declspec(naked) __stdcall ex_c4atod() { _asm { JMP _c4atod } }
-VOID _declspec(naked) __stdcall ex_c4atol() { _asm { JMP _c4atol } }
-VOID _declspec(naked) __stdcall ex_f4ptr() { _asm { JMP _f4ptr } }
-VOID _declspec(naked) __stdcall ex_f4name() { _asm { JMP _f4name } }
-VOID _declspec(naked) __stdcall ex_f4type() { _asm { JMP _f4type } }
-VOID _declspec(naked) __stdcall ex_f4len() { _asm { JMP _f4len } }
-VOID _declspec(naked) __stdcall ex_f4decimals() { _asm { JMP _f4decimals } }
-VOID _declspec(naked) __stdcall ex_d4delete() { _asm { JMP _d4delete } }
-VOID _declspec(naked) __stdcall ex_d4close() { _asm { JMP _d4close } }
-VOID _declspec(naked) __stdcall ex_d4pack() { _asm { JMP _d4pack } }
-VOID _declspec(naked) __stdcall ex_d4fieldJ() { _asm { JMP _d4fieldJ } }
-VOID _declspec(naked) __stdcall ex_d4numFields() { _asm { JMP _d4numFields } }
-VOID _declspec(naked) __stdcall ex_d4open() { _asm { JMP _d4open } }
-VOID _declspec(naked) __stdcall ex_d4openClone() { _asm { JMP _d4openClone } }
-VOID _declspec(naked) __stdcall ex_d4appendBlank() { _asm { JMP _d4appendBlank } }
-VOID _declspec(naked) __stdcall ex_d4bof() { _asm { JMP _d4bof } }
-VOID _declspec(naked) __stdcall ex_d4eof() { _asm { JMP _d4eof } }
-VOID _declspec(naked) __stdcall ex_d4deleted() { _asm { JMP _d4deleted } }
-VOID _declspec(naked) __stdcall ex_d4goBof() { _asm { JMP _d4goBof } }
-VOID _declspec(naked) __stdcall ex_d4skip() { _asm { JMP _d4skip } }
-VOID _declspec(naked) __stdcall ex_d4lockAll() { _asm { JMP _d4lockAll } }
-VOID _declspec(naked) __stdcall ex_d4unlock() { _asm { JMP _d4unlock } }
-VOID _declspec(naked) __stdcall ex_d4changed() { _asm { JMP _d4changed } }
-VOID _declspec(naked) __stdcall ex_d4field() { _asm { JMP _d4field } }
-VOID _declspec(naked) __stdcall ex_u4freeDefault() { _asm { JMP _u4freeDefault } }
-VOID _declspec(naked) __stdcall ex_code4optStart() { _asm { JMP _code4optStart } }
-VOID _declspec(naked) __stdcall ex_code4initLow() { _asm { JMP _code4initLow } }
-VOID _declspec(naked) __stdcall ex_code4initUndo() { _asm { JMP _code4initUndo } }
-VOID _declspec(naked) __stdcall ex_code4close() { _asm { JMP _code4close } }
-VOID _declspec(naked) __stdcall ex_error4text() { _asm { JMP _error4text } }
-VOID _declspec(naked) __stdcall ex_error4default() { _asm { JMP _error4default } }
-VOID _declspec(naked) __stdcall ex_expr4parseLow() { _asm { JMP _expr4parseLow } }
-VOID _declspec(naked) __stdcall ex_expr4source() { _asm { JMP _expr4source } }
-VOID _declspec(naked) __stdcall ex_expr4true() { _asm { JMP _expr4true } }
+VOID _declspec(naked) __stdcall ex_c4ltoa45()
+{
+	_asm { JMP _c4ltoa45 }
+}
+VOID _declspec(naked) __stdcall ex_c4dtoa45()
+{
+	_asm { JMP _c4dtoa45 }
+}
+VOID _declspec(naked) __stdcall ex_c4atod()
+{
+	_asm { JMP _c4atod }
+}
+VOID _declspec(naked) __stdcall ex_c4atol()
+{
+	_asm { JMP _c4atol }
+}
+VOID _declspec(naked) __stdcall ex_f4ptr()
+{
+	_asm { JMP _f4ptr }
+}
+VOID _declspec(naked) __stdcall ex_f4name()
+{
+	_asm { JMP _f4name }
+}
+VOID _declspec(naked) __stdcall ex_f4type()
+{
+	_asm { JMP _f4type }
+}
+VOID _declspec(naked) __stdcall ex_f4len()
+{
+	_asm { JMP _f4len }
+}
+VOID _declspec(naked) __stdcall ex_f4decimals()
+{
+	_asm { JMP _f4decimals }
+}
+VOID _declspec(naked) __stdcall ex_d4delete()
+{
+	_asm { JMP _d4delete }
+}
+VOID _declspec(naked) __stdcall ex_d4close()
+{
+	_asm { JMP _d4close }
+}
+VOID _declspec(naked) __stdcall ex_d4pack()
+{
+	_asm { JMP _d4pack }
+}
+VOID _declspec(naked) __stdcall ex_d4fieldJ()
+{
+	_asm { JMP _d4fieldJ }
+}
+VOID _declspec(naked) __stdcall ex_d4numFields()
+{
+	_asm { JMP _d4numFields }
+}
+VOID _declspec(naked) __stdcall ex_d4open()
+{
+	_asm { JMP _d4open }
+}
+VOID _declspec(naked) __stdcall ex_d4openClone()
+{
+	_asm { JMP _d4openClone }
+}
+VOID _declspec(naked) __stdcall ex_d4appendBlank()
+{
+	_asm { JMP _d4appendBlank }
+}
+VOID _declspec(naked) __stdcall ex_d4bof()
+{
+	_asm { JMP _d4bof }
+}
+VOID _declspec(naked) __stdcall ex_d4eof()
+{
+	_asm { JMP _d4eof }
+}
+VOID _declspec(naked) __stdcall ex_d4deleted()
+{
+	_asm { JMP _d4deleted }
+}
+VOID _declspec(naked) __stdcall ex_d4goBof()
+{
+	_asm { JMP _d4goBof }
+}
+VOID _declspec(naked) __stdcall ex_d4skip()
+{
+	_asm { JMP _d4skip }
+}
+VOID _declspec(naked) __stdcall ex_d4lockAll()
+{
+	_asm { JMP _d4lockAll }
+}
+VOID _declspec(naked) __stdcall ex_d4unlock()
+{
+	_asm { JMP _d4unlock }
+}
+VOID _declspec(naked) __stdcall ex_d4changed()
+{
+	_asm { JMP _d4changed }
+}
+VOID _declspec(naked) __stdcall ex_d4field()
+{
+	_asm { JMP _d4field }
+}
+VOID _declspec(naked) __stdcall ex_u4freeDefault()
+{
+	_asm { JMP _u4freeDefault }
+}
+VOID _declspec(naked) __stdcall ex_code4optStart()
+{
+	_asm { JMP _code4optStart }
+}
+VOID _declspec(naked) __stdcall ex_code4initLow()
+{
+	_asm { JMP _code4initLow }
+}
+VOID _declspec(naked) __stdcall ex_code4initUndo()
+{
+	_asm { JMP _code4initUndo }
+}
+VOID _declspec(naked) __stdcall ex_code4close()
+{
+	_asm { JMP _code4close }
+}
+VOID _declspec(naked) __stdcall ex_error4text()
+{
+	_asm { JMP _error4text }
+}
+VOID _declspec(naked) __stdcall ex_error4default()
+{
+	_asm { JMP _error4default }
+}
+VOID _declspec(naked) __stdcall ex_expr4parseLow()
+{
+	_asm { JMP _expr4parseLow }
+}
+VOID _declspec(naked) __stdcall ex_expr4source()
+{
+	_asm { JMP _expr4source }
+}
+VOID _declspec(naked) __stdcall ex_expr4true()
+{
+	_asm { JMP _expr4true }
+}
 
 DOUBLE __fastcall MathRound(DOUBLE number)
 {
@@ -115,15 +223,11 @@ DOUBLE __fastcall MathRound(DOUBLE number)
 	return floorVal + 0.5f > number ? floorVal : MathCeil(number);
 }
 
-typedef VOID*(__cdecl *MALLOC)(size_t);
-typedef VOID(__cdecl *FREE)(VOID*);
-
-struct Aligned
-{
+struct Aligned {
 	Aligned* last;
 	VOID* data;
 	VOID* block;
-} *alignedList;
+} * alignedList;
 
 VOID* __fastcall AlignedAlloc(size_t size)
 {
@@ -150,19 +254,20 @@ VOID __fastcall AlignedFree(VOID* block)
 			alignedList = last;
 			return;
 		}
-		else while (entry->last)
-		{
-			if (entry->last->block == block)
+		else
+			while (entry->last)
 			{
-				Aligned* last = entry->last->last;
-				MemoryFree(entry->last->data);
-				MemoryFree(entry->last);
-				entry->last = last;
-				return;
-			}
+				if (entry->last->block == block)
+				{
+					Aligned* last = entry->last->last;
+					MemoryFree(entry->last->data);
+					MemoryFree(entry->last);
+					entry->last = last;
+					return;
+				}
 
-			entry = entry->last;
-		}
+				entry = entry->last;
+			}
 	}
 }
 

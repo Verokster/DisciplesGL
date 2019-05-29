@@ -40,7 +40,7 @@ namespace Main
 
 	HRESULT __stdcall DrawCreate(GUID* lpGUID, LPDIRECTDRAW* lplpDD, IUnknown* pUnkOuter)
 	{
-		*lplpDD = (LPDIRECTDRAW)new OpenDraw((IDrawUnknown**)&drawList);
+		*lplpDD = (LPDIRECTDRAW) new OpenDraw((IDrawUnknown**)&drawList);
 		return DD_OK;
 	}
 

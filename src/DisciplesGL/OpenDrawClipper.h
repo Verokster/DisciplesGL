@@ -27,8 +27,7 @@
 
 class OpenDraw;
 
-class OpenDrawClipper : public IDrawClipper
-{
+class OpenDrawClipper : public IDrawClipper {
 public:
 	OpenDraw* ddraw;
 	HWND hWnd;
@@ -38,4 +37,3 @@ public:
 	// Inherited via IDrawClipper
 	HRESULT __stdcall SetHWnd(DWORD, HWND) override;
 };
-

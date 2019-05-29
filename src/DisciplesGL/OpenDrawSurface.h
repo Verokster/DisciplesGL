@@ -30,8 +30,7 @@
 
 class OpenDraw;
 
-class OpenDrawSurface : public IDrawSurface7
-{
+class OpenDrawSurface : public IDrawSurface7 {
 private:
 	BOOL isCreated;
 	DDCOLORKEY colorKey;
@@ -77,4 +76,3 @@ public:
 	HRESULT __stdcall GetPalette(IDrawPalette**) override;
 	HRESULT __stdcall GetDDInterface(LPVOID*) override;
 };
-

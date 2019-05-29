@@ -37,14 +37,12 @@ extern BOOL isFpsChanged;
 
 extern const WORD counters[10][FPS_HEIGHT];
 
-struct FrameItem
-{
+struct FrameItem {
 	DWORD tick;
 	DWORD span;
 };
 
-class FpsCounter
-{
+class FpsCounter {
 private:
 	DWORD accuracy;
 	DWORD count;

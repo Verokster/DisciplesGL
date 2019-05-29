@@ -26,11 +26,10 @@
 
 #include "ddraw.h"
 
-class IDrawUnknown
-{
+class IDrawUnknown {
 protected:
 	ULONG refCount;
-	
+
 public:
 	IDrawUnknown** list;
 	IDrawUnknown* last;

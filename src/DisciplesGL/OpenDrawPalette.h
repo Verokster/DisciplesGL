@@ -27,8 +27,7 @@
 
 class OpenDraw;
 
-class OpenDrawPalette : public IDrawPalette
-{
+class OpenDrawPalette : public IDrawPalette {
 public:
 	OpenDraw* ddraw;
 	DWORD* entries;
@@ -40,4 +39,3 @@ public:
 	HRESULT __stdcall GetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY) override;
 	HRESULT __stdcall SetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY) override;
 };
-

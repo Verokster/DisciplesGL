@@ -29,8 +29,7 @@
 #include "OpenDrawClipper.h"
 #include "OpenDrawPalette.h"
 
-class OpenDraw : public IDraw7
-{
+class OpenDraw : public IDraw7 {
 public:
 	OpenDrawSurface* surfaceEntries;
 	OpenDrawClipper* clipperEntries;

@@ -93,7 +93,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 				ReleaseActCtxC(hActCtx);
 
 			UnregisterClass(WC_DRAW, hDllModule);
-			GL::Free();
+
 			ClipCursor(NULL);
 			Window::SetCaptureKeys(FALSE);
 		}
@@ -101,7 +101,8 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 		break;
 	}
 
-	default: break;
+	default:
+		break;
 	}
 	return TRUE;
 }

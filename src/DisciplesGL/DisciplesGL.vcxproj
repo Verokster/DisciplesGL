@@ -112,7 +112,7 @@
       <SectionAlignment>
       </SectionAlignment>
       <AssemblyDebug>true</AssemblyDebug>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
@@ -159,7 +159,7 @@
       <SectionAlignment>
       </SectionAlignment>
       <AssemblyDebug>true</AssemblyDebug>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
@@ -205,7 +205,7 @@
     </ClCompile>
     <ResourceCompile />
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AssemblyDebug>false</AssemblyDebug>
       <BaseAddress>0x60000000</BaseAddress>

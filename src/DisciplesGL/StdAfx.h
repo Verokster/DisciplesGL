@@ -36,10 +36,10 @@
 #define WS_WINDOWED (WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS)
 #define WS_FULLSCREEN (WS_POPUP | WS_SYSMENU | WS_VISIBLE | WS_CLIPSIBLINGS | WS_MAXIMIZE)
 
-typedef HANDLE(__stdcall *CREATEACTCTXA)(ACTCTX* pActCtx);
-typedef VOID(__stdcall *RELEASEACTCTX)(HANDLE hActCtx);
-typedef BOOL(__stdcall *ACTIVATEACTCTX)(HANDLE hActCtx, ULONG_PTR* lpCookie);
-typedef BOOL(__stdcall *DEACTIVATEACTCTX)(DWORD dwFlags, ULONG_PTR ulCookie);
+typedef HANDLE(__stdcall* CREATEACTCTXA)(ACTCTX* pActCtx);
+typedef VOID(__stdcall* RELEASEACTCTX)(HANDLE hActCtx);
+typedef BOOL(__stdcall* ACTIVATEACTCTX)(HANDLE hActCtx, ULONG_PTR* lpCookie);
+typedef BOOL(__stdcall* DEACTIVATEACTCTX)(DWORD dwFlags, ULONG_PTR ulCookie);
 
 extern CREATEACTCTXA CreateActCtxC;
 extern RELEASEACTCTX ReleaseActCtxC;
@@ -50,20 +50,20 @@ extern "C" _CRTIMP int __cdecl sprintf(char*, const char*, ...);
 
 #define MemoryAlloc(size) malloc(size)
 #define MemoryFree(block) free(block)
-#define MemorySet(dst,val,size) memset(dst,val,size)
-#define MemoryZero(dst,size) memset(dst,0,size)
-#define MemoryCopy(dst,src,size) memcpy(dst,src,size)
-#define MemoryCompare(buf1,buf2,size) memcmp(buf1,buf2,size)
+#define MemorySet(dst, val, size) memset(dst, val, size)
+#define MemoryZero(dst, size) memset(dst, 0, size)
+#define MemoryCopy(dst, src, size) memcpy(dst, src, size)
+#define MemoryCompare(buf1, buf2, size) memcmp(buf1, buf2, size)
 #define MathCeil(x) ceil(x)
 #define MathFloor(x) floor(x)
-#define StrPrint(buf,fmt,...) sprintf(buf,fmt,__VA_ARGS__)
-#define StrCompare(str1,str2) strcmp(str1,str2)
-#define StrCompareInsensitive(str1,str2) _stricmp(str1,str2)
-#define StrCopy(dst,src) strcpy(dst,src)
-#define StrCat(dst,src) strcat(dst,src)
-#define StrLastChar(str,ch) strrchr(str,ch)
-#define StrStr(str,substr) strstr(str,substr)
-#define StrToAnsi(dst,src,size) wcstombs(dst,src,size)
+#define StrPrint(buf, fmt, ...) sprintf(buf, fmt, __VA_ARGS__)
+#define StrCompare(str1, str2) strcmp(str1, str2)
+#define StrCompareInsensitive(str1, str2) _stricmp(str1, str2)
+#define StrCopy(dst, src) strcpy(dst, src)
+#define StrCat(dst, src) strcat(dst, src)
+#define StrLastChar(str, ch) strrchr(str, ch)
+#define StrStr(str, substr) strstr(str, substr)
+#define StrToAnsi(dst, src, size) wcstombs(dst, src, size)
 #define Exit(code) exit(code)
 
 DOUBLE __fastcall MathRound(DOUBLE);

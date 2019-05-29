@@ -90,7 +90,8 @@ namespace Window
 		CheckMenuItem(hMenu, IDM_FILT_CUBIC, MF_BYCOMMAND | MF_UNCHECKED);
 
 		// ScaleNx
-		HMENU hMenuScaleNx = NULL; DWORD posScaleNx;
+		HMENU hMenuScaleNx = NULL;
+		DWORD posScaleNx;
 		FindMenuByChildId(hMenu, IDM_FILT_SCALENX_LINEAR, &hMenuScaleNx, &posScaleNx);
 		if (hMenuScaleNx)
 		{
@@ -108,7 +109,8 @@ namespace Window
 		CheckMenuItem(hMenu, IDM_FILT_SCALENX_3X, MF_BYCOMMAND | MF_UNCHECKED);
 
 		// Eagle
-		HMENU hMenuEagle = NULL; DWORD posEagle;
+		HMENU hMenuEagle = NULL;
+		DWORD posEagle;
 		FindMenuByChildId(hMenu, IDM_FILT_EAGLE_LINEAR, &hMenuEagle, &posEagle);
 		if (hMenuEagle)
 		{
@@ -124,7 +126,8 @@ namespace Window
 		CheckMenuItem(hMenu, IDM_FILT_EAGLE_2X, MF_BYCOMMAND | MF_UNCHECKED);
 
 		// XSal
-		HMENU hMenuXSal = NULL; DWORD posXSal;
+		HMENU hMenuXSal = NULL;
+		DWORD posXSal;
 		FindMenuByChildId(hMenu, IDM_FILT_XSAL_LINEAR, &hMenuXSal, &posXSal);
 		if (hMenuXSal)
 		{
@@ -140,7 +143,8 @@ namespace Window
 		CheckMenuItem(hMenu, IDM_FILT_XSAL_2X, MF_BYCOMMAND | MF_UNCHECKED);
 
 		// ScaleHQ
-		HMENU hMenuScaleHQ = NULL; DWORD posScaleHQ;
+		HMENU hMenuScaleHQ = NULL;
+		DWORD posScaleHQ;
 		FindMenuByChildId(hMenu, IDM_FILT_SCALEHQ_LINEAR, &hMenuScaleHQ, &posScaleHQ);
 		if (hMenuScaleHQ)
 		{
@@ -158,7 +162,8 @@ namespace Window
 		CheckMenuItem(hMenu, IDM_FILT_SCALEHQ_4X, MF_BYCOMMAND | MF_UNCHECKED);
 
 		// xBRz
-		HMENU hMenuXBRZ = NULL; DWORD posXBRZ;
+		HMENU hMenuXBRZ = NULL;
+		DWORD posXBRZ;
 		FindMenuByChildId(hMenu, IDM_FILT_XRBZ_LINEAR, &hMenuXBRZ, &posXBRZ);
 		if (hMenuXBRZ)
 		{
@@ -528,15 +533,13 @@ namespace Window
 								DWORD* translate = lpTranslate;
 								while (count && (!isTitle || !isCopyright))
 								{
-									if (!isTitle && StrPrint(path, "\\StringFileInfo\\%04x%04x\\%s", LOWORD(*translate), HIWORD(*translate), "FileDescription") &&
-										VerQueryValue(verData, path, &buffer, &size) && size)
+									if (!isTitle && StrPrint(path, "\\StringFileInfo\\%04x%04x\\%s", LOWORD(*translate), HIWORD(*translate), "FileDescription") && VerQueryValue(verData, path, &buffer, &size) && size)
 									{
 										SetDlgItemText(hDlg, IDC_TITLE, (CHAR*)buffer);
 										isTitle = TRUE;
 									}
 
-									if (!isCopyright && StrPrint(path, "\\StringFileInfo\\%04x%04x\\%s", LOWORD(*translate), HIWORD(*translate), "LegalCopyright") &&
-										VerQueryValue(verData, path, &buffer, &size) && size)
+									if (!isCopyright && StrPrint(path, "\\StringFileInfo\\%04x%04x\\%s", LOWORD(*translate), HIWORD(*translate), "LegalCopyright") && VerQueryValue(verData, path, &buffer, &size) && size)
 									{
 										SetDlgItemText(hDlg, IDC_COPYRIGHT, (CHAR*)buffer);
 										isCopyright = TRUE;
@@ -601,7 +604,7 @@ namespace Window
 						if (VerQueryValue(verData, "\\", &buffer, &size) && size)
 						{
 							VS_FIXEDFILEINFO* verInfo = (VS_FIXEDFILEINFO*)buffer;
-							
+
 							GetDlgItemText(hDlg, IDC_VERSION, temp, sizeof(temp));
 							StrPrint(path, temp, HIWORD(verInfo->dwProductVersionMS), LOWORD(verInfo->dwProductVersionMS), HIWORD(verInfo->dwProductVersionLS), LOWORD(verInfo->dwFileVersionLS));
 							SetDlgItemText(hDlg, IDC_VERSION, path);
@@ -795,8 +798,7 @@ namespace Window
 						GetCursorPos(&p);
 						ScreenToClient(hWnd, &p);
 
-						if (p.x >= ddraw->viewport.rectangle.x && p.x < ddraw->viewport.rectangle.x + ddraw->viewport.rectangle.width &&
-							p.y >= ddraw->viewport.rectangle.y && p.y < ddraw->viewport.rectangle.y + ddraw->viewport.rectangle.height)
+						if (p.x >= ddraw->viewport.rectangle.x && p.x < ddraw->viewport.rectangle.x + ddraw->viewport.rectangle.width && p.y >= ddraw->viewport.rectangle.y && p.y < ddraw->viewport.rectangle.y + ddraw->viewport.rectangle.height)
 							SetCursor(NULL);
 						else
 							SetCursor(config.cursor);

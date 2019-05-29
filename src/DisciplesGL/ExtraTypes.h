@@ -26,28 +26,24 @@
 #include "windows.h"
 #include "GLib.h"
 
-struct Rect
-{
+struct Rect {
 	INT x;
 	INT y;
 	INT width;
 	INT height;
 };
 
-struct VecSize
-{
+struct VecSize {
 	INT width;
 	INT height;
 };
 
-struct TexSize
-{
+struct TexSize {
 	FLOAT width;
 	FLOAT height;
 };
 
-struct Frame
-{
+struct Frame {
 	GLuint id;
 	Rect rect;
 	POINT point;
@@ -55,8 +51,7 @@ struct Frame
 	TexSize tSize;
 };
 
-struct Viewport
-{
+struct Viewport {
 	BOOL refresh;
 	INT width;
 	INT height;
@@ -78,20 +73,17 @@ enum ImageFilter
 	FilterScaleNx = 7
 };
 
-struct FilterType
-{
+struct FilterType {
 	WORD value;
 	WORD type;
 };
 
-struct Resolution
-{
+struct Resolution {
 	WORD width;
 	WORD height;
 };
 
-struct DisplayMode
-{
+struct DisplayMode {
 	DWORD width;
 	DWORD height;
 	DWORD bpp;
@@ -104,8 +96,7 @@ enum FpsState
 	FpsBenchmark
 };
 
-struct ShaderProgram
-{
+struct ShaderProgram {
 	GLuint id;
 	const CHAR* version;
 	DWORD vertexName;
@@ -117,13 +108,12 @@ struct ShaderProgram
 	} texSize;
 };
 
-struct ConfigItems
-{
+struct ConfigItems {
 	BOOL version;
 	BOOL windowedMode;
 	DisplayMode* mode;
 	Resolution resolution;
-	
+
 	HCURSOR cursor;
 	HMENU menu;
 	HICON icon;
@@ -139,7 +129,7 @@ struct ConfigItems
 	BOOL gameBorders;
 	BOOL singleWindow;
 	BOOL alwaysActive;
-    BOOL coldCPU;
+	BOOL coldCPU;
 	BOOL borderlessMode;
 
 	struct {
@@ -174,8 +164,7 @@ struct ConfigItems
 	CHAR file[MAX_PATH];
 };
 
-struct MappedFile
-{
+struct MappedFile {
 	HMODULE hModule;
 	HANDLE hFile;
 	HANDLE hMap;
@@ -189,15 +178,13 @@ enum SurfaceType
 	SurfaceOther
 };
 
-struct MenuItemData
-{
+struct MenuItemData {
 	HMENU hParent;
 	INT index;
 	UINT childId;
 };
 
-struct ResourceStream
-{
+struct ResourceStream {
 	VOID* data;
 	DWORD position;
 };

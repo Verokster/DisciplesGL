@@ -26,8 +26,7 @@
 
 namespace Hooks
 {
-	struct AddressSpaceV1
-	{
+	struct AddressSpaceV1 {
 		DWORD check;
 		DWORD value;
 		DWORD scroll_speed;
@@ -35,8 +34,7 @@ namespace Hooks
 		DWORD scroll_hook;
 	};
 
-	struct AddressSpaceV2
-	{
+	struct AddressSpaceV2 {
 		DWORD check_1;
 		DWORD value_1;
 		DWORD check_2;
@@ -111,16 +109,14 @@ namespace Hooks
 		DWORD dblclick_hook;
 	};
 
-	struct BlendData
-	{
+	struct BlendData {
 		DWORD* srcData;
 		DWORD* dstData;
 		DWORD length;
 		VOID* mskData;
 	};
 
-	struct BlitObject
-	{
+	struct BlitObject {
 		BYTE isTrueColor;
 		VOID* data;
 		RECT rect;
@@ -128,14 +124,12 @@ namespace Hooks
 		DWORD color;
 	};
 
-	struct OffsetLength
-	{
+	struct OffsetLength {
 		LONG offset;
 		LONG length;
 	};
 
-	struct PixObject
-	{
+	struct PixObject {
 		BYTE exists;
 		DWORD color;
 	};

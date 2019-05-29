@@ -229,7 +229,7 @@ namespace Config
 
 			if (!config.version)
 				config.hd = Config::Get(CONFIG_WRAPPER, "HD", TRUE);
-			
+
 			config.image.aspect = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageAspect", TRUE);
 			config.image.vSync = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageVSync", TRUE);
 
@@ -442,7 +442,7 @@ namespace Config
 
 	INT __fastcall Get(const CHAR* app, const CHAR* key, INT default)
 	{
-		return GetPrivateProfileInt(app, key, (INT)default, config.file);
+		return GetPrivateProfileInt(app, key, (INT) default, config.file);
 	}
 
 	DWORD __fastcall Get(const CHAR* app, const CHAR* key, CHAR* default, CHAR* returnString, DWORD nSize)

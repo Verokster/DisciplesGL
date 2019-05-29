@@ -26,12 +26,12 @@
 
 #include "png.h"
 
-typedef png_structp(__cdecl *PNG_CREATE_READ_STRUCT)(png_const_charp user_png_ver, png_voidp error_ptr, png_error_ptr error_fn, png_error_ptr warn_fn);
-typedef png_infop(__cdecl *PNG_CREATE_INFO_STRUCT)(png_structp png_ptr);
-typedef VOID(__cdecl *PNG_SET_READ_FN)(png_structp png_ptr, png_voidp io_ptr, png_rw_ptr read_data_fn);
-typedef VOID(__cdecl *PNG_DESTROY_READ_STRUCT)(png_structpp png_ptr_ptr, png_infopp info_ptr_ptr, png_infopp end_info_ptr_ptr);
-typedef VOID(__cdecl *PNG_READ_INFO)(png_structp png_ptr, png_infop info_ptr);
-typedef VOID(__cdecl *PNG_READ_IMAGE)(png_structp png_ptr, png_bytepp image);
+typedef png_structp(__cdecl* PNG_CREATE_READ_STRUCT)(png_const_charp user_png_ver, png_voidp error_ptr, png_error_ptr error_fn, png_error_ptr warn_fn);
+typedef png_infop(__cdecl* PNG_CREATE_INFO_STRUCT)(png_structp png_ptr);
+typedef VOID(__cdecl* PNG_SET_READ_FN)(png_structp png_ptr, png_voidp io_ptr, png_rw_ptr read_data_fn);
+typedef VOID(__cdecl* PNG_DESTROY_READ_STRUCT)(png_structpp png_ptr_ptr, png_infopp info_ptr_ptr, png_infopp end_info_ptr_ptr);
+typedef VOID(__cdecl* PNG_READ_INFO)(png_structp png_ptr, png_infop info_ptr);
+typedef VOID(__cdecl* PNG_READ_IMAGE)(png_structp png_ptr, png_bytepp image);
 
 extern PNG_CREATE_READ_STRUCT pnglib_create_read_struct;
 extern PNG_CREATE_INFO_STRUCT pnglib_create_info_struct;

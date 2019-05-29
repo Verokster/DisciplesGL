@@ -54,8 +54,8 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
-		0xFFFC
-	}, { // 1
+		0xFFFC },
+	{ // 1
 		0xF000,
 		0xF000,
 		0xF000,
@@ -79,8 +79,8 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xF000,
 		0xF000,
 		0xF000,
-		0xF000
-	}, { // 2
+		0xF000 },
+	{ // 2
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
@@ -104,8 +104,8 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
-		0xFFFC
-	}, { // 3
+		0xFFFC },
+	{ // 3
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
@@ -129,8 +129,8 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
-		0xFFFC
-	}, { // 4
+		0xFFFC },
+	{ // 4
 		0xF03C,
 		0xF03C,
 		0xF03C,
@@ -154,8 +154,8 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xF000,
 		0xF000,
 		0xF000,
-		0xF000
-	}, { // 5
+		0xF000 },
+	{ // 5
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
@@ -179,8 +179,8 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
-		0xFFFC
-	}, { // 6
+		0xFFFC },
+	{ // 6
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
@@ -204,8 +204,8 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
-		0xFFFC
-	}, { // 7
+		0xFFFC },
+	{ // 7
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
@@ -229,8 +229,8 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xF000,
 		0xF000,
 		0xF000,
-		0xF000
-	}, { // 8
+		0xF000 },
+	{ // 8
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
@@ -254,8 +254,8 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
-		0xFFFC
-	}, { // 9
+		0xFFFC },
+	{ // 9
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
@@ -279,8 +279,7 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC,
 		0xFFFC,
 		0xFFFC,
-		0xFFFC
-	}
+		0xFFFC }
 };
 
 VOID* FpsCounter::operator new(size_t size) { return MemoryAlloc(size); }
@@ -399,11 +398,9 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 
 			for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 			{
-				DWORD* idx = (DWORD*)srcBuffer + (FPS_Y + y) * frameWidth +
-					FPS_X + FPS_WIDTH * (dcount - 1);
+				DWORD* idx = (DWORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
 
-				DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 +
-					FPS_WIDTH * (dcount - 1);
+				DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 				WORD check = *lpDig++;
 				DWORD width = FPS_WIDTH;
@@ -423,11 +420,9 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 		{
 			for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 			{
-				DWORD* idx = (DWORD*)srcBuffer + (FPS_Y + y) * frameWidth +
-					FPS_X + FPS_WIDTH * (dcount - 1);
+				DWORD* idx = (DWORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
 
-				DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 +
-					FPS_WIDTH * (dcount - 1);
+				DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 				DWORD width = FPS_WIDTH;
 				do
@@ -452,11 +447,9 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 
 				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 				{
-					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth +
-						FPS_X + FPS_WIDTH * (dcount - 1);
+					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
 
-					WORD* pix = (WORD*)dstBuffer + y * FPS_WIDTH * 4 +
-						FPS_WIDTH * (dcount - 1);
+					WORD* pix = (WORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 					WORD check = *lpDig++;
 					DWORD width = FPS_WIDTH;
@@ -476,11 +469,9 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 			{
 				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 				{
-					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth +
-						FPS_X + FPS_WIDTH * (dcount - 1);
+					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
 
-					WORD* pix = (WORD*)dstBuffer + y * FPS_WIDTH * 4 +
-						FPS_WIDTH * (dcount - 1);
+					WORD* pix = (WORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 					DWORD width = FPS_WIDTH;
 					do
@@ -503,11 +494,9 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 
 				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 				{
-					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth +
-						FPS_X + FPS_WIDTH * (dcount - 1);
+					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
 
-					DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 +
-						FPS_WIDTH * (dcount - 1);
+					DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 					WORD check = *lpDig++;
 					DWORD width = FPS_WIDTH;
@@ -535,11 +524,9 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 			{
 				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 				{
-					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth +
-						FPS_X + FPS_WIDTH * (dcount - 1);
+					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
 
-					DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 +
-						FPS_WIDTH * (dcount - 1);
+					DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 					DWORD width = FPS_WIDTH;
 					do
