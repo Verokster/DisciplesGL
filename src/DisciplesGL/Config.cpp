@@ -216,9 +216,6 @@ namespace Config
 
 			Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
 			Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
-
-			config.singleWindow = TRUE;
-			Config::Set(CONFIG_WRAPPER, "SingleWindow", config.singleWindow);
 		}
 		else
 		{
@@ -357,7 +354,6 @@ namespace Config
 
 			config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
 			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
-			config.singleWindow = (BOOL)Config::Get(CONFIG_WRAPPER, "SingleWindow", TRUE);
 		}
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));

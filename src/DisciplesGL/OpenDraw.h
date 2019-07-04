@@ -37,7 +37,6 @@ public:
 
 	OpenDrawSurface* attachedSurface;
 
-	HWND hDraw;
 	HDC hDc;
 	HWND hWnd;
 

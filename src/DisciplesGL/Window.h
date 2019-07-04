@@ -34,5 +34,4 @@ namespace Window
 
 	VOID __fastcall SetCaptureKeys(BOOL state);
 	VOID __fastcall SetCaptureWindow(HWND hWnd);
-	VOID __fastcall SetCapturePanel(HWND hWnd);
 }

@@ -30,7 +30,7 @@
 #define PREFIX_GL "gl"
 #define PREFIX_WGL "wgl"
 
-WGLCREATECONTEXTATTRIBSARB WGLCreateContextAttribs;
+WGLCREATECONTEXTATTRIBS WGLCreateContextAttribs;
 WGLCHOOSEPIXELFORMAT WGLChoosePixelFormat;
 WGLGETEXTENSIONSSTRING WGLGetExtensionsString;
 WGLSWAPINTERVAL WGLSwapInterval;
@@ -127,9 +127,7 @@ namespace GL
 		if (sufix)
 			StrCat(buffer, sufix);
 
-		if (wglGetProcAddress)
-			*func = wglGetProcAddress(buffer);
-
+		*func = wglGetProcAddress(buffer);
 		if ((INT)*func >= -1 && (INT)*func <= 3)
 		{
 			if (!hGLModule)
@@ -389,6 +387,7 @@ namespace GL
 									WGL_DOUBLE_BUFFER_ARB, (pfd->dwFlags & PFD_DOUBLEBUFFER) ? GL_TRUE : GL_FALSE,
 									WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
 									WGL_COLOR_BITS_ARB, pfd->cColorBits,
+									WGL_STENCIL_BITS_ARB, pfd->cStencilBits,
 									WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
 									WGL_SWAP_METHOD_ARB, (pfd->dwFlags & PFD_SWAP_EXCHANGE) ? WGL_SWAP_EXCHANGE_ARB : WGL_SWAP_COPY_ARB,
 									0

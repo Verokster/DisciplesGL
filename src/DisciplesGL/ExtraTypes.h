@@ -127,7 +127,6 @@ struct ConfigItems {
 	BOOL zoomImage;
 	BOOL menuZoomImage;
 	BOOL gameBorders;
-	BOOL singleWindow;
 	BOOL alwaysActive;
 	BOOL coldCPU;
 	BOOL borderlessMode;

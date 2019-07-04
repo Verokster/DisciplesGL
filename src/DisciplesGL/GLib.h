@@ -104,8 +104,7 @@ typedef char GLchar;
 #define GL_RENDERBUFFER 0x8D41
 #define GL_DEPTH24_STENCIL8 0x88F0
 
-typedef HGLRC(__stdcall* WGLCREATECONTEXTATTRIBSARB)(HDC hDC, HGLRC hshareContext, const DWORD* attribList);
-typedef BOOL(__stdcall* WGLCHOOSEPIXELFORMATARB)(HDC hDC, const INT* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, INT* piFormats, UINT* nNumFormats);
+typedef HGLRC(__stdcall* WGLCREATECONTEXTATTRIBS)(HDC hDC, HGLRC hshareContext, const DWORD* attribList);
 typedef BOOL(__stdcall* WGLCHOOSEPIXELFORMAT)(HDC hDC, const INT* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, INT* piFormats, UINT* nNumFormats);
 typedef const CHAR*(__stdcall* WGLGETEXTENSIONSSTRING)();
 typedef BOOL(__stdcall* WGLSWAPINTERVAL)(INT interval);
@@ -184,7 +183,7 @@ typedef VOID(__stdcall* GLBINDRENDERBUFFER)(GLenum target, GLuint renderbuffer);
 typedef VOID(__stdcall* GLRENDERBUFFERSTORAGE)(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
 typedef VOID(__stdcall* GLFRAMEBUFFERRENDERBUFFER)(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
 
-extern WGLCREATECONTEXTATTRIBSARB WGLCreateContextAttribs;
+extern WGLCREATECONTEXTATTRIBS WGLCreateContextAttribs;
 extern WGLCHOOSEPIXELFORMAT WGLChoosePixelFormat;
 extern WGLGETEXTENSIONSSTRING WGLGetExtensionsString;
 extern WGLSWAPINTERVAL WGLSwapInterval;

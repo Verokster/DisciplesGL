@@ -176,29 +176,32 @@ VOID OpenDraw::TakeSnapshot(VOID* buffer, DWORD frameWidth, DWORD frameHeight)
 DWORD __stdcall RenderThread(LPVOID lpParameter)
 {
 	OpenDraw* ddraw = (OpenDraw*)lpParameter;
-	ddraw->hDc = ::GetDC(ddraw->hDraw);
+	ddraw->hDc = ::GetDC(ddraw->hWnd);
 	if (ddraw->hDc)
 	{
-		PIXELFORMATDESCRIPTOR pfd;
-		INT glPixelFormat = GL::PreparePixelFormat(&pfd);
-		if (!glPixelFormat)
+		if (!::GetPixelFormat(ddraw->hDc))
 		{
-			glPixelFormat = ::ChoosePixelFormat(ddraw->hDc, &pfd);
+			PIXELFORMATDESCRIPTOR pfd;
+			INT glPixelFormat = GL::PreparePixelFormat(&pfd);
 			if (!glPixelFormat)
-				Main::ShowError(IDS_ERROR_CHOOSE_PF, __FILE__, __LINE__);
-			else if (pfd.dwFlags & PFD_NEED_PALETTE)
-				Main::ShowError(IDS_ERROR_NEED_PALETTE, __FILE__, __LINE__);
+			{
+				glPixelFormat = ::ChoosePixelFormat(ddraw->hDc, &pfd);
+				if (!glPixelFormat)
+					Main::ShowError(IDS_ERROR_CHOOSE_PF, __FILE__, __LINE__);
+				else if (pfd.dwFlags & PFD_NEED_PALETTE)
+					Main::ShowError(IDS_ERROR_NEED_PALETTE, __FILE__, __LINE__);
+			}
+
+			if (!::SetPixelFormat(ddraw->hDc, glPixelFormat, &pfd))
+				Main::ShowError(IDS_ERROR_SET_PF, __FILE__, __LINE__);
+
+			GL::ResetPixelFormatDescription(&pfd);
+			if (::DescribePixelFormat(ddraw->hDc, glPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd) == NULL)
+				Main::ShowError(IDS_ERROR_DESCRIBE_PF, __FILE__, __LINE__);
+
+			if ((pfd.iPixelType != PFD_TYPE_RGBA) || (pfd.cRedBits < 5) || (pfd.cGreenBits < 6) || (pfd.cBlueBits < 5))
+				Main::ShowError(IDS_ERROR_BAD_PF, __FILE__, __LINE__);
 		}
-
-		if (!::SetPixelFormat(ddraw->hDc, glPixelFormat, &pfd))
-			Main::ShowError(IDS_ERROR_SET_PF, __FILE__, __LINE__);
-
-		GL::ResetPixelFormatDescription(&pfd);
-		if (::DescribePixelFormat(ddraw->hDc, glPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd) == NULL)
-			Main::ShowError(IDS_ERROR_DESCRIBE_PF, __FILE__, __LINE__);
-
-		if ((pfd.iPixelType != PFD_TYPE_RGBA) || (pfd.cRedBits < 5) || (pfd.cGreenBits < 6) || (pfd.cBlueBits < 5))
-			Main::ShowError(IDS_ERROR_BAD_PF, __FILE__, __LINE__);
 
 		HGLRC hRc = wglCreateContext(ddraw->hDc);
 		if (hRc)
@@ -234,7 +237,7 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 			wglDeleteContext(hRc);
 		}
 
-		::ReleaseDC(ddraw->hDraw, ddraw->hDc);
+		::ReleaseDC(ddraw->hWnd, ddraw->hDc);
 		ddraw->hDc = NULL;
 	}
 
@@ -1353,51 +1356,11 @@ VOID OpenDraw::RenderStart()
 
 	this->isFinish = FALSE;
 
-	RECT rect;
-	GetClientRect(this->hWnd, &rect);
-
-	if (config.singleWindow)
-		this->hDraw = this->hWnd;
-	else
-	{
-		if (!config.windowedMode && !config.borderlessMode)
-		{
-			this->hDraw = CreateWindowEx(
-				WS_EX_CONTROLPARENT | WS_EX_TOPMOST,
-				WC_DRAW,
-				NULL,
-				WS_VISIBLE | WS_POPUP,
-				0, 0,
-				rect.right, rect.bottom,
-				this->hWnd,
-				NULL,
-				hDllModule,
-				NULL);
-		}
-		else
-		{
-			this->hDraw = CreateWindowEx(
-				WS_EX_CONTROLPARENT,
-				WC_DRAW,
-				NULL,
-				WS_VISIBLE | WS_CHILD,
-				0, 0,
-				rect.right, rect.bottom,
-				this->hWnd,
-				NULL,
-				hDllModule,
-				NULL);
-		}
-
-		Window::SetCapturePanel(this->hDraw);
-
-		SetClassLongPtr(this->hDraw, GCLP_HBRBACKGROUND, NULL);
-		RedrawWindow(this->hDraw, NULL, NULL, RDW_INVALIDATE);
-	}
-
 	SetClassLongPtr(this->hWnd, GCLP_HBRBACKGROUND, NULL);
 	RedrawWindow(this->hWnd, NULL, NULL, RDW_INVALIDATE);
 
+	RECT rect;
+	GetClientRect(this->hWnd, &rect);
 	this->viewport.width = rect.right;
 	this->viewport.height = rect.bottom - this->viewport.offset;
 	this->viewport.refresh = TRUE;
@@ -1420,12 +1383,7 @@ VOID OpenDraw::RenderStop()
 	CloseHandle(this->hDrawThread);
 	this->hDrawThread = NULL;
 
-	BOOL wasFull = GetWindowLong(this->hDraw, GWL_STYLE) & WS_POPUP;
-	if (!config.singleWindow)
-		DestroyWindow(this->hDraw);
-
-	this->hDraw = NULL;
-	if (wasFull)
+	if (GetWindowLong(this->hWnd, GWL_STYLE) & WS_POPUP)
 		GL::ResetPixelFormat();
 
 	ClipCursor(NULL);
@@ -1543,7 +1501,6 @@ OpenDraw::OpenDraw(IDrawUnknown** list)
 	this->attachedSurface = NULL;
 
 	this->hWnd = NULL;
-	this->hDraw = NULL;
 	this->hDc = NULL;
 
 	this->isTakeSnapshot = FALSE;

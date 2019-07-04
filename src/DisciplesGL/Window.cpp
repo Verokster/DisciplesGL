@@ -697,30 +697,7 @@ namespace Window
 		{
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 			if (ddraw)
-			{
-				if (ddraw->hDraw && !config.singleWindow)
-				{
-					DWORD stye = GetWindowLong(ddraw->hDraw, GWL_STYLE);
-					if (stye & WS_POPUP)
-					{
-						POINT point = { LOWORD(lParam), HIWORD(lParam) };
-						ScreenToClient(hWnd, &point);
-
-						RECT rect;
-						rect.left = point.x - LOWORD(lParam);
-						rect.top = point.y - HIWORD(lParam);
-						rect.right = rect.left + 256;
-						rect.bottom = rect.left + 256;
-
-						AdjustWindowRect(&rect, stye, FALSE);
-						SetWindowPos(ddraw->hDraw, NULL, rect.left, rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
-					}
-					else
-						SetWindowPos(ddraw->hDraw, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
-				}
-
 				SetEvent(ddraw->hDrawEvent);
-			}
 
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
@@ -730,9 +707,6 @@ namespace Window
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 			if (ddraw)
 			{
-				if (ddraw->hDraw && !config.singleWindow)
-					SetWindowPos(ddraw->hDraw, NULL, 0, 0, LOWORD(lParam), HIWORD(lParam), SWP_NOZORDER | SWP_NOMOVE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
-
 				ddraw->viewport.width = LOWORD(lParam);
 				ddraw->viewport.height = HIWORD(lParam) - ddraw->viewport.offset;
 				ddraw->viewport.refresh = TRUE;
@@ -1301,39 +1275,6 @@ namespace Window
 		}
 	}
 
-	LRESULT __stdcall PanelProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		switch (uMsg)
-		{
-		case WM_NCHITTEST:
-		case WM_SETCURSOR:
-
-		case WM_MOUSEMOVE:
-		case WM_MOUSEWHEEL:
-
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_LBUTTONDBLCLK:
-		case WM_RBUTTONDOWN:
-		case WM_RBUTTONUP:
-		case WM_RBUTTONDBLCLK:
-		case WM_MBUTTONDOWN:
-		case WM_MBUTTONUP:
-		case WM_MBUTTONDBLCLK:
-
-		case WM_SYSCOMMAND:
-		case WM_SYSKEYDOWN:
-		case WM_SYSKEYUP:
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-		case WM_CHAR:
-			return WindowProc(GetParent(hWnd), uMsg, wParam, lParam);
-
-		default:
-			return CallWindowProc(OldPanelProc, hWnd, uMsg, wParam, lParam);
-		}
-	}
-
 	VOID __fastcall SetCaptureKeys(BOOL state)
 	{
 		if (state)
@@ -1351,10 +1292,5 @@ namespace Window
 	VOID __fastcall SetCaptureWindow(HWND hWnd)
 	{
 		OldWindowProc = (WNDPROC)SetWindowLong(hWnd, GWL_WNDPROC, (LPARAM)WindowProc);
-	}
-
-	VOID __fastcall SetCapturePanel(HWND hWnd)
-	{
-		OldPanelProc = (WNDPROC)SetWindowLong(hWnd, GWL_WNDPROC, (LPARAM)PanelProc);
 	}
 }

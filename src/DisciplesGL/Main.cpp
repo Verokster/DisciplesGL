@@ -55,7 +55,7 @@ namespace Main
 		OpenDraw* ddraw = drawList;
 		while (ddraw)
 		{
-			if (ddraw->hWnd == hWnd || ddraw->hDraw == hWnd)
+			if (ddraw->hWnd == hWnd)
 				return ddraw;
 
 			ddraw = (OpenDraw*)ddraw->last;

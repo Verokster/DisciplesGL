@@ -231,9 +231,8 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 																BOOL tick = FALSE;
 																while (copyWidth--)
 																{
-																	BYTE c = tick ? (*src++ >> 4) : (*src & 0xF);
+																	*dst++ = palette[!tick ? (*src >> 4) : (*src++ & 0xF)];
 																	tick = !tick;
-																	*dst++ = palette[c];
 																}
 															}
 															else
@@ -364,9 +363,8 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 														BOOL tick = FALSE;
 														while (copyWidth--)
 														{
-															BYTE c = tick ? (*src++ >> 4) : (*src & 0xF);
+															*dst++ = palette[!tick ? (*src >> 4) : (*src++ & 0xF)];
 															tick = !tick;
-															*dst++ = palette[c];
 														}
 													}
 													else
