@@ -188,7 +188,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 														*dst++ = *src++;
 														*dst++ = *src++;
 														*dst++ = *src++;
-														*dst++ = 0;
+														*dst++ = 0xFF;
 													}
 												}
 
@@ -316,7 +316,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 														*dst++ = *src++;
 														*dst++ = *src++;
 														*dst++ = *src++;
-														*dst++ = 0;
+														*dst++ = 0xFF;
 													}
 												}
 
@@ -818,7 +818,7 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 					DWORD count = width;
 					do
 					{
-						if ((*src & 0xF8FCF8) != colorKey)
+						if ((*src & 0x00F8FCF8) != colorKey)
 							*dest = *src;
 
 						++src;

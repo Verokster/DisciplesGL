@@ -957,13 +957,7 @@ namespace Hooks
 #define COLORKEY_CHECK 0x00F800F8
 
 	DWORD pBinkCopyToBuffer;
-	INT __stdcall BinkCopyToBufferHook(VOID* hBnk,
-		VOID* dest,
-		INT pitch,
-		DWORD height,
-		DWORD x,
-		DWORD y,
-		DWORD flags)
+	INT __stdcall BinkCopyToBufferHook(VOID* hBnk, VOID* dest, INT pitch, DWORD height, DWORD x, DWORD y, DWORD flags)
 	{
 		if (config.bpp32Hooked)
 		{
@@ -971,9 +965,7 @@ namespace Hooks
 			flags = 0x80000004;
 		}
 
-		return ((INT(__stdcall*)(VOID*, VOID*, INT, DWORD, DWORD, DWORD,
-			DWORD))pBinkCopyToBuffer)(hBnk, dest, pitch, height,
-			x, y, flags);
+		return ((INT(__stdcall*)(VOID*, VOID*, INT, DWORD, DWORD, DWORD, DWORD))pBinkCopyToBuffer)(hBnk, dest, pitch, height, x, y, flags);
 	}
 
 	BlendData blendList[32];
@@ -1028,12 +1020,7 @@ namespace Hooks
 #pragma endregion
 
 #pragma region PIXEL
-	VOID __stdcall Pixel_Blit_Indexed_to_565(BYTE* srcData,
-		DWORD srcPitch,
-		DWORD* palette,
-		DWORD* dstData,
-		DWORD dstPitch,
-		RECT* rect)
+	VOID __stdcall Pixel_Blit_Indexed_to_565(BYTE* srcData, DWORD srcPitch, DWORD* palette, DWORD* dstData, DWORD dstPitch, RECT* rect)
 	{
 		dstPitch >>= 1;
 
@@ -1048,7 +1035,7 @@ namespace Hooks
 
 			DWORD width = rect->right - rect->left;
 			do
-				*dst++ = palette[*src++] & 0x00FFFFFF;
+				*dst++ = palette[*src++] & 0x00FFFFFF | 0xFF000000;
 			while (--width);
 
 			lpSrc += srcPitch;
@@ -1061,15 +1048,7 @@ namespace Hooks
 		return (red >> 3) | (green >> 3 << 6) | (blue >> 3 << 11);
 	}
 
-	VOID __stdcall Pixel_Blit_By_Masks(DWORD* srcData,
-		LONG srcPitch,
-		DWORD redMask,
-		DWORD greenMask,
-		DWORD blueMask,
-		DWORD alphaMask,
-		BYTE* dstData,
-		LONG dstPitch,
-		RECT* rect)
+	VOID __stdcall Pixel_Blit_By_Masks(DWORD* srcData, LONG srcPitch, DWORD redMask, DWORD greenMask, DWORD blueMask, DWORD alphaMask, BYTE* dstData, LONG dstPitch, RECT* rect)
 	{
 		srcPitch >>= 1;
 
@@ -1103,10 +1082,7 @@ namespace Hooks
 		} while (--height);
 	}
 
-	VOID __stdcall Pixel_ConvertPixel_565_to_RGB(DWORD color,
-		BYTE* red,
-		BYTE* green,
-		BYTE* blue)
+	VOID __stdcall Pixel_ConvertPixel_565_to_RGB(DWORD color, BYTE* red, BYTE* green, BYTE* blue)
 	{
 		BYTE* px = (BYTE*)&color;
 
@@ -1115,11 +1091,7 @@ namespace Hooks
 		*blue = *px;
 	}
 
-	VOID __stdcall Pixel_Blit_RGB_to_565(BYTE* srcData,
-		DWORD srcPitch,
-		DWORD* dstData,
-		DWORD dstPitch,
-		RECT* rect)
+	VOID __stdcall Pixel_Blit_RGB_to_565(BYTE* srcData, DWORD srcPitch, DWORD* dstData, DWORD dstPitch, RECT* rect)
 	{
 		dstPitch >>= 1;
 
@@ -1138,8 +1110,7 @@ namespace Hooks
 				*dst++ = *src++;
 				*dst++ = *src++;
 				*dst++ = *src++;
-
-				++dst;
+				*dst++ = 0xFF;
 			} while (--width);
 
 			srcData += srcPitch;
@@ -1168,78 +1139,45 @@ namespace Hooks
   }*/
 	}
 
-	DWORD __stdcall Pixel_BlendSome(DWORD pix, BYTE b, BYTE g, BYTE r, BYTE msk)
-	{
-		if (msk == 255)
-			return r | (g << 8) | (b << 16);
-		else if (msk)
-		{
-			DWORD px = pix & 0xFF;
-			DWORD red = (((px * 255) + (r - px) * msk) / 255) & 0xFF;
-
-			px = (pix >> 8) & 0xFF;
-			DWORD green = ((((px * 255) + (g - px) * msk) / 255) & 0xFF) << 8;
-
-			px = (pix >> 16) & 0xFF;
-			DWORD blue = ((((px * 255) + (b - px) * msk) / 255) & 0xFF) << 16;
-
-			return red | green | blue;
-		}
-		else
-			return pix;
-	}
-
 	DWORD __stdcall Pixel_Blend(DWORD dstData, DWORD srcData, BYTE msk)
 	{
+		DWORD res;
+
 		if (msk == 255)
-			return srcData;
+			res = srcData;
 		else if (msk)
 		{
 			DWORD src = srcData & 0x000000FF;
 			DWORD dst = dstData & 0x000000FF;
-			DWORD red = (((dst * 255) + (src - dst) * msk) / 255) & 0x000000FF;
+			DWORD r = (((dst * 255) + (src - dst) * msk) / 255) & 0x000000FF;
 
 			src = srcData & 0x0000FF00;
 			dst = dstData & 0x0000FF00;
-			DWORD green = (((dst * 255) + (src - dst) * msk) / 255) & 0x0000FF00;
+			DWORD g = (((dst * 255) + (src - dst) * msk) / 255) & 0x0000FF00;
 
 			src = srcData & 0x00FF0000;
 			dst = dstData & 0x00FF0000;
-			DWORD blue = (((dst * 255) + (src - dst) * msk) / 255) & 0x00FF0000;
+			DWORD b = (((dst * 255) + (src - dst) * msk) / 255) & 0x00FF0000;
 
-			return red | green | blue;
+			res = r | g | b;
 		}
 		else
-			return dstData;
+			res = dstData;
+
+		return res | 0xFF000000;
 	}
 
-	VOID __stdcall Pixel_BlitBlend(DWORD* srcData,
-		DWORD* dstData,
-		DWORD count,
-		BYTE* mskData)
+	DWORD __stdcall Pixel_BlendSome(DWORD pix, BYTE b, BYTE g, BYTE r, BYTE msk)
+	{
+		DWORD color = r | (g << 8) | (b << 16);
+		return Pixel_Blend(pix, color, msk);
+	}
+
+	VOID __stdcall Pixel_BlitBlend(DWORD* srcData, DWORD* dstData, DWORD count, BYTE* mskData)
 	{
 		while (count--)
 		{
-			DWORD msk = *mskData;
-
-			if (msk == 255)
-				*dstData = *srcData;
-			else if (msk)
-			{
-				DWORD src = *srcData & 0x000000FF;
-				DWORD dst = *dstData & 0x000000FF;
-				DWORD red = (((dst * 255) + (src - dst) * msk) / 255) & 0x000000FF;
-
-				src = *srcData & 0x0000FF00;
-				dst = *dstData & 0x0000FF00;
-				DWORD green = (((dst * 255) + (src - dst) * msk) / 255) & 0x0000FF00;
-
-				src = *srcData & 0x00FF0000;
-				dst = *dstData & 0x00FF0000;
-				DWORD blue = (((dst * 255) + (src - dst) * msk) / 255) & 0x00FF0000;
-
-				*dstData = red | green | blue;
-			}
+			*dstData = Pixel_Blend(*dstData, *srcData, *(BYTE*)mskData);
 
 			++srcData;
 			++dstData;
@@ -1247,9 +1185,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall Pixel_BlitBlendWithColorKey(BlendData* blendItem,
-		DWORD count,
-		DWORD colorKey)
+	VOID __stdcall Pixel_BlitBlendWithColorKey(BlendData* blendItem, DWORD count, DWORD colorKey)
 	{
 		colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
 		while (count--)
@@ -1261,31 +1197,8 @@ namespace Hooks
 			DWORD length = blendItem->length;
 			while (length--)
 			{
-				DWORD msk = *mskData;
-				if (msk == 255)
-				{
-					if ((*dstData & COLORKEY_AND) != colorKey)
-						*dstData = *srcData;
-				}
-				else if (msk)
-				{
-					if ((*dstData & COLORKEY_AND) != colorKey)
-					{
-						DWORD src = *srcData & 0x000000FF;
-						DWORD dst = *dstData & 0x000000FF;
-						DWORD red = (((dst * 255) + (src - dst) * msk) / 255) & 0x000000FF;
-
-						src = *srcData & 0x0000FF00;
-						dst = *dstData & 0x0000FF00;
-						DWORD green = (((dst * 255) + (src - dst) * msk) / 255) & 0x0000FF00;
-
-						src = *srcData & 0x00FF0000;
-						dst = *dstData & 0x00FF0000;
-						DWORD blue = (((dst * 255) + (src - dst) * msk) / 255) & 0x00FF0000;
-
-						*dstData = red | green | blue;
-					}
-				}
+				if ((*dstData & COLORKEY_AND) != colorKey)
+					*dstData = Pixel_Blend(*dstData, *srcData, *(BYTE*)mskData);
 
 				++srcData;
 				++dstData;
@@ -1296,15 +1209,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall Pixel_BlitBlendAvarage(DWORD* srcData,
-		LONG srcPitch,
-		POINT* srcPos,
-		DWORD* dstData,
-		LONG dstPitch,
-		POINT* dstPos,
-		SIZE* size,
-		BYTE flag,
-		DWORD colorKey)
+	VOID __stdcall Pixel_BlitBlendAvarage(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size, BYTE flag, DWORD colorKey)
 	{
 		if (!flag || flag == 0xFF)
 			return;
@@ -1337,13 +1242,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall Pixel_Add(DWORD* srcData,
-		LONG srcPitch,
-		POINT* srcPos,
-		DWORD* dstData,
-		LONG dstPitch,
-		POINT* dstPos,
-		SIZE* size)
+	VOID __stdcall Pixel_Add(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size)
 	{
 		srcPitch >>= 1;
 		dstPitch >>= 1;
@@ -1363,19 +1262,19 @@ namespace Hooks
 				DWORD cs = *src++;
 				DWORD cd = *dst;
 
-				DWORD r = (cd & 0x0000FF) + (cs & 0x0000FF);
-				if (r > 0x0000FF)
-					r = 0x0000FF;
+				DWORD r = (cd & 0x000000FF) + (cs & 0x000000FF);
+				if (r > 0x000000FF)
+					r = 0x000000FF;
 
-				DWORD g = (cd & 0x00FF00) + (cs & 0x00FF00);
-				if (g > 0x00FF00)
-					g = 0x00FF00;
+				DWORD g = (cd & 0x0000FF00) + (cs & 0x0000FF00);
+				if (g > 0x0000FF00)
+					g = 0x0000FF00;
 
-				DWORD b = (cd & 0xFF0000) + (cs & 0xFF0000);
-				if (b > 0xFF0000)
-					b = 0xFF0000;
+				DWORD b = (cd & 0x00FF0000) + (cs & 0x00FF0000);
+				if (b > 0x00FF0000)
+					b = 0x00FF0000;
 
-				*dst++ = r | g | b;
+				*dst++ = r | g | b | 0xFF000000;
 			}
 
 			srcData += srcPitch;
@@ -1383,13 +1282,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall Pixel_Sub(DWORD* srcData,
-		LONG srcPitch,
-		POINT* srcPos,
-		DWORD* dstData,
-		LONG dstPitch,
-		POINT* dstPos,
-		SIZE* size)
+	VOID __stdcall Pixel_Sub(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size)
 	{
 		srcPitch >>= 1;
 		dstPitch >>= 1;
@@ -1409,19 +1302,19 @@ namespace Hooks
 				DWORD cs = *src++;
 				DWORD cd = *dst;
 
-				INT r = (cd & 0x0000FF) - (cs & 0x0000FF);
+				INT r = (cd & 0x000000FF) - (cs & 0x000000FF);
 				if (r < 0)
 					r = 0;
 
-				INT g = (cd & 0x00FF00) - (cs & 0x00FF00);
+				INT g = (cd & 0x0000FF00) - (cs & 0x0000FF00);
 				if (g < 0)
 					g = 0;
 
-				INT b = (cd & 0xFF0000) - (cs & 0xFF0000);
+				INT b = (cd & 0x00FF0000) - (cs & 0x00FF0000);
 				if (b < 0)
 					b = 0;
 
-				*dst++ = r | g | b;
+				*dst++ = r | g | b | 0xFF000000;
 			}
 
 			srcData += srcPitch;
@@ -1429,15 +1322,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall Pixel_BlitColorKey(DWORD* srcData,
-		LONG srcPitch,
-		POINT* srcPos,
-		DWORD* dstData,
-		LONG dstPitch,
-		POINT* dstPos,
-		SIZE* size,
-		BYTE flag,
-		DWORD colorKey)
+	VOID __stdcall Pixel_BlitColorKey(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size, BYTE flag, DWORD colorKey)
 	{
 		if (!flag || flag == 0xFF)
 			return;
@@ -1482,13 +1367,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall Pixel_BlitEmptyColor(DWORD* srcData,
-		LONG srcPitch,
-		POINT* srcPos,
-		DWORD* dstData,
-		LONG dstPitch,
-		POINT* dstPos,
-		SIZE* size)
+	VOID __stdcall Pixel_BlitEmptyColor(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size)
 	{
 		srcPitch >>= 1;
 		dstPitch >>= 1;
@@ -1529,11 +1408,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall Pixel_DoubleLighter(DWORD* data,
-		LONG pitch,
-		SIZE* size,
-		DWORD colorKey,
-		BYTE flag)
+	VOID __stdcall Pixel_DoubleLighter(DWORD* data, LONG pitch, SIZE* size, DWORD colorKey, BYTE flag)
 	{
 		colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
 		pitch >>= 1;
@@ -1553,6 +1428,7 @@ namespace Hooks
 					DWORD r = *ptr & 0xFF;
 					DWORD g = (*ptr >> 8) & 0xFF;
 					DWORD b = (*ptr >> 16) & 0xFF;
+					DWORD a = (*ptr >> 24) & 0xFF;
 
 					if (r + g + b > 56)
 					{
@@ -1568,7 +1444,11 @@ namespace Hooks
 						if (b > 0xFF)
 							b = 0xFF;
 
-						*ptr = r | (g << 8) | (b << 16);
+						a <<= 1;
+						if (a > 0xFF)
+							a = 0xFF;
+
+						*ptr = r | (g << 8) | (b << 16) | (a << 24);
 					}
 					else
 						*ptr = 0;
@@ -1599,13 +1479,7 @@ namespace Hooks
 		Pixel_DoubleLighter };
 #pragma endregion
 
-	BOOL __fastcall Clip(LONG* shiftX,
-		LONG* shiftY,
-		LONG* left,
-		LONG* top,
-		LONG* width,
-		LONG* height,
-		RECT* clipper)
+	BOOL __fastcall Clip(LONG* shiftX, LONG* shiftY, LONG* left, LONG* top, LONG* width, LONG* height, RECT* clipper)
 	{
 		if (*left < clipper->left)
 		{
@@ -1630,12 +1504,7 @@ namespace Hooks
 		return *width > 0 && *height > 0;
 	}
 
-	VOID __stdcall DrawMinimapObjects(BlitObject* obj,
-		VOID* data,
-		RECT* rect,
-		DWORD pitch,
-		DWORD colorKey,
-		POINT* loc)
+	VOID __stdcall DrawMinimapObjects(BlitObject* obj, VOID* data, RECT* rect, DWORD pitch, DWORD colorKey, POINT* loc)
 	{
 		if (data && rect->left <= rect->right && rect->top <= rect->bottom && (colorKey <= (obj->isTrueColor ? 0xFFFFu : 0xFFu) || colorKey == 0xFFFFFFFF))
 		{
@@ -1776,7 +1645,7 @@ namespace Hooks
 		if (obj->isTrueColor)
 		{
 			DWORD pitch = obj->pitch >> 1;
-			color = ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8);
+			color = ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8) | 0xFF000000;
 
 			DWORD* data = (DWORD*)obj->data + rect->top * pitch + rect->left;
 			DWORD height = rect->bottom - rect->top;
@@ -1819,10 +1688,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall DrawWaterBorders(DWORD* thisObj,
-		BlitObject* obj,
-		POINT* loc,
-		RECT* rect)
+	VOID __stdcall DrawWaterBorders(DWORD* thisObj, BlitObject* obj, POINT* loc, RECT* rect)
 	{
 		DWORD pitch = obj->pitch >> 1;
 
@@ -1898,13 +1764,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall DrawGround(DWORD* thisObj,
-		BlitObject* obj,
-		POINT* srcLoc,
-		POINT* dstLoc,
-		RECT* rect,
-		BYTE* blendMask,
-		DWORD* alphaMask)
+	VOID __stdcall DrawGround(DWORD* thisObj, BlitObject* obj, POINT* srcLoc, POINT* dstLoc, RECT* rect, BYTE* blendMask, DWORD* alphaMask)
 	{
 		DWORD pitch = obj->pitch >> 1;
 
@@ -2053,7 +1913,12 @@ namespace Hooks
 					size = rect->right - dstX;
 
 				if (size > 0)
-					MemoryZero(dstData + dstX, size * sizeof(DWORD));
+				{
+					DWORD* dst = dstData + dstX;
+					do
+						*dst++ = 0xFF000000;
+					while (--size);
+				}
 			}
 
 			if (++idx == 32)
@@ -2074,17 +1939,7 @@ namespace Hooks
 		} while (TRUE);
 	}
 
-	VOID __stdcall DrawSymbol(DWORD* obj,
-		DWORD* data,
-		LONG dstPitch,
-		LONG left,
-		LONG top,
-		RECT* clipper,
-		RECT* rect,
-		DWORD colorFill,
-		DWORD colorShadow,
-		BYTE castShadow,
-		CHAR symbol)
+	VOID __stdcall DrawSymbol(DWORD* obj, DWORD* data, LONG dstPitch, LONG left, LONG top, RECT* clipper, RECT* rect, DWORD colorFill, DWORD colorShadow, BYTE castShadow, CHAR symbol)
 	{
 		if (symbol != '\n' && symbol != '\r')
 		{
@@ -2095,8 +1950,8 @@ namespace Hooks
 
 			if (Clip(&shift.x, &shift.y, &left, &top, &size.cx, &size.cy, clipper))
 			{
-				colorFill = ((colorFill & 0x001F) << 3) | ((colorFill & 0x07E0) << 5) | ((colorFill & 0xF800) << 8);
-				colorShadow = ((colorShadow & 0x001F) << 3) | ((colorShadow & 0x07E0) << 5) | ((colorShadow & 0xF800) << 8);
+				colorFill = ((colorFill & 0x001F) << 3) | ((colorFill & 0x07E0) << 5) | ((colorFill & 0xF800) << 8) | 0xFF000000;
+				colorShadow = ((colorShadow & 0x001F) << 3) | ((colorShadow & 0x07E0) << 5) | ((colorShadow & 0xF800) << 8) | 0xFF000000;
 
 				DWORD srcPitch = font[3];
 				BYTE* src = (BYTE*)font[4] + shift.y * srcPitch + (shift.x >> 3);
@@ -2178,12 +2033,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall DrawLineHorizontal(DWORD* data,
-		SIZE* sizePitch,
-		LONG left,
-		LONG top,
-		LONG width,
-		DWORD colorFill)
+	VOID __stdcall DrawLineHorizontal(DWORD* data, SIZE* sizePitch, LONG left, LONG top, LONG width, DWORD colorFill)
 	{
 		POINT shift = { 0, 0 };
 		LONG height = 1;
@@ -2191,7 +2041,7 @@ namespace Hooks
 
 		if (Clip(&shift.x, &shift.y, &left, &top, &width, &height, &clipper))
 		{
-			colorFill = ((colorFill & 0x001F) << 3) | ((colorFill & 0x07E0) << 5) | ((colorFill & 0xF800) << 8);
+			colorFill = ((colorFill & 0x001F) << 3) | ((colorFill & 0x07E0) << 5) | ((colorFill & 0xF800) << 8) | 0xFF000000;
 
 			DWORD* dst = (DWORD*)data + top * sizePitch->cx + left;
 			do
@@ -2205,12 +2055,7 @@ namespace Hooks
 		__asm { JMP DrawLineHorizontal }
 	}
 
-	VOID __stdcall DrawLineVertical(DWORD* data,
-		SIZE* sizePitch,
-		LONG left,
-		LONG top,
-		LONG height,
-		DWORD colorFill)
+	VOID __stdcall DrawLineVertical(DWORD* data, SIZE* sizePitch, LONG left, LONG top, LONG height, DWORD colorFill)
 	{
 		POINT shift = { 0, 0 };
 		LONG width = 1;
@@ -2218,7 +2063,7 @@ namespace Hooks
 
 		if (Clip(&shift.x, &shift.y, &left, &top, &width, &height, &clipper))
 		{
-			colorFill = ((colorFill & 0x001F) << 3) | ((colorFill & 0x07E0) << 5) | ((colorFill & 0xF800) << 8);
+			colorFill = ((colorFill & 0x001F) << 3) | ((colorFill & 0x07E0) << 5) | ((colorFill & 0xF800) << 8) | 0xFF000000;
 
 			DWORD* dst = (DWORD*)data + top * sizePitch->cx + left;
 			do
@@ -2234,10 +2079,7 @@ namespace Hooks
 		__asm { JMP DrawLineVertical }
 	}
 
-	VOID __stdcall DrawMinimapGround(DWORD* thisObj,
-		LONG left,
-		LONG top,
-		BlitObject* obj)
+	VOID __stdcall DrawMinimapGround(DWORD* thisObj, LONG left, LONG top, BlitObject* obj)
 	{
 		if (left > 0 && left < obj->rect.right && top > 0 && top < obj->rect.bottom)
 		{
@@ -2350,20 +2192,7 @@ namespace Hooks
 		*(BYTE*)&thisObj[9] = 0;
 	}
 
-	VOID __stdcall DrawFaces(VOID* dstData,
-		LONG dstPitch,
-		VOID* srcData,
-		LONG srcPitch,
-		LONG top,
-		LONG bottom,
-		LONG width,
-		BYTE isMirror,
-		BYTE k,
-		DWORD minIdx,
-		PixObject* pixData_1,
-		PixObject* pixData_2,
-		VOID* mskData,
-		LONG mskPitch)
+	VOID __stdcall DrawFaces(VOID* dstData, LONG dstPitch, VOID* srcData, LONG srcPitch, LONG top, LONG bottom, LONG width, BYTE isMirror, BYTE k, DWORD minIdx, PixObject* pixData_1, PixObject* pixData_2, VOID* mskData, LONG mskPitch)
 	{
 		DWORD* source = (DWORD*)srcData + top * srcPitch;
 		DWORD* mask = (DWORD*)mskData + top * mskPitch;
@@ -2383,52 +2212,10 @@ namespace Hooks
 			{
 				DWORD pix = *src;
 				if (mskData || pixData_1->exists)
-				{
-					if (k == 255)
-						pix = mskData ? *msk : pixData_1->color;
-					else if (k)
-					{
-						DWORD mult = mskData ? *msk : pixData_1->color;
-
-						DWORD r1 = pix & 0x000000FF;
-						DWORD r2 = mult & 0x000000FF;
-						DWORD red = (((r1 * 255) + (r2 - r1) * k) / 255) & 0x000000FF;
-
-						r1 = pix & 0x0000FF00;
-						r2 = mult & 0x0000FF00;
-						DWORD green = (((r1 * 255) + (r2 - r1) * k) / 255) & 0x0000FF00;
-
-						r1 = pix & 0x00FF0000;
-						r2 = mult & 0x00FF0000;
-						DWORD blue = (((r1 * 255) + (r2 - r1) * k) / 255) & 0x00FF0000;
-
-						pix = red | green | blue;
-					}
-				}
+					pix = Pixel_Blend(pix, mskData ? *msk : pixData_1->color, k);
 
 				if (idx >= minIdx && pixData_2->exists) // color
-				{
-					if (k == 255)
-						pix = pixData_2->color;
-					else if (k)
-					{
-						DWORD mult = pixData_2->color;
-
-						DWORD r1 = pix & 0x000000FF;
-						DWORD r2 = mult & 0x000000FF;
-						DWORD red = (((r1 * 255) + (r2 - r1) * k) / 255) & 0x000000FF;
-
-						r1 = pix & 0x0000FF00;
-						r2 = mult & 0x0000FF00;
-						DWORD green = (((r1 * 255) + (r2 - r1) * k) / 255) & 0x0000FF00;
-
-						r1 = pix & 0x00FF0000;
-						r2 = mult & 0x00FF0000;
-						DWORD blue = (((r1 * 255) + (r2 - r1) * k) / 255) & 0x00FF0000;
-
-						pix = red | green | blue;
-					}
-				}
+					pix = Pixel_Blend(pix, pixData_2->color, k);
 
 				*dst = pix;
 
@@ -2452,7 +2239,7 @@ namespace Hooks
 	VOID __stdcall DrawLine(BlitObject* obj, POINT* loc, DWORD count, DWORD color)
 	{
 		DWORD pitch = obj->pitch >> 1;
-		color = ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8);
+		color = ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8) | 0xFF000000;
 
 		DWORD* data = (DWORD*)obj->data + loc->y * pitch + loc->x;
 		while (count--)
@@ -2461,7 +2248,7 @@ namespace Hooks
 
 	DWORD __stdcall Color565toRGB(DWORD color)
 	{
-		return ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8);
+		return ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8) | 0xFF000000;
 	}
 
 	DWORD back_005383AA;
