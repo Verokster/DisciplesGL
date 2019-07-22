@@ -46,6 +46,7 @@ GLLOADIDENTITY GLLoadIdentity;
 GLORTHO GLOrtho;
 GLFINISH GLFinish;
 GLENABLE GLEnable;
+GLDISABLE GLDisable;
 GLBINDTEXTURE GLBindTexture;
 GLDELETETEXTURES GLDeleteTextures;
 GLTEXPARAMETERI GLTexParameteri;
@@ -58,6 +59,7 @@ GLGETINTEGERV GLGetIntegerv;
 GLCLEAR GLClear;
 GLCLEARCOLOR GLClearColor;
 GLCOLORMASK GLColorMask;
+GLBLENDFUNC GLBlendFunc;
 
 #ifdef _DEBUG
 GLGETERROR GLGetError;
@@ -202,6 +204,7 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "Ortho", (PROC*)&GLOrtho);
 		LoadFunction(buffer, PREFIX_GL, "Finish", (PROC*)&GLFinish);
 		LoadFunction(buffer, PREFIX_GL, "Enable", (PROC*)&GLEnable);
+		LoadFunction(buffer, PREFIX_GL, "Disable", (PROC*)&GLDisable);
 		LoadFunction(buffer, PREFIX_GL, "BindTexture", (PROC*)&GLBindTexture);
 		LoadFunction(buffer, PREFIX_GL, "DeleteTextures", (PROC*)&GLDeleteTextures);
 		LoadFunction(buffer, PREFIX_GL, "TexParameteri", (PROC*)&GLTexParameteri);
@@ -214,6 +217,7 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "Clear", (PROC*)&GLClear);
 		LoadFunction(buffer, PREFIX_GL, "ClearColor", (PROC*)&GLClearColor);
 		LoadFunction(buffer, PREFIX_GL, "ColorMask", (PROC*)&GLColorMask);
+		LoadFunction(buffer, PREFIX_GL, "BlendFunc", (PROC*)&GLBlendFunc);
 
 #ifdef _DEBUG
 		LoadFunction(buffer, PREFIX_GL, "GetError", (PROC*)&GLGetError);

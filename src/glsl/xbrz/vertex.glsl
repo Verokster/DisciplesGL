@@ -22,33 +22,22 @@
 	SOFTWARE.
 */
 
-uniform sampler2D tex01;
-uniform sampler2D tex02;
-uniform bool doubled;
+uniform mat4 mvp;
 
 #if __VERSION__ >= 130
 	#define COMPAT_IN in
-	#define COMPAT_TEXTURE texture
+	#define COMPAT_OUT out
 	precision mediump float;
-	out mediump vec4 FRAG_COLOR;
 #else
-	#define COMPAT_IN varying 
-	#define COMPAT_TEXTURE texture2D
-	#define FRAG_COLOR gl_FragColor
+	#define COMPAT_IN attribute 
+	#define COMPAT_OUT varying 
 #endif
 
-COMPAT_IN vec2 fTex01;
-COMPAT_IN vec2 fTex02;
+COMPAT_IN vec2 vCoord;
+COMPAT_IN vec2 vTex01;
+COMPAT_OUT vec2 fTex01;
 
 void main() {
-	vec4 color01 = COMPAT_TEXTURE(tex01, fTex01);
-	if (!doubled || color01.a == 1.0)
-		FRAG_COLOR = color01;
-	else if (color01.a == 0.0)
-		FRAG_COLOR = COMPAT_TEXTURE(tex02, fTex02);
-	else
-	{
-		vec4 color02 = COMPAT_TEXTURE(tex02, fTex02);
-		FRAG_COLOR = vec4(mix(color02.rgb, color01.rgb, color01.a), 1.0);
-	}
+	gl_Position = mvp * vec4(vCoord, 0.0, 1.0);
+	fTex01 = vTex01;
 }

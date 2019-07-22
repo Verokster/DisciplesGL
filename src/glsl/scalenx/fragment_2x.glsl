@@ -32,37 +32,36 @@ uniform sampler2D tex01;
 uniform sampler2D tex02;
 uniform vec2 texSize;
 
-in vec2 fTexCoord;
-
+in vec2 fTex01;
 out vec4 fragColor;
 
-bool eq(vec3 A, vec3 B) {
+bool eq(vec4 A, vec4 B) {
 	return (A==B);
 }
 
-bool neq(vec3 A, vec3 B) {
+bool neq(vec4 A, vec4 B) {
 	return (A!=B);
 }
 
 void main() {
-	if (texture(tex01, fTexCoord) == texture(tex02, fTexCoord))
+	if (eq(texture(tex01, fTex01), texture(tex02, fTex01)))
 		discard;
 
-	vec2 texel = floor(fTexCoord * texSize) + 0.5;
+	vec2 texel = floor(fTex01 * texSize) + 0.5;
 
-	#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize).rgb
+	#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize)
 
-	vec3 B = TEX( 0.0, -1.0);
-	vec3 D = TEX(-1.0,  0.0);
-	vec3 E = TEX( 0.0,  0.0);
-	vec3 F = TEX( 1.0,  0.0);
-	vec3 H = TEX( 0.0,  1.0);
+	vec4 B = TEX( 0.0, -1.0);
+	vec4 D = TEX(-1.0,  0.0);
+	vec4 E = TEX( 0.0,  0.0);
+	vec4 F = TEX( 1.0,  0.0);
+	vec4 H = TEX( 0.0,  1.0);
 
-	vec3 E0 = eq(B,D) ? B : E;
-	vec3 E1 = eq(B,F) ? B : E;
-	vec3 E2 = eq(H,D) ? H : E;
-	vec3 E3 = eq(H,F) ? H : E;
+	vec4 E0 = eq(B,D) ? B : E;
+	vec4 E1 = eq(B,F) ? B : E;
+	vec4 E2 = eq(H,D) ? H : E;
+	vec4 E3 = eq(H,F) ? H : E;
 
-	vec2 fp = floor(2.0 * fract(fTexCoord * texSize));
-	fragColor = vec4(neq(B,H) && neq(D,F) ? (fp.y == 0. ? (fp.x == 0. ? E0 : E1) : (fp.x == 0. ? E2 : E3)) : E, 1.0);
+	vec2 fp = floor(2.0 * fract(fTex01 * texSize));
+	fragColor = neq(B,H) && neq(D,F) ? (fp.y == 0. ? (fp.x == 0. ? E0 : E1) : (fp.x == 0. ? E2 : E3)) : E;
 }

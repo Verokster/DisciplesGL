@@ -27,7 +27,9 @@
 */
 
 uniform sampler2D tex01;
+uniform sampler2D tex02;
 uniform vec2 texSize;
+uniform bool doubled;
 
 #if __VERSION__ >= 130
 	#define COMPAT_IN in
@@ -40,9 +42,16 @@ uniform vec2 texSize;
 	#define FRAG_COLOR gl_FragColor
 #endif
 
-COMPAT_IN vec2 fTexCoord;
+COMPAT_IN vec2 fTex01;
+COMPAT_IN vec2 fTex02;
 
-void weights(vec2 t, out vec4 x, out vec4 y) {
+vec4 sample(sampler2D tex, vec2 coord)
+{
+	vec2 uv = coord * texSize - 0.5;
+	vec2 texel = floor(uv);
+	vec2 t = uv - texel;
+	texel -= 0.5;
+
 	vec2 t2 = t * t;
 	vec2 t3 = t2 * t;
 
@@ -54,21 +63,45 @@ void weights(vec2 t, out vec4 x, out vec4 y) {
 	const vec4 p2 = vec4(+0.0, +0.5, +2.0, -1.5);
 	const vec4 p3 = vec4(+0.0,  0.0, -0.5, +0.5);
 
-	x = vec4(dot(xs, p0), dot(xs, p1), dot(xs, p2), dot(xs, p3));
-	y = vec4(dot(ys, p0), dot(ys, p1), dot(ys, p2), dot(ys, p3));
+	vec4 x = vec4(dot(xs, p0), dot(xs, p1), dot(xs, p2), dot(xs, p3));
+	vec4 y = vec4(dot(ys, p0), dot(ys, p1), dot(ys, p2), dot(ys, p3));
+
+	return
+		x.r * y.r * COMPAT_TEXTURE(tex, (texel + vec2(0.0, 0.0)) / texSize) +
+		x.g * y.r * COMPAT_TEXTURE(tex, (texel + vec2(1.0, 0.0)) / texSize) +
+		x.b * y.r * COMPAT_TEXTURE(tex, (texel + vec2(2.0, 0.0)) / texSize) +
+		x.a * y.r * COMPAT_TEXTURE(tex, (texel + vec2(3.0, 0.0)) / texSize) +
+
+		x.r * y.g * COMPAT_TEXTURE(tex, (texel + vec2(0.0, 1.0)) / texSize) +
+		x.g * y.g * COMPAT_TEXTURE(tex, (texel + vec2(1.0, 1.0)) / texSize) +
+		x.b * y.g * COMPAT_TEXTURE(tex, (texel + vec2(2.0, 1.0)) / texSize) +
+		x.a * y.g * COMPAT_TEXTURE(tex, (texel + vec2(3.0, 1.0)) / texSize) +
+
+		x.r * y.b * COMPAT_TEXTURE(tex, (texel + vec2(0.0, 2.0)) / texSize) +
+		x.g * y.b * COMPAT_TEXTURE(tex, (texel + vec2(1.0, 2.0)) / texSize) +
+		x.b * y.b * COMPAT_TEXTURE(tex, (texel + vec2(2.0, 2.0)) / texSize) +
+		x.a * y.b * COMPAT_TEXTURE(tex, (texel + vec2(3.0, 2.0)) / texSize) +
+
+		x.r * y.a * COMPAT_TEXTURE(tex, (texel + vec2(0.0, 3.0)) / texSize) +
+		x.g * y.a * COMPAT_TEXTURE(tex, (texel + vec2(1.0, 3.0)) / texSize) +
+		x.b * y.a * COMPAT_TEXTURE(tex, (texel + vec2(2.0, 3.0)) / texSize) +
+		x.a * y.a * COMPAT_TEXTURE(tex, (texel + vec2(3.0, 3.0)) / texSize);
 }
 
 void main() {
-	vec2 uv = fTexCoord * texSize - 0.5;
-	vec2 texel = floor(uv);
-	
-	vec4 x, y;
-	weights(uv - texel, x, y);
-
-	texel -= 0.5;
-	vec4 color = vec4(0.0);
-	for(int j = 0; j < 4; ++j) for(int i = 0; i < 4; ++i)
-		color += x[i] * y[j] * COMPAT_TEXTURE(tex01, (texel + vec2(i, j)) / texSize);
-
-	FRAG_COLOR = color;
+	if (!doubled)
+		FRAG_COLOR = sample(tex01, fTex01);
+	else
+	{
+		float check = COMPAT_TEXTURE(tex01, fTex01).a;
+		if (check == 1.0)
+			FRAG_COLOR = sample(tex01, fTex01);
+		else if (check == 0.0)
+			FRAG_COLOR = sample(tex02, fTex02);
+		else
+		{
+			vec4 color = sample(tex01, fTex01);
+			FRAG_COLOR = vec4(mix(sample(tex02, fTex02).rgb, color.rgb, color.a), 1.0);
+		}
+	}
 } 

@@ -28,6 +28,10 @@
 #include "OpenDrawClipper.h"
 #include "OpenDrawPalette.h"
 
+#define STATE_NONE		0x0
+#define STATE_ZOOMED	0x1
+#define STATE_BORDER	0x2
+
 class OpenDraw;
 
 class OpenDrawSurface : public IDrawSurface7 {
@@ -48,7 +52,8 @@ public:
 	VOID* secondaryBuffer;
 	BOOL bufferIndex;
 	DWORD drawIndex;
-	BOOL isZoomed[2];
+
+	DWORD state[2];
 
 	SurfaceType type;
 

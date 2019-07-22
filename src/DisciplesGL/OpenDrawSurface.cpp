@@ -25,6 +25,7 @@
 #include "stdafx.h"
 #include "OpenDrawSurface.h"
 #include "OpenDraw.h"
+#include "Hooks.h"
 #include "Main.h"
 #include "Config.h"
 #include "Resource.h"
@@ -55,9 +56,14 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, SurfaceTyp
 	this->drawEnabled = TRUE;
 	this->drawIndex = 0;
 
-	BOOL isZoomed = config.zoomImage && config.isBorder;
-	this->isZoomed[0] = isZoomed;
-	this->isZoomed[1] = isZoomed;
+	*this->state = STATE_NONE;
+	if (config.zoomImage && config.isBorder)
+		*this->state |= STATE_ZOOMED;
+
+	if (config.showBackBorder && config.isBorder)
+		*this->state |= STATE_BORDER;
+
+	this->state[1] = this->state[0];
 
 	this->type = type;
 
@@ -132,38 +138,33 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 			this->secondaryBuffer = AlignedAlloc(size);
 			MemoryZero(this->secondaryBuffer, size);
 
-			if (this->type == SurfaceSecondary)
+			if (this->type == SurfaceSecondary && config.gameBorders)
 			{
-				ResourceStream stream;
-				DWORD palette[256];
-
+				HRSRC hResource = FindResource(hDllModule, MAKEINTRESOURCE(IDR_BORDER), RT_RCDATA);
+				if (hResource)
 				{
-					HRSRC hResource = FindResource(hDllModule, MAKEINTRESOURCE(IDR_BACK), RT_RCDATA);
-					if (hResource)
+					HGLOBAL hResourceData = LoadResource(hDllModule, hResource);
+					if (hResourceData)
 					{
-						HGLOBAL hResourceData = LoadResource(hDllModule, hResource);
-						if (hResourceData)
+						ResourceStream stream = { LockResource(hResourceData), 0 };
+						if (stream.data)
 						{
-							stream.data = LockResource(hResourceData);
-							if (stream.data)
+							png_structp png_ptr = pnglib_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+							png_infop info_ptr = pnglib_create_info_struct(png_ptr);
+
+							if (info_ptr)
 							{
-								stream.position = 0;
+								pnglib_set_read_fn(png_ptr, &stream, PngLib::ReadDataFromInputStream);
+								pnglib_read_info(png_ptr, info_ptr);
 
-								png_structp png_ptr = pnglib_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-								png_infop info_ptr = pnglib_create_info_struct(png_ptr);
-
-								if (info_ptr)
+								if (info_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
 								{
-									pnglib_set_read_fn(png_ptr, &stream, PngLib::ReadDataFromInputStream);
-									pnglib_read_info(png_ptr, info_ptr);
-
-									if (info_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
+									BYTE* data = (BYTE*)MemoryAlloc(info_ptr->height * info_ptr->rowbytes);
+									if (data)
 									{
-										BYTE* data = (BYTE*)MemoryAlloc(info_ptr->height * info_ptr->rowbytes);
-										if (data)
+										BYTE** list = (BYTE**)MemoryAlloc(info_ptr->height * sizeof(BYTE*));
+										if (list)
 										{
-											BYTE** list = (BYTE**)MemoryAlloc(info_ptr->height * sizeof(BYTE*));
-											if (list)
 											{
 												BYTE** item = list;
 												BYTE* row = data;
@@ -175,215 +176,88 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 												}
 
 												pnglib_read_image(png_ptr, list);
-												MemoryFree(list);
-
-												{
-													BYTE* src = (BYTE*)info_ptr->palette;
-													BYTE* dst = (BYTE*)palette;
-													DWORD count = (DWORD)info_ptr->num_palette;
-													if (count > 256)
-														count = 256;
-													while (count--)
-													{
-														*dst++ = *src++;
-														*dst++ = *src++;
-														*dst++ = *src++;
-														*dst++ = 0xFF;
-													}
-												}
-
-												DWORD divX = width / (DWORD)info_ptr->width;
-												DWORD modX = width % (DWORD)info_ptr->width;
-												if (modX)
-													++divX;
-
-												DWORD divY = height / (DWORD)info_ptr->height;
-												DWORD modY = height % (DWORD)info_ptr->height;
-												if (modY)
-													++divY;
-
-												DWORD* dstH = (DWORD*)this->secondaryBuffer;
-
-												DWORD divH = divY;
-												while (divH--)
-												{
-													DWORD cheight = !divH && modY ? modY : (DWORD)info_ptr->height;
-
-													DWORD* dstW = dstH;
-
-													DWORD divW = divX;
-													while (divW--)
-													{
-														DWORD cwidth = !divW && modX ? modX : (DWORD)info_ptr->width;
-
-														BYTE* srcData = data;
-														DWORD* dstData = dstW;
-
-														DWORD copyHeight = cheight;
-														while (copyHeight--)
-														{
-															BYTE* src = srcData;
-															DWORD* dst = dstData;
-
-															DWORD copyWidth = cwidth;
-															if (info_ptr->pixel_depth == 4)
-															{
-																BOOL tick = FALSE;
-																while (copyWidth--)
-																{
-																	*dst++ = palette[!tick ? (*src >> 4) : (*src++ & 0xF)];
-																	tick = !tick;
-																}
-															}
-															else
-															{
-																while (copyWidth--)
-																	*dst++ = palette[*src++];
-															}
-
-															srcData += info_ptr->rowbytes;
-															dstData += width;
-														}
-
-														dstW += info_ptr->width;
-													}
-
-													dstH += info_ptr->height * width;
-												}
 											}
-											MemoryFree(data);
-										}
-									}
-								}
+											MemoryFree(list);
 
-								pnglib_destroy_read_struct(&png_ptr, NULL, NULL);
-							}
-						}
-					}
-				}
-
-				if (config.gameBorders)
-				{
-					HRSRC hResource = FindResource(hDllModule, MAKEINTRESOURCE(IDR_BORDER), RT_RCDATA);
-					if (hResource)
-					{
-						HGLOBAL hResourceData = LoadResource(hDllModule, hResource);
-						if (hResourceData)
-						{
-							stream.data = LockResource(hResourceData);
-							if (stream.data)
-							{
-								stream.position = 0;
-
-								png_structp png_ptr = pnglib_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-								png_infop info_ptr = pnglib_create_info_struct(png_ptr);
-
-								if (info_ptr)
-								{
-									pnglib_set_read_fn(png_ptr, &stream, PngLib::ReadDataFromInputStream);
-									pnglib_read_info(png_ptr, info_ptr);
-
-									if (info_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
-									{
-										BYTE* data = (BYTE*)MemoryAlloc(info_ptr->height * info_ptr->rowbytes);
-										if (data)
-										{
-											BYTE** list = (BYTE**)MemoryAlloc(info_ptr->height * sizeof(BYTE*));
-											if (list)
+											DWORD palette[256];
 											{
+												BYTE* src = (BYTE*)info_ptr->palette;
+												BYTE* dst = (BYTE*)palette;
+												DWORD count = (DWORD)info_ptr->num_palette;
+												if (count > 256)
+													count = 256;
+												while (count--)
 												{
-													BYTE** item = list;
-													BYTE* row = data;
-													DWORD count = info_ptr->height;
-													while (count--)
-													{
-														*item++ = (BYTE*)row;
-														row += info_ptr->rowbytes;
-													}
-
-													pnglib_read_image(png_ptr, list);
-												}
-												MemoryFree(list);
-
-												{
-													BYTE* src = (BYTE*)info_ptr->palette;
-													BYTE* dst = (BYTE*)palette;
-													DWORD count = (DWORD)info_ptr->num_palette;
-													if (count > 256)
-														count = 256;
-													while (count--)
-													{
-														*dst++ = *src++;
-														*dst++ = *src++;
-														*dst++ = *src++;
-														*dst++ = 0xFF;
-													}
-												}
-
-												LONG srcX, srcY, dstX, dstY;
-												DWORD cWidth, cHeight;
-
-												dstX = ((LONG)width - (LONG)info_ptr->width) >> 1;
-												if (dstX < 0)
-												{
-													srcX = -dstX;
-													dstX = 0;
-													cWidth = width;
-												}
-												else
-												{
-													srcX = 0;
-													cWidth = (DWORD)info_ptr->width;
-												}
-
-												dstY = ((LONG)height - (LONG)info_ptr->height) >> 1;
-												if (dstY < 0)
-												{
-													srcY = -dstY;
-													dstY = 0;
-													cHeight = height;
-												}
-												else
-												{
-													srcY = 0;
-													cHeight = (DWORD)info_ptr->height;
-												}
-
-												BYTE* srcData = data + srcY * info_ptr->width + srcX;
-												DWORD* dstData = (DWORD*)this->secondaryBuffer + dstY * width + dstX;
-
-												while (cHeight--)
-												{
-													BYTE* src = srcData;
-													DWORD* dst = dstData;
-
-													DWORD copyWidth = cWidth;
-													if (info_ptr->pixel_depth == 4)
-													{
-														BOOL tick = FALSE;
-														while (copyWidth--)
-														{
-															*dst++ = palette[!tick ? (*src >> 4) : (*src++ & 0xF)];
-															tick = !tick;
-														}
-													}
-													else
-													{
-														while (copyWidth--)
-															*dst++ = palette[*src++];
-													}
-
-													srcData += info_ptr->rowbytes;
-													dstData += width;
+													*dst++ = *src++;
+													*dst++ = *src++;
+													*dst++ = *src++;
+													*dst++ = 0xFF;
 												}
 											}
-											MemoryFree(data);
+
+											LONG srcX, srcY, dstX, dstY;
+											DWORD cWidth, cHeight;
+
+											dstX = ((LONG)width - (LONG)info_ptr->width) >> 1;
+											if (dstX < 0)
+											{
+												srcX = -dstX;
+												dstX = 0;
+												cWidth = width;
+											}
+											else
+											{
+												srcX = 0;
+												cWidth = (DWORD)info_ptr->width;
+											}
+
+											dstY = ((LONG)height - (LONG)info_ptr->height) >> 1;
+											if (dstY < 0)
+											{
+												srcY = -dstY;
+												dstY = 0;
+												cHeight = height;
+											}
+											else
+											{
+												srcY = 0;
+												cHeight = (DWORD)info_ptr->height;
+											}
+
+											BYTE* srcData = data + srcY * info_ptr->width + srcX;
+											DWORD* dstData = (DWORD*)this->secondaryBuffer + dstY * width + dstX;
+
+											while (cHeight--)
+											{
+												BYTE* src = srcData;
+												DWORD* dst = dstData;
+
+												DWORD copyWidth = cWidth;
+												if (info_ptr->pixel_depth == 4)
+												{
+													BOOL tick = FALSE;
+													while (copyWidth--)
+													{
+														*dst++ = palette[!tick ? (*src >> 4) : (*src++ & 0xF)];
+														tick = !tick;
+													}
+												}
+												else
+												{
+													while (copyWidth--)
+														*dst++ = palette[*src++];
+												}
+
+												srcData += info_ptr->rowbytes;
+												dstData += width;
+											}
 										}
+										MemoryFree(data);
 									}
 								}
-
-								pnglib_destroy_read_struct(&png_ptr, NULL, NULL);
 							}
+
+							pnglib_destroy_read_struct(&png_ptr, NULL, NULL);
 						}
 					}
 				}
@@ -422,10 +296,9 @@ VOID OpenDrawSurface::Flush()
 			++this->drawIndex;
 
 			BOOL index = this->bufferIndex;
-			BOOL zoommed = surface->isZoomed[0];
-			this->isZoomed[index] = zoommed;
 
-			if (!zoommed)
+			this->state[index] = *surface->state;
+			if (!(*surface->state & STATE_ZOOMED))
 			{
 				VOID** lpBuffer = !index ? &this->indexBuffer : &this->secondaryBuffer;
 				VOID* buffer = *lpBuffer;
@@ -655,10 +528,16 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 
 			if (this->type == SurfaceSecondary)
 			{
-				this->isZoomed[0] = config.zoomImage && config.isBorder;
+				*this->state = STATE_NONE;
 
-				if (config.resHooked && config.showBackBorder && config.isBorder)
+				if (config.zoomImage && config.isBorder)
+					*this->state |= STATE_ZOOMED;
+
+				if (config.showBackBorder && config.isBorder)
+				{
+					*this->state |= STATE_BORDER;
 					MemoryCopy(this->indexBuffer, this->secondaryBuffer, size);
+				}
 				else
 					MemoryZero(this->indexBuffer, size);
 			}
@@ -724,12 +603,33 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 			DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
 			DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
 
-			do
+			if (Hooks::isBink)
 			{
-				MemoryCopy(destination, source, width * sizeof(DWORD));
-				source += sWidth;
-				destination += dWidth;
-			} while (--height);
+				Hooks::isBink = FALSE;
+
+				do
+				{
+					DWORD* src = source;
+					DWORD* dst = destination;
+
+					DWORD cWidth = width;
+					do
+						*dst++ = *src++ | 0xFF000000;
+					while (--cWidth);
+
+					source += sWidth;
+					destination += dWidth;
+				} while (--height);
+			}
+			else
+			{
+				do
+				{
+					MemoryCopy(destination, source, width * sizeof(DWORD));
+					source += sWidth;
+					destination += dWidth;
+				} while (--height);
+			}
 		}
 		else
 		{

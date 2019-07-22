@@ -64,6 +64,8 @@ extern "C" _CRTIMP int __cdecl sprintf(char*, const char*, ...);
 #define StrLastChar(str, ch) strrchr(str, ch)
 #define StrStr(str, substr) strstr(str, substr)
 #define StrToAnsi(dst, src, size) wcstombs(dst, src, size)
+#define Random() rand()
+#define SeedRandom(seed) srand(seed)
 #define Exit(code) exit(code)
 
 DOUBLE __fastcall MathRound(DOUBLE);

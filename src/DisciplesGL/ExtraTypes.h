@@ -44,7 +44,7 @@ struct TexSize {
 };
 
 struct Frame {
-	GLuint id;
+	GLuint id[2];
 	Rect rect;
 	POINT point;
 	VecSize vSize;
@@ -96,16 +96,19 @@ enum FpsState
 	FpsBenchmark
 };
 
+struct Uniform {
+	GLint location;
+	DWORD value;
+};
+
 struct ShaderProgram {
 	GLuint id;
 	const CHAR* version;
 	DWORD vertexName;
 	DWORD fragmentName;
 	GLfloat* mvp;
-	struct {
-		GLint location;
-		DWORD value;
-	} texSize;
+	Uniform texSize;
+	Uniform doubled;
 };
 
 struct ConfigItems {
@@ -130,6 +133,7 @@ struct ConfigItems {
 	BOOL alwaysActive;
 	BOOL coldCPU;
 	BOOL borderlessMode;
+	POINT randPos;
 
 	struct {
 		DWORD index;
