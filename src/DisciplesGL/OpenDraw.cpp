@@ -33,11 +33,15 @@
 #include "Hooks.h"
 #include "PngLib.h"
 
-VOID __fastcall UseShaderProgram(ShaderProgram* program, DWORD texSize, BOOL doubled)
+VOID __fastcall UseShaderProgram(ShaderProgram* program, DWORD texSize)
 {
 	if (!program->id)
 	{
 		program->id = GLCreateProgram();
+
+		GLBindAttribLocation(program->id, 0, "vCoord");
+		GLBindAttribLocation(program->id, 1, "vTex01");
+		GLBindAttribLocation(program->id, 2, "vTex02");
 
 		GLuint vShader = GL::CompileShaderSource(program->vertexName, program->version, GL_VERTEX_SHADER);
 		GLuint fShader = GL::CompileShaderSource(program->fragmentName, program->version, GL_FRAGMENT_SHADER);
@@ -54,10 +58,12 @@ VOID __fastcall UseShaderProgram(ShaderProgram* program, DWORD texSize, BOOL dou
 		GLDeleteShader(vShader);
 
 		GLUseProgram(program->id);
+
 		GLUniformMatrix4fv(GLGetUniformLocation(program->id, "mvp"), 1, GL_FALSE, program->mvp);
 		GLUniform1i(GLGetUniformLocation(program->id, "tex01"), 0);
-		GLUniform1i(GLGetUniformLocation(program->id, "tex02"), 1);
-		GLUniform1i(GLGetUniformLocation(program->id, "doubled"), 1);
+		GLint loc = GLGetUniformLocation(program->id, "tex02");
+		if (loc >= 0)
+			GLUniform1i(loc, 1);
 
 		program->texSize.location = GLGetUniformLocation(program->id, "texSize");
 		if (program->texSize.location >= 0)
@@ -65,120 +71,109 @@ VOID __fastcall UseShaderProgram(ShaderProgram* program, DWORD texSize, BOOL dou
 			program->texSize.value = texSize;
 			GLUniform2f(program->texSize.location, (FLOAT)LOWORD(texSize), (FLOAT)HIWORD(texSize));
 		}
-
-		program->doubled.location = GLGetUniformLocation(program->id, "doubled");
-		if (program->doubled.location >= 0)
-		{
-			program->doubled.value = doubled;
-			GLUniform1i(program->doubled.location, doubled);
-		}
 	}
 	else
 	{
 		GLUseProgram(program->id);
 
-		if (program->doubled.location >= 0 && program->doubled.value != doubled)
+		if (program->texSize.location >= 0 && program->texSize.value != texSize)
 		{
-			program->doubled.value = doubled;
-			GLUniform1i(program->doubled.location, doubled);
+			program->texSize.value = texSize;
+			GLUniform2f(program->texSize.location, (FLOAT)LOWORD(texSize), (FLOAT)HIWORD(texSize));
 		}
 	}
 }
 
-VOID OpenDraw::TakeSnapshot(VOID* buffer, DWORD frameWidth, DWORD frameHeight)
+VOID OpenDraw::TakeSnapshot()
 {
-	this->isTakeSnapshot = FALSE;
-
-	if (OpenClipboard(NULL))
+	if (this->isTakeSnapshot)
 	{
-		EmptyClipboard();
 
-		BOOL isTrueColor = config.mode->bpp != 16 || config.bpp32Hooked;
+		this->isTakeSnapshot = FALSE;
+		GLFinish();
 
-		DWORD pitch = frameWidth * (isTrueColor ? 3 : 2);
-		if (pitch & 3)
-			pitch = (pitch & 0xFFFFFFFC) + 4;
-
-		DWORD infoSize = sizeof(BITMAPINFOHEADER);
-		if (!isTrueColor)
-			infoSize += sizeof(DWORD) * 3;
-
-		DWORD dataSize = pitch * frameHeight;
-		HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, infoSize + dataSize);
+		if (OpenClipboard(NULL))
 		{
-			VOID* data = GlobalLock(hMemory);
+			EmptyClipboard();
+
+			BOOL isTrueColor = config.mode->bpp != 16 || config.bpp32Hooked || glVersion < GL_VER_1_1;
+
+			DWORD pitch = this->viewport.rectangle.width * (isTrueColor ? 3 : 2);
+			if (pitch & 3)
+				pitch = (pitch & 0xFFFFFFFC) + 4;
+
+			DWORD dataSize = pitch * this->viewport.rectangle.height;
 			{
-				BITMAPV4HEADER* bmiHeader = (BITMAPV4HEADER*)data;
-				bmiHeader->bV4Size = sizeof(BITMAPINFOHEADER);
-				bmiHeader->bV4Width = frameWidth;
-				bmiHeader->bV4Height = frameHeight;
-				bmiHeader->bV4Planes = 1;
-				bmiHeader->bV4SizeImage = dataSize;
-				bmiHeader->bV4XPelsPerMeter = 1;
-				bmiHeader->bV4YPelsPerMeter = 1;
-				bmiHeader->bV4ClrUsed = 0;
-				bmiHeader->bV4ClrImportant = 0;
+				DWORD infoSize = sizeof(BITMAPINFOHEADER);
+				if (!isTrueColor)
+					infoSize += sizeof(DWORD) * 3;
 
-				if (isTrueColor)
+				HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, infoSize + dataSize);
 				{
-					bmiHeader->bV4BitCount = 24;
-					bmiHeader->bV4V4Compression = BI_RGB;
-
-					DWORD* src = (DWORD*)buffer;
-					BYTE* dstData = (BYTE*)data + infoSize + dataSize - pitch;
-
-					DWORD height = frameHeight;
-					do
+					VOID* data = GlobalLock(hMemory);
 					{
-						BYTE* dst = dstData;
+						BITMAPV4HEADER* bmiHeader = (BITMAPV4HEADER*)data;
+						bmiHeader->bV4Size = sizeof(BITMAPINFOHEADER);
+						bmiHeader->bV4Width = this->viewport.rectangle.width;
+						bmiHeader->bV4Height = this->viewport.rectangle.height;
+						bmiHeader->bV4Planes = 1;
+						bmiHeader->bV4SizeImage = dataSize;
+						bmiHeader->bV4XPelsPerMeter = 1;
+						bmiHeader->bV4YPelsPerMeter = 1;
+						bmiHeader->bV4ClrUsed = 0;
+						bmiHeader->bV4ClrImportant = 0;
 
-						DWORD width = frameWidth;
-						do
+						BYTE* buffer = (BYTE*)data + infoSize;
+
+						if (isTrueColor)
 						{
-							DWORD color = _byteswap_ulong(*src++);
-							BYTE* px = (BYTE*)&color;
+							bmiHeader->bV4BitCount = 24;
+							bmiHeader->bV4V4Compression = BI_RGB;
 
-							*dst++ = *++px;
-							*dst++ = *++px;
-							*dst++ = *++px;
-						} while (--width);
+							if (glVersion > GL_VER_1_1)
+								GLReadPixels(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
+							else
+							{
+								GLReadPixels(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 
-						dstData -= pitch;
-					} while (--height);
-				}
-				else
-				{
-					bmiHeader->bV4BitCount = 16;
-					bmiHeader->bV4V4Compression = BI_BITFIELDS;
-					bmiHeader->bV4RedMask = 0xF800;
-					bmiHeader->bV4GreenMask = 0x07E0;
-					bmiHeader->bV4BlueMask = 0x001F;
+								DWORD height = this->viewport.rectangle.height;
+								do
+								{
+									BYTE* src = buffer;
 
-					WORD* src = (WORD*)buffer;
-					BYTE* dstData = (BYTE*)data + infoSize + dataSize - pitch;
+									DWORD width = this->viewport.rectangle.width;
+									do
+									{
+										BYTE dt = src[0];
+										src[0] = src[2];
+										src[2] = dt;
 
-					DWORD height = frameHeight;
-					do
-					{
-						BYTE* dst = dstData;
+										src += 3;
+									} while (--width);
 
-						DWORD width = frameWidth;
-						do
+									buffer += pitch;
+								} while (--height);
+							}
+						}
+						else
 						{
-							*(WORD*)dst = *src++;
-							dst += 2;
-						} while (--width);
+							bmiHeader->bV4BitCount = 16;
+							bmiHeader->bV4V4Compression = BI_BITFIELDS;
+							bmiHeader->bV4RedMask = 0xF800;
+							bmiHeader->bV4GreenMask = 0x07E0;
+							bmiHeader->bV4BlueMask = 0x001F;
 
-						dstData -= pitch;
-					} while (--height);
+							GLReadPixels(this->viewport.rectangle.x, this->viewport.rectangle.y, this->viewport.rectangle.width, this->viewport.rectangle.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, buffer);
+						}
+					}
+					GlobalUnlock(hMemory);
+					SetClipboardData(CF_DIB, hMemory);
 				}
+				GlobalFree(hMemory);
 			}
-			GlobalUnlock(hMemory);
-			SetClipboardData(CF_DIB, hMemory);
-		}
-		GlobalFree(hMemory);
 
-		CloseClipboard();
+			CloseClipboard();
+		}
 	}
 }
 
@@ -231,7 +226,7 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 					if (maxTexSize > glMaxTexSize)
 						glVersion = GL_VER_1_1;
 				}
-
+				
 				Window::CheckMenu(ddraw->hWnd);
 				if (glVersion >= GL_VER_3_0)
 					ddraw->RenderNew();
@@ -804,8 +799,7 @@ VOID OpenDraw::RenderOld()
 							}
 						}
 
-						if (this->isTakeSnapshot)
-							this->TakeSnapshot(currentBuffer, frameWidth, frameHeight);
+						this->TakeSnapshot();
 
 						SwapBuffers(this->hDc);
 						GLFinish();
@@ -878,13 +872,16 @@ VOID OpenDraw::RenderMid()
 
 	struct {
 		ShaderProgram linear;
+		ShaderProgram linear_double;
 		ShaderProgram cubic;
+		ShaderProgram cubic_double;
 	} shaders = {
 		{ 0, GLSL_VER_1_10, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT, (GLfloat*)mvpMatrix },
-		{ 0, GLSL_VER_1_10, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT, (GLfloat*)mvpMatrix }
+		{ 0, GLSL_VER_1_10, IDR_LINEAR_VERTEX_DOUBLE, IDR_LINEAR_FRAGMENT_DOUBLE, (GLfloat*)mvpMatrix },
+		{ 0, GLSL_VER_1_10, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT, (GLfloat*)mvpMatrix },
+		{ 0, GLSL_VER_1_10, IDR_CUBIC_VERTEX_DOUBLE, IDR_CUBIC_FRAGMENT_DOUBLE, (GLfloat*)mvpMatrix }
 	};
 
-	ShaderProgram* filterProgram = &shaders.linear;
 	{
 		GLuint bufferName;
 		GLGenBuffers(1, &bufferName);
@@ -907,18 +904,16 @@ VOID OpenDraw::RenderMid()
 					GLBufferData(GL_ARRAY_BUFFER, sizeof(buffer), buffer, GL_STATIC_DRAW);
 				}
 
-				UseShaderProgram(filterProgram, texSize, config.showBackBorder);
-				GLint attrLoc = GLGetAttribLocation(filterProgram->id, "vCoord");
-				GLEnableVertexAttribArray(attrLoc);
-				GLVertexAttribPointer(attrLoc, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)0);
+				{
+					GLEnableVertexAttribArray(0);
+					GLVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)0);
 
-				attrLoc = GLGetAttribLocation(filterProgram->id, "vTex01");
-				GLEnableVertexAttribArray(attrLoc);
-				GLVertexAttribPointer(attrLoc, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)8);
+					GLEnableVertexAttribArray(1);
+					GLVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)8);
 
-				attrLoc = GLGetAttribLocation(filterProgram->id, "vTex02");
-				GLEnableVertexAttribArray(attrLoc);
-				GLVertexAttribPointer(attrLoc, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)16);
+					GLEnableVertexAttribArray(2);
+					GLVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)16);
+				}
 
 				struct {
 					GLuint back;
@@ -979,7 +974,7 @@ VOID OpenDraw::RenderMid()
 						FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 						{
 							this->isStateChanged = TRUE;
-							BOOL borderStatus = config.showBackBorder;
+							DWORD borderStatus = STATE_NONE;
 
 							BOOL isVSync = config.image.vSync;
 							if (WGLSwapInterval)
@@ -1016,23 +1011,31 @@ VOID OpenDraw::RenderMid()
 									if (this->CheckView(TRUE))
 										GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
-									if (borderStatus != config.showBackBorder)
+									if (this->isStateChanged || borderStatus != (state & STATE_BORDER))
 									{
-										borderStatus = config.showBackBorder;
-										this->isStateChanged = true;
-									}
+										borderStatus = state & STATE_BORDER;
 
-									if (this->isStateChanged)
-									{
-										this->isStateChanged = FALSE;
+										UseShaderProgram(config.image.filter == FilterCubic
+												? (state & STATE_BORDER ? &shaders.cubic_double : &shaders.cubic)
+												: (state & STATE_BORDER ? &shaders.linear_double : &shaders.linear),
+											texSize);
 
-										ImageFilter frameFilter = config.image.filter;
-										filterProgram = frameFilter == FilterCubic ? &shaders.cubic : &shaders.linear;
-										UseShaderProgram(filterProgram, texSize, borderStatus);
+										if (this->isStateChanged)
+										{
+											this->isStateChanged = FALSE;
 
-										DWORD filter = frameFilter == FilterLinear ? GL_LINEAR : GL_NEAREST;
-										GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-										GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+											DWORD filter = config.image.filter == FilterLinear ? GL_LINEAR : GL_NEAREST;
+
+											GLActiveTexture(GL_TEXTURE1);
+											GLBindTexture(GL_TEXTURE_2D, textureId.back);
+											GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+											GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+
+											GLActiveTexture(GL_TEXTURE0);
+											GLBindTexture(GL_TEXTURE_2D, textureId.primary);
+											GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+											GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+										}
 									}
 
 									DWORD frameWidth, frameHeight;
@@ -1061,8 +1064,7 @@ VOID OpenDraw::RenderMid()
 										GLDrawArrays(GL_TRIANGLE_FAN, state & STATE_ZOOMED ? 4 : 0, 4);
 									}
 
-									if (this->isTakeSnapshot)
-										this->TakeSnapshot(currentBuffer, frameWidth, frameHeight);
+									this->TakeSnapshot();
 
 									SwapBuffers(this->hDc);
 									GLFinish();
@@ -1144,7 +1146,9 @@ VOID OpenDraw::RenderNew()
 
 	struct {
 		ShaderProgram linear;
+		ShaderProgram linear_double;
 		ShaderProgram cubic;
+		ShaderProgram cubic_double;
 		ShaderProgram xBRz_2x;
 		ShaderProgram xBRz_3x;
 		ShaderProgram xBRz_4x;
@@ -1158,7 +1162,9 @@ VOID OpenDraw::RenderNew()
 		ShaderProgram scaleNx_3x;
 	} shaders = {
 		{ 0, GLSL_VER_1_30, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT, (GLfloat*)mvpMatrix },
+		{ 0, GLSL_VER_1_30, IDR_LINEAR_VERTEX_DOUBLE, IDR_LINEAR_FRAGMENT_DOUBLE, (GLfloat*)mvpMatrix },
 		{ 0, GLSL_VER_1_30, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT, (GLfloat*)mvpMatrix },
+		{ 0, GLSL_VER_1_30, IDR_CUBIC_VERTEX_DOUBLE, IDR_CUBIC_FRAGMENT_DOUBLE, (GLfloat*)mvpMatrix },
 		{ 0, GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_2X, (GLfloat*)mvpMatrix },
 		{ 0, GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_3X, (GLfloat*)mvpMatrix },
 		{ 0, GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_4X, (GLfloat*)mvpMatrix },
@@ -1172,12 +1178,8 @@ VOID OpenDraw::RenderNew()
 		{ 0, GLSL_VER_1_30, IDR_SCALENX_VERTEX_3X, IDR_SCALENX_FRAGMENT_3X, (GLfloat*)mvpMatrix }
 	};
 
-	ShaderProgram* filterProgram = &shaders.linear;
-	ShaderProgram* filterProgram2 = &shaders.linear;
 	{
-		POINTFLOAT* stencil = NULL;
-		GLuint stArrayName, stBufferName, arrayName;
-
+		GLuint arrayName;
 		GLGenVertexArrays(1, &arrayName);
 		{
 			GLBindVertexArray(arrayName);
@@ -1213,18 +1215,16 @@ VOID OpenDraw::RenderNew()
 							GLBufferData(GL_ARRAY_BUFFER, sizeof(buffer), buffer, GL_STATIC_DRAW);
 						}
 
-						UseShaderProgram(filterProgram, texSize, config.showBackBorder);
-						GLint attrLoc = GLGetAttribLocation(filterProgram->id, "vCoord");
-						GLEnableVertexAttribArray(attrLoc);
-						GLVertexAttribPointer(attrLoc, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)0);
+						{
+							GLEnableVertexAttribArray(0);
+							GLVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)0);
 
-						attrLoc = GLGetAttribLocation(filterProgram->id, "vTex01");
-						GLEnableVertexAttribArray(attrLoc);
-						GLVertexAttribPointer(attrLoc, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)8);
+							GLEnableVertexAttribArray(1);
+							GLVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)8);
 
-						attrLoc = GLGetAttribLocation(filterProgram->id, "vTex02");
-						GLEnableVertexAttribArray(attrLoc);
-						GLVertexAttribPointer(attrLoc, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)16);
+							GLEnableVertexAttribArray(2);
+							GLVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 32, (GLvoid*)16);
+						}
 
 						struct {
 							GLuint back;
@@ -1295,9 +1295,11 @@ VOID OpenDraw::RenderNew()
 										FpsCounter* fpsCounter = new FpsCounter(FPS_ACCURACY);
 										{
 											BOOL activeIndex = TRUE;
-											DWORD oldZoomed = STATE_NONE;
 											this->isStateChanged = TRUE;
-											BOOL borderStatus = config.showBackBorder;
+											DWORD zoomStatus = STATE_NONE;
+											DWORD borderStatus = STATE_NONE;
+											ShaderProgram* filterProgram;
+											ImageFilter frameFilter2;
 
 											BOOL isVSync = config.image.vSync;
 											if (WGLSwapInterval)
@@ -1328,17 +1330,11 @@ VOID OpenDraw::RenderNew()
 															WGLSwapInterval(isVSync);
 													}
 
-													if (this->isStateChanged)
-														this->viewport.refresh = TRUE;
-
-													if (oldZoomed != (state & STATE_ZOOMED))
-													{
-														oldZoomed = state & STATE_ZOOMED;
-														this->viewport.refresh = TRUE;
-													}
-
 													if (fpsState)
 														fpsCounter->Calculate();
+
+													if (this->isStateChanged)
+														this->viewport.refresh = TRUE;
 
 													DWORD frameWidth, frameHeight;
 													if (state & STATE_ZOOMED)
@@ -1350,12 +1346,6 @@ VOID OpenDraw::RenderNew()
 													{
 														frameWidth = config.mode->width;
 														frameHeight = config.mode->height;
-													}
-
-													if (borderStatus != config.showBackBorder)
-													{
-														borderStatus = config.showBackBorder;
-														this->isStateChanged = true;
 													}
 
 													ImageFilter frameFilter = config.image.filter;
@@ -1381,7 +1371,7 @@ VOID OpenDraw::RenderNew()
 																	filterProgram = &shaders.scaleNx_2x;
 																	break;
 																}
-																filterProgram2 = config.image.scaleNx.type ? &shaders.cubic : &shaders.linear;
+																frameFilter2 = config.image.scaleNx.type ? FilterCubic : FilterLinear;
 																break;
 
 															case FilterScaleHQ:
@@ -1395,7 +1385,7 @@ VOID OpenDraw::RenderNew()
 																	filterProgram = &shaders.scaleHQ_2x;
 																	break;
 																}
-																filterProgram2 = config.image.scaleHQ.type ? &shaders.cubic : &shaders.linear;
+																frameFilter2 = config.image.scaleHQ.type ? FilterCubic : FilterLinear;
 																break;
 
 															case FilterXRBZ:
@@ -1418,23 +1408,23 @@ VOID OpenDraw::RenderNew()
 																	filterProgram = &shaders.xBRz_2x;
 																	break;
 																}
-																filterProgram2 = config.image.xBRz.type ? &shaders.cubic : &shaders.linear;
+																frameFilter2 = config.image.xBRz.type ? FilterCubic : FilterLinear;
 																break;
 
 															case FilterXSal:
 																scaleValue = config.image.xSal.value;
 																filterProgram = &shaders.xSal_2x;
-																filterProgram2 = config.image.xSal.type ? &shaders.cubic : &shaders.linear;
+																frameFilter2 = config.image.xSal.type ? FilterCubic : FilterLinear;
 																break;
 
 															default:
 																scaleValue = config.image.eagle.value;
 																filterProgram = &shaders.eagle_2x;
-																filterProgram2 = config.image.eagle.type ? &shaders.cubic : &shaders.linear;
+																frameFilter2 = config.image.eagle.type ? FilterCubic : FilterLinear;
 																break;
 															}
 
-															UseShaderProgram(filterProgram, texSize, FALSE);
+															UseShaderProgram(filterProgram, texSize);
 
 															DWORD newSize = MAKELONG(config.mode->width * scaleValue, config.mode->height * scaleValue);
 															if (newSize != viewSize)
@@ -1484,15 +1474,12 @@ VOID OpenDraw::RenderNew()
 																}
 															}
 
-															if (state & STATE_ZOOMED)
-																GLViewport(0, 0, DWORD(tk * LOWORD(viewSize)), DWORD(tk * HIWORD(viewSize)));
-															else
-																GLViewport(0, 0, LOWORD(viewSize), HIWORD(viewSize));
-
 															if (config.resHooked)
 															{
+																GLViewport(0, 0, LOWORD(viewSize), HIWORD(viewSize));
+
 																GLFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId.backBO, 0);
-																
+
 																GLActiveTexture(GL_TEXTURE1);
 																GLBindTexture(GL_TEXTURE_2D, ((GLuint*)&textureId.primary)[activeIndex]);
 																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1516,21 +1503,21 @@ VOID OpenDraw::RenderNew()
 
 															GLFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId.primaryBO, 0);
 														}
+
+														if (state & STATE_ZOOMED)
+															GLViewport(0, 0, DWORD(tk * LOWORD(viewSize)), DWORD(tk * HIWORD(viewSize)));
 														else
-														{
-															if (state & STATE_ZOOMED)
-																GLViewport(0, 0, DWORD(tk * LOWORD(viewSize)), DWORD(tk * HIWORD(viewSize)));
-															else
-																GLViewport(0, 0, LOWORD(viewSize), HIWORD(viewSize));
-														}
+															GLViewport(0, 0, LOWORD(viewSize), HIWORD(viewSize));
 
 														GLActiveTexture(GL_TEXTURE1);
 														GLBindTexture(GL_TEXTURE_2D, ((GLuint*)&textureId.primary)[activeIndex]);
 														GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 														GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-														if (this->CheckView(FALSE))
+														if (this->CheckView(FALSE) || zoomStatus != (state & STATE_ZOOMED))
 														{
+															zoomStatus = state & STATE_ZOOMED;
+
 															if (isTrueColor)
 															{
 																DWORD* ptr = (DWORD*)frameBuffer;
@@ -1558,34 +1545,38 @@ VOID OpenDraw::RenderNew()
 														if (this->CheckView(TRUE))
 															GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
-														if (this->isStateChanged)
+														if (this->isStateChanged || borderStatus != (state & STATE_BORDER))
 														{
-															this->isStateChanged = FALSE;
+															borderStatus = state & STATE_BORDER;
 
-															filterProgram = frameFilter == FilterCubic ? &shaders.cubic : &shaders.linear;
-															UseShaderProgram(filterProgram, texSize, borderStatus);
+															UseShaderProgram(frameFilter == FilterCubic
+																	? (state & STATE_BORDER ? &shaders.cubic_double : &shaders.cubic)
+																	: (state & STATE_BORDER ? &shaders.linear_double : &shaders.linear),
+																texSize);
 
-															if (viewSize)
+															if (this->isStateChanged)
 															{
-																GLDeleteTextures(config.resHooked ? 3 : 2, (GLuint*)&textureId.secondary);
-																GLDeleteRenderbuffers(1, &rboId);
-																viewSize = 0;
-															}
+																this->isStateChanged = FALSE;
 
-															DWORD filter = frameFilter == FilterLinear ? GL_LINEAR : GL_NEAREST;
+																if (viewSize)
+																{
+																	GLDeleteTextures(config.resHooked ? 3 : 2, (GLuint*)&textureId.secondary);
+																	GLDeleteRenderbuffers(1, &rboId);
+																	viewSize = 0;
+																}
 
-															if (borderStatus)
-															{
+																DWORD filter = frameFilter == FilterLinear ? GL_LINEAR : GL_NEAREST;
+
 																GLActiveTexture(GL_TEXTURE1);
 																GLBindTexture(GL_TEXTURE_2D, textureId.back);
 																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-															}
 
-															GLActiveTexture(GL_TEXTURE0);
-															GLBindTexture(GL_TEXTURE_2D, textureId.primary);
-															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+																GLActiveTexture(GL_TEXTURE0);
+																GLBindTexture(GL_TEXTURE_2D, textureId.primary);
+																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+															}
 														}
 													}
 
@@ -1610,20 +1601,19 @@ VOID OpenDraw::RenderNew()
 														GLFinish();
 														GLBindFramebuffer(GL_DRAW_FRAMEBUFFER, NULL);
 
-														UseShaderProgram(filterProgram2, viewSize, borderStatus);
+														UseShaderProgram(frameFilter2 == FilterCubic
+																? (state & STATE_BORDER ? &shaders.cubic_double : &shaders.cubic)
+																: (state & STATE_BORDER ? &shaders.linear_double : &shaders.linear),
+															viewSize);
 														{
 															GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
-															//GLClear(GL_COLOR_BUFFER_BIT);
 
-															DWORD filter = filterProgram2 == &shaders.linear ? GL_LINEAR : GL_NEAREST;
+															DWORD filter = frameFilter2 == FilterLinear ? GL_LINEAR : GL_NEAREST;
 
-															if (borderStatus)
-															{
-																GLActiveTexture(GL_TEXTURE1);
-																GLBindTexture(GL_TEXTURE_2D, textureId.backBO);
-																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-																GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-															}
+															GLActiveTexture(GL_TEXTURE1);
+															GLBindTexture(GL_TEXTURE_2D, textureId.backBO);
+															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 
 															GLActiveTexture(GL_TEXTURE0);
 															GLBindTexture(GL_TEXTURE_2D, textureId.primaryBO);
@@ -1631,89 +1621,11 @@ VOID OpenDraw::RenderNew()
 															GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 
 															GLDrawArrays(GL_TRIANGLE_FAN, state & STATE_ZOOMED ? 12 : 8, 4);
-
-															if (this->isTakeSnapshot)
-															{
-																this->isTakeSnapshot = FALSE;
-
-																GLFinish();
-
-																if (OpenClipboard(NULL))
-																{
-																	EmptyClipboard();
-
-																	DWORD viewWidth = LOWORD(viewSize);
-																	DWORD viewHeight = HIWORD(viewSize);
-																	if (state & STATE_ZOOMED)
-																	{
-																		viewWidth = DWORD(tk * viewWidth);
-																		viewHeight = DWORD(tk * viewHeight);
-																	}
-
-																	DWORD pitch = viewWidth * 3;
-																	if (pitch & 3)
-																		pitch = (pitch & 0xFFFFFFFC) + 4;
-
-																	DWORD dataSize = pitch * viewHeight;
-																	HGLOBAL hMemory = GlobalAlloc(GMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + dataSize);
-																	{
-																		VOID* data = GlobalLock(hMemory);
-																		{
-																			BITMAPINFOHEADER* bmiHeader = (BITMAPINFOHEADER*)data;
-																			bmiHeader->biSize = sizeof(BITMAPINFOHEADER);
-																			bmiHeader->biWidth = viewWidth;
-																			bmiHeader->biHeight = viewHeight;
-																			bmiHeader->biPlanes = 1;
-																			bmiHeader->biBitCount = 24;
-																			bmiHeader->biCompression = BI_RGB;
-																			bmiHeader->biSizeImage = dataSize;
-																			bmiHeader->biXPelsPerMeter = 1;
-																			bmiHeader->biYPelsPerMeter = 1;
-																			bmiHeader->biClrUsed = 0;
-																			bmiHeader->biClrImportant = 0;
-
-																			VOID* pixels = (BYTE*)data + sizeof(BITMAPINFOHEADER);
-
-																			if (!(state & STATE_ZOOMED))
-																				GLGetTexImage(GL_TEXTURE_2D, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixels);
-																			else
-																			{
-																				DWORD bufferPitch = LOWORD(viewSize) * 3;
-																				if (bufferPitch & 3)
-																					bufferPitch = (bufferPitch & 0xFFFFFFFC) + 4;
-
-																				DWORD bufferSize = bufferPitch * HIWORD(viewSize);
-																				VOID* buffer = MemoryAlloc(bufferSize);
-																				{
-																					GLGetTexImage(GL_TEXTURE_2D, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
-
-																					BYTE* srcData = (BYTE*)buffer;
-																					BYTE* dstData = (BYTE*)pixels;
-
-																					do
-																					{
-																						MemoryCopy(dstData, srcData, pitch);
-
-																						srcData += bufferPitch;
-																						dstData += pitch;
-																					} while (--viewHeight);
-																				}
-																				MemoryFree(buffer);
-																			}
-																		}
-																		GlobalUnlock(hMemory);
-																		SetClipboardData(CF_DIB, hMemory);
-																	}
-																	GlobalFree(hMemory);
-
-																	CloseClipboard();
-																}
-															}
 														}
-														UseShaderProgram(filterProgram, texSize, FALSE);
+														UseShaderProgram(filterProgram, texSize);
 													}
-													else if (this->isTakeSnapshot)
-														this->TakeSnapshot(currentBuffer, frameWidth, frameHeight);
+
+													this->TakeSnapshot();
 
 													SwapBuffers(this->hDc);
 													GLFinish();
@@ -1750,13 +1662,6 @@ VOID OpenDraw::RenderNew()
 			GLBindVertexArray(NULL);
 		}
 		GLDeleteVertexArrays(1, &arrayName);
-
-		if (stencil)
-		{
-			MemoryFree(stencil);
-			GLDeleteBuffers(1, &stBufferName);
-			GLDeleteVertexArrays(1, &stArrayName);
-		}
 	}
 	GLUseProgram(NULL);
 

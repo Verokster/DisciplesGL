@@ -35,12 +35,10 @@ uniform mat4 mvp;
 
 COMPAT_IN vec2 vCoord;
 COMPAT_IN vec2 vTex01;
-COMPAT_IN vec2 vTex02;
+
 COMPAT_OUT vec2 fTex01;
-COMPAT_OUT vec2 fTex02;
 
 void main() {
 	gl_Position = mvp * vec4(vCoord, 0.0, 1.0);
 	fTex01 = vTex01;
-	fTex02 = vTex02;
 }

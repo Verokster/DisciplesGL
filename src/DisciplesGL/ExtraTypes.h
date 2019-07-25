@@ -108,7 +108,6 @@ struct ShaderProgram {
 	DWORD fragmentName;
 	GLfloat* mvp;
 	Uniform texSize;
-	Uniform doubled;
 };
 
 struct ConfigItems {

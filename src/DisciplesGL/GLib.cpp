@@ -60,6 +60,7 @@ GLCLEAR GLClear;
 GLCLEARCOLOR GLClearColor;
 GLCOLORMASK GLColorMask;
 GLBLENDFUNC GLBlendFunc;
+GLREADPIXELS GLReadPixels;
 
 #ifdef _DEBUG
 GLGETERROR GLGetError;
@@ -88,7 +89,7 @@ GLUSEPROGRAM GLUseProgram;
 GLGETSHADERIV GLGetShaderiv;
 GLGETSHADERINFOLOG GLGetShaderInfoLog;
 
-GLGETATTRIBLOCATION GLGetAttribLocation;
+GLBINDATTRIBLOCATION GLBindAttribLocation;
 GLGETUNIFORMLOCATION GLGetUniformLocation;
 
 GLUNIFORM1I GLUniform1i;
@@ -218,6 +219,7 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "ClearColor", (PROC*)&GLClearColor);
 		LoadFunction(buffer, PREFIX_GL, "ColorMask", (PROC*)&GLColorMask);
 		LoadFunction(buffer, PREFIX_GL, "BlendFunc", (PROC*)&GLBlendFunc);
+		LoadFunction(buffer, PREFIX_GL, "ReadPixels", (PROC*)&GLReadPixels);
 
 #ifdef _DEBUG
 		LoadFunction(buffer, PREFIX_GL, "GetError", (PROC*)&GLGetError);
@@ -246,7 +248,7 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "GetShaderiv", (PROC*)&GLGetShaderiv);
 		LoadFunction(buffer, PREFIX_GL, "GetShaderInfoLog", (PROC*)&GLGetShaderInfoLog);
 
-		LoadFunction(buffer, PREFIX_GL, "GetAttribLocation", (PROC*)&GLGetAttribLocation);
+		LoadFunction(buffer, PREFIX_GL, "BindAttribLocation", (PROC*)&GLBindAttribLocation);
 		LoadFunction(buffer, PREFIX_GL, "GetUniformLocation", (PROC*)&GLGetUniformLocation);
 
 		LoadFunction(buffer, PREFIX_GL, "Uniform1i", (PROC*)&GLUniform1i);

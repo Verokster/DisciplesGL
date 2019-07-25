@@ -66,7 +66,7 @@ public:
 	VOID RenderOld();
 	VOID RenderMid();
 	VOID RenderNew();
-	VOID __fastcall TakeSnapshot(VOID*, DWORD, DWORD);
+	VOID __fastcall TakeSnapshot();
 
 	// Inherited via  IDraw
 	HRESULT __stdcall OpenDraw::QueryInterface(REFIID, LPVOID*) override;

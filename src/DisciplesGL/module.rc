@@ -335,10 +335,12 @@ END
 
 IDR_LINEAR_VERTEX			RCDATA		DISCARDABLE			"..\\glsl\\linear\\vertex.glsl"
 IDR_LINEAR_FRAGMENT			RCDATA		DISCARDABLE			"..\\glsl\\linear\\fragment.glsl"
+IDR_LINEAR_VERTEX_DOUBLE	RCDATA		DISCARDABLE			"..\\glsl\\linear\\vertex_double.glsl"
+IDR_LINEAR_FRAGMENT_DOUBLE	RCDATA		DISCARDABLE			"..\\glsl\\linear\\fragment_double.glsl"
 
 IDR_CUBIC_FRAGMENT			RCDATA		DISCARDABLE			"..\\glsl\\cubic\\fragment.glsl"
+IDR_CUBIC_FRAGMENT_DOUBLE	RCDATA		DISCARDABLE			"..\\glsl\\cubic\\fragment_double.glsl"
 
-IDR_XBRZ_VERTEX				RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\vertex.glsl"
 IDR_XBRZ_FRAGMENT_2X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_2x.glsl"
 IDR_XBRZ_FRAGMENT_3X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_3x.glsl"
 IDR_XBRZ_FRAGMENT_4X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_4x.glsl"
@@ -364,8 +366,8 @@ IDR_BORDER					RCDATA		DISCARDABLE			"..\\bmp\\border.png"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,7,22,685
- PRODUCTVERSION 1,3,2,0
+ FILEVERSION 2019,7,25,714
+ PRODUCTVERSION 1,3,3,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -381,10 +383,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2019.07.22.685"
+			VALUE "FileVersion", "2019.07.25.714"
 			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4DLL.dll"
-			VALUE "ProductVersion", "1.3.2"
+			VALUE "ProductVersion", "1.3.3"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

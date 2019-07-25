@@ -135,6 +135,7 @@ typedef VOID(__stdcall* GLCLEAR)(GLbitfield mask);
 typedef VOID(__stdcall* GLCLEARCOLOR)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
 typedef VOID(__stdcall* GLCOLORMASK)(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
 typedef VOID(__stdcall* GLBLENDFUNC)(GLenum sfactor, GLenum dfactor);
+typedef VOID(__stdcall* GLREADPIXELS)(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data);
 
 #ifdef _DEBUG
 typedef GLenum(__stdcall* GLGETERROR)();
@@ -164,12 +165,12 @@ typedef VOID(__stdcall* GLUSEPROGRAM)(GLuint program);
 typedef VOID(__stdcall* GLGETSHADERIV)(GLuint shader, GLenum pname, GLint* params);
 typedef VOID(__stdcall* GLGETSHADERINFOLOG)(GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
 
-typedef GLuint(__stdcall* GLGETATTRIBLOCATION)(GLuint program, const GLchar* name);
-typedef GLuint(__stdcall* GLGETUNIFORMLOCATION)(GLuint program, const GLchar* name);
+typedef VOID(__stdcall* GLBINDATTRIBLOCATION)(GLuint program, GLuint index, const GLchar* name);
+typedef GLint(__stdcall* GLGETUNIFORMLOCATION)(GLuint program, const GLchar* name);
 
 typedef VOID(__stdcall* GLUNIFORM1I)(GLint location, GLint v0);
 typedef VOID(__stdcall* GLUNIFORM2F)(GLint location, GLfloat v0, GLfloat v1);
-typedef GLuint(__stdcall* GLUNIFORMMATRIX4FV)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+typedef VOID(__stdcall* GLUNIFORMMATRIX4FV)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 
 typedef VOID(__stdcall* GLGENVERTEXARRAYS)(GLsizei n, GLuint* arrays);
 typedef VOID(__stdcall* GLBINDVERTEXARRAY)(GLuint array);
@@ -216,6 +217,7 @@ extern GLCLEAR GLClear;
 extern GLCLEARCOLOR GLClearColor;
 extern GLCOLORMASK GLColorMask;
 extern GLBLENDFUNC GLBlendFunc;
+extern GLREADPIXELS GLReadPixels;
 
 #ifdef _DEBUG
 extern GLGETERROR GLGetError;
@@ -244,7 +246,7 @@ extern GLUSEPROGRAM GLUseProgram;
 extern GLGETSHADERIV GLGetShaderiv;
 extern GLGETSHADERINFOLOG GLGetShaderInfoLog;
 
-extern GLGETATTRIBLOCATION GLGetAttribLocation;
+extern GLBINDATTRIBLOCATION GLBindAttribLocation;
 extern GLGETUNIFORMLOCATION GLGetUniformLocation;
 
 extern GLUNIFORM1I GLUniform1i;

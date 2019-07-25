@@ -1,8 +1,4 @@
 /*
-	Cubic fragment shader
-	based on libretro Cubic shader
-	https://github.com/libretro/glsl-shaders/tree/master/cubic/shaders
-
 	MIT License
 
 	Copyright (c) 2019 Oleksiy Ryabchun
@@ -27,6 +23,7 @@
 */
 
 uniform sampler2D tex01;
+uniform sampler2D tex02;
 uniform vec2 texSize;
 
 #if __VERSION__ >= 130
@@ -41,6 +38,7 @@ uniform vec2 texSize;
 #endif
 
 COMPAT_IN vec2 fTex01;
+COMPAT_IN vec2 fTex02;
 
 vec4 sample(sampler2D tex, vec2 coord)
 {
@@ -86,5 +84,7 @@ vec4 sample(sampler2D tex, vec2 coord)
 }
 
 void main() {
-	FRAG_COLOR = sample(tex01, fTex01);
+	vec4 color01 = sample(tex01, fTex01);
+	vec4 color02 = sample(tex02, fTex02);
+	FRAG_COLOR = mix(color02, color01, color01.a);
 } 
