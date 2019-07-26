@@ -32,7 +32,7 @@ uniform sampler2D tex01;
 uniform sampler2D tex02;
 uniform vec2 texSize;
 
-in vec2 fTex01;
+in vec2 fTex;
 out vec4 fragColor;
 
 #define MX 1.0
@@ -44,10 +44,10 @@ out vec4 fragColor;
 vec4 dt = vec4(1.0);
 
 void main() {
-	if (texture(tex01, fTex01) == texture(tex02, fTex01))
+	if (texture(tex01, fTex) == texture(tex02, fTex))
 		discard;
 
-	#define TEX(x, y) texture(tex01, (floor(fTex01 * texSize + vec2(x, y)) + 0.5) / texSize)
+	#define TEX(x, y) texture(tex01, (floor(fTex * texSize + vec2(x, y)) + 0.5) / texSize)
 
 	vec4 c  = TEX( 0.0,   0.0);
 
@@ -60,17 +60,17 @@ void main() {
 
 	#define TEX2(x, y) texture(tex01, (texel + vec2(x, y)) / texSize)
 
-	texel = floor(fTex01 * texSize - 0.5) + 0.5;
+	texel = floor(fTex * texSize - 0.5) + 0.5;
 	vec4 o1 = TEX2(0.0, 0.0); 
 	vec4 o3 = TEX2(1.0, 1.0); 
 	vec4 o2 = TEX2(1.0, 0.0);
 	vec4 o4 = TEX2(0.0, 1.0);
 
-	texel = floor(fTex01 * texSize - vec2(0.0, 0.5)) + 0.5;
+	texel = floor(fTex * texSize - vec2(0.0, 0.5)) + 0.5;
 	vec4 s1 = TEX2(0.0, 0.0); 
 	vec4 s3 = TEX2(0.0, 1.0);
 
-	texel = floor(fTex01 * texSize - vec2(0.5, 0.0)) + 0.5;
+	texel = floor(fTex * texSize - vec2(0.5, 0.0)) + 0.5;
 	vec4 s2 = TEX2(1.0, 0.0); 
 	vec4 s4 = TEX2(0.0, 0.0);
 

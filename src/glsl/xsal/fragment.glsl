@@ -32,14 +32,14 @@ uniform sampler2D tex01;
 uniform sampler2D tex02;
 uniform vec2 texSize;
 
-in vec2 fTex01;
+in vec2 fTex;
 out vec4 fragColor;
 
 void main() {
-	if (texture(tex01, fTex01) == texture(tex02, fTex01))
+	if (texture(tex01, fTex) == texture(tex02, fTex))
 		discard;
 
-	#define TEX(x, y) texture(tex01, (floor(fTex01 * texSize + vec2(x, y)) + 0.5) / texSize)
+	#define TEX(x, y) texture(tex01, (floor(fTex * texSize + vec2(x, y)) + 0.5) / texSize)
 
 	vec4 c00 = TEX(-0.25, -0.25);
 	vec4 c20 = TEX( 0.25, -0.25);

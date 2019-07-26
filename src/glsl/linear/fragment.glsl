@@ -35,8 +35,8 @@ uniform sampler2D tex01;
 	#define FRAG_COLOR gl_FragColor
 #endif
 
-COMPAT_IN vec2 fTex01;
+COMPAT_IN vec2 fTex;
 
 void main() {
-	FRAG_COLOR = COMPAT_TEXTURE(tex01, fTex01);
+	FRAG_COLOR = COMPAT_TEXTURE(tex01, fTex);
 }

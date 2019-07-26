@@ -32,7 +32,7 @@ uniform sampler2D tex01;
 uniform sampler2D tex02;
 uniform vec2 texSize;
 
-in vec2 fTex01;
+in vec2 fTex;
 out vec4 fragColor;
 
 vec4 dtt = vec4(65536.0,255.0,1.0,0.0);
@@ -51,10 +51,10 @@ int GET_RESULT(float A, float B, float C, float D) {
 }
 
 void main() {
-	if (texture(tex01, fTex01) == texture(tex02, fTex01))
+	if (texture(tex01, fTex) == texture(tex02, fTex))
 		discard;
 
-	vec2 texel = floor(fTex01 * texSize) + 0.5;
+	vec2 texel = floor(fTex * texSize) + 0.5;
 
 	#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize)
 
@@ -153,6 +153,6 @@ void main() {
 		}
 	}
 
-	vec2 fp = fract(fTex01 * texSize);
+	vec2 fp = fract(fTex * texSize);
 	fragColor = (fp.x < 0.50) ? (fp.y < 0.50 ? p00 : p10) : (fp.y < 0.50 ? p01: p11);
 }

@@ -162,7 +162,7 @@ namespace Config
 			config.image.vSync = TRUE;
 			Config::Set(CONFIG_WRAPPER, "ImageVSync", config.image.vSync);
 
-			config.image.interpolation = InterpolateCubic;
+			config.image.interpolation = InterpolateHermite;
 			Config::Set(CONFIG_WRAPPER, "Interpolation", *(INT*)&config.image.interpolation);
 
 			config.image.upscaling = UpscaleNone;
@@ -233,10 +233,10 @@ namespace Config
 			config.image.aspect = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageAspect", TRUE);
 			config.image.vSync = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageVSync", TRUE);
 
-			INT value = Config::Get(CONFIG_WRAPPER, "Interpolation", InterpolateCubic);
+			INT value = Config::Get(CONFIG_WRAPPER, "Interpolation", InterpolateHermite);
 			config.image.interpolation = *(InterpolationFilter*)&value;
 			if (config.image.interpolation < InterpolateNearest || config.image.interpolation > InterpolateCubic)
-				config.image.interpolation = InterpolateCubic;
+				config.image.interpolation = InterpolateHermite;
 
 			value = Config::Get(CONFIG_WRAPPER, "Upscaling", UpscaleNone);
 			config.image.upscaling = *(UpscalingFilter*)&value;

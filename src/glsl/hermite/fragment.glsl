@@ -36,7 +36,7 @@ uniform vec2 texSize;
 	#define FRAG_COLOR gl_FragColor
 #endif
 
-COMPAT_IN vec2 fTex01;
+COMPAT_IN vec2 fTex;
 
 vec4 sample(sampler2D tex, vec2 coord)
 {
@@ -50,5 +50,5 @@ vec4 sample(sampler2D tex, vec2 coord)
 }
 
 void main() {
-	FRAG_COLOR = sample(tex01, fTex01);
+	FRAG_COLOR = sample(tex01, fTex);
 }

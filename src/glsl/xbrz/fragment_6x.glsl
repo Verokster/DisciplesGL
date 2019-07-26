@@ -32,7 +32,7 @@ uniform sampler2D tex01;
 uniform sampler2D tex02;
 uniform vec2 texSize;
 
-in vec2 fTex01;
+in vec2 fTex;
 out vec4 fragColor;
 
 #define BLEND_NONE 0
@@ -73,13 +73,13 @@ bool IsBlendingNeeded(const ivec4 blend) {
 }
 
 void main() {
-	vec4 check = texture(tex01, fTex01);
-	if (check == texture(tex02, fTex01))
+	vec4 check = texture(tex01, fTex);
+	if (check == texture(tex02, fTex))
 		discard;
 
 	if (check.a != 0.0)
 	{
-		vec2 texel = floor(fTex01 * texSize) + 0.5;
+		vec2 texel = floor(fTex * texSize) + 0.5;
 
 		#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize).rgb
 
@@ -315,7 +315,7 @@ void main() {
 		
 		}
 	
-		vec2 f = fract(fTex01 * texSize);
+		vec2 f = fract(fTex * texSize);
 		vec3 res = mix( mix( mix( mix( mix( mix(dst[20], dst[21], step(one_sixth, f.x) ), dst[22], step(two_sixth, f.x) ), mix( mix(dst[23], dst[24], step(four_sixth, f.x) ), dst[25], step(five_sixth, f.x) ), step(0.50, f.x) ),
 									  mix( mix( mix(dst[19], dst[ 6], step(one_sixth, f.x) ), dst[ 7], step(two_sixth, f.x) ), mix( mix(dst[ 8], dst[ 9], step(four_sixth, f.x) ), dst[26], step(five_sixth, f.x) ), step(0.50, f.x) ), step(one_sixth, f.y) ),
 									  mix( mix( mix(dst[18], dst[ 5], step(one_sixth, f.x) ), dst[ 0], step(two_sixth, f.x) ), mix( mix(dst[ 1], dst[10], step(four_sixth, f.x) ), dst[27], step(five_sixth, f.x) ), step(0.50, f.x) ), step(two_sixth, f.y) ),

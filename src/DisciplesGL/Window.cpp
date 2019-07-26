@@ -173,7 +173,7 @@ namespace Window
 		switch (config.image.interpolation)
 		{
 		case InterpolateLinear:
-			CheckMenuItem(hMenu, glVersion ? IDM_FILT_LINEAR : IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 			break;
 
 		case InterpolateHermite:

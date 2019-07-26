@@ -32,7 +32,7 @@ uniform sampler2D tex01;
 uniform sampler2D tex02;
 uniform vec2 texSize;
 
-in vec2 fTex01;
+in vec2 fTex;
 out vec4 fragColor;
 
 #define BLEND_NONE 0
@@ -72,13 +72,13 @@ bool IsBlendingNeeded(const ivec4 blend) {
 }
 
 void main() {
-	vec4 check = texture(tex01, fTex01);
-	if (check == texture(tex02, fTex01))
+	vec4 check = texture(tex01, fTex);
+	if (check == texture(tex02, fTex))
 		discard;
 
 	if (check.a != 0.0)
 	{
-		vec2 texel = floor(fTex01 * texSize) + 0.5;
+		vec2 texel = floor(fTex * texSize) + 0.5;
 
 		#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize).rgb
 
@@ -218,7 +218,7 @@ void main() {
 			dst[0] = mix(dst[0], blendPix, (needBlend && doLineBlend && haveShallowLine) ? 0.25 : 0.00);
 		}
 	
-		vec2 f = fract(fTex01 * texSize);
+		vec2 f = fract(fTex * texSize);
 		vec3 res = mix( mix(dst[0], dst[1], step(0.50, f.x)),
 							mix(dst[3], dst[2], step(0.50, f.x)), step(0.50, f.y) );
 
