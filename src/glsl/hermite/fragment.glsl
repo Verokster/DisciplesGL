@@ -23,7 +23,7 @@
 */
 
 uniform sampler2D tex01;
-uniform sampler2D tex02;
+uniform vec2 texSize;
 
 #if __VERSION__ >= 130
 	#define COMPAT_IN in
@@ -37,10 +37,18 @@ uniform sampler2D tex02;
 #endif
 
 COMPAT_IN vec2 fTex01;
-COMPAT_IN vec2 fTex02;
+
+vec4 sample(sampler2D tex, vec2 coord)
+{
+	vec2 uv = coord * texSize - 0.5;
+	vec2 texel = floor(uv) + 0.5;
+	vec2 t = fract(uv);
+
+	uv = texel + t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+
+	return COMPAT_TEXTURE(tex, uv / texSize);
+}
 
 void main() {
-	vec4 color01 = COMPAT_TEXTURE(tex01, fTex01);
-	vec4 color02 = COMPAT_TEXTURE(tex02, fTex02);
-	FRAG_COLOR = mix(color02, color01, color01.a);
+	FRAG_COLOR = sample(tex01, fTex01);
 }

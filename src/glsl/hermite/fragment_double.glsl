@@ -43,47 +43,16 @@ COMPAT_IN vec2 fTex02;
 vec4 sample(sampler2D tex, vec2 coord)
 {
 	vec2 uv = coord * texSize - 0.5;
-	vec2 texel = floor(uv) - 0.5;
+	vec2 texel = floor(uv) + 0.5;
 	vec2 t = fract(uv);
 
-	vec2 t2 = t * t;
-	vec2 t3 = t2 * t;
+	uv = texel + t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
 
-	vec4 xs = vec4(1.0, t.x, t2.x, t3.x);
-	vec4 ys = vec4(1.0, t.y, t2.y, t3.y);
-
-	const vec4 p0 = vec4(+0.0, -0.5, +1.0, -0.5);
-	const vec4 p1 = vec4(+1.0,  0.0, -2.5, +1.5);
-	const vec4 p2 = vec4(+0.0, +0.5, +2.0, -1.5);
-	const vec4 p3 = vec4(+0.0,  0.0, -0.5, +0.5);
-
-	vec4 x = vec4(dot(xs, p0), dot(xs, p1), dot(xs, p2), dot(xs, p3));
-	vec4 y = vec4(dot(ys, p0), dot(ys, p1), dot(ys, p2), dot(ys, p3));
-
-	return
-		x.r * y.r * COMPAT_TEXTURE(tex, (texel + vec2(0.0, 0.0)) / texSize) +
-		x.g * y.r * COMPAT_TEXTURE(tex, (texel + vec2(1.0, 0.0)) / texSize) +
-		x.b * y.r * COMPAT_TEXTURE(tex, (texel + vec2(2.0, 0.0)) / texSize) +
-		x.a * y.r * COMPAT_TEXTURE(tex, (texel + vec2(3.0, 0.0)) / texSize) +
-
-		x.r * y.g * COMPAT_TEXTURE(tex, (texel + vec2(0.0, 1.0)) / texSize) +
-		x.g * y.g * COMPAT_TEXTURE(tex, (texel + vec2(1.0, 1.0)) / texSize) +
-		x.b * y.g * COMPAT_TEXTURE(tex, (texel + vec2(2.0, 1.0)) / texSize) +
-		x.a * y.g * COMPAT_TEXTURE(tex, (texel + vec2(3.0, 1.0)) / texSize) +
-
-		x.r * y.b * COMPAT_TEXTURE(tex, (texel + vec2(0.0, 2.0)) / texSize) +
-		x.g * y.b * COMPAT_TEXTURE(tex, (texel + vec2(1.0, 2.0)) / texSize) +
-		x.b * y.b * COMPAT_TEXTURE(tex, (texel + vec2(2.0, 2.0)) / texSize) +
-		x.a * y.b * COMPAT_TEXTURE(tex, (texel + vec2(3.0, 2.0)) / texSize) +
-
-		x.r * y.a * COMPAT_TEXTURE(tex, (texel + vec2(0.0, 3.0)) / texSize) +
-		x.g * y.a * COMPAT_TEXTURE(tex, (texel + vec2(1.0, 3.0)) / texSize) +
-		x.b * y.a * COMPAT_TEXTURE(tex, (texel + vec2(2.0, 3.0)) / texSize) +
-		x.a * y.a * COMPAT_TEXTURE(tex, (texel + vec2(3.0, 3.0)) / texSize);
+	return COMPAT_TEXTURE(tex, uv / texSize);
 }
 
 void main() {
 	vec4 color01 = sample(tex01, fTex01);
 	vec4 color02 = sample(tex02, fTex02);
 	FRAG_COLOR = mix(color02, color01, color01.a);
-} 
+}

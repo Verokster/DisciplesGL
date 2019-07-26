@@ -45,9 +45,8 @@ COMPAT_IN vec2 fTex01;
 vec4 sample(sampler2D tex, vec2 coord)
 {
 	vec2 uv = coord * texSize - 0.5;
-	vec2 texel = floor(uv);
-	vec2 t = uv - texel;
-	texel -= 0.5;
+	vec2 texel = floor(uv) - 0.5;
+	vec2 t = fract(uv);
 
 	vec2 t2 = t * t;
 	vec2 t3 = t2 * t;

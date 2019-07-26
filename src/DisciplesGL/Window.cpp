@@ -79,6 +79,7 @@ namespace Window
 		CheckMenuItem(hMenu, IDM_VSYNC, MF_BYCOMMAND | (WGLSwapInterval && config.image.vSync ? MF_CHECKED : MF_UNCHECKED));
 
 		CheckMenuItem(hMenu, IDM_FILT_OFF, MF_BYCOMMAND | MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_FILT_NONE, MF_BYCOMMAND | MF_UNCHECKED);
 
 		EnableMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | (glVersion ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 		CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_UNCHECKED);
@@ -86,23 +87,22 @@ namespace Window
 		DWORD isFilters20 = glVersion >= GL_VER_2_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
 		DWORD isFilters30 = glVersion >= GL_VER_3_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
 
+		EnableMenuItem(hMenu, IDM_FILT_HERMITE, MF_BYCOMMAND | isFilters20);
+		CheckMenuItem(hMenu, IDM_FILT_HERMITE, MF_BYCOMMAND | MF_UNCHECKED);
+
 		EnableMenuItem(hMenu, IDM_FILT_CUBIC, MF_BYCOMMAND | isFilters20);
 		CheckMenuItem(hMenu, IDM_FILT_CUBIC, MF_BYCOMMAND | MF_UNCHECKED);
 
 		// ScaleNx
 		HMENU hMenuScaleNx = NULL;
 		DWORD posScaleNx;
-		FindMenuByChildId(hMenu, IDM_FILT_SCALENX_LINEAR, &hMenuScaleNx, &posScaleNx);
+		FindMenuByChildId(hMenu, IDM_FILT_SCALENX_2X, &hMenuScaleNx, &posScaleNx);
 		if (hMenuScaleNx)
 		{
 			EnableMenuItem(hMenuScaleNx, posScaleNx, MF_BYPOSITION | isFilters30);
 			CheckMenuItem(hMenuScaleNx, posScaleNx, MF_BYPOSITION | MF_UNCHECKED);
 		}
 
-		EnableMenuItem(hMenu, IDM_FILT_SCALENX_LINEAR, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_SCALENX_LINEAR, MF_BYCOMMAND | MF_UNCHECKED);
-		EnableMenuItem(hMenu, IDM_FILT_SCALENX_CUBIC, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_SCALENX_CUBIC, MF_BYCOMMAND | MF_UNCHECKED);
 		EnableMenuItem(hMenu, IDM_FILT_SCALENX_2X, MF_BYCOMMAND | isFilters30);
 		CheckMenuItem(hMenu, IDM_FILT_SCALENX_2X, MF_BYCOMMAND | MF_UNCHECKED);
 		EnableMenuItem(hMenu, IDM_FILT_SCALENX_3X, MF_BYCOMMAND | isFilters30);
@@ -111,51 +111,39 @@ namespace Window
 		// Eagle
 		HMENU hMenuEagle = NULL;
 		DWORD posEagle;
-		FindMenuByChildId(hMenu, IDM_FILT_EAGLE_LINEAR, &hMenuEagle, &posEagle);
+		FindMenuByChildId(hMenu, IDM_FILT_EAGLE_2X, &hMenuEagle, &posEagle);
 		if (hMenuEagle)
 		{
 			EnableMenuItem(hMenuEagle, posEagle, MF_BYPOSITION | isFilters30);
 			CheckMenuItem(hMenuEagle, posEagle, MF_BYPOSITION | MF_UNCHECKED);
 		}
 
-		EnableMenuItem(hMenu, IDM_FILT_EAGLE_LINEAR, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_EAGLE_LINEAR, MF_BYCOMMAND | MF_UNCHECKED);
-		EnableMenuItem(hMenu, IDM_FILT_EAGLE_CUBIC, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_EAGLE_CUBIC, MF_BYCOMMAND | MF_UNCHECKED);
 		EnableMenuItem(hMenu, IDM_FILT_EAGLE_2X, MF_BYCOMMAND | isFilters30);
 		CheckMenuItem(hMenu, IDM_FILT_EAGLE_2X, MF_BYCOMMAND | MF_UNCHECKED);
 
 		// XSal
 		HMENU hMenuXSal = NULL;
 		DWORD posXSal;
-		FindMenuByChildId(hMenu, IDM_FILT_XSAL_LINEAR, &hMenuXSal, &posXSal);
+		FindMenuByChildId(hMenu, IDM_FILT_XSAL_2X, &hMenuXSal, &posXSal);
 		if (hMenuXSal)
 		{
 			EnableMenuItem(hMenuXSal, posXSal, MF_BYPOSITION | isFilters30);
 			CheckMenuItem(hMenuXSal, posXSal, MF_BYPOSITION | MF_UNCHECKED);
 		}
 
-		EnableMenuItem(hMenu, IDM_FILT_XSAL_LINEAR, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_XSAL_LINEAR, MF_BYCOMMAND | MF_UNCHECKED);
-		EnableMenuItem(hMenu, IDM_FILT_XSAL_CUBIC, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_XSAL_CUBIC, MF_BYCOMMAND | MF_UNCHECKED);
 		EnableMenuItem(hMenu, IDM_FILT_XSAL_2X, MF_BYCOMMAND | isFilters30);
 		CheckMenuItem(hMenu, IDM_FILT_XSAL_2X, MF_BYCOMMAND | MF_UNCHECKED);
 
 		// ScaleHQ
 		HMENU hMenuScaleHQ = NULL;
 		DWORD posScaleHQ;
-		FindMenuByChildId(hMenu, IDM_FILT_SCALEHQ_LINEAR, &hMenuScaleHQ, &posScaleHQ);
+		FindMenuByChildId(hMenu, IDM_FILT_SCALEHQ_2X, &hMenuScaleHQ, &posScaleHQ);
 		if (hMenuScaleHQ)
 		{
 			EnableMenuItem(hMenuScaleHQ, posScaleHQ, MF_BYPOSITION | isFilters30);
 			CheckMenuItem(hMenuScaleHQ, posScaleHQ, MF_BYPOSITION | MF_UNCHECKED);
 		}
 
-		EnableMenuItem(hMenu, IDM_FILT_SCALEHQ_LINEAR, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_SCALEHQ_LINEAR, MF_BYCOMMAND | MF_UNCHECKED);
-		EnableMenuItem(hMenu, IDM_FILT_SCALEHQ_CUBIC, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_SCALEHQ_CUBIC, MF_BYCOMMAND | MF_UNCHECKED);
 		EnableMenuItem(hMenu, IDM_FILT_SCALEHQ_2X, MF_BYCOMMAND | isFilters30);
 		CheckMenuItem(hMenu, IDM_FILT_SCALEHQ_2X, MF_BYCOMMAND | MF_UNCHECKED);
 		EnableMenuItem(hMenu, IDM_FILT_SCALEHQ_4X, MF_BYCOMMAND | isFilters30);
@@ -164,17 +152,13 @@ namespace Window
 		// xBRz
 		HMENU hMenuXBRZ = NULL;
 		DWORD posXBRZ;
-		FindMenuByChildId(hMenu, IDM_FILT_XRBZ_LINEAR, &hMenuXBRZ, &posXBRZ);
+		FindMenuByChildId(hMenu, IDM_FILT_XRBZ_2X, &hMenuXBRZ, &posXBRZ);
 		if (hMenuXBRZ)
 		{
 			EnableMenuItem(hMenuXBRZ, posXBRZ, MF_BYPOSITION | isFilters30);
 			CheckMenuItem(hMenuXBRZ, posXBRZ, MF_BYPOSITION | MF_UNCHECKED);
 		}
 
-		EnableMenuItem(hMenu, IDM_FILT_XRBZ_LINEAR, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_XRBZ_LINEAR, MF_BYCOMMAND | MF_UNCHECKED);
-		EnableMenuItem(hMenu, IDM_FILT_XRBZ_CUBIC, MF_BYCOMMAND | isFilters30);
-		CheckMenuItem(hMenu, IDM_FILT_XRBZ_CUBIC, MF_BYCOMMAND | MF_UNCHECKED);
 		EnableMenuItem(hMenu, IDM_FILT_XRBZ_2X, MF_BYCOMMAND | isFilters30);
 		CheckMenuItem(hMenu, IDM_FILT_XRBZ_2X, MF_BYCOMMAND | MF_UNCHECKED);
 		EnableMenuItem(hMenu, IDM_FILT_XRBZ_3X, MF_BYCOMMAND | isFilters30);
@@ -186,24 +170,34 @@ namespace Window
 		EnableMenuItem(hMenu, IDM_FILT_XRBZ_6X, MF_BYCOMMAND | isFilters30);
 		CheckMenuItem(hMenu, IDM_FILT_XRBZ_6X, MF_BYCOMMAND | MF_UNCHECKED);
 
-		switch (config.image.filter)
+		switch (config.image.interpolation)
 		{
-		case FilterLinear:
+		case InterpolateLinear:
 			CheckMenuItem(hMenu, glVersion ? IDM_FILT_LINEAR : IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 			break;
 
-		case FilterCubic:
+		case InterpolateHermite:
+			CheckMenuItem(hMenu, isFilters20 == MF_ENABLED ? IDM_FILT_HERMITE : IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
+			break;
+
+		case InterpolateCubic:
 			CheckMenuItem(hMenu, isFilters20 == MF_ENABLED ? IDM_FILT_CUBIC : IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 			break;
 
-		case FilterScaleNx:
-			if (isFilters30 == MF_ENABLED)
+		default:
+			CheckMenuItem(hMenu, IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
+			break;
+		}
+
+		if (config.image.upscaling != UpscaleNone && isFilters30 == MF_ENABLED)
+		{
+			switch (config.image.upscaling)
 			{
+			case UpscaleScaleNx:
 				if (hMenuScaleNx)
 					CheckMenuItem(hMenuScaleNx, posScaleNx, MF_BYPOSITION | MF_CHECKED);
 
-				CheckMenuItem(hMenu, config.image.scaleNx.type ? IDM_FILT_SCALENX_CUBIC : IDM_FILT_SCALENX_LINEAR, MF_BYCOMMAND | MF_CHECKED);
-				switch (config.image.scaleNx.value)
+				switch (config.image.scaleNx)
 				{
 				case 3:
 					CheckMenuItem(hMenu, IDM_FILT_SCALENX_3X, MF_BYCOMMAND | MF_CHECKED);
@@ -213,48 +207,30 @@ namespace Window
 					CheckMenuItem(hMenu, IDM_FILT_SCALENX_2X, MF_BYCOMMAND | MF_CHECKED);
 					break;
 				}
-			}
-			else
-				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 
-			break;
+				break;
 
-		case FilterEagle:
-			if (isFilters30 == MF_ENABLED)
-			{
+			case UpscaleEagle:
 				if (hMenuEagle)
 					CheckMenuItem(hMenuEagle, posEagle, MF_BYPOSITION | MF_CHECKED);
 
-				CheckMenuItem(hMenu, config.image.eagle.type ? IDM_FILT_EAGLE_CUBIC : IDM_FILT_EAGLE_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 				CheckMenuItem(hMenu, IDM_FILT_EAGLE_2X, MF_BYCOMMAND | MF_CHECKED);
-			}
-			else
-				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 
-			break;
+				break;
 
-		case FilterXSal:
-			if (isFilters30 == MF_ENABLED)
-			{
+			case UpscaleXSal:
 				if (hMenuXSal)
 					CheckMenuItem(hMenuXSal, posXSal, MF_BYPOSITION | MF_CHECKED);
 
-				CheckMenuItem(hMenu, config.image.xSal.type ? IDM_FILT_XSAL_CUBIC : IDM_FILT_XSAL_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 				CheckMenuItem(hMenu, IDM_FILT_XSAL_2X, MF_BYCOMMAND | MF_CHECKED);
-			}
-			else
-				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 
-			break;
+				break;
 
-		case FilterScaleHQ:
-			if (isFilters30 == MF_ENABLED)
-			{
+			case UpscaleScaleHQ:
 				if (hMenuScaleHQ)
 					CheckMenuItem(hMenuScaleHQ, posScaleHQ, MF_BYPOSITION | MF_CHECKED);
 
-				CheckMenuItem(hMenu, config.image.scaleHQ.type ? IDM_FILT_SCALEHQ_CUBIC : IDM_FILT_SCALEHQ_LINEAR, MF_BYCOMMAND | MF_CHECKED);
-				switch (config.image.scaleHQ.value)
+				switch (config.image.scaleHQ)
 				{
 				case 4:
 					CheckMenuItem(hMenu, IDM_FILT_SCALEHQ_4X, MF_BYCOMMAND | MF_CHECKED);
@@ -264,20 +240,14 @@ namespace Window
 					CheckMenuItem(hMenu, IDM_FILT_SCALEHQ_2X, MF_BYCOMMAND | MF_CHECKED);
 					break;
 				}
-			}
-			else
-				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
 
-			break;
+				break;
 
-		case FilterXRBZ:
-			if (isFilters30 == MF_ENABLED)
-			{
+			case UpscaleXRBZ:
 				if (hMenuXBRZ)
 					CheckMenuItem(hMenuXBRZ, posXBRZ, MF_BYPOSITION | MF_CHECKED);
 
-				CheckMenuItem(hMenu, config.image.xBRz.type ? IDM_FILT_XRBZ_CUBIC : IDM_FILT_XRBZ_LINEAR, MF_BYCOMMAND | MF_CHECKED);
-				switch (config.image.xBRz.value)
+				switch (config.image.xBRz)
 				{
 				case 3:
 					CheckMenuItem(hMenu, IDM_FILT_XRBZ_3X, MF_BYCOMMAND | MF_CHECKED);
@@ -299,16 +269,15 @@ namespace Window
 					CheckMenuItem(hMenu, IDM_FILT_XRBZ_2X, MF_BYCOMMAND | MF_CHECKED);
 					break;
 				}
+
+				break;
+
+			default:
+				break;
 			}
-			else
-				CheckMenuItem(hMenu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
-
-			break;
-
-		default:
-			CheckMenuItem(hMenu, IDM_FILT_OFF, MF_BYCOMMAND | MF_CHECKED);
-			break;
 		}
+		else
+			CheckMenuItem(hMenu, IDM_FILT_NONE, MF_BYCOMMAND | MF_CHECKED);
 
 		// Resolutions
 		DWORD count = sizeof(resolutionsList) / sizeof(Resolution);
@@ -377,9 +346,9 @@ namespace Window
 		CheckMenu(GetMenu(hWnd));
 	}
 
-	VOID __fastcall FilterChanged(HWND hWnd)
+	VOID __fastcall FilterChanged(HWND hWnd, const CHAR* name, INT value)
 	{
-		Config::Set(CONFIG_WRAPPER, "ImageFilter", *(INT*)&config.image.filter);
+		Config::Set(CONFIG_WRAPPER, name, value);
 		CheckMenu(hWnd);
 
 		OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
@@ -390,69 +359,51 @@ namespace Window
 		}
 	}
 
-	VOID __fastcall SelectScaleNxMode(HWND hWnd, WORD value, DWORD isMode)
+	VOID __fastcall InterpolationChanged(HWND hWnd, InterpolationFilter filter)
 	{
-		if (isMode)
-			config.image.scaleNx.value = value;
-		else
-			config.image.scaleNx.type = value;
-
-		Config::Set(CONFIG_WRAPPER, "ImageScaleNx", *(INT*)&config.image.scaleNx);
-
-		config.image.filter = glVersion >= GL_VER_3_0 ? FilterScaleNx : FilterLinear;
-		FilterChanged(hWnd);
+		config.image.interpolation = glVersion >= GL_VER_2_0 || filter < InterpolateHermite ? filter : InterpolateLinear;
+		FilterChanged(hWnd, "Interpolation", *(INT*)&config.image.interpolation);
 	}
 
-	VOID __fastcall SelectXSalMode(HWND hWnd, WORD value, DWORD isMode)
+	VOID __fastcall UpscalingChanged(HWND hWnd, UpscalingFilter filter)
 	{
-		if (isMode)
-			config.image.xSal.value = value;
-		else
-			config.image.xSal.type = value;
-
-		Config::Set(CONFIG_WRAPPER, "ImageXSal", *(INT*)&config.image.xSal);
-
-		config.image.filter = glVersion >= GL_VER_3_0 ? FilterXSal : FilterLinear;
-		FilterChanged(hWnd);
+		config.image.upscaling = glVersion >= GL_VER_3_0 ? filter : UpscaleNone;
+		FilterChanged(hWnd, "Upscaling", *(INT*)&config.image.upscaling);
 	}
 
-	VOID __fastcall SelectEagleMode(HWND hWnd, WORD value, DWORD isMode)
+	VOID __fastcall SelectScaleNxMode(HWND hWnd, DWORD value)
 	{
-		if (isMode)
-			config.image.eagle.value = value;
-		else
-			config.image.eagle.type = value;
-
-		Config::Set(CONFIG_WRAPPER, "ImageEagle", *(INT*)&config.image.eagle);
-
-		config.image.filter = glVersion >= GL_VER_3_0 ? FilterEagle : FilterLinear;
-		FilterChanged(hWnd);
+		config.image.scaleNx = value;
+		Config::Set(CONFIG_WRAPPER, "ScaleNx", *(INT*)&config.image.scaleNx);
+		UpscalingChanged(hWnd, UpscaleScaleNx);
 	}
 
-	VOID __fastcall SelectScaleHQMode(HWND hWnd, WORD value, DWORD isMode)
+	VOID __fastcall SelectXSalMode(HWND hWnd, INT value)
 	{
-		if (isMode)
-			config.image.scaleHQ.value = value;
-		else
-			config.image.scaleHQ.type = value;
-
-		Config::Set(CONFIG_WRAPPER, "ImageScaleHQ", *(INT*)&config.image.scaleHQ);
-
-		config.image.filter = glVersion >= GL_VER_3_0 ? FilterScaleHQ : FilterLinear;
-		FilterChanged(hWnd);
+		config.image.xSal = value;
+		Config::Set(CONFIG_WRAPPER, "XSal", *(INT*)&config.image.xSal);
+		UpscalingChanged(hWnd, UpscaleXSal);
 	}
 
-	VOID __fastcall SelectXBRZMode(HWND hWnd, WORD value, DWORD isMode)
+	VOID __fastcall SelectEagleMode(HWND hWnd, DWORD value)
 	{
-		if (isMode)
-			config.image.xBRz.value = value;
-		else
-			config.image.xBRz.type = value;
+		config.image.eagle = value;
+		Config::Set(CONFIG_WRAPPER, "Eagle", *(INT*)&config.image.eagle);
+		UpscalingChanged(hWnd, UpscaleEagle);
+	}
 
-		Config::Set(CONFIG_WRAPPER, "ImageXBRZ", *(INT*)&config.image.xBRz);
+	VOID __fastcall SelectScaleHQMode(HWND hWnd, DWORD value)
+	{
+		config.image.scaleHQ = value;
+		Config::Set(CONFIG_WRAPPER, "ScaleHQ", *(INT*)&config.image.scaleHQ);
+		UpscalingChanged(hWnd, UpscaleScaleHQ);
+	}
 
-		config.image.filter = glVersion >= GL_VER_3_0 ? FilterXRBZ : FilterLinear;
-		FilterChanged(hWnd);
+	VOID __fastcall SelectXBRZMode(HWND hWnd, DWORD value)
+	{
+		config.image.xBRz = value;
+		Config::Set(CONFIG_WRAPPER, "XBRZ", *(INT*)&config.image.xBRz);
+		UpscalingChanged(hWnd, UpscaleXRBZ);
 	}
 
 	BOOL __stdcall EnumChildProc(HWND hDlg, LPARAM lParam)
@@ -813,22 +764,24 @@ namespace Window
 				}
 				else if (config.keys.imageFilter && config.keys.imageFilter + VK_F1 - 1 == wParam)
 				{
-					switch (config.image.filter)
+					switch (config.image.interpolation)
 					{
-					case FilterNearest:
-						config.image.filter = FilterLinear;
+					case InterpolateNearest:
+						InterpolationChanged(hWnd, InterpolateLinear);
 						break;
 
-					case FilterLinear:
-						config.image.filter = glVersion >= GL_VER_2_0 ? FilterCubic : FilterNearest;
+					case InterpolateLinear:
+						InterpolationChanged(hWnd, glVersion >= GL_VER_2_0 ? InterpolateHermite : InterpolateNearest);
+						break;
+
+					case InterpolateHermite:
+						InterpolationChanged(hWnd, glVersion >= GL_VER_2_0 ? InterpolateCubic : InterpolateNearest);
 						break;
 
 					default:
-						config.image.filter = FilterNearest;
+						InterpolationChanged(hWnd, InterpolateNearest);
 						break;
 					}
-
-					FilterChanged(hWnd);
 
 					return NULL;
 				}
@@ -981,148 +934,97 @@ namespace Window
 
 			case IDM_FILT_OFF:
 			{
-				config.image.filter = FilterNearest;
-				FilterChanged(hWnd);
+				InterpolationChanged(hWnd, InterpolateNearest);
 				return NULL;
 			}
 
 			case IDM_FILT_LINEAR:
 			{
-				config.image.filter = FilterLinear;
-				FilterChanged(hWnd);
+				InterpolationChanged(hWnd, InterpolateLinear);
+				return NULL;
+			}
+
+			case IDM_FILT_HERMITE:
+			{
+				InterpolationChanged(hWnd, InterpolateHermite);
 				return NULL;
 			}
 
 			case IDM_FILT_CUBIC:
 			{
-				config.image.filter = glVersion >= GL_VER_2_0 ? FilterCubic : FilterNearest;
-				FilterChanged(hWnd);
+				InterpolationChanged(hWnd, InterpolateCubic);
 				return NULL;
 			}
 
-			case IDM_FILT_SCALENX_LINEAR:
+			case IDM_FILT_NONE:
 			{
-				SelectScaleNxMode(hWnd, 0, FALSE);
-				return NULL;
-			}
-
-			case IDM_FILT_SCALENX_CUBIC:
-			{
-				SelectScaleNxMode(hWnd, 1, FALSE);
+				UpscalingChanged(hWnd, UpscaleNone);
 				return NULL;
 			}
 
 			case IDM_FILT_SCALENX_2X:
 			{
-				SelectScaleNxMode(hWnd, 2, TRUE);
+				SelectScaleNxMode(hWnd, 2);
 				return NULL;
 			}
 
 			case IDM_FILT_SCALENX_3X:
 			{
-				SelectScaleNxMode(hWnd, 3, TRUE);
-				return NULL;
-			}
-
-			case IDM_FILT_XSAL_LINEAR:
-			{
-				SelectXSalMode(hWnd, 0, FALSE);
-				return NULL;
-			}
-
-			case IDM_FILT_XSAL_CUBIC:
-			{
-				SelectXSalMode(hWnd, 1, FALSE);
+				SelectScaleNxMode(hWnd, 3);
 				return NULL;
 			}
 
 			case IDM_FILT_XSAL_2X:
 			{
-				SelectXSalMode(hWnd, 2, TRUE);
-				return NULL;
-			}
-
-			case IDM_FILT_EAGLE_LINEAR:
-			{
-				SelectEagleMode(hWnd, 0, FALSE);
-				return NULL;
-			}
-
-			case IDM_FILT_EAGLE_CUBIC:
-			{
-				SelectEagleMode(hWnd, 1, FALSE);
+				SelectXSalMode(hWnd, 2);
 				return NULL;
 			}
 
 			case IDM_FILT_EAGLE_2X:
 			{
-				SelectEagleMode(hWnd, 2, TRUE);
-				return NULL;
-			}
-
-			case IDM_FILT_SCALEHQ_LINEAR:
-			{
-				SelectScaleHQMode(hWnd, 0, FALSE);
-				return NULL;
-			}
-
-			case IDM_FILT_SCALEHQ_CUBIC:
-			{
-				SelectScaleHQMode(hWnd, 1, FALSE);
+				SelectEagleMode(hWnd, 2);
 				return NULL;
 			}
 
 			case IDM_FILT_SCALEHQ_2X:
 			{
-				SelectScaleHQMode(hWnd, 2, TRUE);
+				SelectScaleHQMode(hWnd, 2);
 				return NULL;
 			}
 
 			case IDM_FILT_SCALEHQ_4X:
 			{
-				SelectScaleHQMode(hWnd, 4, TRUE);
-				return NULL;
-			}
-
-			case IDM_FILT_XRBZ_LINEAR:
-			{
-				SelectXBRZMode(hWnd, 0, FALSE);
-				return NULL;
-			}
-
-			case IDM_FILT_XRBZ_CUBIC:
-			{
-				SelectXBRZMode(hWnd, 1, FALSE);
+				SelectScaleHQMode(hWnd, 4);
 				return NULL;
 			}
 
 			case IDM_FILT_XRBZ_2X:
 			{
-				SelectXBRZMode(hWnd, 2, TRUE);
+				SelectXBRZMode(hWnd, 2);
 				return NULL;
 			}
 
 			case IDM_FILT_XRBZ_3X:
 			{
-				SelectXBRZMode(hWnd, 3, TRUE);
+				SelectXBRZMode(hWnd, 3);
 				return NULL;
 			}
 
 			case IDM_FILT_XRBZ_4X:
 			{
-				SelectXBRZMode(hWnd, 4, TRUE);
+				SelectXBRZMode(hWnd, 4);
 				return NULL;
 			}
 
 			case IDM_FILT_XRBZ_5X:
 			{
-				SelectXBRZMode(hWnd, 5, TRUE);
+				SelectXBRZMode(hWnd, 5);
 				return NULL;
 			}
 
 			case IDM_FILT_XRBZ_6X:
 			{
-				SelectXBRZMode(hWnd, 6, TRUE);
+				SelectXBRZMode(hWnd, 6);
 				return NULL;
 			}
 

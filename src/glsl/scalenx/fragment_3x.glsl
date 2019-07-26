@@ -72,7 +72,7 @@ void main() {
 	vec4 E5 = eqBF && neqEI || eqHF && neqEC ? F : E;
 	vec4 E6 = eqHD ? H : E;
 	vec4 E7 = eqHD && neqEI || eqHF && neqEG ? H : E;
-	vec4. E8 = eqHF ? H : E;
+	vec4 E8 = eqHF ? H : E;
 
 	vec2 fp = floor(3.0 * fract(fTex01));
 	fragColor = neq(B,H) && neq(D,F) ? (fp.y == 0. ? (fp.x == 0. ? E0 : fp.x == 1. ? E1 : E2) : (fp.y == 1. ? (fp.x == 0. ? E3 : fp.x == 1. ? E : E5) : (fp.x == 0. ? E6 : fp.x == 1. ? E7 : E8))) : E;
