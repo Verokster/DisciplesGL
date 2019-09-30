@@ -55,13 +55,34 @@ namespace Main
 		OpenDraw* ddraw = drawList;
 		while (ddraw)
 		{
-			if (ddraw->hWnd == hWnd)
+			if (ddraw->hWnd == hWnd || ddraw->hDraw == hWnd)
 				return ddraw;
 
 			ddraw = (OpenDraw*)ddraw->last;
 		}
 
 		return NULL;
+	}
+
+	BOOL __fastcall LoadResource(LPCSTR name, Stream* stream)
+	{
+		HGLOBAL hResourceData;
+		HRSRC hResource = FindResource(hDllModule, name, RT_RCDATA);
+		if (hResource)
+		{
+			hResourceData = LoadResource(hDllModule, hResource);
+			if (hResourceData)
+			{
+				stream->data = (BYTE*)LockResource(hResourceData);
+				if (stream->data)
+				{
+					stream->size = SizeofResource(hDllModule, hResource);
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
 	}
 
 	VOID __fastcall ShowError(UINT id, CHAR* file, DWORD line)
@@ -76,14 +97,7 @@ namespace Main
 		CHAR dest[400];
 		StrPrint(dest, "%s\n\n\nFILE %s\nLINE %d", message, file, line);
 
-		ULONG_PTR cookie = NULL;
-		if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
-			cookie = NULL;
-
-		MessageBox(NULL, dest, "Error", MB_OK | MB_ICONERROR);
-
-		if (cookie)
-			DeactivateActCtxC(0, cookie);
+		Hooks::MessageBoxHook(NULL, dest, "Error", MB_OK | MB_ICONERROR | MB_TASKMODAL);
 
 		Exit(EXIT_FAILURE);
 	}
@@ -97,14 +111,19 @@ namespace Main
 
 	VOID __fastcall ShowInfo(CHAR* message)
 	{
-		ULONG_PTR cookie = NULL;
-		if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
-			cookie = NULL;
+		Hooks::MessageBoxHook(NULL, message, "Information", MB_OK | MB_ICONASTERISK | MB_TASKMODAL);
+	}
 
-		MessageBox(NULL, message, "Information", MB_OK | MB_ICONASTERISK);
+	BOOL __fastcall ShowWarn(UINT id)
+	{
+		CHAR message[256];
+		LoadString(hDllModule, id, message, sizeof(message));
+		return ShowWarn(message);
+	}
 
-		if (cookie)
-			DeactivateActCtxC(0, cookie);
+	BOOL __fastcall ShowWarn(CHAR* message)
+	{
+		return Hooks::MessageBoxHook(NULL, message, "Warning", MB_OKCANCEL | MB_ICONWARNING | MB_TASKMODAL) == IDOK;
 	}
 
 #ifdef _DEBUG

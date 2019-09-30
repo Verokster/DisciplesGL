@@ -46,6 +46,7 @@ typedef char GLchar;
 
 #define GLSL_VER_1_10 "#version 110\n"
 #define GLSL_VER_1_30 "#version 130\n"
+#define GLSL_VER_1_30_ALPHA "#version 130\n#define ALPHA_CHECK\n"
 
 #define WGL_DRAW_TO_WINDOW_ARB 0x2001
 #define WGL_SUPPORT_OPENGL_ARB 0x2010
@@ -133,7 +134,6 @@ typedef GLenum(__stdcall* GLGENTEXTURES)(GLsizei n, GLuint* textures);
 typedef VOID(__stdcall* GLGETINTEGERV)(GLenum pname, GLint* data);
 typedef VOID(__stdcall* GLCLEAR)(GLbitfield mask);
 typedef VOID(__stdcall* GLCLEARCOLOR)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-typedef VOID(__stdcall* GLCOLORMASK)(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
 typedef VOID(__stdcall* GLBLENDFUNC)(GLenum sfactor, GLenum dfactor);
 typedef VOID(__stdcall* GLREADPIXELS)(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data);
 
@@ -170,7 +170,6 @@ typedef GLint(__stdcall* GLGETUNIFORMLOCATION)(GLuint program, const GLchar* nam
 
 typedef VOID(__stdcall* GLUNIFORM1I)(GLint location, GLint v0);
 typedef VOID(__stdcall* GLUNIFORM2F)(GLint location, GLfloat v0, GLfloat v1);
-typedef VOID(__stdcall* GLUNIFORMMATRIX4FV)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 
 typedef VOID(__stdcall* GLGENVERTEXARRAYS)(GLsizei n, GLuint* arrays);
 typedef VOID(__stdcall* GLBINDVERTEXARRAY)(GLuint array);
@@ -215,7 +214,6 @@ extern GLGENTEXTURES GLGenTextures;
 extern GLGETINTEGERV GLGetIntegerv;
 extern GLCLEAR GLClear;
 extern GLCLEARCOLOR GLClearColor;
-extern GLCOLORMASK GLColorMask;
 extern GLBLENDFUNC GLBlendFunc;
 extern GLREADPIXELS GLReadPixels;
 
@@ -251,7 +249,6 @@ extern GLGETUNIFORMLOCATION GLGetUniformLocation;
 
 extern GLUNIFORM1I GLUniform1i;
 extern GLUNIFORM2F GLUniform2f;
-extern GLUNIFORMMATRIX4FV GLUniformMatrix4fv;
 
 extern GLGENVERTEXARRAYS GLGenVertexArrays;
 extern GLBINDVERTEXARRAY GLBindVertexArray;

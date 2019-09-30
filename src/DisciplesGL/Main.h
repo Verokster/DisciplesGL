@@ -37,10 +37,14 @@ namespace Main
 
 	OpenDraw* __fastcall FindOpenDrawByWindow(HWND hWnd);
 
+	BOOL __fastcall LoadResource(LPCSTR name, Stream* stream);
+
 	VOID __fastcall ShowError(UINT id, CHAR* file, DWORD line);
 	VOID __fastcall ShowError(CHAR* message, CHAR* file, DWORD line);
 	VOID __fastcall ShowInfo(UINT id);
 	VOID __fastcall ShowInfo(CHAR* message);
+	BOOL __fastcall ShowWarn(UINT id);
+	BOOL __fastcall ShowWarn(CHAR* message);
 
 #ifdef _DEBUG
 	VOID __fastcall CheckError(CHAR* file, DWORD line);

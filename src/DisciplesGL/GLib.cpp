@@ -58,7 +58,6 @@ GLGENTEXTURES GLGenTextures;
 GLGETINTEGERV GLGetIntegerv;
 GLCLEAR GLClear;
 GLCLEARCOLOR GLClearColor;
-GLCOLORMASK GLColorMask;
 GLBLENDFUNC GLBlendFunc;
 GLREADPIXELS GLReadPixels;
 
@@ -94,7 +93,6 @@ GLGETUNIFORMLOCATION GLGetUniformLocation;
 
 GLUNIFORM1I GLUniform1i;
 GLUNIFORM2F GLUniform2f;
-GLUNIFORMMATRIX4FV GLUniformMatrix4fv;
 
 GLGENVERTEXARRAYS GLGenVertexArrays;
 GLBINDVERTEXARRAY GLBindVertexArray;
@@ -121,9 +119,6 @@ namespace GL
 #pragma optimize("s", on)
 	VOID __fastcall LoadFunction(CHAR* buffer, const CHAR* prefix, const CHAR* name, PROC* func, const CHAR* sufix = NULL)
 	{
-		if (*func)
-			return;
-
 		StrCopy(buffer, prefix);
 		StrCat(buffer, name);
 
@@ -136,13 +131,13 @@ namespace GL
 			if (!hGLModule)
 				hGLModule = GetModuleHandle("OPENGL32.dll");
 			*func = GetProcAddress(hGLModule, buffer);
-		}
 
-		if (!sufix)
-		{
-			LoadFunction(buffer, prefix, name, func, "EXT");
-			if (!*func)
-				LoadFunction(buffer, prefix, name, func, "ARB");
+			if (!*func && !sufix)
+			{
+				LoadFunction(buffer, prefix, name, func, "EXT");
+				if (!*func)
+					LoadFunction(buffer, prefix, name, func, "ARB");
+			}
 		}
 	}
 
@@ -217,7 +212,6 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "GetIntegerv", (PROC*)&GLGetIntegerv);
 		LoadFunction(buffer, PREFIX_GL, "Clear", (PROC*)&GLClear);
 		LoadFunction(buffer, PREFIX_GL, "ClearColor", (PROC*)&GLClearColor);
-		LoadFunction(buffer, PREFIX_GL, "ColorMask", (PROC*)&GLColorMask);
 		LoadFunction(buffer, PREFIX_GL, "BlendFunc", (PROC*)&GLBlendFunc);
 		LoadFunction(buffer, PREFIX_GL, "ReadPixels", (PROC*)&GLReadPixels);
 
@@ -253,7 +247,6 @@ namespace GL
 
 		LoadFunction(buffer, PREFIX_GL, "Uniform1i", (PROC*)&GLUniform1i);
 		LoadFunction(buffer, PREFIX_GL, "Uniform2f", (PROC*)&GLUniform2f);
-		LoadFunction(buffer, PREFIX_GL, "UniformMatrix4fv", (PROC*)&GLUniformMatrix4fv);
 
 		LoadFunction(buffer, PREFIX_GL, "GenVertexArrays", (PROC*)&GLGenVertexArrays);
 		LoadFunction(buffer, PREFIX_GL, "BindVertexArray", (PROC*)&GLBindVertexArray);
@@ -345,7 +338,7 @@ namespace GL
 			ReleaseDC(NULL, hDc);
 		}
 
-		pfd->dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE | PFD_STEREO_DONTCARE | PFD_SWAP_EXCHANGE;
+		pfd->dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE | PFD_SWAP_EXCHANGE;
 		pfd->cColorBits = (bpp == 16 || bpp == 24) ? (BYTE)bpp : 32;
 	}
 
@@ -384,23 +377,21 @@ namespace GL
 							LoadFunction(buffer, PREFIX_WGL, "ChoosePixelFormat", (PROC*)&WGLChoosePixelFormat, "ARB");
 							if (WGLChoosePixelFormat)
 							{
-								INT piFormats[128];
-								UINT nNumFormats = 0;
-
 								INT glAttributes[] = {
 									WGL_DRAW_TO_WINDOW_ARB, (pfd->dwFlags & PFD_DRAW_TO_WINDOW) ? GL_TRUE : GL_FALSE,
 									WGL_SUPPORT_OPENGL_ARB, (pfd->dwFlags & PFD_SUPPORT_OPENGL) ? GL_TRUE : GL_FALSE,
 									WGL_DOUBLE_BUFFER_ARB, (pfd->dwFlags & PFD_DOUBLEBUFFER) ? GL_TRUE : GL_FALSE,
 									WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
 									WGL_COLOR_BITS_ARB, pfd->cColorBits,
-									WGL_STENCIL_BITS_ARB, pfd->cStencilBits,
 									WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
 									WGL_SWAP_METHOD_ARB, (pfd->dwFlags & PFD_SWAP_EXCHANGE) ? WGL_SWAP_EXCHANGE_ARB : WGL_SWAP_COPY_ARB,
 									0
 								};
 
-								if (WGLChoosePixelFormat(hDc, glAttributes, NULL, sizeof(piFormats) / sizeof(INT), piFormats, &nNumFormats) && nNumFormats)
-									res = piFormats[0];
+								INT piFormat;
+								UINT nNumFormats;
+								if (WGLChoosePixelFormat(hDc, glAttributes, NULL, 1, &piFormat, &nNumFormats) && nNumFormats)
+									res = piFormat;
 							}
 
 							wglMakeCurrent(hDc, NULL);
@@ -421,9 +412,6 @@ namespace GL
 
 	VOID __fastcall ResetPixelFormat()
 	{
-		PIXELFORMATDESCRIPTOR pfd;
-		PreparePixelFormatDescription(&pfd);
-
 		HWND hWnd = CreateWindowEx(
 			WS_EX_APPWINDOW,
 			WC_DRAW,
@@ -441,6 +429,9 @@ namespace GL
 			HDC hDc = GetDC(hWnd);
 			if (hDc)
 			{
+				PIXELFORMATDESCRIPTOR pfd;
+				PreparePixelFormatDescription(&pfd);
+
 				INT res = ::ChoosePixelFormat(hDc, &pfd);
 				if (res)
 					::SetPixelFormat(hDc, res, &pfd);
@@ -469,13 +460,14 @@ namespace GL
 
 		GLuint shader = GLCreateShader(type);
 
+		DWORD pre = StrLength(version);
 		DWORD length = SizeofResource(hDllModule, hResource);
-		DWORD size = length + 13;
+		DWORD size = length + pre;
 		CHAR* source = (CHAR*)MemoryAlloc(size + 1);
 		const GLchar* srcData[] = { source };
 		{
-			MemoryCopy(source, version, 13);
-			MemoryCopy(source + 13, pData, length);
+			MemoryCopy(source, version, pre);
+			MemoryCopy(source + pre, pData, length);
 			*(source + size) = NULL;
 
 			GLShaderSource(shader, 1, srcData, NULL);

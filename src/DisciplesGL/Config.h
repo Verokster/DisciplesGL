@@ -31,6 +31,17 @@
 #define CONFIG_SETTINGS "Settings"
 #define CONFIG_KEYS "FunktionKeys"
 
+#define BORDERLESS_OFFSET 1
+
+#define WIDE_WIDTH 990
+#define WIDE_HEIGHT 800
+
+extern LONG GAME_WIDTH;
+extern LONG GAME_HEIGHT;
+
+extern FLOAT GAME_WIDTH_FLOAT;
+extern FLOAT GAME_HEIGHT_FLOAT;
+
 extern ConfigItems config;
 extern DisplayMode modesList[4];
 extern const Resolution resolutionsList[28];
@@ -43,4 +54,8 @@ namespace Config
 	DWORD __fastcall Get(const CHAR* app, const CHAR* key, CHAR* default, CHAR* returnString, DWORD nSize);
 	BOOL __fastcall Set(const CHAR* app, const CHAR* key, INT value);
 	BOOL __fastcall Set(const CHAR* app, const CHAR* key, CHAR* value);
+	BOOL __fastcall IsZoomed();
+	VOID __fastcall CalcZoomed(Size* dst, Size* src, FLOAT scale);
+	VOID __fastcall CalcZoomed();
+	VOID __fastcall UpdateLocale();
 }

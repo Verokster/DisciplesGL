@@ -39,17 +39,21 @@ public:
 
 	HDC hDc;
 	HWND hWnd;
+	HWND hDraw;
 
 	WINDOWPLACEMENT windowPlacement;
 
 	HANDLE hDrawThread;
 	HANDLE hDrawEvent;
+	HANDLE hCheckEvent;
 
 	Viewport viewport;
 	DWORD clearStage;
 	BOOL isFinish;
 	BOOL isStateChanged;
-	BOOL isTakeSnapshot;
+	SnapshotType isTakeSnapshot;
+	BOOL bufferIndex;
+	DOUBLE flushTime;
 
 	OpenDraw(IDrawUnknown**);
 	~OpenDraw();
@@ -66,6 +70,8 @@ public:
 	VOID RenderOld();
 	VOID RenderMid();
 	VOID RenderNew();
+
+	VOID __fastcall ReadFrameBufer(BYTE*, DWORD);
 	VOID __fastcall TakeSnapshot();
 
 	// Inherited via  IDraw

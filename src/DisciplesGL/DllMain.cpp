@@ -41,7 +41,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 		if (Config::Load())
 		{
 			Hooks::Load();
-
+			
 			Window::SetCaptureKeys(TRUE);
 			{
 				WNDCLASS wc = {
@@ -58,6 +58,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 			}
 
 			LoadKernel32();
+			
 			if (CreateActCtxC)
 			{
 				CHAR path[MAX_PATH];
@@ -72,6 +73,8 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 				actCtx.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
 				hActCtx = CreateActCtxC(&actCtx);
 			}
+
+			Window::CheckMenu();
 
 			if (config.coldCPU)
 				timeBeginPeriod(1);

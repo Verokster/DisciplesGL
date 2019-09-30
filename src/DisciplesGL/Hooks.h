@@ -82,18 +82,37 @@ namespace Hooks
 	extern BOOL isBink;
 
 	struct AddressSpaceV1 {
+		BOOL isEditor;
+
 		DWORD check;
 		DWORD value;
 		DWORD scroll_speed;
 		DWORD scroll_nop;
 		DWORD scroll_hook;
+
+		DWORD res_mode_1;
+		DWORD res_mode_2;
+		DWORD res_linelist_hook;
+
+		DWORD res_CreateDialog;
+		DWORD res_CreateIsoDialog;
+
+		DWORD res_LoadImage;
+		DWORD res_StartDecodeImage;
+		DWORD res_EndDecodeImage;
 	};
 
 	struct AddressSpaceV2 {
+		DWORD version;
 		DWORD check_1;
 		DWORD value_1;
 		DWORD check_2;
 		DWORD value_2;
+
+		DWORD mapSize;
+		DWORD bitmaskFix;
+
+		DWORD random_nop;
 
 		DWORD memory_1;
 		DWORD memory_2;
@@ -136,12 +155,6 @@ namespace Hooks
 		DWORD right_curve;
 		DWORD minimap_fill;
 
-		DWORD snapshot_size;
-		DWORD snapshot_rect;
-		DWORD snapshot_nop1;
-		DWORD snapshot_hook;
-		DWORD snapshot_nop2;
-
 		DWORD maxSize_1;
 		DWORD maxSize_2;
 		DWORD maxSize_3;
@@ -153,6 +166,15 @@ namespace Hooks
 		DWORD png_read_info;
 		DWORD png_read_image;
 
+		DWORD png_create_write_struct;
+		DWORD png_set_write_fn;
+		DWORD png_destroy_write_struct;
+		DWORD png_write_info;
+		DWORD png_write_image;
+		DWORD png_write_end;
+		DWORD png_set_filter;
+		DWORD png_set_IHDR;
+
 		DWORD scroll_speed;
 		DWORD scroll_check;
 		DWORD scroll_nop_1;
@@ -160,6 +182,40 @@ namespace Hooks
 		DWORD scroll_hook;
 
 		DWORD dblclick_hook;
+
+		DWORD btlClass;
+		DWORD btlCentrBack;
+		DWORD btlCentrUnits;
+		DWORD btlReverseGroup;
+		DWORD btlMouseCheck;
+		DWORD btlSwapGroup;
+		DWORD btlGroupsActive;
+		DWORD btlGroupsInactive;
+		DWORD btlInitGroups1_1;
+		DWORD btlInitGroups1_2;
+		DWORD btlInitGroups1_3;
+		DWORD btlInitGroups2_1;
+		DWORD btlInitGroups2_2;
+		DWORD btlInitGroups2_3;
+		DWORD btlImgIndices;
+		DWORD btlDialog_1;
+		DWORD btlDialog_2;
+		DWORD btlFileGetStr;
+
+		DWORD btlLoadBack_1;
+		DWORD btlLoadBack_2;
+		DWORD btlLoadBack_3;
+		DWORD btlBackHeight;
+
+		DWORD waitClass;
+		DWORD waitHook;
+		DWORD waitLoadCursor;
+		DWORD waitShowCursor;
+
+		DWORD debugPosition;
+		DWORD msgIconPosition;
+		DWORD msgTextPosition;
+		DWORD msgTimeHook;
 	};
 
 	struct BlendData {
@@ -187,5 +243,7 @@ namespace Hooks
 		DWORD color;
 	};
 
-	BOOL Load();
+	INT __stdcall MessageBoxHook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType);
+
+	VOID Load();
 }

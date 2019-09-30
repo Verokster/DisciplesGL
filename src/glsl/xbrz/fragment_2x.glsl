@@ -26,8 +26,6 @@
 	SOFTWARE.
 */
 
-precision mediump float;
-
 uniform sampler2D tex01;
 uniform sampler2D tex02;
 uniform vec2 texSize;
@@ -76,8 +74,10 @@ void main() {
 	if (check == texture(tex02, fTex))
 		discard;
 
+#ifdef ALPHA_CHECK
 	if (check.a != 0.0)
 	{
+#endif
 		vec2 texel = floor(fTex * texSize) + 0.5;
 
 		#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize).rgb
@@ -223,7 +223,9 @@ void main() {
 							mix(dst[3], dst[2], step(0.50, f.x)), step(0.50, f.y) );
 
 		fragColor = vec4(res, check.a);
+#ifdef ALPHA_CHECK
 	}
 	else
 		fragColor = vec4(0.0);
+#endif
 }

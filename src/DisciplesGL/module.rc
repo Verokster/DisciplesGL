@@ -34,6 +34,9 @@ BEGIN
 	IDS_ERROR_LOAD_RESOURCE			"Load resource failed"
 	IDS_ERROR_COMPILE_SHADER		"Compile shader failed"
 	IDS_INFO_RESTART				"In order for the changes to take effect, please restart the game"
+	IDS_INFO_NEXT_BATTLE			"This option will be affected at the next battle"
+	IDS_WARN_RESET					"This option will reset all wrapper configuration to default.\r\nAre you sure you want to continue?"
+	IDS_INFO_RESET					"All settings have been reset. Changes take effect after game restart"
 END
 
 /////////////////////////////////////////////////////////////////////////////
@@ -45,6 +48,8 @@ IDR_MENU MENU DISCARDABLE
 BEGIN
 	POPUP "&File"
 	BEGIN
+		MENUITEM "&Reset Configuration"				IDM_FILE_RESET
+		MENUITEM SEPARATOR
 		MENUITEM "&Quit",							IDM_FILE_QUIT
 	END
 	POPUP "&Display"
@@ -94,7 +99,7 @@ BEGIN
 			MENUITEM "&Hermite",					IDM_FILT_HERMITE
 			MENUITEM "&Cubic",						IDM_FILT_CUBIC
 		END
-		POPUP "&Upscaling\a"
+		POPUP "&Upscaling"
 		BEGIN
 			MENUITEM "&None",						IDM_FILT_NONE
 			MENUITEM SEPARATOR
@@ -133,11 +138,12 @@ BEGIN
 	END
 	POPUP "&Options"
 	BEGIN
-		POPUP "&Full Screen Mode\a"
+		POPUP "&Full Screen Mode"
 		BEGIN
 			MENUITEM "&Borderless",					IDM_MODE_BORDERLESS
 			MENUITEM "&Exclusive",					IDM_MODE_EXCLUSIVE
 		END
+		MENUITEM "&Widescreen Battle",				IDM_MODE_WIDEBATTLE
 		POPUP "Game &Speed\a"
 		BEGIN
 			MENUITEM "1.0x",						IDM_SPEED_1_0
@@ -162,13 +168,37 @@ BEGIN
 			MENUITEM "2.9x",						IDM_SPEED_2_9
 			MENUITEM "3.0x",						IDM_SPEED_3_0
 		END
-		MENUITEM "Always &Active\a",				IDM_ALWAYS_ACTIVE
+		MENUITEM "Always &Active",					IDM_ALWAYS_ACTIVE
 		MENUITEM "&Cold CPU",						IDM_PATCH_CPU
+		MENUITEM SEPARATOR
+		POPUP "&Locale"
+		BEGIN
+			MENUITEM "Default",						IDM_LOCALE_DEFAULT
+			MENUITEM SEPARATOR
+		END
+		MENUITEM SEPARATOR
+		POPUP "Screenshot &Type"
+		BEGIN
+			MENUITEM "BMP",							IDM_SCR_BMP
+			MENUITEM "PNG",							IDM_SCR_PNG
+		END
+		POPUP "&Compression Level"
+		BEGIN
+			MENUITEM "1 - lowest",					IDM_SCR_1
+			MENUITEM "2",							IDM_SCR_2
+			MENUITEM "3",							IDM_SCR_3
+			MENUITEM "4",							IDM_SCR_4
+			MENUITEM "5",							IDM_SCR_5
+			MENUITEM "6",							IDM_SCR_6
+			MENUITEM "7",							IDM_SCR_7
+			MENUITEM "8",							IDM_SCR_8
+			MENUITEM "9 - highest",					IDM_SCR_9
+		END
 	END
 	POPUP "&Help"
 	BEGIN
-		MENUITEM "About &Application...\a",			IDM_HELP_ABOUT_APPLICATION
-		MENUITEM "About &Wrapper...\a",				IDM_HELP_ABOUT_WRAPPER
+		MENUITEM "About &Application...",			IDM_HELP_ABOUT_APPLICATION
+		MENUITEM "About &Wrapper...",				IDM_HELP_ABOUT_WRAPPER
 	END
 END
 
@@ -176,6 +206,8 @@ IDR_MENU_OLD MENU DISCARDABLE
 BEGIN
 	POPUP "&File"
 	BEGIN
+		MENUITEM "&Reset Configuration"				IDM_FILE_RESET
+		MENUITEM SEPARATOR
 		MENUITEM "&Quit",							IDM_FILE_QUIT
 	END
 	POPUP "&Display"
@@ -215,7 +247,7 @@ BEGIN
 			MENUITEM "&Hermite",					IDM_FILT_HERMITE
 			MENUITEM "&Cubic",						IDM_FILT_CUBIC
 		END
-		POPUP "&Upscaling\a"
+		POPUP "&Upscaling"
 		BEGIN
 			MENUITEM "&None",						IDM_FILT_NONE
 			MENUITEM SEPARATOR
@@ -254,11 +286,12 @@ BEGIN
 	END
 	POPUP "&Options"
 	BEGIN
-		POPUP "&Full Screen Mode\a"
+		POPUP "&Full Screen Mode"
 		BEGIN
 			MENUITEM "&Borderless",					IDM_MODE_BORDERLESS
 			MENUITEM "&Exclusive",					IDM_MODE_EXCLUSIVE
 		END
+		MENUITEM "&Widescreen Battle",				IDM_MODE_WIDEBATTLE
 		POPUP "Game &Speed\a"
 		BEGIN
 			MENUITEM "1.0x",						IDM_SPEED_1_0
@@ -273,13 +306,37 @@ BEGIN
 			MENUITEM "1.9x",						IDM_SPEED_1_9
 			MENUITEM "2.0x",						IDM_SPEED_2_0
 		END
-		MENUITEM "Always &Active\a",				IDM_ALWAYS_ACTIVE
+		MENUITEM "Always &Active",					IDM_ALWAYS_ACTIVE
 		MENUITEM "&Cold CPU",						IDM_PATCH_CPU
+		MENUITEM SEPARATOR
+		POPUP "&Locale"
+		BEGIN
+			MENUITEM "Default",						IDM_LOCALE_DEFAULT
+			MENUITEM SEPARATOR
+		END
+		MENUITEM SEPARATOR
+		POPUP "Screenshot &Type"
+		BEGIN
+			MENUITEM "BMP",							IDM_SCR_BMP
+			MENUITEM "PNG",							IDM_SCR_PNG
+		END
+		POPUP "&Compression Level"
+		BEGIN
+			MENUITEM "1 - lowest",					IDM_SCR_1
+			MENUITEM "2",							IDM_SCR_2
+			MENUITEM "3",							IDM_SCR_3
+			MENUITEM "4",							IDM_SCR_4
+			MENUITEM "5",							IDM_SCR_5
+			MENUITEM "6",							IDM_SCR_6
+			MENUITEM "7",							IDM_SCR_7
+			MENUITEM "8",							IDM_SCR_8
+			MENUITEM "9 - highest",					IDM_SCR_9
+		END
 	END
 	POPUP "&Help"
 	BEGIN
-		MENUITEM "About &Application...\a",			IDM_HELP_ABOUT_APPLICATION
-		MENUITEM "About &Wrapper...\a",				IDM_HELP_ABOUT_WRAPPER
+		MENUITEM "About &Application...",			IDM_HELP_ABOUT_APPLICATION
+		MENUITEM "About &Wrapper...",				IDM_HELP_ABOUT_WRAPPER
 	END
 END
 
@@ -357,6 +414,18 @@ IDR_SCALENX_FRAGMENT_3X		RCDATA		DISCARDABLE			"..\\glsl\\scalenx\\fragment_3x.g
 
 IDR_BACK					RCDATA		DISCARDABLE			"..\\bmp\\back.png"
 IDR_BORDER					RCDATA		DISCARDABLE			"..\\bmp\\border.png"
+IDR_BORDER_WIDE				RCDATA		DISCARDABLE			"..\\bmp\\border_widest.png"
+
+IDR_DLG_BATTLE_B			RCDATA		DISCARDABLE			"..\\files\\DLG_BATTLE_B.dlg"
+IDR_DLG_ISO_NEW				RCDATA		DISCARDABLE			"..\\files\\DLG_ISO_NEW.dlg"
+IDR_DLG_ISO_VIEW_NEW		RCDATA		DISCARDABLE			"..\\files\\DLG_ISO_VIEW_NEW.dlg"
+IDR_DLG_STRATEGIC_NEW		RCDATA		DISCARDABLE			"..\\files\\DLG_STRATEGIC_NEW.dlg"
+IDR_DLG_STRAT_SPELL_NEW		RCDATA		DISCARDABLE			"..\\files\\DLG_STRAT_SPELL_NEW.dlg"
+IDR_DLG_STRAT_WAIT_NEW		RCDATA		DISCARDABLE			"..\\files\\DLG_STRAT_WAIT_NEW.dlg"
+IDR_DLG_ISO_EDIT			RCDATA		DISCARDABLE			"..\\files\\DLG_ISO_EDIT.dlg"
+IDR_DLG_MAP_EDIT			RCDATA		DISCARDABLE			"..\\files\\DLG_MAP_EDIT.dlg"
+IDR_DLG_LANDMARK_EDIT		RCDATA		DISCARDABLE			"..\\files\\DLG_LANDMARK_EDIT.dlg"
+IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.dlg"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -364,8 +433,8 @@ IDR_BORDER					RCDATA		DISCARDABLE			"..\\bmp\\border.png"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,7,26,737
- PRODUCTVERSION 1,3,3,0
+ FILEVERSION 2019,9,30,1060
+ PRODUCTVERSION 1,4,5,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -381,10 +450,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2019.07.26.737"
+			VALUE "FileVersion", "2019.09.30.1060"
 			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
-			VALUE "OriginalFilename", "C4DLL.dll"
-			VALUE "ProductVersion", "1.3.3"
+			VALUE "OriginalFilename", "C4dll-R.dll"
+			VALUE "ProductVersion", "1.4.5"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

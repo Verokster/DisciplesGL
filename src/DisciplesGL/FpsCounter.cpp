@@ -23,6 +23,7 @@
 */
 
 #include "stdafx.h"
+#include "Mmsystem.h"
 #include "FpsCounter.h"
 #include "Config.h"
 
@@ -282,10 +283,6 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC }
 };
 
-VOID* FpsCounter::operator new(size_t size) { return MemoryAlloc(size); }
-
-VOID FpsCounter::operator delete(VOID* p) { MemoryFree(p); }
-
 FpsCounter::FpsCounter(DWORD accuracy)
 {
 	this->accuracy = accuracy;
@@ -318,7 +315,7 @@ VOID FpsCounter::Calculate()
 	}
 
 	FrameItem* tickItem = &tickQueue[this->currentIndex];
-	tickItem->tick = GetTickCount();
+	tickItem->tick = timeGetTime();
 
 	if (this->lastTick)
 	{

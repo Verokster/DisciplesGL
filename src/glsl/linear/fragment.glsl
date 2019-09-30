@@ -27,8 +27,7 @@ uniform sampler2D tex01;
 #if __VERSION__ >= 130
 	#define COMPAT_IN in
 	#define COMPAT_TEXTURE texture
-	precision mediump float;
-	out mediump vec4 FRAG_COLOR;
+	out vec4 FRAG_COLOR;
 #else
 	#define COMPAT_IN varying 
 	#define COMPAT_TEXTURE texture2D

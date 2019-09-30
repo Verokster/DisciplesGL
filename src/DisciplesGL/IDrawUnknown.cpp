@@ -25,7 +25,7 @@
 #include "stdafx.h"
 #include "IDrawUnknown.h"
 
-VOID* IDrawUnknown::operator new(size_t size) { return MemoryAlloc(size); }
+VOID* IDrawUnknown::operator new(size_t size) { return MemoryNew(size); }
 
 VOID IDrawUnknown::operator delete(VOID* p)
 {
@@ -36,7 +36,7 @@ VOID IDrawUnknown::operator delete(VOID* p)
 		if (entry == item)
 		{
 			*item->list = entry->last;
-			MemoryFree(p);
+			MemoryDelete(p);
 			return;
 		}
 		else
@@ -45,7 +45,7 @@ VOID IDrawUnknown::operator delete(VOID* p)
 				if (entry->last == item)
 				{
 					entry->last = item->last;
-					MemoryFree(p);
+					MemoryDelete(p);
 					return;
 				}
 

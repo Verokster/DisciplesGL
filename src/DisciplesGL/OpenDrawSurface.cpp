@@ -31,7 +31,7 @@
 #include "Resource.h"
 #include "PngLib.h"
 
-OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, SurfaceType type)
+OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, SurfaceType type, OpenDrawSurface* attached)
 {
 	this->refCount = 1;
 	this->list = list;
@@ -40,32 +40,24 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, SurfaceTyp
 
 	this->ddraw = lpDD;
 
+	this->type = type;
+
 	this->attachedPalette = NULL;
 	this->attachedClipper = NULL;
-	this->attachedSurface = NULL;
+
+	this->attachedSurface = attached;
+	if (attached)
+		attached->attachedSurface = this;
 
 	this->indexBuffer = NULL;
 	this->secondaryBuffer = NULL;
-	this->bufferIndex = FALSE;
-	this->isCreated = FALSE;
+	this->backBuffer = NULL;
 
 	this->mode.width = 0;
 	this->mode.height = 0;
 	this->mode.bpp = 0;
 
 	this->drawEnabled = TRUE;
-	this->drawIndex = 0;
-
-	*this->state = STATE_NONE;
-	if (config.zoomImage && config.isBorder)
-		*this->state |= STATE_ZOOMED;
-
-	if (config.showBackBorder && config.isBorder)
-		*this->state |= STATE_BORDER;
-
-	this->state[1] = this->state[0];
-
-	this->type = type;
 
 	this->colorKey.dwColorSpaceLowValue = 0;
 	this->colorKey.dwColorSpaceHighValue = 0;
@@ -74,7 +66,10 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, SurfaceTyp
 OpenDrawSurface::~OpenDrawSurface()
 {
 	if (this->ddraw->attachedSurface == this)
+	{
+		this->ddraw->RenderStop();
 		this->ddraw->attachedSurface = NULL;
+	}
 
 	if (this->attachedPalette)
 		this->attachedPalette->Release();
@@ -82,32 +77,184 @@ OpenDrawSurface::~OpenDrawSurface()
 	if (this->attachedClipper)
 		this->attachedClipper->Release();
 
-	if (this->attachedSurface)
-		this->attachedSurface->Release();
-
 	this->ReleaseBuffer();
 }
 
 VOID OpenDrawSurface::ReleaseBuffer()
 {
-	if (this->isCreated)
+	if (this->indexBuffer)
+		delete this->indexBuffer;
+
+	if (this->secondaryBuffer)
+		delete this->secondaryBuffer;
+
+	if (this->backBuffer)
+		delete this->backBuffer;
+}
+
+VOID __fastcall DrawBorders(VOID* data, DWORD width, DWORD height, StateBuffer* srcBuffer)
+{
+	if (!srcBuffer)
+		return;
+
+	LONG srcX, srcY, dstX, dstY;
+	DWORD cWidth, cHeight;
+
+	dstX = ((LONG)width - (LONG)srcBuffer->width) >> 1;
+	if (dstX < 0)
 	{
-		this->isCreated = FALSE;
-
-		if (this->indexBuffer)
-		{
-			AlignedFree(this->indexBuffer);
-			this->indexBuffer = NULL;
-		}
-
-		if (this->secondaryBuffer)
-		{
-			AlignedFree(this->secondaryBuffer);
-			this->secondaryBuffer = NULL;
-		}
-
-		this->bufferIndex = FALSE;
+		srcX = -dstX;
+		dstX = 0;
+		cWidth = width;
 	}
+	else
+	{
+		srcX = 0;
+		cWidth = srcBuffer->width;
+	}
+
+	dstY = ((LONG)height - (LONG)srcBuffer->height) >> 1;
+	if (dstY < 0)
+	{
+		srcY = -dstY;
+		dstY = 0;
+		cHeight = height;
+	}
+	else
+	{
+		srcY = 0;
+		cHeight = srcBuffer->height;
+	}
+
+	DWORD* dstData = (DWORD*)data + dstY * width + dstX;
+	if (srcBuffer->isAllocated)
+	{
+		DWORD* srcData = (DWORD*)srcBuffer->data + srcY * srcBuffer->width + srcX;
+		
+		while (cHeight--)
+		{
+			MemoryCopy(dstData, srcData, cWidth * sizeof(DWORD));
+
+			srcData += srcBuffer->width;
+			dstData += width;
+		}
+	}
+	else
+	{
+		while (cHeight--)
+		{
+			DWORD* dst = dstData;
+
+			DWORD count = cWidth;
+			while (count--)
+				*dst++ = 0xFF000000;
+
+			dstData += width;
+		}
+	}
+}
+
+StateBuffer* __fastcall LoadBufferImage(LPSTR resourceId)
+{
+	StateBuffer* buffer = NULL;
+
+	Stream stream;
+	MemoryZero(&stream, sizeof(Stream));
+	if (Main::LoadResource(resourceId, &stream))
+	{
+		png_structp png_ptr = pnglib_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		png_infop info_ptr = pnglib_create_info_struct(png_ptr);
+
+		if (info_ptr)
+		{
+			pnglib_set_read_fn(png_ptr, &stream, PngLib::ReadDataFromInputStream);
+			pnglib_read_info(png_ptr, info_ptr);
+
+			if (info_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
+			{
+				BYTE* data = (BYTE*)MemoryAlloc(info_ptr->height * info_ptr->rowbytes);
+				if (data)
+				{
+					BYTE** list = (BYTE**)MemoryAlloc(info_ptr->height * sizeof(BYTE*));
+					if (list)
+					{
+						{
+							BYTE** item = list;
+							BYTE* row = data;
+							DWORD count = info_ptr->height;
+							while (count--)
+							{
+								*item++ = (BYTE*)row;
+								row += info_ptr->rowbytes;
+							}
+
+							pnglib_read_image(png_ptr, list);
+						}
+						MemoryFree(list);
+
+						DWORD palette[256];
+						{
+							BYTE* src = (BYTE*)info_ptr->palette;
+							BYTE* trs = (BYTE*)info_ptr->trans;
+							BYTE* dst = (BYTE*)palette;
+
+							DWORD colors = (DWORD)info_ptr->num_palette;
+							DWORD trans = (DWORD)info_ptr->num_trans;
+							while (colors--)
+							{
+								*dst++ = *src++;
+								*dst++ = *src++;
+								*dst++ = *src++;
+
+								if (trans)
+								{
+									--trans;
+									*dst++ = *trs++;
+								}
+								else
+									*dst++ = 0xFF;
+							}
+						}
+
+						buffer = new StateBuffer(info_ptr->width, info_ptr->height, info_ptr->width * info_ptr->height * sizeof(DWORD), FALSE);
+
+						BYTE* srcData = data;
+						DWORD* dst = (DWORD*)buffer->data;
+
+						DWORD cHeight = info_ptr->height;
+						do
+						{
+							BYTE* src = srcData;
+
+							DWORD cWidth = info_ptr->width;
+							if (info_ptr->pixel_depth == 4)
+							{
+								BOOL tick = FALSE;
+								do
+								{
+									*dst++ = palette[!tick ? (*src >> 4) : (*src++ & 0xF)];
+									tick = !tick;
+								} while (--cWidth);
+							}
+							else
+							{
+								do
+									*dst++ = palette[*src++];
+								while (--cWidth);
+							}
+
+							srcData += info_ptr->rowbytes;
+						} while (--cHeight);
+					}
+					MemoryFree(data);
+				}
+			}
+		}
+
+		pnglib_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+	}
+
+	return buffer;
 }
 
 VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* buffer)
@@ -119,10 +266,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 	this->mode.bpp = bpp;
 
 	if (buffer)
-	{
-		this->indexBuffer = buffer;
-		this->secondaryBuffer = NULL;
-	}
+		this->indexBuffer = new StateBuffer(width, height, buffer);
 	else
 	{
 		bpp >>= 3;
@@ -130,146 +274,47 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 			bpp = sizeof(DWORD);
 
 		DWORD size = width * height * bpp;
-		this->indexBuffer = AlignedAlloc(size);
-		MemoryZero(this->indexBuffer, size);
 
-		if (!config.version && (this->type == SurfacePrimary || this->type == SurfaceSecondary && config.resHooked))
+		if (this->type == SurfacePrimary || this->type == SurfaceSecondary)
 		{
-			this->secondaryBuffer = AlignedAlloc(size);
-			MemoryZero(this->secondaryBuffer, size);
+			this->indexBuffer = new StateBuffer(width, height, size, TRUE);
 
-			if (this->type == SurfaceSecondary && config.gameBorders)
-			{
-				HRSRC hResource = FindResource(hDllModule, MAKEINTRESOURCE(IDR_BORDER), RT_RCDATA);
-				if (hResource)
-				{
-					HGLOBAL hResourceData = LoadResource(hDllModule, hResource);
-					if (hResourceData)
-					{
-						ResourceStream stream = { LockResource(hResourceData), 0 };
-						if (stream.data)
-						{
-							png_structp png_ptr = pnglib_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-							png_infop info_ptr = pnglib_create_info_struct(png_ptr);
-
-							if (info_ptr)
-							{
-								pnglib_set_read_fn(png_ptr, &stream, PngLib::ReadDataFromInputStream);
-								pnglib_read_info(png_ptr, info_ptr);
-
-								if (info_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
-								{
-									BYTE* data = (BYTE*)MemoryAlloc(info_ptr->height * info_ptr->rowbytes);
-									if (data)
-									{
-										BYTE** list = (BYTE**)MemoryAlloc(info_ptr->height * sizeof(BYTE*));
-										if (list)
-										{
-											{
-												BYTE** item = list;
-												BYTE* row = data;
-												DWORD count = info_ptr->height;
-												while (count--)
-												{
-													*item++ = (BYTE*)row;
-													row += info_ptr->rowbytes;
-												}
-
-												pnglib_read_image(png_ptr, list);
-											}
-											MemoryFree(list);
-
-											DWORD palette[256];
-											{
-												BYTE* src = (BYTE*)info_ptr->palette;
-												BYTE* dst = (BYTE*)palette;
-												DWORD count = (DWORD)info_ptr->num_palette;
-												if (count > 256)
-													count = 256;
-												while (count--)
-												{
-													*dst++ = *src++;
-													*dst++ = *src++;
-													*dst++ = *src++;
-													*dst++ = 0xFF;
-												}
-											}
-
-											LONG srcX, srcY, dstX, dstY;
-											DWORD cWidth, cHeight;
-
-											dstX = ((LONG)width - (LONG)info_ptr->width) >> 1;
-											if (dstX < 0)
-											{
-												srcX = -dstX;
-												dstX = 0;
-												cWidth = width;
-											}
-											else
-											{
-												srcX = 0;
-												cWidth = (DWORD)info_ptr->width;
-											}
-
-											dstY = ((LONG)height - (LONG)info_ptr->height) >> 1;
-											if (dstY < 0)
-											{
-												srcY = -dstY;
-												dstY = 0;
-												cHeight = height;
-											}
-											else
-											{
-												srcY = 0;
-												cHeight = (DWORD)info_ptr->height;
-											}
-
-											BYTE* srcData = data + srcY * info_ptr->width + srcX;
-											DWORD* dstData = (DWORD*)this->secondaryBuffer + dstY * width + dstX;
-
-											while (cHeight--)
-											{
-												BYTE* src = srcData;
-												DWORD* dst = dstData;
-
-												DWORD copyWidth = cWidth;
-												if (info_ptr->pixel_depth == 4)
-												{
-													BOOL tick = FALSE;
-													while (copyWidth--)
-													{
-														*dst++ = palette[!tick ? (*src >> 4) : (*src++ & 0xF)];
-														tick = !tick;
-													}
-												}
-												else
-												{
-													while (copyWidth--)
-														*dst++ = palette[*src++];
-												}
-
-												srcData += info_ptr->rowbytes;
-												dstData += width;
-											}
-										}
-										MemoryFree(data);
-									}
-								}
-							}
-
-							pnglib_destroy_read_struct(&png_ptr, NULL, NULL);
-						}
-					}
-				}
-			}
+			this->indexBuffer->isZoomed = Config::IsZoomed();
+			if (config.showBackBorder && config.isBorder)
+				this->indexBuffer->isBorder = TRUE;
 		}
 		else
-			this->secondaryBuffer = NULL;
+			this->indexBuffer = new StateBuffer(width, height, size, FALSE);
 
-		this->isCreated = TRUE;
+		if (this->type == SurfacePrimary)
+		{
+			this->secondaryBuffer = new StateBuffer(width, height, size, TRUE);
+			this->backBuffer = new StateBuffer(width, height, size, TRUE);
+		}
+		else if (this->type == SurfaceSecondary && config.gameBorders)
+		{
+			this->secondaryBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_BORDER));
+			this->backBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_BORDER_WIDE));
+
+			if (!this->secondaryBuffer)
+				this->secondaryBuffer = new StateBuffer(GAME_WIDTH, GAME_HEIGHT, NULL);
+
+			if (!this->backBuffer)
+				this->backBuffer = new StateBuffer(WIDE_WIDTH, WIDE_HEIGHT, NULL);
+		}
 	}
+}
 
-	this->bufferIndex = FALSE;
+VOID OpenDrawSurface::SwapBuffers()
+{
+	this->backBuffer->isReady = TRUE;
+
+	DWORD index = this->ddraw->bufferIndex;
+	StateBuffer** lpBuffer = !index ? &this->indexBuffer : &this->secondaryBuffer;
+	StateBuffer* buffer = *lpBuffer;
+	*lpBuffer = this->backBuffer;
+
+	this->backBuffer = buffer;
 }
 
 VOID OpenDrawSurface::Flush()
@@ -278,79 +323,159 @@ VOID OpenDrawSurface::Flush()
 
 	if (this->mode.bpp == 8)
 	{
-		BYTE* src = (BYTE*)surface->indexBuffer;
-		DWORD* dest = (DWORD*)this->indexBuffer;
+		BYTE* src = (BYTE*)surface->indexBuffer->data;
+		DWORD* dest = (DWORD*)this->backBuffer->data;
 
 		DWORD count = this->mode.width * this->mode.height;
 		do
 			*dest++ = this->attachedPalette->entries[*src++];
 		while (--count);
 
+		this->SwapBuffers();
 		SetEvent(this->ddraw->hDrawEvent);
 		Sleep(0);
 	}
 	else
 	{
-		if (surface->drawEnabled && this->drawIndex < 1)
+		BOOL redraw = FALSE;
+		if (surface->drawEnabled)
 		{
-			++this->drawIndex;
-
-			BOOL index = this->bufferIndex;
-
-			this->state[index] = *surface->state;
-			if (!(*surface->state & STATE_ZOOMED))
+			surface->indexBuffer->isZoomed = Config::IsZoomed();
+			if (config.showBackBorder && config.isBorder)
 			{
-				VOID** lpBuffer = !index ? &this->indexBuffer : &this->secondaryBuffer;
-				VOID* buffer = *lpBuffer;
-				*lpBuffer = surface->indexBuffer;
+				if (!surface->indexBuffer->isBorder)
+					redraw = surface->indexBuffer->isBorder = TRUE;
+			}
+			else
+				surface->indexBuffer->isBorder = FALSE;
+		}
 
-				if (index != this->bufferIndex)
+		BOOL isSync = !config.isAiThinking && !config.isWaiting && config.coldCPU;
+		surface->drawEnabled = isSync || config.singleThread || this->drawEnabled;
+		if (surface->drawEnabled)
+		{
+			this->drawEnabled = FALSE;
+
+			if (redraw)
+			{
+				Size* size = surface->indexBuffer->isZoomed ? &config.zoomed : (Size*)config.mode;
+				
+				MemoryZero(this->backBuffer->data, this->mode.width * this->mode.height * sizeof(DWORD));
+				DrawBorders(this->backBuffer->data, size->width, size->height, !config.isBattle || !config.isWideBattle ? surface->secondaryBuffer : surface->backBuffer);
+
+				DWORD top = (this->mode.height - size->height) >> 1;
+				DWORD left = (this->mode.width - size->width) >> 1;
+
+				DWORD sctPitch = surface->mode.width;
+				DWORD* srcData = (DWORD*)surface->indexBuffer->data + top * sctPitch + left;
+				DWORD* dstData = (DWORD*)this->backBuffer->data;
+
+				DWORD height = size->height;
+				do
 				{
-					*lpBuffer = buffer;
-					lpBuffer = index ? &this->indexBuffer : &this->secondaryBuffer;
-					buffer = *lpBuffer;
-				}
+					DWORD* src = srcData;
+					DWORD* dst = dstData;
 
-				surface->indexBuffer = buffer;
+					DWORD width = size->width;
+					do
+					{
+						DWORD alpha = *src >> 24;
+						if (alpha == 255)
+							*dst = *src;
+						else if (alpha)
+						{
+							++alpha;
+
+							DWORD s = *src & 0x000000FF;
+							DWORD d = *dst & 0x000000FF;
+							DWORD res = (d + ((s - d) * alpha) / 256) & 0x000000FF;
+
+							s = *src & 0x0000FF00;
+							d = *dst & 0x0000FF00;
+							res |= (d + ((s - d) * alpha) / 256) & 0x0000FF00;
+
+							s = *src & 0x00FF0000;
+							d = *dst & 0x00FF0000;
+							res |= (d + ((s - d) * alpha) / 256) & 0x00FF0000;
+
+							*dst = res;
+						}
+
+						++src;
+						++dst;
+					} while (--width);
+
+					srcData += sctPitch;
+					dstData += size->width;
+				} while (--height);
+
+				this->backBuffer->isZoomed = surface->indexBuffer->isZoomed;
+				this->backBuffer->isBorder = surface->indexBuffer->isBorder;
 			}
 			else
 			{
-				DWORD width, height;
-
-				FLOAT k = (FLOAT)this->mode.width / this->mode.height;
-				if (k >= 4.0f / 3.0f)
+				if (!surface->indexBuffer->isZoomed)
 				{
-					width = DWORD(GAME_HEIGHT_FLOAT * k);
-					height = GAME_HEIGHT;
+					StateBuffer* buffer = this->backBuffer;
+					this->backBuffer = surface->indexBuffer;
+					surface->indexBuffer = buffer;
 				}
 				else
 				{
-					width = GAME_WIDTH;
-					height = DWORD(GAME_WIDTH_FLOAT * this->mode.height / this->mode.width);
+					Size* size = &config.zoomed;
+
+					MemoryZero(this->backBuffer->data, this->mode.width * this->mode.height * sizeof(DWORD));
+
+					DWORD top = (this->mode.height - size->height) >> 1;
+					DWORD left = (this->mode.width - size->width) >> 1;
+
+					DWORD sctPitch = surface->mode.width;
+					DWORD* srcData = (DWORD*)surface->indexBuffer->data + top * sctPitch + left;
+					DWORD* dstData = (DWORD*)this->backBuffer->data;
+
+					DWORD width = size->width << 2;
+					DWORD height = size->height;
+					do
+					{
+						MemoryCopy(dstData, srcData, width);
+
+						srcData += sctPitch;
+						dstData += size->width;
+					} while (--height);
+
+					this->backBuffer->isZoomed = surface->indexBuffer->isZoomed;
+					this->backBuffer->isBorder = surface->indexBuffer->isBorder;
 				}
-
-				DWORD top = (this->mode.height - height) >> 1;
-				DWORD left = (this->mode.width - width) >> 1;
-
-				DWORD sctPitch = surface->mode.width;
-				DWORD* srcData = (DWORD*)surface->indexBuffer + top * sctPitch + left;
-				DWORD* dstData = (DWORD*)(!index ? this->indexBuffer : this->secondaryBuffer);
-
-				DWORD count = width << 2;
-				do
-				{
-					MemoryCopy(dstData, srcData, count);
-
-					srcData += sctPitch;
-					dstData += width;
-				} while (--height);
 			}
 
+			this->SwapBuffers();
 			SetEvent(this->ddraw->hDrawEvent);
-			Sleep(0);
-		}
 
-		surface->drawEnabled = this->drawIndex < 1;
+			if (isSync)
+			{
+				LONGLONG qp;
+				QueryPerformanceFrequency((LARGE_INTEGER*)&qp);
+				DOUBLE timerResolution = (DOUBLE)qp / 1000.0;
+
+				QueryPerformanceCounter((LARGE_INTEGER*)&qp);
+				DOUBLE time = (DOUBLE)qp / timerResolution;
+
+				if (time < this->ddraw->flushTime)
+				{
+					DWORD sleep = DWORD(this->ddraw->flushTime - time);
+					this->ddraw->flushTime += config.syncStep;
+					Sleep(sleep);
+				}
+				else
+				{
+					time += config.syncStep;
+					this->ddraw->flushTime += DWORD((time - this->ddraw->flushTime) / config.syncStep) * config.syncStep;
+					Sleep(0);
+				}
+			}
+			else
+				Sleep(0);
+		}
 	}
 }
 
@@ -432,7 +557,8 @@ HRESULT __stdcall OpenDrawSurface::GetSurfaceDesc(LPDDSURFACEDESC2 lpDDSurfaceDe
 	lpDDSurfaceDesc->dwWidth = this->mode.width;
 	lpDDSurfaceDesc->dwHeight = this->mode.height;
 	lpDDSurfaceDesc->lPitch = this->mode.width * (this->mode.bpp >> 3);
-	lpDDSurfaceDesc->lpSurface = this->indexBuffer;
+
+	lpDDSurfaceDesc->lpSurface = this->type != SurfaceSecondary || this->drawEnabled ? this->indexBuffer->data : (config.bpp32Hooked ? NULL : this->attachedSurface->backBuffer->data);
 
 	this->GetPixelFormat(&lpDDSurfaceDesc->ddpfPixelFormat);
 
@@ -443,11 +569,12 @@ HRESULT __stdcall OpenDrawSurface::GetAttachedSurface(LPDDSCAPS2 lpDDSCaps, IDra
 {
 	if (!this->attachedSurface)
 	{
-		this->attachedSurface = new OpenDrawSurface((IDrawUnknown**)&this->ddraw->surfaceEntries, this->ddraw, SurfaceSecondary);
+		this->attachedSurface = new OpenDrawSurface((IDrawUnknown**)&this->ddraw->surfaceEntries, this->ddraw, SurfaceSecondary, this);
 		this->attachedSurface->CreateBuffer(this->mode.width, this->mode.height, this->mode.bpp, NULL);
 	}
+	else
+		this->attachedSurface->AddRef();
 
-	this->attachedSurface->AddRef();
 	*lplpDDAttachedSurface = this->attachedSurface;
 
 	return DD_OK;
@@ -525,24 +652,14 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 		if (this->drawEnabled)
 		{
 			DWORD size = this->mode.width * this->mode.height * (this->mode.bpp == 8 ? 1 : (config.bpp32Hooked ? sizeof(DWORD) : sizeof(WORD)));
+			MemoryZero(this->indexBuffer->data, size);
 
 			if (this->type == SurfaceSecondary)
 			{
-				*this->state = STATE_NONE;
-
-				if (config.zoomImage && config.isBorder)
-					*this->state |= STATE_ZOOMED;
-
-				if (config.showBackBorder && config.isBorder)
-				{
-					*this->state |= STATE_BORDER;
-					MemoryCopy(this->indexBuffer, this->secondaryBuffer, size);
-				}
-				else
-					MemoryZero(this->indexBuffer, size);
+				this->indexBuffer->isBorder = config.showBackBorder && config.isBorder;
+				if (this->indexBuffer->isBorder)
+					DrawBorders(this->indexBuffer->data, this->mode.width, this->mode.height, !config.isBattle || !config.isWideBattle ? this->secondaryBuffer : this->backBuffer);
 			}
-			else
-				MemoryZero(this->indexBuffer, size);
 		}
 	}
 	else if (this->type == SurfacePrimary && lpDDSrcSurface == this->attachedSurface)
@@ -600,8 +717,8 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 
 		if (config.bpp32Hooked)
 		{
-			DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-			DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+			DWORD* source = (DWORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
+			DWORD* destination = (DWORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
 			if (Hooks::isBink)
 			{
@@ -633,8 +750,8 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 		}
 		else
 		{
-			WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-			WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+			WORD* source = (WORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
+			WORD* destination = (WORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
 			do
 			{
@@ -650,9 +767,9 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 
 HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* lpDDSrcSurface, LPRECT lpSrcRect, DWORD dwTrans)
 {
+	// 17 - DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	if (this->drawEnabled)
 	{
-		// 17 - DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 		OpenDrawSurface* surface = (OpenDrawSurface*)lpDDSrcSurface;
 
 		RECT src;
@@ -675,37 +792,16 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			lpDestRect = &dest;
 		}
 
-		DWORD sWidth;
-		if (surface->attachedClipper)
-		{
-			POINT offset = { 0, 0 };
-			ClientToScreen(surface->attachedClipper->hWnd, &offset);
-			OffsetRect(lpSrcRect, -offset.x, -offset.y);
-
-			sWidth = config.mode->width;
-		}
-		else
-			sWidth = surface->mode.width;
-
-		DWORD dWidth;
-		if (this->attachedClipper)
-		{
-			POINT offset = { 0, 0 };
-			ClientToScreen(this->attachedClipper->hWnd, &offset);
-			OffsetRect(lpDestRect, -offset.x, -offset.y);
-
-			dWidth = config.mode->width;
-		}
-		else
-			dWidth = this->mode.width;
+		DWORD sWidth = surface->mode.width;
+		DWORD dWidth = this->mode.width;
 
 		INT width = lpSrcRect->right - lpSrcRect->left;
 		INT height = lpSrcRect->bottom - lpSrcRect->top;
 
 		if (config.bpp32Hooked)
 		{
-			DWORD* source = (DWORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-			DWORD* destination = (DWORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+			DWORD* source = (DWORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
+			DWORD* destination = (DWORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
 			DWORD colorKey = surface->colorKey.dwColorSpaceHighValue;
 			if (colorKey)
@@ -741,8 +837,8 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 		}
 		else
 		{
-			WORD* source = (WORD*)surface->indexBuffer + lpSrcRect->top * sWidth + lpSrcRect->left;
-			WORD* destination = (WORD*)this->indexBuffer + lpDestRect->top * dWidth + lpDestRect->left;
+			WORD* source = (WORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
+			WORD* destination = (WORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
 			WORD colorKey = LOWORD(surface->colorKey.dwColorSpaceLowValue);
 			if (colorKey)

@@ -23,6 +23,8 @@
 */
 
 #include "stdafx.h"
+#include "intrin.h"
+#include "Mmsystem.h"
 
 HMODULE hDllModule;
 HANDLE hActCtx;

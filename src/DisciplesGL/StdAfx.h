@@ -29,6 +29,7 @@
 #include "windows.h"
 #include "mmreg.h"
 #include "math.h"
+#include "locale.h"
 #include "ddraw.h"
 #include "ExtraTypes.h"
 
@@ -46,38 +47,58 @@ extern RELEASEACTCTX ReleaseActCtxC;
 extern ACTIVATEACTCTX ActivateActCtxC;
 extern DEACTIVATEACTCTX DeactivateActCtxC;
 
-extern "C" _CRTIMP int __cdecl sprintf(char*, const char*, ...);
+extern "C"
+{
+	_CRTIMP int __cdecl sprintf(char*, const char*, ...);
+	_CRTIMP int __cdecl vsprintf(char*, const char*, va_list);
+	_CRTIMP void* __cdecl shi_new(size_t size);
+	_CRTIMP void __cdecl shi_delete(void* block);
+	_CRTIMP void* __cdecl shi_malloc(size_t size);
+	_CRTIMP void __cdecl shi_free(void* block);
+}
 
-#define MemoryAlloc(size) malloc(size)
-#define MemoryFree(block) free(block)
+#define MemoryNew(size) shi_new(size)
+#define MemoryDelete(block) shi_delete(block)
+#define MemoryAlloc(size) shi_malloc(size)
+#define MemoryFree(block) shi_free(block)
 #define MemorySet(dst, val, size) memset(dst, val, size)
 #define MemoryZero(dst, size) memset(dst, 0, size)
 #define MemoryCopy(dst, src, size) memcpy(dst, src, size)
 #define MemoryCompare(buf1, buf2, size) memcmp(buf1, buf2, size)
+#define MemoryChar(block, ch, length) memchr(block, ch, length)
 #define MathCeil(x) ceil(x)
 #define MathFloor(x) floor(x)
 #define StrPrint(buf, fmt, ...) sprintf(buf, fmt, __VA_ARGS__)
+#define StrPrintVar(buf, fmt, va) vsprintf(buf, fmt, va)
+#define StrLength(str) strlen(str)
 #define StrCompare(str1, str2) strcmp(str1, str2)
 #define StrCompareInsensitive(str1, str2) _stricmp(str1, str2)
 #define StrCopy(dst, src) strcpy(dst, src)
 #define StrCat(dst, src) strcat(dst, src)
+#define StrDuplicate(str) _strdup(str)
 #define StrLastChar(str, ch) strrchr(str, ch)
+#define StrChar(str, ch) strchr(str, ch)
 #define StrStr(str, substr) strstr(str, substr)
 #define StrToAnsi(dst, src, size) wcstombs(dst, src, size)
+#define StrToInt(src) atoi(src)
+#define FileGetStr(str, num, stream) fgets(str, num, stream)
 #define Random() rand()
 #define SeedRandom(seed) srand(seed)
+#define SetLocale(cat, loc) setlocale(cat, loc)
+#define IsAlpha(ch) isalpha(ch)
+#define IsAlNum(ch) isalnum(ch)
+#define IsDigit(ch) isdigit(ch)
+#define IsSpace(ch) isspace(ch)
+#define IsPunct(ch) ispunct(ch)
+#define IsCntrl(ch) iscntrl(ch)
+#define IsUpper(ch) isupper(ch)
+#define ToUpper(ch) toupper(ch)
+#define ToLower(ch) tolower(ch)
 #define Exit(code) exit(code)
 
 DOUBLE __fastcall MathRound(DOUBLE);
 VOID* __fastcall AlignedAlloc(size_t size);
 VOID __fastcall AlignedFree(VOID* block);
-
-#define GAME_WIDTH 800
-#define GAME_HEIGHT 600
-
-#define GAME_WIDTH_FLOAT 800.0f
-#define GAME_HEIGHT_FLOAT 600.0f
-#define BORDERLESS_OFFSET 1
 
 extern HMODULE hDllModule;
 extern HANDLE hActCtx;

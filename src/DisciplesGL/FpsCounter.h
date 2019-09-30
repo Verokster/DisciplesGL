@@ -23,6 +23,8 @@
 */
 
 #pragma once
+
+#include "Allocation.h"
 #include "ExtraTypes.h"
 
 #define FPS_X 3
@@ -42,7 +44,7 @@ struct FrameItem {
 	DWORD span;
 };
 
-class FpsCounter {
+class FpsCounter : public Allocation {
 private:
 	DWORD accuracy;
 	DWORD count;
@@ -54,9 +56,6 @@ private:
 
 public:
 	DWORD value;
-
-	VOID* operator new(size_t);
-	VOID operator delete(VOID*);
 
 	FpsCounter(DWORD accuracy);
 	~FpsCounter();

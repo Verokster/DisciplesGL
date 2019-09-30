@@ -68,18 +68,18 @@
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 1|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2|Win32'">
     <Midl>
@@ -112,11 +112,11 @@
       <SectionAlignment>
       </SectionAlignment>
       <AssemblyDebug>true</AssemblyDebug>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;shw32.lib;cb63.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
-      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4DLL-R$(TargetExt)</OutputFile>
+      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4dll-R$(TargetExt)</OutputFile>
       <StackReserveSize>
       </StackReserveSize>
       <EntryPointSymbol>DllMain</EntryPointSymbol>
@@ -159,11 +159,11 @@
       <SectionAlignment>
       </SectionAlignment>
       <AssemblyDebug>true</AssemblyDebug>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;shw32.lib;cb63.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
-      <OutputFile>D:\Games\Disciples\Exe\C4DLL-R$(TargetExt)</OutputFile>
+      <OutputFile>D:\Games\Sacred Lands\Exe\C4dll-R$(TargetExt)</OutputFile>
       <StackReserveSize>
       </StackReserveSize>
       <EntryPointSymbol>DllMain</EntryPointSymbol>
@@ -186,7 +186,6 @@
     </Midl>
     <ClCompile>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <StringPooling>true</StringPooling>
@@ -202,16 +201,17 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <ErrorReporting>None</ErrorReporting>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <ResourceCompile />
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;msvcrt.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;msvcrt.lib;shw32.lib;cb63.lib</AdditionalDependencies>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AssemblyDebug>false</AssemblyDebug>
       <BaseAddress>0x60000000</BaseAddress>
       <SectionAlignment>4096</SectionAlignment>
       <ModuleDefinitionFile>$(ProjectDir)module.def</ModuleDefinitionFile>
-      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4DLL-R$(TargetExt)</OutputFile>
+      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4dll-R$(TargetExt)</OutputFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <LinkErrorReporting>NoErrorReport</LinkErrorReporting>
       <CLRSupportLastError>Disabled</CLRSupportLastError>
@@ -228,12 +228,14 @@
     <Bscmake />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Allocation.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="IDraw7.cpp" />
     <ClCompile Include="IDrawClipper.cpp" />
     <ClCompile Include="IDrawPalette.cpp" />
     <ClCompile Include="IDrawSurface7.cpp" />
     <ClCompile Include="IDrawUnknown.cpp" />
+    <ClCompile Include="IPlay4.cpp" />
     <ClCompile Include="OpenDraw.cpp" />
     <ClCompile Include="OpenDrawClipper.cpp" />
     <ClCompile Include="OpenDrawPalette.cpp" />
@@ -243,6 +245,7 @@
     <ClCompile Include="GLib.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="PngLib.cpp" />
+    <ClCompile Include="StateBuffer.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 2|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 1|Win32'">Create</PrecompiledHeader>
@@ -251,12 +254,14 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Allocation.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="IDraw7.h" />
     <ClInclude Include="IDrawClipper.h" />
     <ClInclude Include="IDrawPalette.h" />
     <ClInclude Include="IDrawSurface7.h" />
     <ClInclude Include="IDrawUnknown.h" />
+    <ClInclude Include="IPlay4.h" />
     <ClInclude Include="OpenDraw.h" />
     <ClInclude Include="OpenDrawClipper.h" />
     <ClInclude Include="OpenDrawPalette.h" />
@@ -268,6 +273,7 @@
     <ClInclude Include="Main.h" />
     <ClInclude Include="PngLib.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="StateBuffer.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

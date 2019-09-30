@@ -84,6 +84,16 @@ struct Resolution {
 	WORD height;
 };
 
+struct Size {
+	DWORD width;
+	DWORD height;
+};
+
+struct SizeFloat {
+	FLOAT width;
+	FLOAT height;
+};
+
 struct DisplayMode {
 	DWORD width;
 	DWORD height;
@@ -110,10 +120,19 @@ struct ShaderProgram {
 	Uniform texSize;
 };
 
+enum ImageType
+{
+	ImageBMP = 0,
+	ImagePNG
+};
+
 struct ConfigItems {
 	BOOL version;
+	BOOL isEditor;
 	BOOL windowedMode;
 	DisplayMode* mode;
+	Size zoomed;
+	SizeFloat zoomedFloat;
 	Resolution resolution;
 
 	HCURSOR cursor;
@@ -132,7 +151,35 @@ struct ConfigItems {
 	BOOL alwaysActive;
 	BOOL coldCPU;
 	BOOL borderlessMode;
+	BOOL borderlessReal;
+	BOOL wideHooked;
+	BOOL wideAllowed;
+	BOOL isBattle;
+	BOOL isWideBattle;
+	BOOL isWideZoomable;
+	BOOL singleWindow;
+	BOOL singleThread;
+	BOOL isAiThinking;
+	BOOL isWaiting;
+	DOUBLE syncStep;
 	POINT randPos;
+	FLOAT zoomFactor;
+
+	struct {
+		struct {
+			LCID id;
+			DWORD oem;
+			DWORD ansi;
+		} current;
+		HMENU menus[('Z' - 'A') + 1];
+		DWORD count;
+		LCID* list;
+	} locales;
+	
+	struct {
+		ImageType type;
+		DWORD level;
+	} snapshot;
 
 	struct {
 		DWORD index;
@@ -161,6 +208,7 @@ struct ConfigItems {
 		BYTE showBorders;
 		BYTE zoomImage;
 		BYTE speedToggle;
+		BYTE snapshot;
 	} keys;
 
 	BOOL isExist;
@@ -183,11 +231,57 @@ enum SurfaceType
 
 struct MenuItemData {
 	HMENU hParent;
+	HMENU hMenu;
 	INT index;
 	UINT childId;
 };
 
-struct ResourceStream {
-	VOID* data;
+struct Stream {
+	BYTE* data;
+	DWORD size;
 	DWORD position;
+};
+
+struct WinMessage {
+	WinMessage* prev;
+	UINT id;
+	CHAR* name;
+};
+
+enum SnapshotType {
+	SnapshotNone = 0,
+	SnapshotFile,
+	SnapshotClipboard
+};
+
+enum MenuType
+{
+	MenuLocale,
+	MenuAspect,
+	MenuVSync,
+	MenuInterpolate,
+	MenuUpscale,
+	MenuResolution,
+	MenuSpeed,
+	MenuBorders,
+	MenuStretch,
+	MenuWindowMode,
+	MenuWindowType,
+	MenuActive,
+	MenuCpu,
+	MenuBattle,
+	MenuSnapshotType,
+	MenuSnapshotLevel
+};
+
+struct SpritePosition {
+	POINT dstPos;
+	Rect srcRect;
+};
+
+struct ImageIndices {
+	Size size;
+	const VOID* lpIndices;
+	DWORD count;
+	SpritePosition indices[];
 };

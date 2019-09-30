@@ -27,37 +27,34 @@
 #include "ExtraTypes.h"
 #include "OpenDrawClipper.h"
 #include "OpenDrawPalette.h"
-
-#define STATE_NONE		0x0
-#define STATE_ZOOMED	0x1
-#define STATE_BORDER	0x2
+#include "StateBuffer.h"
 
 class OpenDraw;
 
 class OpenDrawSurface : public IDrawSurface7 {
 private:
-	BOOL isCreated;
 	DDCOLORKEY colorKey;
-	BOOL drawEnabled;
+	StateBuffer* backBuffer;
+
+	VOID SwapBuffers();
 
 public:
 	OpenDraw* ddraw;
 	DisplayMode mode;
+	DWORD pitch;
 
 	OpenDrawClipper* attachedClipper;
 	OpenDrawPalette* attachedPalette;
 	OpenDrawSurface* attachedSurface;
 
-	VOID* indexBuffer;
-	VOID* secondaryBuffer;
-	BOOL bufferIndex;
-	DWORD drawIndex;
-
-	DWORD state[2];
+	StateBuffer* indexBuffer;
+	StateBuffer* secondaryBuffer;
+	
+	BOOL drawEnabled;
 
 	SurfaceType type;
 
-	OpenDrawSurface(IDrawUnknown**, OpenDraw*, SurfaceType);
+	OpenDrawSurface(IDrawUnknown**, OpenDraw*, SurfaceType, OpenDrawSurface*);
 	~OpenDrawSurface();
 
 	VOID CreateBuffer(DWORD, DWORD, DWORD, VOID*);

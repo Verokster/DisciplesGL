@@ -1,8 +1,4 @@
 /*
-	ScaleNx fragment shader
-	based on libretro ScaleNx shader
-	https://github.com/libretro/glsl-shaders/blob/master/scalenx/shaders
-
 	MIT License
 
 	Copyright (c) 2019 Oleksiy Ryabchun
@@ -26,40 +22,8 @@
 	SOFTWARE.
 */
 
-uniform sampler2D tex01;
-uniform sampler2D tex02;
-uniform vec2 texSize;
+#include "stdafx.h"
+#include "Allocation.h"
 
-in vec2 fTex;
-out vec4 fragColor;
-
-bool eq(vec4 A, vec4 B) {
-	return (A==B);
-}
-
-bool neq(vec4 A, vec4 B) {
-	return (A!=B);
-}
-
-void main() {
-	if (eq(texture(tex01, fTex), texture(tex02, fTex)))
-		discard;
-
-	vec2 texel = floor(fTex * texSize) + 0.5;
-
-	#define TEX(x, y) texture(tex01, (texel + vec2(x, y)) / texSize)
-
-	vec4 B = TEX( 0.0, -1.0);
-	vec4 D = TEX(-1.0,  0.0);
-	vec4 E = TEX( 0.0,  0.0);
-	vec4 F = TEX( 1.0,  0.0);
-	vec4 H = TEX( 0.0,  1.0);
-
-	vec4 E0 = eq(B,D) ? B : E;
-	vec4 E1 = eq(B,F) ? B : E;
-	vec4 E2 = eq(H,D) ? H : E;
-	vec4 E3 = eq(H,F) ? H : E;
-
-	vec2 fp = floor(2.0 * fract(fTex * texSize));
-	fragColor = neq(B,H) && neq(D,F) ? (fp.y == 0. ? (fp.x == 0. ? E0 : E1) : (fp.x == 0. ? E2 : E3)) : E;
-}
+VOID* Allocation::operator new(size_t size) { return MemoryNew(size); }
+VOID Allocation::operator delete(VOID* p) { MemoryDelete(p); }
