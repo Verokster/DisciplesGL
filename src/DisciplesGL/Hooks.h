@@ -90,6 +90,8 @@ namespace Hooks
 		DWORD scroll_nop;
 		DWORD scroll_hook;
 
+		DWORD random_nop;
+
 		DWORD res_mode_1;
 		DWORD res_mode_2;
 		DWORD res_linelist_hook;
