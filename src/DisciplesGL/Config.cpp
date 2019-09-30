@@ -25,6 +25,7 @@
 #include "stdafx.h"
 #include "Config.h"
 #include "Resource.h"
+#include "Window.h"
 
 LONG GAME_WIDTH;
 LONG GAME_HEIGHT;
@@ -76,41 +77,6 @@ const BYTE speedList[] = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 2
 
 namespace Config
 {
-	BOOL __fastcall GetMenuByChildID(HMENU hParent, INT index, MenuItemData* mData)
-	{
-		HMENU hMenu = GetSubMenu(hParent, index);
-
-		INT count = GetMenuItemCount(hMenu);
-		for (INT i = 0; i < count; ++i)
-		{
-			UINT id = GetMenuItemID(hMenu, i);
-			if (id == mData->childId)
-			{
-				mData->hParent = hParent;
-				mData->hMenu = hMenu;
-				mData->index = index;
-
-				return TRUE;
-			}
-			else if (GetMenuByChildID(hMenu, i, mData))
-				return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	BOOL __fastcall GetMenuByChildID(HMENU hMenu, MenuItemData* mData)
-	{
-		INT count = GetMenuItemCount(hMenu);
-		for (INT i = 0; i < count; ++i)
-		{
-			if (GetMenuByChildID(hMenu, i, mData))
-				return TRUE;
-		}
-
-		return FALSE;
-	}
-
 	BOOL __stdcall EnumLocalesCount(LPTSTR lpLocaleString)
 	{
 		++config.locales.count;
@@ -319,6 +285,10 @@ namespace Config
 
 			config.locales.current.id = GetUserDefaultLCID();
 			Config::Set(CONFIG_WRAPPER, "Locale", *(INT*)&config.locales.current.id);
+
+			config.msgTimeScale.time = MSG_TIMEOUT;
+			config.msgTimeScale.value = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "MessageTimeout", config.msgTimeScale.time);
 		}
 		else
 		{
@@ -473,6 +443,13 @@ namespace Config
 			config.zoomFactor = (FLOAT)value / 100.0f;
 
 			config.locales.current.id = (LCID)Config::Get(CONFIG_WRAPPER, "Locale", (INT)GetUserDefaultLCID());
+
+			value = Config::Get(CONFIG_WRAPPER, "MessageTimeout", MSG_TIMEOUT);
+			if (value < 1)
+				value = 1;
+
+			config.msgTimeScale.time = *(DWORD*)&value;
+			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 		}
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));
@@ -547,7 +524,7 @@ namespace Config
 		{
 			MenuItemData mData;
 			mData.childId = IDM_LOCALE_DEFAULT;
-			if (GetMenuByChildID(config.menu, &mData))
+			if (Window::GetMenuByChildID(&mData))
 			{
 				CHAR title[4];
 				*(DWORD*)title = NULL;
@@ -608,7 +585,7 @@ namespace Config
 		if (config.keys.imageFilter)
 		{
 			mData.childId = IDM_FILT_OFF;
-			if (GetMenuByChildID(config.menu, &mData) && (info.cch = sizeof(buffer), GetMenuItemInfo(mData.hParent, mData.index, TRUE, &info)))
+			if (Window::GetMenuByChildID(&mData) && (info.cch = sizeof(buffer), GetMenuItemInfo(mData.hParent, mData.index, TRUE, &info)))
 			{
 				StrPrint(buffer, "%sF%d", buffer, config.keys.imageFilter);
 				SetMenuItemInfo(mData.hParent, mData.index, TRUE, &info);
@@ -618,7 +595,7 @@ namespace Config
 		if (config.keys.speedToggle)
 		{
 			mData.childId = IDM_SPEED_1_0;
-			if (GetMenuByChildID(config.menu, &mData) && (info.cch = sizeof(buffer), GetMenuItemInfo(mData.hParent, mData.index, TRUE, &info)))
+			if (Window::GetMenuByChildID(&mData) && (info.cch = sizeof(buffer), GetMenuItemInfo(mData.hParent, mData.index, TRUE, &info)))
 			{
 				StrPrint(buffer, "%sF%d", buffer, config.keys.speedToggle);
 				SetMenuItemInfo(mData.hParent, mData.index, TRUE, &info);

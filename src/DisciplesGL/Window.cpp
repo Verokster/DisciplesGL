@@ -41,31 +41,56 @@ namespace Window
 	HHOOK OldKeysHook;
 	WNDPROC OldWindowProc, OldPanelProc;
 
-	BOOL __fastcall FindMenuByChildId(HMENU hMenu, DWORD childId, HMENU* hParent, DWORD* pos)
+	BOOL __fastcall GetMenuByChildID(HMENU hParent, MenuItemData* mData, INT index)
 	{
-		DWORD count = GetMenuItemCount(hMenu);
-		while (count--)
-		{
-			HMENU hSub = GetSubMenu(hMenu, count);
-			if (hSub)
-			{
-				DWORD subCount = GetMenuItemCount(hSub);
-				while (subCount--)
-				{
-					if (GetMenuItemID(hSub, subCount) == childId)
-					{
-						*hParent = hMenu;
-						*pos = count;
-						return TRUE;
-					}
+		HMENU hMenu = GetSubMenu(hParent, index);
 
-					if (FindMenuByChildId(hSub, childId, hParent, pos))
-						return TRUE;
-				}
+		INT count = GetMenuItemCount(hMenu);
+		for (INT i = 0; i < count; ++i)
+		{
+			UINT id = GetMenuItemID(hMenu, i);
+			if (id == mData->childId)
+			{
+				mData->hParent = hParent;
+				mData->hMenu = hMenu;
+				mData->index = index;
+
+				return TRUE;
 			}
+			else if (GetMenuByChildID(hMenu, mData, i))
+				return TRUE;
 		}
 
 		return FALSE;
+	}
+
+	BOOL __fastcall GetMenuByChildID(MenuItemData* mData)
+	{
+		INT count = GetMenuItemCount(config.menu);
+		for (INT i = 0; i < count; ++i)
+		{
+			if (GetMenuByChildID(config.menu, mData, i))
+				return TRUE;
+		}
+
+		MemoryZero(mData, sizeof(MenuItemData));
+		return FALSE;
+	}
+
+	VOID __fastcall CheckEnablePopup(MenuItemData* mData, DWORD flags)
+	{
+		if (GetMenuByChildID(mData))
+		{
+			EnableMenuItem(mData->hParent, mData->index, MF_BYPOSITION | flags);
+			CheckMenuItem(mData->hParent, mData->index, MF_BYPOSITION | MF_UNCHECKED);
+
+			UINT count = (UINT)GetMenuItemCount(mData->hMenu);
+			for (UINT i = 0; i < count; ++i)
+			{
+				EnableMenuItem(mData->hMenu, i, MF_BYPOSITION | flags);
+				CheckMenuItem(mData->hMenu, i, MF_BYPOSITION | MF_UNCHECKED);
+			}
+		}
 	}
 
 	VOID __fastcall CheckMenu(MenuType type)
@@ -113,7 +138,7 @@ namespace Window
 		case MenuInterpolate:
 		{
 			CheckMenuItem(config.menu, IDM_FILT_OFF, MF_BYCOMMAND | MF_UNCHECKED);
-			
+
 			EnableMenuItem(config.menu, IDM_FILT_LINEAR, MF_BYCOMMAND | (glVersion ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			CheckMenuItem(config.menu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_UNCHECKED);
 
@@ -152,90 +177,35 @@ namespace Window
 
 			DWORD isFilters = glVersion >= GL_VER_3_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
 
-			// ScaleNx
-			HMENU hMenuScaleNx = NULL;
-			DWORD posScaleNx;
-			FindMenuByChildId(config.menu, IDM_FILT_SCALENX_2X, &hMenuScaleNx, &posScaleNx);
-			if (hMenuScaleNx)
-			{
-				EnableMenuItem(hMenuScaleNx, posScaleNx, MF_BYPOSITION | isFilters);
-				CheckMenuItem(hMenuScaleNx, posScaleNx, MF_BYPOSITION | MF_UNCHECKED);
-			}
+			MenuItemData mScaleNx, mEagle, mXSal, mScaleHQ, mXBRZ;
 
-			EnableMenuItem(config.menu, IDM_FILT_SCALENX_2X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_SCALENX_2X, MF_BYCOMMAND | MF_UNCHECKED);
-			EnableMenuItem(config.menu, IDM_FILT_SCALENX_3X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_SCALENX_3X, MF_BYCOMMAND | MF_UNCHECKED);
+			// ScaleNx
+			mScaleNx.childId = IDM_FILT_SCALENX_2X;
+			CheckEnablePopup(&mScaleNx, isFilters);
 
 			// Eagle
-			HMENU hMenuEagle = NULL;
-			DWORD posEagle;
-			FindMenuByChildId(config.menu, IDM_FILT_EAGLE_2X, &hMenuEagle, &posEagle);
-			if (hMenuEagle)
-			{
-				EnableMenuItem(hMenuEagle, posEagle, MF_BYPOSITION | isFilters);
-				CheckMenuItem(hMenuEagle, posEagle, MF_BYPOSITION | MF_UNCHECKED);
-			}
-
-			EnableMenuItem(config.menu, IDM_FILT_EAGLE_2X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_EAGLE_2X, MF_BYCOMMAND | MF_UNCHECKED);
+			mEagle.childId = IDM_FILT_EAGLE_2X;
+			CheckEnablePopup(&mEagle, isFilters);
 
 			// XSal
-			HMENU hMenuXSal = NULL;
-			DWORD posXSal;
-			FindMenuByChildId(config.menu, IDM_FILT_XSAL_2X, &hMenuXSal, &posXSal);
-			if (hMenuXSal)
-			{
-				EnableMenuItem(hMenuXSal, posXSal, MF_BYPOSITION | isFilters);
-				CheckMenuItem(hMenuXSal, posXSal, MF_BYPOSITION | MF_UNCHECKED);
-			}
-
-			EnableMenuItem(config.menu, IDM_FILT_XSAL_2X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_XSAL_2X, MF_BYCOMMAND | MF_UNCHECKED);
+			mXSal.childId = IDM_FILT_XSAL_2X;
+			CheckEnablePopup(&mXSal, isFilters);
 
 			// ScaleHQ
-			HMENU hMenuScaleHQ = NULL;
-			DWORD posScaleHQ;
-			FindMenuByChildId(config.menu, IDM_FILT_SCALEHQ_2X, &hMenuScaleHQ, &posScaleHQ);
-			if (hMenuScaleHQ)
-			{
-				EnableMenuItem(hMenuScaleHQ, posScaleHQ, MF_BYPOSITION | isFilters);
-				CheckMenuItem(hMenuScaleHQ, posScaleHQ, MF_BYPOSITION | MF_UNCHECKED);
-			}
-
-			EnableMenuItem(config.menu, IDM_FILT_SCALEHQ_2X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_SCALEHQ_2X, MF_BYCOMMAND | MF_UNCHECKED);
-			EnableMenuItem(config.menu, IDM_FILT_SCALEHQ_4X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_SCALEHQ_4X, MF_BYCOMMAND | MF_UNCHECKED);
+			mScaleHQ.childId = IDM_FILT_SCALEHQ_2X;
+			CheckEnablePopup(&mScaleHQ, isFilters);
 
 			// xBRz
-			HMENU hMenuXBRZ = NULL;
-			DWORD posXBRZ;
-			FindMenuByChildId(config.menu, IDM_FILT_XRBZ_2X, &hMenuXBRZ, &posXBRZ);
-			if (hMenuXBRZ)
-			{
-				EnableMenuItem(hMenuXBRZ, posXBRZ, MF_BYPOSITION | isFilters);
-				CheckMenuItem(hMenuXBRZ, posXBRZ, MF_BYPOSITION | MF_UNCHECKED);
-			}
-
-			EnableMenuItem(config.menu, IDM_FILT_XRBZ_2X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_XRBZ_2X, MF_BYCOMMAND | MF_UNCHECKED);
-			EnableMenuItem(config.menu, IDM_FILT_XRBZ_3X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_XRBZ_3X, MF_BYCOMMAND | MF_UNCHECKED);
-			EnableMenuItem(config.menu, IDM_FILT_XRBZ_4X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_XRBZ_4X, MF_BYCOMMAND | MF_UNCHECKED);
-			EnableMenuItem(config.menu, IDM_FILT_XRBZ_5X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_XRBZ_5X, MF_BYCOMMAND | MF_UNCHECKED);
-			EnableMenuItem(config.menu, IDM_FILT_XRBZ_6X, MF_BYCOMMAND | isFilters);
-			CheckMenuItem(config.menu, IDM_FILT_XRBZ_6X, MF_BYCOMMAND | MF_UNCHECKED);
+			mXBRZ.childId = IDM_FILT_XRBZ_2X;
+			CheckEnablePopup(&mXBRZ, isFilters);
 
 			if (config.image.upscaling != UpscaleNone && isFilters == MF_ENABLED)
 			{
 				switch (config.image.upscaling)
 				{
 				case UpscaleScaleNx:
-					if (hMenuScaleNx)
-						CheckMenuItem(hMenuScaleNx, posScaleNx, MF_BYPOSITION | MF_CHECKED);
+					if (mScaleNx.hParent)
+						CheckMenuItem(mScaleNx.hParent, mScaleNx.index, MF_BYPOSITION | MF_CHECKED);
 
 					switch (config.image.scaleNx)
 					{
@@ -251,24 +221,24 @@ namespace Window
 					break;
 
 				case UpscaleEagle:
-					if (hMenuEagle)
-						CheckMenuItem(hMenuEagle, posEagle, MF_BYPOSITION | MF_CHECKED);
+					if (mEagle.hParent)
+						CheckMenuItem(mEagle.hParent, mEagle.index, MF_BYPOSITION | MF_CHECKED);
 
 					CheckMenuItem(config.menu, IDM_FILT_EAGLE_2X, MF_BYCOMMAND | MF_CHECKED);
 
 					break;
 
 				case UpscaleXSal:
-					if (hMenuXSal)
-						CheckMenuItem(hMenuXSal, posXSal, MF_BYPOSITION | MF_CHECKED);
+					if (mXSal.hParent)
+						CheckMenuItem(mXSal.hParent, mXSal.index, MF_BYPOSITION | MF_CHECKED);
 
 					CheckMenuItem(config.menu, IDM_FILT_XSAL_2X, MF_BYCOMMAND | MF_CHECKED);
 
 					break;
 
 				case UpscaleScaleHQ:
-					if (hMenuScaleHQ)
-						CheckMenuItem(hMenuScaleHQ, posScaleHQ, MF_BYPOSITION | MF_CHECKED);
+					if (mScaleHQ.hParent)
+						CheckMenuItem(mScaleHQ.hParent, mScaleHQ.index, MF_BYPOSITION | MF_CHECKED);
 
 					switch (config.image.scaleHQ)
 					{
@@ -284,8 +254,8 @@ namespace Window
 					break;
 
 				case UpscaleXRBZ:
-					if (hMenuXBRZ)
-						CheckMenuItem(hMenuXBRZ, posXBRZ, MF_BYPOSITION | MF_CHECKED);
+					if (mXBRZ.hParent)
+						CheckMenuItem(mXBRZ.hParent, mXBRZ.index, MF_BYPOSITION | MF_CHECKED);
 
 					switch (config.image.xBRz)
 					{
@@ -450,11 +420,10 @@ namespace Window
 		{
 			if (!pnglib_create_write_struct)
 			{
-				HMENU hMenuLevel = NULL;
-				DWORD posLevel;
-				FindMenuByChildId(config.menu, IDM_SCR_1, &hMenuLevel, &posLevel);
-				if (hMenuLevel)
-					EnableMenuItem(hMenuLevel, posLevel, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
+				MenuItemData mData;
+				mData.childId = IDM_SCR_1;
+				if (GetMenuByChildID(&mData))
+					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
 			}
 
 			DWORD count = IDM_SCR_9 - IDM_SCR_1 + 1;
@@ -463,6 +432,29 @@ namespace Window
 			{
 				CheckMenuItem(config.menu, id, MF_BYCOMMAND | (pnglib_create_write_struct && id - IDM_SCR_PNG == config.snapshot.level ? MF_CHECKED : MF_UNCHECKED));
 				++id;
+			}
+		}
+		break;
+
+		case MenuMsgTimeScale:
+		{
+			MenuItemData mData;
+			mData.childId = IDM_MSG_5;
+			if (GetMenuByChildID(&mData))
+			{
+				if (config.msgTimeScale.hooked)
+				{
+					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_ENABLED);
+
+					UINT count = (UINT)GetMenuItemCount(mData.hMenu);
+					for (UINT i = 0; i < count; ++i)
+					{
+						UINT id = GetMenuItemID(mData.hMenu, i);
+						CheckMenuItem(mData.hMenu, i, MF_BYPOSITION | (id - IDM_MSG_0 == config.msgTimeScale.time ? MF_CHECKED : MF_UNCHECKED));
+					}
+				}
+				else
+					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
 			}
 		}
 		break;
@@ -490,6 +482,7 @@ namespace Window
 		CheckMenu(MenuBattle);
 		CheckMenu(MenuSnapshotType);
 		CheckMenu(MenuSnapshotLevel);
+		CheckMenu(MenuMsgTimeScale);
 	}
 
 	VOID __fastcall FilterChanged(HWND hWnd, const CHAR* name, INT value)
@@ -1419,6 +1412,16 @@ namespace Window
 					Config::UpdateLocale();
 					Config::Set(CONFIG_WRAPPER, "Locale", *(INT*)&config.locales.current.id);
 					CheckMenu(MenuLocale);
+
+					return NULL;
+				}
+				else if (wParam > IDM_MSG_0 && wParam <= IDM_MSG_30)
+				{
+					config.msgTimeScale.time = wParam - IDM_MSG_0;
+					config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
+
+					Config::Set(CONFIG_WRAPPER, "MessageTimeout", *(INT*)&config.msgTimeScale.time);
+					CheckMenu(MenuMsgTimeScale);
 
 					return NULL;
 				}

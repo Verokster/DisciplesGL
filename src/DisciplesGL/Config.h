@@ -36,6 +36,8 @@
 #define WIDE_WIDTH 990
 #define WIDE_HEIGHT 800
 
+#define MSG_TIMEOUT 10
+
 extern LONG GAME_WIDTH;
 extern LONG GAME_HEIGHT;
 

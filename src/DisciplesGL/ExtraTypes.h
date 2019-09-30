@@ -166,6 +166,12 @@ struct ConfigItems {
 	FLOAT zoomFactor;
 
 	struct {
+		BOOL hooked;
+		DWORD time;
+		DOUBLE value;
+	} msgTimeScale;
+
+	struct {
 		struct {
 			LCID id;
 			DWORD oem;
@@ -232,7 +238,7 @@ enum SurfaceType
 struct MenuItemData {
 	HMENU hParent;
 	HMENU hMenu;
-	INT index;
+	UINT index;
 	UINT childId;
 };
 
@@ -271,7 +277,8 @@ enum MenuType
 	MenuCpu,
 	MenuBattle,
 	MenuSnapshotType,
-	MenuSnapshotLevel
+	MenuSnapshotLevel,
+	MenuMsgTimeScale
 };
 
 struct SpritePosition {
@@ -284,4 +291,12 @@ struct ImageIndices {
 	const VOID* lpIndices;
 	DWORD count;
 	SpritePosition indices[];
+};
+
+struct TimeScale {
+	DWORD real;
+	DWORD virt;
+	DWORD lastReal;
+	DWORD lastVirt;
+	DOUBLE scale;
 };

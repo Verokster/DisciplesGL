@@ -217,6 +217,14 @@
 
 #define IDM_LOCALE_DEFAULT 5000
 
+#define IDM_MSG_0 400
+#define IDM_MSG_5 405
+#define IDM_MSG_10 410
+#define IDM_MSG_15 415
+#define IDM_MSG_20 420
+#define IDM_MSG_25 425
+#define IDM_MSG_30 430
+
 // Next default values for new objects
 //
 #ifdef APSTUDIO_INVOKED

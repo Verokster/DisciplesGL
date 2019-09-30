@@ -2682,24 +2682,26 @@ namespace Hooks
 	}
 #pragma endregion
 
-	DWORD realTime, virtualTime, lastTime, lastVirtual;
-	DOUBLE lastSpeed = 1.0;
-	DWORD __stdcall timeGetTimeHook()
+	TimeScale gameSpeed;
+	DWORD __fastcall GetTimeSpeed(TimeScale* time, DOUBLE scale)
 	{
-		DOUBLE speed = config.speed.enabled ? config.speed.value : 1.0;
-
-		if (speed != lastSpeed)
+		if (time->scale != scale)
 		{
-			lastTime = realTime;
-			lastVirtual = virtualTime;
+			time->scale = scale;
 
-			lastSpeed = speed;
+			time->lastReal = time->real;
+			time->lastVirt = time->virt;
 		}
 
-		realTime = timeGetTime();
-		virtualTime = lastVirtual + DWORD(lastSpeed * (realTime - lastTime));
+		time->real = timeGetTime();
+		time->virt = time->lastVirt + DWORD(time->scale * (time->real - time->lastReal));
 
-		return virtualTime;
+		return time->virt;
+	}
+
+	DWORD __stdcall timeGetTimeHook()
+	{
+		return GetTimeSpeed(&gameSpeed, config.speed.enabled ? config.speed.value : 1.0);
 	}
 
 	DWORD __stdcall GetDoubleClickTimeHook()
@@ -3549,12 +3551,18 @@ namespace Hooks
 		}
 	}
 
+	TimeScale msgScale;
+	DWORD __stdcall MessageTimeout()
+	{
+		return GetTimeSpeed(&msgScale, config.msgTimeScale.value);
+	}
+
 	VOID __declspec(naked) hook_00484CD0()
 	{
 		__asm {
 			PUSH ECX
 
-			CALL timeGetTime
+			CALL MessageTimeout
 			
 			POP ECX
 			RETN
@@ -4707,6 +4715,7 @@ namespace Hooks
 
 		// Messages real time
 		PatchCall(hookSpace->msgTimeHook, hook_00484CD0);
+		config.msgTimeScale.hooked = TRUE;
 
 		// Png
 		{

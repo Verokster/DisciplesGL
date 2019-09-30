@@ -29,6 +29,7 @@
 
 namespace Window
 {
+	BOOL __fastcall GetMenuByChildID(MenuItemData* mData);
 	VOID __fastcall CheckMenu(MenuType type);
 	VOID __fastcall CheckMenu();
 
