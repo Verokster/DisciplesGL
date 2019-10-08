@@ -162,9 +162,9 @@ namespace GL
 		{
 			DWORD errorCode = GetLastError();
 			if (errorCode == ERROR_INVALID_VERSION_ARB)
-				Main::ShowError(IDS_ERROR_ARB_VERSION, __FILE__, __LINE__);
+				Main::ShowError(IDS_ERROR_ARB_VERSION, "GLib.cpp", __LINE__);
 			else if (errorCode == ERROR_INVALID_PROFILE_ARB)
-				Main::ShowError(IDS_ERROR_ARB_PROFILE, __FILE__, __LINE__);
+				Main::ShowError(IDS_ERROR_ARB_PROFILE, "GLib.cpp", __LINE__);
 		}
 
 		return FALSE;
@@ -456,7 +456,7 @@ namespace GL
 		}
 
 		if (!pData)
-			Main::ShowError(IDS_ERROR_LOAD_RESOURCE, __FILE__, __LINE__);
+			Main::ShowError(IDS_ERROR_LOAD_RESOURCE, "GLib.cpp", __LINE__);
 
 		GLuint shader = GLCreateShader(type);
 
@@ -483,12 +483,12 @@ namespace GL
 			GLGetShaderiv(shader, GL_INFO_LOG_LENGTH, &result);
 
 			if (!result)
-				Main::ShowError(IDS_ERROR_COMPILE_SHADER, __FILE__, __LINE__);
+				Main::ShowError(IDS_ERROR_COMPILE_SHADER, "GLib.cpp", __LINE__);
 			else
 			{
 				CHAR data[1024];
 				GLGetShaderInfoLog(shader, sizeof(data), &result, data);
-				Main::ShowError(data, __FILE__, __LINE__);
+				Main::ShowError(data, "GLib.cpp", __LINE__);
 			}
 		}
 

@@ -283,9 +283,11 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC }
 };
 
-FpsCounter::FpsCounter(DWORD accuracy)
+FpsCounter::FpsCounter(DWORD accuracy, VOID* tempBuffer)
 {
 	this->accuracy = accuracy;
+	this->tempBuffer = tempBuffer;
+
 	this->count = accuracy * 10;
 	this->tickQueue = (FrameItem*)MemoryAlloc(this->count * sizeof(FrameItem));
 	this->Reset();
@@ -306,23 +308,35 @@ VOID FpsCounter::Reset()
 	MemoryZero(this->tickQueue, this->count * sizeof(FrameItem));
 }
 
+VOID FpsCounter::Init()
+{
+	this->state = fpsState;
+	if (!this->state)
+		return;
+
+		if (isFpsChanged)
+		{
+			isFpsChanged = FALSE;
+			this->Reset();
+		}
+
+		FrameItem* tickItem = &tickQueue[this->currentIndex];
+		tickItem->init = fpsState == FpsBenchmark ? timeGetTime() : this->lastTick;
+}
+
 VOID FpsCounter::Calculate()
 {
-	if (isFpsChanged)
-	{
-		isFpsChanged = FALSE;
-		this->Reset();
-	}
+	if (!this->state)
+		return;
 
 	FrameItem* tickItem = &tickQueue[this->currentIndex];
-	tickItem->tick = timeGetTime();
+	tickItem->tick = this->lastTick = timeGetTime();
 
-	if (this->lastTick)
+	if (tickItem->init)
 	{
-		tickItem->span = tickItem->tick - this->lastTick;
+		tickItem->span = tickItem->tick - tickItem->init;
 		this->summary += tickItem->span;
 	}
-	this->lastTick = tickItem->tick;
 
 	DWORD check = tickItem->tick - accuracy;
 
@@ -374,8 +388,11 @@ VOID FpsCounter::Calculate()
 	this->value = this->summary ? 1000 * total / this->summary : 0;
 }
 
-VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD frameHeight)
+VOID FpsCounter::Draw(VOID* srcBuffer, DWORD frameWidth)
 {
+	if (!this->state)
+		return;
+
 	DWORD fps = this->value;
 	DWORD digCount = 0;
 	DWORD current = fps;
@@ -396,8 +413,7 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 			for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 			{
 				DWORD* idx = (DWORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-
-				DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+				DWORD* pix = (DWORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 				WORD check = *lpDig++;
 				DWORD width = FPS_WIDTH;
@@ -418,8 +434,7 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 			for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 			{
 				DWORD* idx = (DWORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-
-				DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+				DWORD* pix = (DWORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 				DWORD width = FPS_WIDTH;
 				do
@@ -430,7 +445,7 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 			--dcount;
 		}
 
-		GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, dstBuffer);
+		GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, this->tempBuffer);
 	}
 	else
 	{
@@ -445,8 +460,7 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 				{
 					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-
-					WORD* pix = (WORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+					WORD* pix = (WORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 					WORD check = *lpDig++;
 					DWORD width = FPS_WIDTH;
@@ -467,8 +481,7 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 				{
 					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-
-					WORD* pix = (WORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+					WORD* pix = (WORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 					DWORD width = FPS_WIDTH;
 					do
@@ -479,7 +492,7 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 				--dcount;
 			}
 
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, dstBuffer);
+			GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, this->tempBuffer);
 		}
 		else
 		{
@@ -492,8 +505,7 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 				{
 					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-
-					DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+					DWORD* pix = (DWORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 					WORD check = *lpDig++;
 					DWORD width = FPS_WIDTH;
@@ -522,8 +534,7 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
 				{
 					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-
-					DWORD* pix = (DWORD*)dstBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+					DWORD* pix = (DWORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
 
 					DWORD width = FPS_WIDTH;
 					do
@@ -536,7 +547,7 @@ VOID FpsCounter::Draw(VOID* srcBuffer, VOID* dstBuffer, DWORD frameWidth, DWORD 
 				--dcount;
 			}
 
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, dstBuffer);
+			GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, this->tempBuffer);
 		}
 	}
 }

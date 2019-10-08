@@ -50,7 +50,7 @@ public:
 	Viewport viewport;
 	DWORD clearStage;
 	BOOL isFinish;
-	BOOL isStateChanged;
+	FilterState filterState;
 	SnapshotType isTakeSnapshot;
 	BOOL bufferIndex;
 	DOUBLE flushTime;
@@ -70,6 +70,7 @@ public:
 	VOID RenderOld();
 	VOID RenderMid();
 	VOID RenderNew();
+	VOID LoadFilterState();
 
 	VOID __fastcall ReadFrameBufer(BYTE*, DWORD);
 	VOID __fastcall TakeSnapshot();

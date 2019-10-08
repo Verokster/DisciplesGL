@@ -27,6 +27,7 @@
 #include "Objbase.h"
 #include "Mmsystem.h"
 #include "Commdlg.h"
+#include "process.h"
 #include "Hooks.h"
 #include "Main.h"
 #include "Config.h"
@@ -818,24 +819,39 @@ namespace Hooks
 	WNDPROC OldWindowProc;
 	LRESULT __stdcall WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		LRESULT res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
-
+		LRESULT res;
 		if (uMsg == WM_TIMER)
 		{
-			CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
-
-			if (aiTime && timeGetTime() - aiTime < 2000)
+			if (config.isAiThinking)
 			{
-				Sleep(0);
-				PostMessage(hWnd, uMsg, wParam, lParam);
+				MSG msg;
+				if (!config.fastAI || !PeekMessage(&msg, hWnd, NULL, NULL, PM_NOREMOVE))
+				{
+					res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+
+					if (timeGetTime() - aiTime >= 2000)
+						config.isAiThinking = FALSE;
+					else if (config.fastAI)
+					{
+						Sleep(0);
+						PostMessage(hWnd, uMsg, wParam, lParam);
+					}
+				}
+				else
+					res = NULL;
 			}
 			else
-				config.isAiThinking = FALSE;
+				res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
-		else if (uMsg == uAiMsg)
+		else
 		{
-			config.isAiThinking = TRUE;
-			aiTime = timeGetTime();
+			res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+
+			if (uMsg == uAiMsg)
+			{
+				config.isAiThinking = TRUE;
+				aiTime = timeGetTime();
+			}
 		}
 
 		return res;

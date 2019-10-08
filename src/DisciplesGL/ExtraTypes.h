@@ -61,7 +61,7 @@ struct Viewport {
 	POINTFLOAT clipFactor;
 };
 
-enum InterpolationFilter
+enum InterpolationFilter : BYTE
 {
 	InterpolateNearest = 0,
 	InterpolateLinear = 1,
@@ -69,7 +69,7 @@ enum InterpolationFilter
 	InterpolateCubic = 3
 };
 
-enum UpscalingFilter
+enum UpscalingFilter : BYTE
 {
 	UpscaleNone = 0,
 	UpscaleXRBZ = 1,
@@ -77,6 +77,13 @@ enum UpscalingFilter
 	UpscaleXSal = 3,
 	UpscaleEagle = 4,
 	UpscaleScaleNx = 5
+};
+
+struct FilterState {
+	InterpolationFilter interpolation;
+	UpscalingFilter upscaling;
+	BYTE value;
+	BYTE flags;
 };
 
 struct Resolution {
@@ -164,6 +171,7 @@ struct ConfigItems {
 	DOUBLE syncStep;
 	POINT randPos;
 	FLOAT zoomFactor;
+	BOOL fastAI;
 
 	struct {
 		BOOL hooked;
@@ -273,6 +281,7 @@ enum MenuType
 	MenuStretch,
 	MenuWindowMode,
 	MenuWindowType,
+	MenuFastAI,
 	MenuActive,
 	MenuCpu,
 	MenuBattle,

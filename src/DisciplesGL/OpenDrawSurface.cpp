@@ -309,8 +309,7 @@ VOID OpenDrawSurface::SwapBuffers()
 {
 	this->backBuffer->isReady = TRUE;
 
-	DWORD index = this->ddraw->bufferIndex;
-	StateBuffer** lpBuffer = !index ? &this->indexBuffer : &this->secondaryBuffer;
+	StateBuffer** lpBuffer = !this->ddraw->bufferIndex ? &this->indexBuffer : &this->secondaryBuffer;
 	StateBuffer* buffer = *lpBuffer;
 	*lpBuffer = this->backBuffer;
 
@@ -337,94 +336,38 @@ VOID OpenDrawSurface::Flush()
 	}
 	else
 	{
-		BOOL redraw = FALSE;
-		if (surface->drawEnabled)
-		{
-			surface->indexBuffer->isZoomed = Config::IsZoomed();
-			if (config.showBackBorder && config.isBorder)
-			{
-				if (!surface->indexBuffer->isBorder)
-					redraw = surface->indexBuffer->isBorder = TRUE;
-			}
-			else
-				surface->indexBuffer->isBorder = FALSE;
-		}
-
 		BOOL isSync = !config.isAiThinking && !config.isWaiting && config.coldCPU;
 		surface->drawEnabled = isSync || config.singleThread || this->drawEnabled;
 		if (surface->drawEnabled)
 		{
-			this->drawEnabled = FALSE;
+			LONGLONG qp;
+			QueryPerformanceFrequency((LARGE_INTEGER*)&qp);
+			DOUBLE time = (DOUBLE)qp * 0.001;
+			QueryPerformanceCounter((LARGE_INTEGER*)&qp);
+			time = (DOUBLE)qp / time;
 
-			if (redraw)
+			if (time >= this->ddraw->flushTime)
 			{
-				Size* size = surface->indexBuffer->isZoomed ? &config.zoomed : (Size*)config.mode;
-				
-				MemoryZero(this->backBuffer->data, this->mode.width * this->mode.height * sizeof(DWORD));
-				DrawBorders(this->backBuffer->data, size->width, size->height, !config.isBattle || !config.isWideBattle ? surface->secondaryBuffer : surface->backBuffer);
+				this->ddraw->flushTime = config.syncStep * (DWORD(time / config.syncStep) + 1);
 
-				DWORD top = (this->mode.height - size->height) >> 1;
-				DWORD left = (this->mode.width - size->width) >> 1;
+				this->drawEnabled = FALSE;
 
-				DWORD sctPitch = surface->mode.width;
-				DWORD* srcData = (DWORD*)surface->indexBuffer->data + top * sctPitch + left;
-				DWORD* dstData = (DWORD*)this->backBuffer->data;
-
-				DWORD height = size->height;
-				do
+				BOOL redraw = FALSE;
+				surface->indexBuffer->isZoomed = Config::IsZoomed();
+				if (config.showBackBorder && config.isBorder)
 				{
-					DWORD* src = srcData;
-					DWORD* dst = dstData;
-
-					DWORD width = size->width;
-					do
-					{
-						DWORD alpha = *src >> 24;
-						if (alpha == 255)
-							*dst = *src;
-						else if (alpha)
-						{
-							++alpha;
-
-							DWORD s = *src & 0x000000FF;
-							DWORD d = *dst & 0x000000FF;
-							DWORD res = (d + ((s - d) * alpha) / 256) & 0x000000FF;
-
-							s = *src & 0x0000FF00;
-							d = *dst & 0x0000FF00;
-							res |= (d + ((s - d) * alpha) / 256) & 0x0000FF00;
-
-							s = *src & 0x00FF0000;
-							d = *dst & 0x00FF0000;
-							res |= (d + ((s - d) * alpha) / 256) & 0x00FF0000;
-
-							*dst = res;
-						}
-
-						++src;
-						++dst;
-					} while (--width);
-
-					srcData += sctPitch;
-					dstData += size->width;
-				} while (--height);
-
-				this->backBuffer->isZoomed = surface->indexBuffer->isZoomed;
-				this->backBuffer->isBorder = surface->indexBuffer->isBorder;
-			}
-			else
-			{
-				if (!surface->indexBuffer->isZoomed)
-				{
-					StateBuffer* buffer = this->backBuffer;
-					this->backBuffer = surface->indexBuffer;
-					surface->indexBuffer = buffer;
+					if (!surface->indexBuffer->isBorder)
+						redraw = surface->indexBuffer->isBorder = TRUE;
 				}
 				else
+					surface->indexBuffer->isBorder = FALSE;
+
+				if (redraw)
 				{
-					Size* size = &config.zoomed;
+					Size* size = surface->indexBuffer->isZoomed ? &config.zoomed : (Size*)config.mode;
 
 					MemoryZero(this->backBuffer->data, this->mode.width * this->mode.height * sizeof(DWORD));
+					DrawBorders(this->backBuffer->data, size->width, size->height, !config.isBattle || !config.isWideBattle ? surface->secondaryBuffer : surface->backBuffer);
 
 					DWORD top = (this->mode.height - size->height) >> 1;
 					DWORD left = (this->mode.width - size->width) >> 1;
@@ -433,11 +376,40 @@ VOID OpenDrawSurface::Flush()
 					DWORD* srcData = (DWORD*)surface->indexBuffer->data + top * sctPitch + left;
 					DWORD* dstData = (DWORD*)this->backBuffer->data;
 
-					DWORD width = size->width << 2;
 					DWORD height = size->height;
 					do
 					{
-						MemoryCopy(dstData, srcData, width);
+						DWORD* src = srcData;
+						DWORD* dst = dstData;
+
+						DWORD width = size->width;
+						do
+						{
+							DWORD alpha = *src >> 24;
+							if (alpha == 255)
+								*dst = *src;
+							else if (alpha)
+							{
+								++alpha;
+
+								DWORD s = *src & 0x000000FF;
+								DWORD d = *dst & 0x000000FF;
+								DWORD res = (d + ((s - d) * alpha) / 256) & 0x000000FF;
+
+								s = *src & 0x0000FF00;
+								d = *dst & 0x0000FF00;
+								res |= (d + ((s - d) * alpha) / 256) & 0x0000FF00;
+
+								s = *src & 0x00FF0000;
+								d = *dst & 0x00FF0000;
+								res |= (d + ((s - d) * alpha) / 256) & 0x00FF0000;
+
+								*dst = res;
+							}
+
+							++src;
+							++dst;
+						} while (--width);
 
 						srcData += sctPitch;
 						dstData += size->width;
@@ -446,35 +418,59 @@ VOID OpenDrawSurface::Flush()
 					this->backBuffer->isZoomed = surface->indexBuffer->isZoomed;
 					this->backBuffer->isBorder = surface->indexBuffer->isBorder;
 				}
-			}
-
-			this->SwapBuffers();
-			SetEvent(this->ddraw->hDrawEvent);
-
-			if (isSync)
-			{
-				LONGLONG qp;
-				QueryPerformanceFrequency((LARGE_INTEGER*)&qp);
-				DOUBLE timerResolution = (DOUBLE)qp / 1000.0;
-
-				QueryPerformanceCounter((LARGE_INTEGER*)&qp);
-				DOUBLE time = (DOUBLE)qp / timerResolution;
-
-				if (time < this->ddraw->flushTime)
-				{
-					DWORD sleep = DWORD(this->ddraw->flushTime - time);
-					this->ddraw->flushTime += config.syncStep;
-					Sleep(sleep);
-				}
 				else
 				{
-					time += config.syncStep;
-					this->ddraw->flushTime += DWORD((time - this->ddraw->flushTime) / config.syncStep) * config.syncStep;
-					Sleep(0);
+					if (!surface->indexBuffer->isZoomed)
+					{
+						StateBuffer* buffer = this->backBuffer;
+						this->backBuffer = surface->indexBuffer;
+						surface->indexBuffer = buffer;
+					}
+					else
+					{
+						Size* size = &config.zoomed;
+
+						MemoryZero(this->backBuffer->data, this->mode.width * this->mode.height * sizeof(DWORD));
+
+						DWORD top = (this->mode.height - size->height) >> 1;
+						DWORD left = (this->mode.width - size->width) >> 1;
+
+						DWORD sctPitch = surface->mode.width;
+						DWORD* srcData = (DWORD*)surface->indexBuffer->data + top * sctPitch + left;
+						DWORD* dstData = (DWORD*)this->backBuffer->data;
+
+						DWORD width = size->width << 2;
+						DWORD height = size->height;
+						do
+						{
+							MemoryCopy(dstData, srcData, width);
+
+							srcData += sctPitch;
+							dstData += size->width;
+						} while (--height);
+
+						this->backBuffer->isZoomed = surface->indexBuffer->isZoomed;
+						this->backBuffer->isBorder = surface->indexBuffer->isBorder;
+					}
 				}
+
+				this->SwapBuffers();
+				SetEvent(this->ddraw->hDrawEvent);
+
+				if (isSync)
+				{
+					QueryPerformanceFrequency((LARGE_INTEGER*)&qp);
+					time = (DOUBLE)qp * 0.001;
+					QueryPerformanceCounter((LARGE_INTEGER*)&qp);
+					time = (DOUBLE)qp / time;
+
+					Sleep(DWORD(this->ddraw->flushTime - time));
+				}
+				else
+					Sleep(0);
 			}
 			else
-				Sleep(0);
+				surface->drawEnabled = FALSE;
 		}
 	}
 }

@@ -263,9 +263,14 @@ namespace Config
 			config.speed.index = 5;
 			config.speed.value = 0.1f * speedList[config.speed.index];
 			Config::Set(CONFIG_WRAPPER, "GameSpeed", config.speed.index);
+
+			config.speed.enabled = TRUE;
 			Config::Set(CONFIG_WRAPPER, "SpeedEnabled", config.speed.enabled);
 
+			config.alwaysActive = TRUE;
 			Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
+
+			config.coldCPU = TRUE;
 			Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
 
 			if (!config.version)
@@ -289,6 +294,9 @@ namespace Config
 			config.msgTimeScale.time = MSG_TIMEOUT;
 			config.msgTimeScale.value = 1.0f;
 			Config::Set(CONFIG_WRAPPER, "MessageTimeout", config.msgTimeScale.time);
+
+			config.fastAI = FALSE;
+			Config::Set(CONFIG_WRAPPER, "FastAI", config.fastAI);
 		}
 		else
 		{
@@ -419,10 +427,10 @@ namespace Config
 				config.speed.index = 5;
 			config.speed.value = 0.1f * speedList[config.speed.index];
 
-			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", FALSE);
+			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", TRUE);
 
-			config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
-			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
+			config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", TRUE);
+			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", TRUE);
 
 			if (!config.version)
 				config.wideAllowed = (BOOL)Config::Get(CONFIG_WRAPPER, "WideBattle", FALSE);
@@ -450,6 +458,8 @@ namespace Config
 
 			config.msgTimeScale.time = *(DWORD*)&value;
 			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
+
+			config.fastAI = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
 		}
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));

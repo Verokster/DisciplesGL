@@ -101,23 +101,39 @@ namespace Window
 		{
 			CheckMenuItem(config.menu, IDM_LOCALE_DEFAULT, MF_BYCOMMAND | (!config.locales.current.id ? MF_CHECKED : MF_UNCHECKED));
 
-			HMENU* hPopup = config.locales.menus;
-			DWORD count = sizeof(config.locales.menus) / sizeof(HMENU);
-			do
+			MenuItemData mData;
+			mData.childId = IDM_LOCALE_DEFAULT;
+			if (GetMenuByChildID(&mData))
 			{
-				if (*hPopup)
+				HMENU* hPopup = config.locales.menus;
+				DWORD count = sizeof(config.locales.menus) / sizeof(HMENU);
+				DWORD idx = 2;
+				do
 				{
-					INT count = GetMenuItemCount(*hPopup);
-					for (INT i = 0; i < count; ++i)
+					if (*hPopup)
 					{
-						UINT id = GetMenuItemID(*hPopup, i);
-						LCID locale = config.locales.list[id - IDM_LOCALE_DEFAULT];
-						CheckMenuItem(config.menu, id, MF_BYCOMMAND | (locale == config.locales.current.id ? MF_CHECKED : MF_UNCHECKED));
-					}
-				}
+						BOOL checked = FALSE;
+						INT count = GetMenuItemCount(*hPopup);
+						for (INT i = 0; i < count; ++i)
+						{
+							UINT id = GetMenuItemID(*hPopup, i);
+							LCID locale = config.locales.list[id - IDM_LOCALE_DEFAULT];
 
-				++hPopup;
-			} while (--count);
+							BOOL check = locale == config.locales.current.id;
+							CheckMenuItem(config.menu, id, MF_BYCOMMAND | (check ? MF_CHECKED : MF_UNCHECKED));
+
+							if (check)
+								checked = TRUE;
+						}
+
+						CheckMenuItem(mData.hMenu, idx, MF_BYPOSITION | (checked ? MF_CHECKED : MF_UNCHECKED));
+
+						++idx;
+					}
+
+					++hPopup;
+				} while (--count);
+			}
 		}
 		break;
 
@@ -388,6 +404,12 @@ namespace Window
 		}
 		break;
 
+		case MenuFastAI:
+		{
+			CheckMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (config.fastAI ? MF_CHECKED : MF_UNCHECKED));
+		}
+		break;
+
 		case MenuActive:
 		{
 			CheckMenuItem(config.menu, IDM_ALWAYS_ACTIVE, MF_BYCOMMAND | (config.alwaysActive ? MF_CHECKED : MF_UNCHECKED));
@@ -477,6 +499,7 @@ namespace Window
 		CheckMenu(MenuStretch);
 		CheckMenu(MenuWindowMode);
 		CheckMenu(MenuWindowType);
+		CheckMenu(MenuFastAI);
 		CheckMenu(MenuActive);
 		CheckMenu(MenuCpu);
 		CheckMenu(MenuBattle);
@@ -492,7 +515,7 @@ namespace Window
 		OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 		if (ddraw)
 		{
-			ddraw->isStateChanged = TRUE;
+			ddraw->LoadFilterState();
 			SetEvent(ddraw->hDrawEvent);
 		}
 	}
@@ -646,10 +669,6 @@ namespace Window
 				MemoryFree(verData);
 			}
 
-			GetDlgItemText(hDlg, IDC_LNK_EMAIL, temp, sizeof(temp));
-			StrPrint(path, "<A HREF=\"mailto:%s\">%s</A>", temp, temp);
-			SetDlgItemText(hDlg, IDC_LNK_EMAIL, path);
-
 			break;
 		}
 
@@ -718,20 +737,14 @@ namespace Window
 		{
 			if (((NMHDR*)lParam)->code == NM_CLICK && wParam == IDC_LNK_EMAIL)
 			{
-				NMLINK* pNMLink = (NMLINK*)lParam;
-				LITEM iItem = pNMLink->item;
-
-				CHAR url[MAX_PATH];
-				StrToAnsi(url, pNMLink->item.szUrl, sizeof(url) - 1);
-
-				SHELLEXECUTEINFO shExecInfo;
-				MemoryZero(&shExecInfo, sizeof(SHELLEXECUTEINFO));
-				shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+				SHELLEXECUTEINFOW shExecInfo;
+				MemoryZero(&shExecInfo, sizeof(SHELLEXECUTEINFOW));
+				shExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
 				shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-				shExecInfo.lpFile = url;
+				shExecInfo.lpFile = ((NMLINK*)lParam)->item.szUrl;
 				shExecInfo.nShow = SW_SHOW;
 
-				ShellExecuteEx(&shExecInfo);
+				ShellExecuteExW(&shExecInfo);
 			}
 
 			break;
@@ -1276,6 +1289,18 @@ namespace Window
 				config.borderlessReal = config.borderlessMode = FALSE;
 				Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderlessMode);
 				CheckMenu(MenuWindowType);
+				return NULL;
+			}
+
+			case IDM_FAST_AI:
+			{
+				if (config.fastAI || Main::ShowWarn(IDS_WARN_FAST_AI))
+				{
+					config.fastAI = !config.fastAI;
+					Config::Set(CONFIG_WRAPPER, "FastAI", config.fastAI);
+					CheckMenu(MenuFastAI);
+				}
+
 				return NULL;
 			}
 

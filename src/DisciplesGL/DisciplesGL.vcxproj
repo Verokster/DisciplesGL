@@ -186,8 +186,6 @@
     </Midl>
     <ClCompile>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>false</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -202,6 +200,8 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <ErrorReporting>None</ErrorReporting>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <ControlFlowGuard>false</ControlFlowGuard>
     </ClCompile>
     <ResourceCompile />
     <Link>
@@ -244,6 +244,7 @@
     <ClCompile Include="FpsCounter.cpp" />
     <ClCompile Include="GLib.cpp" />
     <ClCompile Include="Hooks.cpp" />
+    <ClCompile Include="PixelBuffer.cpp" />
     <ClCompile Include="PngLib.cpp" />
     <ClCompile Include="StateBuffer.cpp" />
     <ClCompile Include="StdAfx.cpp">
@@ -271,6 +272,7 @@
     <ClInclude Include="GLib.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="PixelBuffer.h" />
     <ClInclude Include="PngLib.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StateBuffer.h" />

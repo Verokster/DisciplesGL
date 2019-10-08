@@ -34,6 +34,8 @@ RELEASEACTCTX ReleaseActCtxC;
 ACTIVATEACTCTX ActivateActCtxC;
 DEACTIVATEACTCTX DeactivateActCtxC;
 
+SETPROCESSDPIAWARENESS SetProcessDpiAwarenessC;
+
 extern "C"
 {
 	VOID __stdcall _c4ltoa45(DWORD, DWORD, DWORD);
@@ -283,4 +285,11 @@ VOID LoadKernel32()
 		ActivateActCtxC = (ACTIVATEACTCTX)GetProcAddress(hLib, "ActivateActCtx");
 		DeactivateActCtxC = (DEACTIVATEACTCTX)GetProcAddress(hLib, "DeactivateActCtx");
 	}
+}
+
+VOID LoadShcore()
+{
+	HMODULE hLib = LoadLibrary("SHCORE.dll");
+	if (hLib)
+		SetProcessDpiAwarenessC = (SETPROCESSDPIAWARENESS)GetProcAddress(hLib, "SetProcessDpiAwareness");
 }

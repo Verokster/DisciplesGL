@@ -26,45 +26,26 @@
 
 #include "Allocation.h"
 #include "ExtraTypes.h"
+#include "StateBuffer.h"
 
-#define FPS_X 3
-#define FPS_Y 5
-#define FPS_WIDTH 16
-#define FPS_HEIGHT 24
-#define FPS_COUNT 120
-#define FPS_ACCURACY 2000
+#define BLOCK_SIZE 256
 
-extern FpsState fpsState;
-extern BOOL isFpsChanged;
-
-extern const WORD counters[10][FPS_HEIGHT];
-
-struct FrameItem {
-	DWORD init;
-	DWORD tick;
-	DWORD span;
-};
-
-class FpsCounter : public Allocation {
+class PixelBuffer : public Allocation {
 private:
-	DWORD accuracy;
-	DWORD count;
-	DWORD checkIndex;
-	DWORD currentIndex;
-	DWORD summary;
-	DWORD lastTick;
-	FpsState state;
+	Size lastSize;
+	Size size;
+
+	BOOL isTrue;
 	VOID* tempBuffer;
-	FrameItem* tickQueue;
+	VOID* primaryBuffer;
+	VOID* secondaryBuffer;
+	BOOL UpdateBlock(Size* newSize, RECT* newRect);
 
 public:
-	DWORD value;
-
-	FpsCounter(DWORD accuracy, VOID* tempBuffer);
-	~FpsCounter();
+	PixelBuffer(DWORD width, DWORD height, BOOL isTrue, VOID* tempBuffer);
+	~PixelBuffer();
 
 	VOID Reset();
-	VOID Init();
-	VOID Calculate();
-	VOID Draw(VOID*, DWORD);
+	BOOL Check(Size* newSize, StateBuffer* stateBuffer);
+	BOOL Update(Size* newSize, StateBuffer* stateBuffer);
 };

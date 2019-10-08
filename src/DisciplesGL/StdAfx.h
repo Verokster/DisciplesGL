@@ -29,6 +29,7 @@
 #include "windows.h"
 #include "mmreg.h"
 #include "math.h"
+#include "shellscalingapi.h"
 #include "locale.h"
 #include "ddraw.h"
 #include "ExtraTypes.h"
@@ -46,6 +47,10 @@ extern CREATEACTCTXA CreateActCtxC;
 extern RELEASEACTCTX ReleaseActCtxC;
 extern ACTIVATEACTCTX ActivateActCtxC;
 extern DEACTIVATEACTCTX DeactivateActCtxC;
+
+typedef HRESULT(__stdcall* SETPROCESSDPIAWARENESS)(PROCESS_DPI_AWARENESS);
+
+extern SETPROCESSDPIAWARENESS SetProcessDpiAwarenessC;
 
 extern "C"
 {
@@ -79,7 +84,6 @@ extern "C"
 #define StrLastChar(str, ch) strrchr(str, ch)
 #define StrChar(str, ch) strchr(str, ch)
 #define StrStr(str, substr) strstr(str, substr)
-#define StrToAnsi(dst, src, size) wcstombs(dst, src, size)
 #define StrToInt(src) atoi(src)
 #define FileGetStr(str, num, stream) fgets(str, num, stream)
 #define Random() rand()
@@ -104,3 +108,4 @@ extern HMODULE hDllModule;
 extern HANDLE hActCtx;
 
 VOID LoadKernel32();
+VOID LoadShcore();

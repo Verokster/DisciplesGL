@@ -37,6 +37,7 @@ BEGIN
 	IDS_INFO_NEXT_BATTLE			"This option will be affected at the next battle"
 	IDS_WARN_RESET					"This option will reset all wrapper configuration to default.\r\nAre you sure you want to continue?"
 	IDS_INFO_RESET					"All settings have been reset. Changes take effect after game restart"
+	IDS_WARN_FAST_AI				"This option increases AI performance, but may cause an unexpected game crash. Do you wish to continue?"
 END
 
 /////////////////////////////////////////////////////////////////////////////
@@ -170,13 +171,14 @@ BEGIN
 		END
 		POPUP "&Message Timeout"
 		BEGIN
-			MENUITEM " 5 seconds",						IDM_MSG_5
-			MENUITEM "10 seconds",						IDM_MSG_10
-			MENUITEM "15 seconds",						IDM_MSG_15
-			MENUITEM "20 seconds",						IDM_MSG_20
-			MENUITEM "25 seconds",						IDM_MSG_25
-			MENUITEM "30 seconds",						IDM_MSG_30
+			MENUITEM " 5 seconds",					IDM_MSG_5
+			MENUITEM "10 seconds",					IDM_MSG_10
+			MENUITEM "15 seconds",					IDM_MSG_15
+			MENUITEM "20 seconds",					IDM_MSG_20
+			MENUITEM "25 seconds",					IDM_MSG_25
+			MENUITEM "30 seconds",					IDM_MSG_30
 		END
+		MENUITEM "Fast &AI",						IDM_FAST_AI
 		MENUITEM "Always &Active",					IDM_ALWAYS_ACTIVE
 		MENUITEM "&Cold CPU",						IDM_PATCH_CPU
 		MENUITEM SEPARATOR
@@ -317,13 +319,14 @@ BEGIN
 		END
 		POPUP "&Message Timeout"
 		BEGIN
-			MENUITEM " 5 seconds",						IDM_MSG_5
-			MENUITEM "10 seconds",						IDM_MSG_10
-			MENUITEM "15 seconds",						IDM_MSG_15
-			MENUITEM "20 seconds",						IDM_MSG_20
-			MENUITEM "25 seconds",						IDM_MSG_25
-			MENUITEM "30 seconds",						IDM_MSG_30
+			MENUITEM " 5 seconds",					IDM_MSG_5
+			MENUITEM "10 seconds",					IDM_MSG_10
+			MENUITEM "15 seconds",					IDM_MSG_15
+			MENUITEM "20 seconds",					IDM_MSG_20
+			MENUITEM "25 seconds",					IDM_MSG_25
+			MENUITEM "30 seconds",					IDM_MSG_30
 		END
+		MENUITEM "Fast &AI",						IDM_FAST_AI
 		MENUITEM "Always &Active",					IDM_ALWAYS_ACTIVE
 		MENUITEM "&Cold CPU",						IDM_PATCH_CPU
 		MENUITEM SEPARATOR
@@ -451,8 +454,8 @@ IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,9,30,1065
- PRODUCTVERSION 1,4,5,0
+ FILEVERSION 2019,10,8,1122
+ PRODUCTVERSION 1,4,6,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -468,10 +471,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2019.09.30.1065"
+			VALUE "FileVersion", "2019.10.08.1122"
 			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4dll-R.dll"
-			VALUE "ProductVersion", "1.4.5"
+			VALUE "ProductVersion", "1.4.6"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END
