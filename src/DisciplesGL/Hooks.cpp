@@ -94,6 +94,9 @@ namespace Hooks
 
 		0x0048ACA4, 0x0053607F, 0x005A22B1, 0x00531627,
 		0x00000000, 0x00000000, 0x00000000, 0x00480A18,
+		0x00487F80, 0x004059C7, 0x004857C7,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .40
@@ -122,6 +125,9 @@ namespace Hooks
 
 		0x0048D187, 0x004C2423, 0x005A863F, 0x00537712,
 		0x00000000, 0x00000000, 0x00000000, 0x00482654,
+		0x0048A53D, 0x004059F2, 0x00487CEB,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .01
@@ -150,6 +156,9 @@ namespace Hooks
 
 		0x0048FAB4, 0x0056CEEE, 0x005AF2A4, 0x0053D265,
 		0x0052FD28, 0x00484900, 0x00484922, 0x004847FF,
+		0x0048CD6F, 0x00405F03, 0x0048A44F,
+
+		0x00450226, 0x004502B3, 0x0040A789,
 #pragma endregion
 
 #pragma region v2 .01 - Steam
@@ -178,6 +187,9 @@ namespace Hooks
 
 		0x0048FB37, 0x005AA77E, 0x005AF894, 0x0053D936,
 		0x00530462, 0x00484960, 0x00484982, 0x0048485F,
+		0x0048CE0E, 0x00405B80, 0x0048A4EE,
+
+		0x0045010A, 0x00450197, 0x0040A4AE,
 #pragma endregion
 
 #pragma region v2 .02
@@ -206,6 +218,9 @@ namespace Hooks
 
 		0x0048FF90, 0x004F146A, 0x005AE161, 0x0053C095,
 		0x0052EAAE, 0x00484DD1, 0x00484DF3, 0x00484CD0,
+		0x0048D25C, 0x00405A1A, 0x0048A93C,
+
+		0x00450417, 0x004504A4, 0x0040A438,
 #pragma endregion
 
 #pragma region v2 .02 - Crack
@@ -234,6 +249,9 @@ namespace Hooks
 
 		0x00490169, 0x0056D6B4, 0x005AFA6A, 0x0053D735,
 		0x005301F8, 0x00484FB5, 0x00484FD7, 0x00484EB4,
+		0x0048D424, 0x00405F19, 0x0048AB04,
+
+		0x004506BD, 0x0045074A, 0x0040A79F,
 #pragma endregion
 
 #pragma region v3 .00 - Steam
@@ -262,6 +280,9 @@ namespace Hooks
 
 		0x00492DB4, 0x00581521, 0x005B2F1A, 0x00540AC6,
 		0x00533515, 0x00487AAD, 0x00487ACF, 0x004879AC,
+		0x00490052, 0x00405929, 0x0048D732,
+
+		0x0045257F, 0x0045260C, 0x0040A3D9,
 #pragma endregion
 
 #pragma region v3 .01a
@@ -290,6 +311,9 @@ namespace Hooks
 
 		0x00492EEA, 0x00403FC0, 0x005B3528, 0x00540B48,
 		0x005335EC, 0x00487AB9, 0x00487ADB, 0x004879B8,
+		0x004900C8, 0x00405C95, 0x0048D7A8,
+
+		0x004526E8, 0x00452775, 0x0040A79D,
 #pragma endregion
 
 #pragma region v3 .01b
@@ -318,6 +342,9 @@ namespace Hooks
 
 		0x00492942, 0x0041B1B3, 0x005B27EE, 0x005401F9,
 		0x00532B79, 0x0048768A, 0x004876AC, 0x00487589,
+		0x0048FBCC, 0x00405921, 0x0048D2E2,
+
+		0x004520B4, 0x00452141, 0x0040A3F9,
 #pragma endregion
 
 #pragma region v1 .10 Editor
@@ -346,6 +373,9 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .41 Editor
@@ -374,6 +404,9 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .00 Editor - Steam
@@ -402,6 +435,9 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .01 Editor
@@ -430,6 +466,9 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .02 Editor
@@ -458,6 +497,9 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .00 Editor - Steam
@@ -486,6 +528,9 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .01 Editor
@@ -513,7 +558,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x00000000, 0x00000000, 0x00000000, 0x00000000
+		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000
 #pragma endregion
 	};
 
@@ -3560,7 +3608,6 @@ namespace Hooks
 			PUSH ESI
 			CALL CalcMessage
 			
-
 			POP ECX
 			MOV EAX, [ECX]
 			JMP [EAX+0x14]
@@ -3719,6 +3766,51 @@ namespace Hooks
 			return TRUE;
 
 		return CharToOem(pSrc, pDst);
+	}
+#pragma endregion
+
+#pragma region Print text
+	DWORD gameObject;
+	DWORD sub_PrintText;
+	VOID __fastcall PrintText(CHAR* str)
+	{
+		if (gameObject)
+			((VOID(__thiscall*)(DWORD, CHAR*))(sub_PrintText))(gameObject, str);
+	}
+
+	DWORD sub_GameObjectInit;
+	VOID __declspec(naked) hook_00405A1A()
+	{
+		__asm
+		{
+			MOV gameObject, ECX
+			JMP sub_GameObjectInit
+		}
+	}
+
+	DWORD sub_GameObjectDeInit;
+	VOID __declspec(naked) hook_0048A93C()
+	{
+		__asm {
+			MOV EAX, gameObject
+			CMP ECX, EAX
+			JNE lbl_return
+
+			XOR EAX, EAX
+			MOV gameObject, EAX
+
+			lbl_return : JMP sub_GameObjectDeInit
+		}
+	}
+#pragma endregion
+
+#pragma region AI list fix
+	DWORD sub_GetType;
+	DWORD sub_45287F;
+	DWORD __stdcall sub_45287F_Hook(DWORD a1, DWORD a2, DWORD a3, DWORD type, DWORD a5, DWORD a6)
+	{
+		type = ((DWORD(__stdcall*)(DWORD))sub_GetType)(a5 - 4);
+		return ((DWORD(__stdcall*)(DWORD, DWORD, DWORD, DWORD, DWORD, DWORD))sub_45287F)(a1, a2, a3, type, a5, a6);
 	}
 #pragma endregion
 
@@ -4733,6 +4825,14 @@ namespace Hooks
 		PatchCall(hookSpace->msgTimeHook, hook_00484CD0);
 		config.msgTimeScale.hooked = TRUE;
 
+		// Print text
+		if (hookSpace->print_text)
+		{
+			sub_PrintText = hookSpace->print_text + baseOffset;
+			RedirectCall(hookSpace->print_init, hook_00405A1A, &sub_GameObjectInit);
+			RedirectCall(hookSpace->print_deinit, hook_0048A93C, &sub_GameObjectDeInit);
+		}
+
 		// Png
 		{
 			pnglib_create_read_struct = (PNG_CREATE_READ_STRUCT)(hookSpace->png_create_read_struct + baseOffset);
@@ -4769,6 +4869,14 @@ namespace Hooks
 
 		// Random
 		PatchNop(hookSpace->random_nop, 5);
+
+		// AI list fix
+		if (hookSpace->ai_list_hook_1)
+		{
+			RedirectCall(hookSpace->ai_list_hook_1, sub_45287F_Hook, &sub_45287F);
+			PatchCall(hookSpace->ai_list_hook_2, sub_45287F_Hook);
+			sub_GetType = hookSpace->ai_list_get_type + baseOffset;
+		}
 
 		if (config.hd)
 		{

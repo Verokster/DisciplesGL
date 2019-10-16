@@ -38,6 +38,52 @@ BEGIN
 	IDS_WARN_RESET					"This option will reset all wrapper configuration to default.\r\nAre you sure you want to continue?"
 	IDS_INFO_RESET					"All settings have been reset. Changes take effect after game restart"
 	IDS_WARN_FAST_AI				"This option increases AI performance, but may cause an unexpected game crash. Do you wish to continue?"
+
+	IDS_TEXT_INTERPOLATIN			"Interpolation filter"
+	IDS_TEXT_UPSCALING				"Upscaling filter"
+	IDS_TEXT_FILT_OFF				"None"
+	IDS_TEXT_FILT_LINEAR			"Linear"
+	IDS_TEXT_FILT_HERMITE			"Hermite"
+	IDS_TEXT_FILT_CUBIC				"Cubic"
+	IDS_TEXT_FILT_NONE				"None"
+	IDS_TEXT_FILT_SCALENX			"ScaleNx"
+	IDS_TEXT_FILT_EAGLE				"Super Eagle"
+	IDS_TEXT_FILT_XSAL				"xSal"
+	IDS_TEXT_FILT_SCALEHQ			"ScaleHQ"
+	IDS_TEXT_FILT_XBRZ				"xBRz"
+
+	IDS_ON							"On"
+	IDS_OFF							"Off"
+
+	IDS_RES_FULL_SCREEN				"Fullscreen mode"
+
+	IDS_MODE_BORDERLESS				"Borderless"
+	IDS_MODE_EXCLUSIVE				"Exclusive"
+
+	IDS_VSYNC						"Vertical sync"
+
+	IDS_ASPECT_RATIO				"Aspect ratio"
+	IDS_ASPECT_KEEP					"Original"
+	IDS_ASPECT_STRETCH				"Stretch"
+
+	IDS_RES_STRETCH					"Zoom window"
+	IDS_RES_BORDERS					"Background"
+
+	IDS_SPEED						"Speed"
+
+	IDS_MSG							"Messages timeout"
+	IDS_MSG_SECONDS					"second(s)"
+
+	IDS_FAST_AI						"Fast AI"
+	IDS_ALWAYS_ACTIVE				"Always active"
+	IDS_PATCH_CPU					"Cold CPU"
+	IDS_LOCALE						"Locale"
+	IDS_LOCALE_DEFAULT				"Default"
+
+	IDS_SCR_TYPE					"Screenshots type"
+	IDS_SCR_BMP						"BMP"
+	IDS_SCR_PNG						"PNG"
+	IDS_SCR_FILE					"Screenshot created"
 END
 
 /////////////////////////////////////////////////////////////////////////////
@@ -113,7 +159,7 @@ BEGIN
 			BEGIN
 				MENUITEM "x2",						IDM_FILT_EAGLE_2X
 			END
-			POPUP "2x&SaI"
+			POPUP "x&SaI"
 			BEGIN
 				MENUITEM "x2",						IDM_FILT_XSAL_2X
 			END
@@ -122,7 +168,7 @@ BEGIN
 				MENUITEM "x2",						IDM_FILT_SCALEHQ_2X
 				MENUITEM "x4",						IDM_FILT_SCALEHQ_4X
 			END
-			POPUP "&xBRz"
+			POPUP "x&BRz"
 			BEGIN
 				MENUITEM "x2",						IDM_FILT_XRBZ_2X
 				MENUITEM "x3",						IDM_FILT_XRBZ_3X
@@ -271,7 +317,7 @@ BEGIN
 			BEGIN
 				MENUITEM "x2",						IDM_FILT_EAGLE_2X
 			END
-			POPUP "2x&SaI"
+			POPUP "x&SaI"
 			BEGIN
 				MENUITEM "x2",						IDM_FILT_XSAL_2X
 			END
@@ -280,7 +326,7 @@ BEGIN
 				MENUITEM "x2",						IDM_FILT_SCALEHQ_2X
 				MENUITEM "x4",						IDM_FILT_SCALEHQ_4X
 			END
-			POPUP "&xBRz"
+			POPUP "x&BRz"
 			BEGIN
 				MENUITEM "x2",						IDM_FILT_XRBZ_2X
 				MENUITEM "x3",						IDM_FILT_XRBZ_3X
@@ -454,8 +500,8 @@ IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,10,8,1122
- PRODUCTVERSION 1,4,6,0
+ FILEVERSION 2019,10,16,1150
+ PRODUCTVERSION 1,4,8,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -471,10 +517,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2019.10.08.1122"
+			VALUE "FileVersion", "2019.10.16.1150"
 			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4dll-R.dll"
-			VALUE "ProductVersion", "1.4.6"
+			VALUE "ProductVersion", "1.4.8"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

@@ -72,8 +72,9 @@ public:
 	VOID RenderNew();
 	VOID LoadFilterState();
 
-	VOID __fastcall ReadFrameBufer(BYTE*, DWORD);
-	VOID __fastcall TakeSnapshot();
+	VOID __fastcall ReadFrameBufer(BYTE*, DWORD, BOOL, BOOL);
+	VOID __fastcall ReadDataBuffer(BYTE*, VOID*, Size*, DWORD, BOOL, BOOL);
+	VOID __fastcall TakeSnapshot(Size*, VOID*, BOOL);
 
 	// Inherited via  IDraw
 	HRESULT __stdcall OpenDraw::QueryInterface(REFIID, LPVOID*) override;

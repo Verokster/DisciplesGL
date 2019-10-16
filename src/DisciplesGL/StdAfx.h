@@ -106,6 +106,8 @@ VOID __fastcall AlignedFree(VOID* block);
 
 extern HMODULE hDllModule;
 extern HANDLE hActCtx;
+extern UINT WM_SNAPSHOT;
+extern CHAR snapshotName[];
 
 VOID LoadKernel32();
 VOID LoadShcore();

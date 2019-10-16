@@ -218,6 +218,14 @@ namespace Hooks
 		DWORD msgIconPosition;
 		DWORD msgTextPosition;
 		DWORD msgTimeHook;
+
+		DWORD print_text;
+		DWORD print_init;
+		DWORD print_deinit;
+
+		DWORD ai_list_hook_1;
+		DWORD ai_list_hook_2;
+		DWORD ai_list_get_type;
 	};
 
 	struct BlendData {
@@ -246,6 +254,8 @@ namespace Hooks
 	};
 
 	INT __stdcall MessageBoxHook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType);
+
+	VOID __fastcall PrintText(CHAR* str);
 
 	VOID Load();
 }

@@ -206,11 +206,11 @@ struct ConfigItems {
 		BOOL vSync;
 		InterpolationFilter interpolation;
 		UpscalingFilter upscaling;
-		INT scaleNx;
-		INT xSal;
-		INT eagle;
-		INT scaleHQ;
-		INT xBRz;
+		BYTE scaleNx;
+		BYTE xSal;
+		BYTE eagle;
+		BYTE scaleHQ;
+		BYTE xBRz;
 	} image;
 
 	struct {
@@ -265,7 +265,9 @@ struct WinMessage {
 enum SnapshotType {
 	SnapshotNone = 0,
 	SnapshotFile,
-	SnapshotClipboard
+	SnapshotClipboard,
+	SnapshotSurfaceFile,
+	SnapshotSurfaceClipboard
 };
 
 enum MenuType

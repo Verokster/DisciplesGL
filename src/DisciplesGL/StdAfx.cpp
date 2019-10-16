@@ -28,6 +28,8 @@
 
 HMODULE hDllModule;
 HANDLE hActCtx;
+UINT WM_SNAPSHOT;
+CHAR snapshotName[MAX_PATH];
 
 CREATEACTCTXA CreateActCtxC;
 RELEASEACTCTX ReleaseActCtxC;

@@ -41,7 +41,7 @@ uniform vec2 texSize;
 
 COMPAT_IN vec2 fTex;
 
-vec4 sample(sampler2D tex, vec2 coord)
+vec4 cubic(sampler2D tex, vec2 coord)
 {
 	vec2 uv = coord * texSize - 0.5;
 	vec2 texel = floor(uv) - 0.5;
@@ -83,5 +83,5 @@ vec4 sample(sampler2D tex, vec2 coord)
 }
 
 void main() {
-	FRAG_COLOR = sample(tex01, fTex);
+	FRAG_COLOR = cubic(tex01, fTex);
 } 

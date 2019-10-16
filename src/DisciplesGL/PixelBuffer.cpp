@@ -64,7 +64,6 @@ DWORD __forceinline ForwardCompare(DWORD* ptr1, DWORD* ptr2, DWORD slice, DWORD 
 		ADD ESI, EAX
 		ADD EDI, EAX
 
-		CLD
 		REPE CMPSD
 		JZ lbl_ret
 		INC ECX

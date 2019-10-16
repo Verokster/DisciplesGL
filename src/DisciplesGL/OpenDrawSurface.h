@@ -37,11 +37,11 @@ private:
 	StateBuffer* backBuffer;
 
 	VOID SwapBuffers();
+	VOID Flush();
 
 public:
 	OpenDraw* ddraw;
 	DisplayMode mode;
-	DWORD pitch;
 
 	OpenDrawClipper* attachedClipper;
 	OpenDrawPalette* attachedPalette;
@@ -59,8 +59,7 @@ public:
 
 	VOID CreateBuffer(DWORD, DWORD, DWORD, VOID*);
 	VOID ReleaseBuffer();
-	VOID Flush();
-
+	
 	// Inherited via IDrawSurface
 	ULONG __stdcall Release() override;
 	HRESULT __stdcall Blt(LPRECT, IDrawSurface7*, LPRECT, DWORD, LPDDBLTFX) override;

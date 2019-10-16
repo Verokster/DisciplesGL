@@ -464,7 +464,8 @@ VOID OpenDrawSurface::Flush()
 					QueryPerformanceCounter((LARGE_INTEGER*)&qp);
 					time = (DOUBLE)qp / time;
 
-					Sleep(DWORD(this->ddraw->flushTime - time));
+					INT sleep = INT(this->ddraw->flushTime - time);
+					Sleep(sleep > 0 ? *(DWORD*)&sleep : 0u);
 				}
 				else
 					Sleep(0);

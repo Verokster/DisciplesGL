@@ -511,7 +511,7 @@ namespace Window
 	VOID __fastcall FilterChanged(HWND hWnd, const CHAR* name, INT value)
 	{
 		Config::Set(CONFIG_WRAPPER, name, value);
-		
+
 		OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 		if (ddraw)
 		{
@@ -523,15 +523,91 @@ namespace Window
 	VOID __fastcall InterpolationChanged(HWND hWnd, InterpolationFilter filter)
 	{
 		config.image.interpolation = glVersion >= GL_VER_2_0 || filter < InterpolateHermite ? filter : InterpolateLinear;
-		CheckMenu(MenuInterpolate);
+
+		{
+			CHAR format[32];
+			LoadString(hDllModule, IDS_TEXT_INTERPOLATIN, format, sizeof(format));
+
+			DWORD id;
+			switch (config.image.interpolation)
+			{
+			case InterpolateLinear:
+				id = IDS_TEXT_FILT_LINEAR;
+				break;
+			case InterpolateHermite:
+				id = IDS_TEXT_FILT_HERMITE;
+				break;
+			case InterpolateCubic:
+				id = IDS_TEXT_FILT_CUBIC;
+				break;
+			default:
+				id = IDS_TEXT_FILT_OFF;
+				break;
+			}
+
+			CHAR str[32];
+			LoadString(hDllModule, id, str, sizeof(str));
+
+			CHAR text[64];
+			StrPrint(text, "%s: %s", format, str);
+			Hooks::PrintText(text);
+		}
+
 		FilterChanged(hWnd, "Interpolation", *(INT*)&config.image.interpolation);
+		CheckMenu(MenuInterpolate);
 	}
 
 	VOID __fastcall UpscalingChanged(HWND hWnd, UpscalingFilter filter)
 	{
 		config.image.upscaling = glVersion >= GL_VER_3_0 ? filter : UpscaleNone;
-		CheckMenu(MenuUpscale);
+
+		{
+			CHAR format[32];
+			LoadString(hDllModule, IDS_TEXT_UPSCALING, format, sizeof(format));
+
+			DWORD id, value;
+			switch (config.image.upscaling)
+			{
+			case UpscaleScaleNx:
+				id = IDS_TEXT_FILT_SCALENX;
+				value = config.image.scaleNx;
+				break;
+			case UpscaleEagle:
+				id = IDS_TEXT_FILT_EAGLE;
+				value = config.image.eagle;
+				break;
+			case UpscaleXSal:
+				id = IDS_TEXT_FILT_XSAL;
+				value = config.image.xSal;
+				break;
+			case UpscaleScaleHQ:
+				id = IDS_TEXT_FILT_SCALEHQ;
+				value = config.image.scaleHQ;
+				break;
+			case UpscaleXRBZ:
+				id = IDS_TEXT_FILT_XBRZ;
+				value = config.image.xBRz;
+				break;
+			default:
+				id = IDS_TEXT_FILT_NONE;
+				break;
+			}
+
+			CHAR str[32];
+			LoadString(hDllModule, id, str, sizeof(str));
+
+			CHAR text[64];
+
+			if (config.image.upscaling)
+				StrPrint(text, "%s: %s x%d", format, str, value);
+			else
+				StrPrint(text, "%s: %s", format, str);
+
+			Hooks::PrintText(text);
+		}
+
 		FilterChanged(hWnd, "Upscaling", *(INT*)&config.image.upscaling);
+		CheckMenu(MenuUpscale);
 	}
 
 	VOID __fastcall SelectScaleNxMode(HWND hWnd, DWORD value)
@@ -919,7 +995,44 @@ namespace Window
 		{
 			if (!(HIWORD(lParam) & KF_ALTDOWN))
 			{
-				if (config.keys.fpsCounter && config.keys.fpsCounter + VK_F1 - 1 == wParam)
+				if (wParam == VK_OEM_PLUS || wParam == VK_OEM_MINUS || wParam == VK_ADD || wParam == VK_SUBTRACT)
+				{
+					DWORD index = config.speed.enabled ? config.speed.index : 0;
+					DWORD oldIndex = index;
+					if (wParam == VK_ADD || wParam == VK_OEM_PLUS)
+					{
+						if (index != sizeof(speedList) / sizeof(BYTE) - 1)
+							++index;
+					}
+					else
+					{
+						if (index)
+							--index;
+					}
+
+					if (index != oldIndex)
+					{
+						config.speed.index = index;
+						config.speed.value = 0.1f * speedList[index];
+						config.speed.enabled = TRUE;
+						Config::Set(CONFIG_WRAPPER, "GameSpeed", *(INT*)&index);
+						Config::Set(CONFIG_WRAPPER, "SpeedEnabled", *(INT*)&config.speed.enabled);
+
+						{
+							CHAR str[32];
+							LoadString(hDllModule, IDS_SPEED, str, sizeof(str));
+
+							CHAR text[64];
+							StrPrint(text, "%s: %.1fx", str, config.speed.value);
+							Hooks::PrintText(text);
+						}
+
+						CheckMenu(MenuSpeed);
+					}
+
+					return NULL;
+				}
+				else if (config.keys.fpsCounter && config.keys.fpsCounter + VK_F1 - 1 == wParam)
 				{
 					switch (fpsState)
 					{
@@ -938,6 +1051,7 @@ namespace Window
 					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 					if (ddraw)
 						SetEvent(ddraw->hDrawEvent);
+
 					return NULL;
 				}
 				else if (config.keys.imageFilter && config.keys.imageFilter + VK_F1 - 1 == wParam)
@@ -992,6 +1106,19 @@ namespace Window
 				{
 					config.speed.enabled = !config.speed.enabled;
 					Config::Set(CONFIG_WRAPPER, "SpeedEnabled", *(INT*)&config.speed.enabled);
+
+					{
+						DWORD index = config.speed.enabled ? config.speed.index : 0;
+						FLOAT value = 0.1f * speedList[index];
+
+						CHAR str[32];
+						LoadString(hDllModule, IDS_SPEED, str, sizeof(str));
+
+						CHAR text[64];
+						StrPrint(text, "%s: %.1fx", str, value);
+						Hooks::PrintText(text);
+					}
+
 					CheckMenu(MenuSpeed);
 					return NULL;
 				}
@@ -1008,7 +1135,15 @@ namespace Window
 			}
 			else
 			{
-				if (config.version && wParam == VK_F10)
+				if (config.keys.snapshot && config.keys.snapshot + VK_F1 - 1 == wParam)
+				{
+					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+					if (ddraw)
+						ddraw->isTakeSnapshot = SnapshotSurfaceFile;
+
+					return NULL;
+				}
+				else if (config.version && wParam == VK_F10)
 					return NULL;
 			}
 
@@ -1099,6 +1234,21 @@ namespace Window
 
 						config.windowedMode = !config.windowedMode;
 						Config::Set(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", config.windowedMode);
+						
+						if (!config.windowedMode)
+						{
+							CHAR str1[32];
+							LoadString(hDllModule, IDS_RES_FULL_SCREEN, str1, sizeof(str1));
+
+							CHAR str2[32];
+							LoadString(hDllModule, config.borderlessReal ? IDS_MODE_BORDERLESS : IDS_MODE_EXCLUSIVE, str2, sizeof(str2));
+
+							CHAR text[64];
+							StrPrint(text, "%s: %s", str1, str2);
+
+							Hooks::PrintText(text);
+						}
+
 						CheckMenu(MenuWindowMode);
 					}
 					ddraw->RenderStart();
@@ -1111,7 +1261,18 @@ namespace Window
 			{
 				config.image.aspect = !config.image.aspect;
 				Config::Set(CONFIG_WRAPPER, "ImageAspect", config.image.aspect);
-				CheckMenu(MenuAspect);
+
+				{
+					CHAR str1[32];
+					LoadString(hDllModule, IDS_ASPECT_RATIO, str1, sizeof(str1));
+
+					CHAR str2[32];
+					LoadString(hDllModule, config.image.aspect ? IDS_ASPECT_KEEP : IDS_ASPECT_STRETCH, str2, sizeof(str2));
+
+					CHAR text[64];
+					StrPrint(text, "%s: %s", str1, str2);
+					Hooks::PrintText(text);
+				}
 
 				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 				if (ddraw)
@@ -1120,6 +1281,8 @@ namespace Window
 					SetEvent(ddraw->hDrawEvent);
 				}
 
+				CheckMenu(MenuAspect);
+
 				return NULL;
 			}
 
@@ -1127,11 +1290,24 @@ namespace Window
 			{
 				config.image.vSync = !config.image.vSync;
 				Config::Set(CONFIG_WRAPPER, "ImageVSync", config.image.vSync);
-				CheckMenu(MenuVSync);
+
+				{
+					CHAR str1[32];
+					LoadString(hDllModule, IDS_VSYNC, str1, sizeof(str1));
+
+					CHAR str2[32];
+					LoadString(hDllModule, config.image.vSync ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+
+					CHAR text[64];
+					StrPrint(text, "%s: %s", str1, str2);
+					Hooks::PrintText(text);
+				}
 
 				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 				if (ddraw)
 					SetEvent(ddraw->hDrawEvent);
+
+				CheckMenu(MenuVSync);
 
 				return NULL;
 			}
@@ -1238,16 +1414,29 @@ namespace Window
 				{
 					config.showBackBorder = !config.showBackBorder;
 					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.showBackBorder);
-					CheckMenu(MenuBorders);
 
 					if (config.resHooked)
 					{
+						{
+							CHAR str1[32];
+							LoadString(hDllModule, IDS_RES_BORDERS, str1, sizeof(str1));
+
+							CHAR str2[32];
+							LoadString(hDllModule, config.showBackBorder ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+
+							CHAR text[64];
+							StrPrint(text, "%s: %s", str1, str2);
+							Hooks::PrintText(text);
+						}
+
 						OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 						if (ddraw)
 							SetEvent(ddraw->hDrawEvent);
 					}
 					else
 						Main::ShowInfo(IDS_INFO_RESTART);
+
+					CheckMenu(MenuBorders);
 
 					return NULL;
 				}
@@ -1261,14 +1450,27 @@ namespace Window
 				{
 					config.menuZoomImage = !config.menuZoomImage;
 					Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.menuZoomImage);
-					CheckMenu(MenuStretch);
 
 					if (config.mode->width > *(DWORD*)&GAME_WIDTH && config.mode->height > *(DWORD*)&GAME_HEIGHT)
 						config.zoomImage = config.menuZoomImage;
 
+					{
+						CHAR str1[32];
+						LoadString(hDllModule, IDS_RES_STRETCH, str1, sizeof(str1));
+
+						CHAR str2[32];
+						LoadString(hDllModule, config.menuZoomImage ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+
+						CHAR text[64];
+						StrPrint(text, "%s: %s", str1, str2);
+						Hooks::PrintText(text);
+					}
+
 					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 					if (ddraw)
 						SetEvent(ddraw->hDrawEvent);
+
+					CheckMenu(MenuStretch);
 
 					return NULL;
 				}
@@ -1298,6 +1500,19 @@ namespace Window
 				{
 					config.fastAI = !config.fastAI;
 					Config::Set(CONFIG_WRAPPER, "FastAI", config.fastAI);
+
+					{
+						CHAR str1[32];
+						LoadString(hDllModule, IDS_FAST_AI, str1, sizeof(str1));
+
+						CHAR str2[32];
+						LoadString(hDllModule, config.fastAI ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+
+						CHAR text[64];
+						StrPrint(text, "%s: %s", str1, str2);
+						Hooks::PrintText(text);
+					}
+
 					CheckMenu(MenuFastAI);
 				}
 
@@ -1308,6 +1523,19 @@ namespace Window
 			{
 				config.alwaysActive = !config.alwaysActive;
 				Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
+
+				{
+					CHAR str1[32];
+					LoadString(hDllModule, IDS_ALWAYS_ACTIVE, str1, sizeof(str1));
+
+					CHAR str2[32];
+					LoadString(hDllModule, config.alwaysActive ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+
+					CHAR text[64];
+					StrPrint(text, "%s: %s", str1, str2);
+					Hooks::PrintText(text);
+				}
+
 				CheckMenu(MenuActive);
 				return NULL;
 			}
@@ -1321,6 +1549,19 @@ namespace Window
 					timeEndPeriod(1);
 
 				Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
+
+				{
+					CHAR str1[32];
+					LoadString(hDllModule, IDS_PATCH_CPU, str1, sizeof(str1));
+
+					CHAR str2[32];
+					LoadString(hDllModule, config.coldCPU ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+
+					CHAR text[64];
+					StrPrint(text, "%s: %s", str1, str2);
+					Hooks::PrintText(text);
+				}
+
 				Window::CheckMenu(MenuCpu);
 				return NULL;
 			}
@@ -1337,20 +1578,29 @@ namespace Window
 			}
 
 			case IDM_SCR_BMP:
-			{
-				config.snapshot.type = ImageBMP;
-				Config::Set(CONFIG_WRAPPER, "ScreenshotType", *(INT*)&config.snapshot.type);
-
-				Window::CheckMenu(MenuSnapshotType);
-				return NULL;
-			}
-
 			case IDM_SCR_PNG:
 			{
-				config.snapshot.type = ImagePNG;
-				Config::Set(CONFIG_WRAPPER, "ScreenshotType", *(INT*)&config.snapshot.type);
+				ImageType type = wParam == IDM_SCR_PNG ? ImagePNG : ImageBMP;
+				if (config.snapshot.type != type)
+				{
+					config.snapshot.type = type;
+					Config::Set(CONFIG_WRAPPER, "ScreenshotType", *(INT*)&config.snapshot.type);
 
-				Window::CheckMenu(MenuSnapshotType);
+					{
+						CHAR str1[32];
+						LoadString(hDllModule, IDS_SCR_TYPE, str1, sizeof(str1));
+
+						CHAR str2[32];
+						LoadString(hDllModule, config.snapshot.type == ImagePNG ? IDS_SCR_PNG : IDS_SCR_BMP, str2, sizeof(str2));
+
+						CHAR text[64];
+						StrPrint(text, "%s: %s", str1, str2);
+						Hooks::PrintText(text);
+					}
+
+					Window::CheckMenu(MenuSnapshotType);
+				}
+
 				return NULL;
 			}
 
@@ -1401,17 +1651,31 @@ namespace Window
 					DWORD index = wParam - IDM_SPEED_1_0;
 					if (index != config.speed.index || !config.speed.enabled)
 					{
+						FLOAT value;
 						if (index)
 						{
 							config.speed.index = index;
 							config.speed.value = 0.1f * speedList[index];
 							config.speed.enabled = TRUE;
 							Config::Set(CONFIG_WRAPPER, "GameSpeed", *(INT*)&index);
+							value = config.speed.value;
 						}
 						else
+						{
 							config.speed.enabled = FALSE;
+							value = 1.0f;
+						}
 
 						Config::Set(CONFIG_WRAPPER, "SpeedEnabled", *(INT*)&config.speed.enabled);
+
+						{
+							CHAR str[32];
+							LoadString(hDllModule, IDS_SPEED, str, sizeof(str));
+
+							CHAR text[64];
+							StrPrint(text, "%s: %.1fx", str, value);
+							Hooks::PrintText(text);
+						}
 
 						CheckMenu(MenuSpeed);
 					}
@@ -1433,20 +1697,69 @@ namespace Window
 				}
 				else if (wParam >= IDM_LOCALE_DEFAULT && wParam <= IDM_LOCALE_DEFAULT + config.locales.count)
 				{
-					config.locales.current.id = config.locales.list[wParam - IDM_LOCALE_DEFAULT];
-					Config::UpdateLocale();
-					Config::Set(CONFIG_WRAPPER, "Locale", *(INT*)&config.locales.current.id);
-					CheckMenu(MenuLocale);
+					LCID id = config.locales.list[wParam - IDM_LOCALE_DEFAULT];
+					if (config.locales.current.id != id)
+					{
+						config.locales.current.id = id;
+						Config::Set(CONFIG_WRAPPER, "Locale", *(INT*)&config.locales.current.id);
+						Config::UpdateLocale();
+
+						{
+							CHAR text[160];
+							CHAR str1[32];
+							LoadString(hDllModule, IDS_LOCALE, str1, sizeof(str1));
+
+							if (config.locales.current.id)
+							{
+
+								CHAR name[64];
+								GetLocaleInfo(config.locales.current.id, LOCALE_SENGLISHLANGUAGENAME, name, sizeof(name));
+
+								CHAR country[64];
+								GetLocaleInfo(config.locales.current.id, LOCALE_SENGLISHCOUNTRYNAME, country, sizeof(country));
+
+								StrPrint(text, "%s: %s (%s)", str1, name, country);
+							}
+							else
+							{
+								CHAR str2[32];
+								LoadString(hDllModule, IDS_LOCALE_DEFAULT, str2, sizeof(str2));
+
+								StrPrint(text, "%s: %s", str1, str2);
+							}
+
+							Hooks::PrintText(text);
+						}
+
+						CheckMenu(MenuLocale);
+					}
 
 					return NULL;
 				}
 				else if (wParam > IDM_MSG_0 && wParam <= IDM_MSG_30)
 				{
-					config.msgTimeScale.time = wParam - IDM_MSG_0;
-					config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
+					DWORD time = wParam - IDM_MSG_0;
+					if (config.msgTimeScale.time != time)
+					{
+						config.msgTimeScale.time = time;
+						config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 
-					Config::Set(CONFIG_WRAPPER, "MessageTimeout", *(INT*)&config.msgTimeScale.time);
-					CheckMenu(MenuMsgTimeScale);
+						Config::Set(CONFIG_WRAPPER, "MessageTimeout", *(INT*)&config.msgTimeScale.time);
+
+						{
+							CHAR str1[32];
+							LoadString(hDllModule, IDS_MSG, str1, sizeof(str1));
+
+							CHAR str2[32];
+							LoadString(hDllModule, IDS_MSG_SECONDS, str2, sizeof(str2));
+
+							CHAR text[64];
+							StrPrint(text, "%s: %d %s", str1, config.msgTimeScale.time, str2);
+							Hooks::PrintText(text);
+						}
+
+						CheckMenu(MenuMsgTimeScale);
+					}
 
 					return NULL;
 				}
@@ -1466,6 +1779,18 @@ namespace Window
 		}
 
 		default:
+			if (uMsg == WM_SNAPSHOT)
+			{
+				CHAR str[32];
+				LoadString(hDllModule, IDS_SCR_FILE, str, sizeof(str));
+
+				CHAR text[MAX_PATH + 36];
+				StrPrint(text, "%s: %s", str, snapshotName);
+				Hooks::PrintText(text);
+
+				return NULL;
+			}
+
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
 	}

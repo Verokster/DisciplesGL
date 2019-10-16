@@ -38,7 +38,7 @@ uniform vec2 texSize;
 
 COMPAT_IN vec4 fTex;
 
-vec4 sample(sampler2D tex, vec2 coord)
+vec4 cubic(sampler2D tex, vec2 coord)
 {
 	vec2 uv = coord * texSize - 0.5;
 	vec2 texel = floor(uv) - 0.5;
@@ -79,8 +79,19 @@ vec4 sample(sampler2D tex, vec2 coord)
 		x.a * y.a * COMPAT_TEXTURE(tex, (texel + vec2(3.0, 3.0)) / texSize);
 }
 
+vec4 hermite(sampler2D tex, vec2 coord)
+{
+	vec2 uv = coord * texSize - 0.5;
+	vec2 texel = floor(uv) + 0.5;
+	vec2 t = fract(uv);
+
+	uv = texel + t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+
+	return COMPAT_TEXTURE(tex, uv / texSize);
+}
+
 void main() {
-	vec4 color01 = sample(tex01, fTex.rg);
-	vec4 color02 = sample(tex02, fTex.ba);
+	vec4 color01 = cubic(tex01, fTex.rg);
+	vec4 color02 = hermite(tex02, fTex.ba);
 	FRAG_COLOR = mix(color02, color01, color01.a);
-} 
+}

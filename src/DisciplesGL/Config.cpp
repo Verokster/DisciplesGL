@@ -141,6 +141,8 @@ namespace Config
 
 	BOOL __fastcall Load()
 	{
+		WM_SNAPSHOT = RegisterWindowMessage("SCREENSHOT");
+
 		HMODULE hModule = GetModuleHandle(NULL);
 
 		GetModuleFileName(hModule, config.file, MAX_PATH - 1);
@@ -270,7 +272,6 @@ namespace Config
 			config.alwaysActive = TRUE;
 			Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
 
-			config.coldCPU = TRUE;
 			Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
 
 			if (!config.version)
@@ -291,8 +292,8 @@ namespace Config
 			config.locales.current.id = GetUserDefaultLCID();
 			Config::Set(CONFIG_WRAPPER, "Locale", *(INT*)&config.locales.current.id);
 
-			config.msgTimeScale.time = MSG_TIMEOUT;
-			config.msgTimeScale.value = 1.0f;
+			config.msgTimeScale.time = 15;
+			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 			Config::Set(CONFIG_WRAPPER, "MessageTimeout", config.msgTimeScale.time);
 
 			config.fastAI = FALSE;
@@ -430,7 +431,7 @@ namespace Config
 			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", TRUE);
 
 			config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", TRUE);
-			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", TRUE);
+			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
 
 			if (!config.version)
 				config.wideAllowed = (BOOL)Config::Get(CONFIG_WRAPPER, "WideBattle", FALSE);
@@ -452,7 +453,7 @@ namespace Config
 
 			config.locales.current.id = (LCID)Config::Get(CONFIG_WRAPPER, "Locale", (INT)GetUserDefaultLCID());
 
-			value = Config::Get(CONFIG_WRAPPER, "MessageTimeout", MSG_TIMEOUT);
+			value = Config::Get(CONFIG_WRAPPER, "MessageTimeout", 15);
 			if (value < 1)
 				value = 1;
 
