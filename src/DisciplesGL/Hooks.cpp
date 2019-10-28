@@ -1578,24 +1578,24 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall Pixel_BlitBlendAvarage(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size, BYTE flag, DWORD colorKey)
+	VOID __stdcall Pixel_BlitBlendAvarage(DWORD* src, LONG srcPitch, POINT* srcPos, DWORD* dst, LONG dstPitch, POINT* dstPos, SIZE* size, BYTE flag, DWORD colorKey)
 	{
-		if (!flag || flag == 0xFF || !dstData)
+		if (!flag || flag == 0xFF || !dst)
 			return;
 
 		colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
 		srcPitch >>= 1;
 		dstPitch >>= 1;
 
-		srcData += srcPitch * srcPos->y + srcPos->x;
-		dstData += dstPitch * dstPos->y + dstPos->x;
+		src += srcPitch * srcPos->y + srcPos->x;
+		dst += dstPitch * dstPos->y + dstPos->x;
+
+		srcPitch -= size->cx;
+		dstPitch -= size->cx;
 
 		DWORD height = size->cy;
 		while (height--)
 		{
-			DWORD* src = srcData;
-			DWORD* dst = dstData;
-
 			DWORD width = size->cx;
 			while (width--)
 			{
@@ -1620,28 +1620,28 @@ namespace Hooks
 				++dst;
 			}
 
-			srcData += srcPitch;
-			dstData += dstPitch;
+			src += srcPitch;
+			dst += dstPitch;
 		}
 	}
 
-	VOID __stdcall Pixel_Add(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size)
+	VOID __stdcall Pixel_Add(DWORD* src, LONG srcPitch, POINT* srcPos, DWORD* dst, LONG dstPitch, POINT* dstPos, SIZE* size)
 	{
-		if (!dstData)
+		if (!dst)
 			return;
 
 		srcPitch >>= 1;
 		dstPitch >>= 1;
 
-		srcData += srcPitch * srcPos->y + srcPos->x;
-		dstData += dstPitch * dstPos->y + dstPos->x;
+		src += srcPitch * srcPos->y + srcPos->x;
+		dst += dstPitch * dstPos->y + dstPos->x;
+
+		srcPitch -= size->cx;
+		dstPitch -= size->cx;
 
 		DWORD height = size->cy;
 		while (height--)
 		{
-			DWORD* src = srcData;
-			DWORD* dst = dstData;
-
 			DWORD width = size->cx;
 			while (width--)
 			{
@@ -1663,28 +1663,28 @@ namespace Hooks
 				*dst++ = r | g | b | 0xFF000000;
 			}
 
-			srcData += srcPitch;
-			dstData += dstPitch;
+			src += srcPitch;
+			dst += dstPitch;
 		}
 	}
 
-	VOID __stdcall Pixel_Sub(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size)
+	VOID __stdcall Pixel_Sub(DWORD* src, LONG srcPitch, POINT* srcPos, DWORD* dst, LONG dstPitch, POINT* dstPos, SIZE* size)
 	{
-		if (!dstData)
+		if (!dst)
 			return;
 
 		srcPitch >>= 1;
 		dstPitch >>= 1;
 
-		srcData += srcPitch * srcPos->y + srcPos->x;
-		dstData += dstPitch * dstPos->y + dstPos->x;
+		src += srcPitch * srcPos->y + srcPos->x;
+		dst += dstPitch * dstPos->y + dstPos->x;
+
+		srcPitch -= size->cx;
+		dstPitch -= size->cx;
 
 		DWORD height = size->cy;
 		while (height--)
 		{
-			DWORD* src = srcData;
-			DWORD* dst = dstData;
-
 			DWORD width = size->cx;
 			while (width--)
 			{
@@ -1706,8 +1706,8 @@ namespace Hooks
 				*dst++ = r | g | b | 0xFF000000;
 			}
 
-			srcData += srcPitch;
-			dstData += dstPitch;
+			src += srcPitch;
+			dst += dstPitch;
 		}
 	}
 
@@ -1804,23 +1804,22 @@ namespace Hooks
 	{
 		colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
 		pitch >>= 1;
+		pitch -= size->cx;
 
 		DWORD height = size->cy;
 		while (height--)
 		{
-			DWORD* ptr = data;
-
 			DWORD width = size->cx;
 			while (width--)
 			{
-				if ((*ptr & COLORKEY_AND) == colorKey)
-					*ptr = 0;
+				if ((*data & COLORKEY_AND) == colorKey)
+					*data = 0;
 				else if (flag)
 				{
-					DWORD r = *ptr & 0xFF;
-					DWORD g = (*ptr >> 8) & 0xFF;
-					DWORD b = (*ptr >> 16) & 0xFF;
-					DWORD a = (*ptr >> 24) & 0xFF;
+					DWORD r = *data & 0xFF;
+					DWORD g = (*data >> 8) & 0xFF;
+					DWORD b = (*data >> 16) & 0xFF;
+					DWORD a = (*data >> 24) & 0xFF;
 
 					if (r + g + b > 56)
 					{
@@ -1836,17 +1835,13 @@ namespace Hooks
 						if (b > 0xFF)
 							b = 0xFF;
 
-						a <<= 1;
-						if (a > 0xFF)
-							a = 0xFF;
-
-						*ptr = r | (g << 8) | (b << 16) | (a << 24);
+						*data = r | (g << 8) | (b << 16) | (a << 24);
 					}
 					else
-						*ptr = 0;
+						*data = 0;
 				}
 
-				++ptr;
+				++data;
 			}
 
 			data += pitch;

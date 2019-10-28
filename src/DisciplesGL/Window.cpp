@@ -68,10 +68,8 @@ namespace Window
 	{
 		INT count = GetMenuItemCount(config.menu);
 		for (INT i = 0; i < count; ++i)
-		{
 			if (GetMenuByChildID(config.menu, mData, i))
 				return TRUE;
-		}
 
 		MemoryZero(mData, sizeof(MenuItemData));
 		return FALSE;
@@ -1001,7 +999,7 @@ namespace Window
 					DWORD oldIndex = index;
 					if (wParam == VK_ADD || wParam == VK_OEM_PLUS)
 					{
-						if (index != sizeof(speedList) / sizeof(BYTE) - 1)
+						if (index != MAX_SPEED_INDEX - 1)
 							++index;
 					}
 					else
@@ -1013,7 +1011,7 @@ namespace Window
 					if (index != oldIndex)
 					{
 						config.speed.index = index;
-						config.speed.value = 0.1f * speedList[index];
+						config.speed.value = 0.1f * (index + 10);
 						config.speed.enabled = TRUE;
 						Config::Set(CONFIG_WRAPPER, "GameSpeed", *(INT*)&index);
 						Config::Set(CONFIG_WRAPPER, "SpeedEnabled", *(INT*)&config.speed.enabled);
@@ -1029,8 +1027,6 @@ namespace Window
 
 						CheckMenu(MenuSpeed);
 					}
-
-					return NULL;
 				}
 				else if (config.keys.fpsCounter && config.keys.fpsCounter + VK_F1 - 1 == wParam)
 				{
@@ -1109,7 +1105,7 @@ namespace Window
 
 					{
 						DWORD index = config.speed.enabled ? config.speed.index : 0;
-						FLOAT value = 0.1f * speedList[index];
+						FLOAT value = 0.1f * (index + 10);
 
 						CHAR str[32];
 						LoadString(hDllModule, IDS_SPEED, str, sizeof(str));
@@ -1655,7 +1651,7 @@ namespace Window
 						if (index)
 						{
 							config.speed.index = index;
-							config.speed.value = 0.1f * speedList[index];
+							config.speed.value = 0.1f * (index + 10);
 							config.speed.enabled = TRUE;
 							Config::Set(CONFIG_WRAPPER, "GameSpeed", *(INT*)&index);
 							value = config.speed.value;

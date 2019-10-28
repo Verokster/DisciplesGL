@@ -73,8 +73,6 @@ const Resolution resolutionsList[] = {
 	7680, 4320
 };
 
-const BYTE speedList[] = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 };
-
 namespace Config
 {
 	BOOL __stdcall EnumLocalesCount(LPTSTR lpLocaleString)
@@ -263,7 +261,7 @@ namespace Config
 			Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderlessMode);
 
 			config.speed.index = 5;
-			config.speed.value = 0.1f * speedList[config.speed.index];
+			config.speed.value = 0.1f * (config.speed.index + 10);
 			Config::Set(CONFIG_WRAPPER, "GameSpeed", config.speed.index);
 
 			config.speed.enabled = TRUE;
@@ -424,9 +422,9 @@ namespace Config
 
 			value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
 			config.speed.index = *(DWORD*)&value;
-			if (config.speed.index >= sizeof(speedList) / sizeof(BYTE))
+			if (config.speed.index >= MAX_SPEED_INDEX)
 				config.speed.index = 5;
-			config.speed.value = 0.1f * speedList[config.speed.index];
+			config.speed.value = 0.1f * (config.speed.index + 10);
 
 			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", TRUE);
 

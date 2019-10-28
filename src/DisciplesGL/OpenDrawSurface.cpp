@@ -336,6 +336,19 @@ VOID OpenDrawSurface::Flush()
 	}
 	else
 	{
+		BOOL redraw = FALSE;
+		if (surface->drawEnabled)
+		{
+			surface->indexBuffer->isZoomed = Config::IsZoomed();
+			if (config.showBackBorder && config.isBorder)
+			{
+				if (!surface->indexBuffer->isBorder)
+					redraw = surface->indexBuffer->isBorder = TRUE;
+			}
+			else
+				surface->indexBuffer->isBorder = FALSE;
+		}
+
 		BOOL isSync = !config.isAiThinking && !config.isWaiting && config.coldCPU;
 		surface->drawEnabled = isSync || config.singleThread || this->drawEnabled;
 		if (surface->drawEnabled)
@@ -352,16 +365,6 @@ VOID OpenDrawSurface::Flush()
 
 				this->drawEnabled = FALSE;
 
-				BOOL redraw = FALSE;
-				surface->indexBuffer->isZoomed = Config::IsZoomed();
-				if (config.showBackBorder && config.isBorder)
-				{
-					if (!surface->indexBuffer->isBorder)
-						redraw = surface->indexBuffer->isBorder = TRUE;
-				}
-				else
-					surface->indexBuffer->isBorder = FALSE;
-
 				if (redraw)
 				{
 					Size* size = surface->indexBuffer->isZoomed ? &config.zoomed : (Size*)config.mode;
@@ -373,15 +376,14 @@ VOID OpenDrawSurface::Flush()
 					DWORD left = (this->mode.width - size->width) >> 1;
 
 					DWORD sctPitch = surface->mode.width;
-					DWORD* srcData = (DWORD*)surface->indexBuffer->data + top * sctPitch + left;
-					DWORD* dstData = (DWORD*)this->backBuffer->data;
+					DWORD* src = (DWORD*)surface->indexBuffer->data + top * sctPitch + left;
+					sctPitch -= size->width;
+
+					DWORD* dst = (DWORD*)this->backBuffer->data;
 
 					DWORD height = size->height;
 					do
 					{
-						DWORD* src = srcData;
-						DWORD* dst = dstData;
-
 						DWORD width = size->width;
 						do
 						{
@@ -411,8 +413,7 @@ VOID OpenDrawSurface::Flush()
 							++dst;
 						} while (--width);
 
-						srcData += sctPitch;
-						dstData += size->width;
+						src += sctPitch;
 					} while (--height);
 
 					this->backBuffer->isZoomed = surface->indexBuffer->isZoomed;
@@ -436,17 +437,17 @@ VOID OpenDrawSurface::Flush()
 						DWORD left = (this->mode.width - size->width) >> 1;
 
 						DWORD sctPitch = surface->mode.width;
-						DWORD* srcData = (DWORD*)surface->indexBuffer->data + top * sctPitch + left;
-						DWORD* dstData = (DWORD*)this->backBuffer->data;
+						DWORD* src = (DWORD*)surface->indexBuffer->data + top * sctPitch + left;
+						DWORD* dst = (DWORD*)this->backBuffer->data;
 
 						DWORD width = size->width << 2;
 						DWORD height = size->height;
 						do
 						{
-							MemoryCopy(dstData, srcData, width);
+							MemoryCopy(dst, src, width);
 
-							srcData += sctPitch;
-							dstData += size->width;
+							src += sctPitch;
+							dst += size->width;
 						} while (--height);
 
 						this->backBuffer->isZoomed = surface->indexBuffer->isZoomed;
@@ -617,7 +618,7 @@ HRESULT __stdcall OpenDrawSurface::GetPalette(IDrawPalette** lplpDDPalette)
 HRESULT __stdcall OpenDrawSurface::SetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDColorKey)
 {
 	// 8 - DDCKEY_SRCBLT
-	if (lpDDColorKey)
+	if (lpDDColorKey && lpDDColorKey->dwColorSpaceLowValue)
 	{
 		DWORD colorKey = lpDDColorKey->dwColorSpaceLowValue;
 		this->colorKey.dwColorSpaceLowValue = colorKey;
@@ -714,47 +715,47 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 
 		if (config.bpp32Hooked)
 		{
-			DWORD* source = (DWORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
-			DWORD* destination = (DWORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
+			DWORD* src = (DWORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
+			DWORD* dst = (DWORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
 			if (Hooks::isBink)
 			{
 				Hooks::isBink = FALSE;
 
+				sWidth -= width;
+				dWidth -= width;
+
 				do
 				{
-					DWORD* src = source;
-					DWORD* dst = destination;
-
 					DWORD cWidth = width;
 					do
 						*dst++ = *src++ | 0xFF000000;
 					while (--cWidth);
 
-					source += sWidth;
-					destination += dWidth;
+					src += sWidth;
+					dst += dWidth;
 				} while (--height);
 			}
 			else
 			{
 				do
 				{
-					MemoryCopy(destination, source, width * sizeof(DWORD));
-					source += sWidth;
-					destination += dWidth;
+					MemoryCopy(dst, src, width * sizeof(DWORD));
+					src += sWidth;
+					dst += dWidth;
 				} while (--height);
 			}
 		}
 		else
 		{
-			WORD* source = (WORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
-			WORD* destination = (WORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
+			WORD* src = (WORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
+			WORD* dst = (WORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
 			do
 			{
-				MemoryCopy(destination, source, width * sizeof(WORD));
-				source += sWidth;
-				destination += dWidth;
+				MemoryCopy(dst, src, width * sizeof(WORD));
+				src += sWidth;
+				dst += dWidth;
 			} while (--height);
 		}
 	}
@@ -797,76 +798,77 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 
 		if (config.bpp32Hooked)
 		{
-			DWORD* source = (DWORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
-			DWORD* destination = (DWORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
+			DWORD* src = (DWORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
+			DWORD* dst = (DWORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
 			DWORD colorKey = surface->colorKey.dwColorSpaceHighValue;
 			if (colorKey)
 			{
+				sWidth -= width;
+				dWidth -= width;
+
 				do
 				{
-					DWORD* src = source;
-					DWORD* dest = destination;
-
 					DWORD count = width;
 					do
 					{
 						if ((*src & 0x00F8FCF8) != colorKey)
-							*dest = *src;
+							*dst = *src;
 
 						++src;
-						++dest;
+						++dst;
 					} while (--count);
 
-					source += sWidth;
-					destination += dWidth;
+					src += sWidth;
+					dst += dWidth;
 				} while (--height);
 			}
 			else if (width == this->mode.width && width == surface->mode.width)
-				MemoryCopy(destination, source, width * height * sizeof(DWORD));
+				MemoryCopy(dst, src, width * height * sizeof(DWORD));
 			else
 				do
 				{
-					MemoryCopy(destination, source, width * sizeof(DWORD));
-					source += sWidth;
-					destination += dWidth;
+					MemoryCopy(dst, src, width * sizeof(DWORD));
+
+					src += sWidth;
+					dst += dWidth;
 				} while (--height);
 		}
 		else
 		{
-			WORD* source = (WORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
-			WORD* destination = (WORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
+			WORD* src = (WORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
+			WORD* dst = (WORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
 			WORD colorKey = LOWORD(surface->colorKey.dwColorSpaceLowValue);
 			if (colorKey)
 			{
 				do
 				{
-					WORD* src = source;
-					WORD* dest = destination;
+					sWidth -= width;
+					dWidth -= width;
 
 					DWORD count = width;
 					do
 					{
 						if (*src != colorKey)
-							*dest = *src;
+							*dst = *src;
 
 						++src;
-						++dest;
+						++dst;
 					} while (--count);
 
-					source += sWidth;
-					destination += dWidth;
+					src += sWidth;
+					dst += dWidth;
 				} while (--height);
 			}
 			else if (width == this->mode.width && width == surface->mode.width)
-				MemoryCopy(destination, source, width * height * sizeof(WORD));
+				MemoryCopy(dst, src, width * height * sizeof(WORD));
 			else
 				do
 				{
-					MemoryCopy(destination, source, width * sizeof(WORD));
-					source += sWidth;
-					destination += dWidth;
+					MemoryCopy(dst, src, width * sizeof(WORD));
+					src += sWidth;
+					dst += dWidth;
 				} while (--height);
 		}
 	}

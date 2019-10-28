@@ -38,6 +38,8 @@
 
 #define MSG_TIMEOUT 10
 
+#define MAX_SPEED_INDEX 21
+
 extern LONG GAME_WIDTH;
 extern LONG GAME_HEIGHT;
 
@@ -47,7 +49,6 @@ extern FLOAT GAME_HEIGHT_FLOAT;
 extern ConfigItems config;
 extern DisplayMode modesList[4];
 extern const Resolution resolutionsList[28];
-extern const BYTE speedList[21];
 
 namespace Config
 {

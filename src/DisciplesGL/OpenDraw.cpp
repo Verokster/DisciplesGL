@@ -1306,18 +1306,20 @@ VOID OpenDraw::RenderMid()
 											{
 												borderStatus = stateBuffer->isBorder;
 
+												ShaderProgram* program;
 												switch (state.interpolation)
 												{
 												case InterpolateHermite:
-													UseShaderProgram(stateBuffer->isBorder ? &shaders.hermite_double : &shaders.hermite, texSize);
+													program = stateBuffer->isBorder ? &shaders.hermite_double : &shaders.hermite;
 													break;
 												case InterpolateCubic:
-													UseShaderProgram(stateBuffer->isBorder ? &shaders.cubic_double : &shaders.cubic, texSize);
+													program = stateBuffer->isBorder ? &shaders.cubic_double : &shaders.cubic;
 													break;
 												default:
-													UseShaderProgram(stateBuffer->isBorder ? &shaders.linear_double : &shaders.linear, texSize);
+													program = stateBuffer->isBorder ? &shaders.linear_double : &shaders.linear;
 													break;
 												}
+												UseShaderProgram(program, texSize);
 
 												if (state.flags)
 												{
