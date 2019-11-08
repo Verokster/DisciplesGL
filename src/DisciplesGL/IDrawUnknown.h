@@ -37,6 +37,8 @@ public:
 	VOID* operator new(size_t);
 	VOID operator delete(VOID*);
 
+	IDrawUnknown(IDrawUnknown** list);
+
 	virtual HRESULT __stdcall QueryInterface(REFIID, LPVOID*);
 	virtual ULONG __stdcall AddRef();
 	virtual ULONG __stdcall Release();

@@ -356,35 +356,43 @@ namespace Window
 				EnableMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_UNCHECKED);
 			}
-			else if (!config.resHooked || !config.zoomable)
+			else if (!config.resHooked || !config.zoom.allowed)
 			{
 				EnableMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_ENABLED);
-				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | (config.showBackBorder ? MF_CHECKED : MF_UNCHECKED));
+				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | (config.border.enabled ? MF_CHECKED : MF_UNCHECKED));
 			}
 			else
 			{
 				EnableMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_ENABLED);
-				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | (config.showBackBorder ? MF_CHECKED : MF_UNCHECKED));
+				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | (config.border.enabled ? MF_CHECKED : MF_UNCHECKED));
 			}
 		}
 		break;
 
 		case MenuStretch:
 		{
-			if (config.version)
+			MenuItemData mData;
+			mData.childId = IDM_STRETCH_OFF;
+			if (GetMenuByChildID(&mData))
 			{
-				EnableMenuItem(config.menu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-				CheckMenuItem(config.menu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_UNCHECKED);
-			}
-			else if (!config.resHooked || !config.zoomable)
-			{
-				EnableMenuItem(config.menu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-				CheckMenuItem(config.menu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_UNCHECKED);
-			}
-			else
-			{
-				EnableMenuItem(config.menu, IDM_RES_STRETCH, MF_BYCOMMAND | MF_ENABLED);
-				CheckMenuItem(config.menu, IDM_RES_STRETCH, MF_BYCOMMAND | (config.menuZoomImage ? MF_CHECKED : MF_UNCHECKED));
+				if (config.version || !config.resHooked || !config.zoom.allowed)
+				{
+					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
+					CheckMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_UNCHECKED);
+				}
+				else
+				{
+					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_ENABLED);
+					CheckMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (config.zoom.menu ? MF_CHECKED : MF_UNCHECKED));
+
+					UINT check = IDM_STRETCH_OFF + (config.zoom.menu ? config.zoom.value : 0);
+					UINT count = (UINT)GetMenuItemCount(mData.hMenu);
+					for (UINT i = 0; i < count; ++i)
+					{
+						UINT id = GetMenuItemID(mData.hMenu, i);
+						CheckMenuItem(mData.hMenu, i, MF_BYPOSITION | (id == check ? MF_CHECKED : MF_UNCHECKED));
+					}
+				}
 			}
 		}
 		break;
@@ -397,14 +405,14 @@ namespace Window
 
 		case MenuWindowType:
 		{
-			CheckMenuItem(config.menu, IDM_MODE_BORDERLESS, MF_BYCOMMAND | (config.borderlessMode ? MF_CHECKED : MF_UNCHECKED));
-			CheckMenuItem(config.menu, IDM_MODE_EXCLUSIVE, MF_BYCOMMAND | (!config.borderlessMode ? MF_CHECKED : MF_UNCHECKED));
+			CheckMenuItem(config.menu, IDM_MODE_BORDERLESS, MF_BYCOMMAND | (config.borderless.mode ? MF_CHECKED : MF_UNCHECKED));
+			CheckMenuItem(config.menu, IDM_MODE_EXCLUSIVE, MF_BYCOMMAND | (!config.borderless.mode ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
 		case MenuFastAI:
 		{
-			CheckMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (config.fastAI ? MF_CHECKED : MF_UNCHECKED));
+			CheckMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (config.ai.fast ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
@@ -422,8 +430,8 @@ namespace Window
 
 		case MenuBattle:
 		{
-			EnableMenuItem(config.menu, IDM_MODE_WIDEBATTLE, MF_BYCOMMAND | (config.wideHooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-			CheckMenuItem(config.menu, IDM_MODE_WIDEBATTLE, MF_BYCOMMAND | (config.wideAllowed ? MF_CHECKED : MF_UNCHECKED));
+			EnableMenuItem(config.menu, IDM_MODE_WIDEBATTLE, MF_BYCOMMAND | (config.wide.hooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_MODE_WIDEBATTLE, MF_BYCOMMAND | (config.wide.allowed ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
@@ -608,35 +616,35 @@ namespace Window
 		CheckMenu(MenuUpscale);
 	}
 
-	VOID __fastcall SelectScaleNxMode(HWND hWnd, DWORD value)
+	VOID __fastcall SelectScaleNxMode(HWND hWnd, BYTE value)
 	{
 		config.image.scaleNx = value;
 		Config::Set(CONFIG_WRAPPER, "ScaleNx", *(INT*)&config.image.scaleNx);
 		UpscalingChanged(hWnd, UpscaleScaleNx);
 	}
 
-	VOID __fastcall SelectXSalMode(HWND hWnd, INT value)
+	VOID __fastcall SelectXSalMode(HWND hWnd, BYTE value)
 	{
 		config.image.xSal = value;
 		Config::Set(CONFIG_WRAPPER, "XSal", *(INT*)&config.image.xSal);
 		UpscalingChanged(hWnd, UpscaleXSal);
 	}
 
-	VOID __fastcall SelectEagleMode(HWND hWnd, DWORD value)
+	VOID __fastcall SelectEagleMode(HWND hWnd, BYTE value)
 	{
 		config.image.eagle = value;
 		Config::Set(CONFIG_WRAPPER, "Eagle", *(INT*)&config.image.eagle);
 		UpscalingChanged(hWnd, UpscaleEagle);
 	}
 
-	VOID __fastcall SelectScaleHQMode(HWND hWnd, DWORD value)
+	VOID __fastcall SelectScaleHQMode(HWND hWnd, BYTE value)
 	{
 		config.image.scaleHQ = value;
 		Config::Set(CONFIG_WRAPPER, "ScaleHQ", *(INT*)&config.image.scaleHQ);
 		UpscalingChanged(hWnd, UpscaleScaleHQ);
 	}
 
-	VOID __fastcall SelectXBRZMode(HWND hWnd, DWORD value)
+	VOID __fastcall SelectXBRZMode(HWND hWnd, BYTE value)
 	{
 		config.image.xBRz = value;
 		Config::Set(CONFIG_WRAPPER, "XBRZ", *(INT*)&config.image.xBRz);
@@ -905,7 +913,7 @@ namespace Window
 			AdjustWindowRect(&min, style, config.windowedMode);
 
 			RECT max = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
-			if (!config.windowedMode && config.borderlessMode)
+			if (!config.windowedMode && config.borderless.mode)
 				max.bottom += BORDERLESS_OFFSET;
 			AdjustWindowRect(&max, style, config.windowedMode);
 
@@ -937,12 +945,12 @@ namespace Window
 			{
 				ddraw->viewport.refresh = TRUE;
 
-				if (!config.windowedMode && (!config.borderlessReal || !config.alwaysActive))
+				if (!config.windowedMode && (!config.borderless.real || !config.alwaysActive))
 				{
-					if (!config.borderlessReal)
+					if (!config.borderless.real)
 					{
 						ddraw->RenderStop();
-						config.borderlessMode = !(BOOL)wParam;
+						config.borderless.mode = !(BOOL)wParam;
 						ddraw->RenderStart();
 					}
 					else
@@ -1095,7 +1103,7 @@ namespace Window
 				}
 				else if (config.keys.zoomImage && config.keys.zoomImage + VK_F1 - 1 == wParam)
 				{
-					return WindowProc(hWnd, WM_COMMAND, IDM_RES_STRETCH, NULL);
+					return WindowProc(hWnd, WM_COMMAND, IDM_STRETCH_OFF + (!config.zoom.menu ? config.zoom.value : 0), NULL);
 					return NULL;
 				}
 				else if (config.keys.speedToggle && config.keys.speedToggle + VK_F1 - 1 == wParam)
@@ -1230,14 +1238,14 @@ namespace Window
 
 						config.windowedMode = !config.windowedMode;
 						Config::Set(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", config.windowedMode);
-						
+
 						if (!config.windowedMode)
 						{
 							CHAR str1[32];
 							LoadString(hDllModule, IDS_RES_FULL_SCREEN, str1, sizeof(str1));
 
 							CHAR str2[32];
-							LoadString(hDllModule, config.borderlessReal ? IDS_MODE_BORDERLESS : IDS_MODE_EXCLUSIVE, str2, sizeof(str2));
+							LoadString(hDllModule, config.borderless.real ? IDS_MODE_BORDERLESS : IDS_MODE_EXCLUSIVE, str2, sizeof(str2));
 
 							CHAR text[64];
 							StrPrint(text, "%s: %s", str1, str2);
@@ -1408,8 +1416,8 @@ namespace Window
 			{
 				if (!config.version)
 				{
-					config.showBackBorder = !config.showBackBorder;
-					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.showBackBorder);
+					config.border.enabled = !config.border.enabled;
+					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.border.enabled);
 
 					if (config.resHooked)
 					{
@@ -1418,7 +1426,7 @@ namespace Window
 							LoadString(hDllModule, IDS_RES_BORDERS, str1, sizeof(str1));
 
 							CHAR str2[32];
-							LoadString(hDllModule, config.showBackBorder ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+							LoadString(hDllModule, config.border.enabled ? IDS_ON : IDS_OFF, str2, sizeof(str2));
 
 							CHAR text[64];
 							StrPrint(text, "%s: %s", str1, str2);
@@ -1440,69 +1448,35 @@ namespace Window
 					return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 			}
 
-			case IDM_RES_STRETCH:
-			{
-				if (!config.version && config.resHooked && config.zoomable)
-				{
-					config.menuZoomImage = !config.menuZoomImage;
-					Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.menuZoomImage);
-
-					if (config.mode->width > *(DWORD*)&GAME_WIDTH && config.mode->height > *(DWORD*)&GAME_HEIGHT)
-						config.zoomImage = config.menuZoomImage;
-
-					{
-						CHAR str1[32];
-						LoadString(hDllModule, IDS_RES_STRETCH, str1, sizeof(str1));
-
-						CHAR str2[32];
-						LoadString(hDllModule, config.menuZoomImage ? IDS_ON : IDS_OFF, str2, sizeof(str2));
-
-						CHAR text[64];
-						StrPrint(text, "%s: %s", str1, str2);
-						Hooks::PrintText(text);
-					}
-
-					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-					if (ddraw)
-						SetEvent(ddraw->hDrawEvent);
-
-					CheckMenu(MenuStretch);
-
-					return NULL;
-				}
-				else
-					return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
-			}
-
 			case IDM_MODE_BORDERLESS:
 			{
-				config.borderlessReal = config.borderlessMode = TRUE;
-				Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderlessMode);
+				config.borderless.real = config.borderless.mode = TRUE;
+				Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderless.mode);
 				CheckMenu(MenuWindowType);
 				return NULL;
 			}
 
 			case IDM_MODE_EXCLUSIVE:
 			{
-				config.borderlessReal = config.borderlessMode = FALSE;
-				Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderlessMode);
+				config.borderless.real = config.borderless.mode = FALSE;
+				Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderless.mode);
 				CheckMenu(MenuWindowType);
 				return NULL;
 			}
 
 			case IDM_FAST_AI:
 			{
-				if (config.fastAI || Main::ShowWarn(IDS_WARN_FAST_AI))
+				if (config.ai.fast || Main::ShowWarn(IDS_WARN_FAST_AI))
 				{
-					config.fastAI = !config.fastAI;
-					Config::Set(CONFIG_WRAPPER, "FastAI", config.fastAI);
+					config.ai.fast = !config.ai.fast;
+					Config::Set(CONFIG_WRAPPER, "FastAI", config.ai.fast);
 
 					{
 						CHAR str1[32];
 						LoadString(hDllModule, IDS_FAST_AI, str1, sizeof(str1));
 
 						CHAR str2[32];
-						LoadString(hDllModule, config.fastAI ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+						LoadString(hDllModule, config.ai.fast ? IDS_ON : IDS_OFF, str2, sizeof(str2));
 
 						CHAR text[64];
 						StrPrint(text, "%s: %s", str1, str2);
@@ -1564,8 +1538,8 @@ namespace Window
 
 			case IDM_MODE_WIDEBATTLE:
 			{
-				config.wideAllowed = !config.wideAllowed;
-				Config::Set(CONFIG_WRAPPER, "WideBattle", config.wideAllowed);
+				config.wide.allowed = !config.wide.allowed;
+				Config::Set(CONFIG_WRAPPER, "WideBattle", config.wide.allowed);
 
 				Main::ShowInfo(IDS_INFO_NEXT_BATTLE);
 
@@ -1615,29 +1589,72 @@ namespace Window
 							Config::Set(CONFIG_WRAPPER, "DisplayWidth", (INT)config.resolution.width);
 							Config::Set(CONFIG_WRAPPER, "DisplayHeight", (INT)config.resolution.height);
 						}
-						else
+						else if (!config.version)
 						{
-							if (!config.version)
-							{
-								Config::Set(CONFIG_WRAPPER, "DisplayWidth", *(INT*)&GAME_WIDTH);
-								Config::Set(CONFIG_WRAPPER, "DisplayHeight", *(INT*)&GAME_HEIGHT);
-							}
+							INT mode;
+							if (config.resolution.width == 1280)
+								mode = 2;
+							else if (config.resolution.width == 1024)
+								mode = 1;
 							else
-							{
-								INT mode;
-								if (config.resolution.width == 1280)
-									mode = 2;
-								else if (config.resolution.width == 1024)
-									mode = 1;
-								else
-									mode = 0;
+								mode = 0;
 
-								Config::Set(CONFIG_DISCIPLE, "DisplaySize", mode);
-							}
+							Config::Set(CONFIG_DISCIPLE, "DisplaySize", mode);
 						}
 
 						Main::ShowInfo(IDS_INFO_RESTART);
 						CheckMenu(MenuResolution);
+					}
+
+					return NULL;
+				}
+				else if (wParam >= IDM_STRETCH_OFF && wParam <= IDM_STRETCH_OFF + 100)
+				{
+					if (!config.version && config.resHooked && config.zoom.allowed)
+					{
+						DWORD value = wParam - IDM_STRETCH_OFF;
+
+						if (value)
+						{
+							config.zoom.menu = TRUE;
+
+							config.zoom.value = value;
+							Config::Set(CONFIG_WRAPPER, "ZoomFactor", *(INT*)&config.zoom.value);
+							config.zoom.factor = 0.01f * config.zoom.value;
+
+							Config::CalcZoomed();
+						}
+						else
+							config.zoom.menu = FALSE;
+
+						config.zoom.menu = value != 0;
+						Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.zoom.menu);
+
+						if (config.mode->width > *(DWORD*)&GAME_WIDTH && config.mode->height > *(DWORD*)&GAME_HEIGHT)
+							config.zoom.enabled = config.zoom.menu;
+
+						{
+							CHAR str1[32];
+							LoadString(hDllModule, IDS_STRETCH, str1, sizeof(str1));
+
+							CHAR text[64];
+							if (!config.zoom.menu)
+							{
+								CHAR str2[32];
+								LoadString(hDllModule, IDS_OFF, str2, sizeof(str2));
+								StrPrint(text, "%s: %s", str1, str2);
+							}
+							else
+								StrPrint(text, "%s: %d%%", str1, config.zoom.value);
+
+							Hooks::PrintText(text);
+						}
+
+						OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+						if (ddraw)
+							SetEvent(ddraw->hDrawEvent);
+
+						CheckMenu(MenuStretch);
 					}
 
 					return NULL;
@@ -1654,7 +1671,7 @@ namespace Window
 							config.speed.value = 0.1f * (index + 10);
 							config.speed.enabled = TRUE;
 							Config::Set(CONFIG_WRAPPER, "GameSpeed", *(INT*)&index);
-							value = config.speed.value;
+							value = (FLOAT)config.speed.value;
 						}
 						else
 						{

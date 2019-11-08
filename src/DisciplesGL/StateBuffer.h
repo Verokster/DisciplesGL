@@ -28,16 +28,32 @@
 
 class StateBuffer : public Allocation {
 public:
-	WORD width;
-	WORD height;
-	BYTE isReady;
-	BYTE isZoomed;
-	BYTE isBorder;
 	BYTE isAllocated;
-	BYTE isAligned;
 	VOID* data;
 
-	StateBuffer(DWORD width, DWORD height, DWORD size, BOOL isAligned);
-	StateBuffer(DWORD width, DWORD height, VOID* data);
-	~StateBuffer();
+	StateBuffer();
+	StateBuffer(DWORD size);
+	StateBuffer(VOID* data);
+	virtual ~StateBuffer();
+};
+
+class StateBufferAligned : public StateBuffer {
+public:
+	BOOL isReady;
+	BOOL isZoomed;
+	BOOL isBorder;
+
+	Size size;
+
+	StateBufferAligned(DWORD size);
+	~StateBufferAligned();
+};
+
+class StateBufferBorder : public StateBuffer {
+public:
+	DWORD width;
+	DWORD height;
+
+	StateBufferBorder(DWORD width, DWORD height, DWORD size);
+	StateBufferBorder(DWORD width, DWORD height, VOID* data);
 };

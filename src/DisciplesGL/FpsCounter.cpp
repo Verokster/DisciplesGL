@@ -314,14 +314,14 @@ VOID FpsCounter::Init()
 	if (!this->state)
 		return;
 
-		if (isFpsChanged)
-		{
-			isFpsChanged = FALSE;
-			this->Reset();
-		}
+	if (isFpsChanged)
+	{
+		isFpsChanged = FALSE;
+		this->Reset();
+	}
 
-		FrameItem* tickItem = &tickQueue[this->currentIndex];
-		tickItem->init = fpsState == FpsBenchmark ? timeGetTime() : this->lastTick;
+	FrameItem* tickItem = &tickQueue[this->currentIndex];
+	tickItem->init = fpsState == FpsBenchmark ? timeGetTime() : this->lastTick;
 }
 
 VOID FpsCounter::Calculate()
@@ -388,7 +388,7 @@ VOID FpsCounter::Calculate()
 	this->value = this->summary ? 1000 * total / this->summary : 0;
 }
 
-VOID FpsCounter::Draw(VOID* srcBuffer, DWORD frameWidth)
+VOID FpsCounter::Draw(VOID* srcBuffer)
 {
 	if (!this->state)
 		return;
@@ -402,6 +402,8 @@ VOID FpsCounter::Draw(VOID* srcBuffer, DWORD frameWidth)
 		current = current / 10;
 	} while (current);
 
+	DWORD slice = config.mode->width - FPS_WIDTH;
+
 	if (config.mode->bpp != 16 || config.bpp32Hooked)
 	{
 		DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
@@ -410,11 +412,12 @@ VOID FpsCounter::Draw(VOID* srcBuffer, DWORD frameWidth)
 		{
 			WORD* lpDig = (WORD*)counters[fps % 10];
 
-			for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-			{
-				DWORD* idx = (DWORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-				DWORD* pix = (DWORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+			DWORD* idx = (DWORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
+			DWORD* pix = (DWORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
 
+			DWORD height = FPS_HEIGHT;
+			do
+			{
 				WORD check = *lpDig++;
 				DWORD width = FPS_WIDTH;
 				do
@@ -423,7 +426,10 @@ VOID FpsCounter::Draw(VOID* srcBuffer, DWORD frameWidth)
 					++idx;
 					check >>= 1;
 				} while (--width);
-			}
+
+				idx += slice;
+				pix += slice;
+			} while (--height);
 
 			fps = fps / 10;
 		} while (--dcount);
@@ -431,123 +437,140 @@ VOID FpsCounter::Draw(VOID* srcBuffer, DWORD frameWidth)
 		dcount = 4;
 		while (dcount != digCount)
 		{
-			for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-			{
-				DWORD* idx = (DWORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-				DWORD* pix = (DWORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+			DWORD* idx = (DWORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
+			DWORD* pix = (DWORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
 
+			DWORD height = FPS_HEIGHT;
+			do
+			{
 				DWORD width = FPS_WIDTH;
 				do
 					*pix++ = *idx++;
 				while (--width);
-			}
+
+				idx += slice;
+				pix += slice;
+			} while (--height);
 
 			--dcount;
 		}
 
 		GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, this->tempBuffer);
 	}
+	else if (glVersion > GL_VER_1_1)
+	{
+		WORD fpsColor = fpsState == FpsBenchmark ? 0xFFE0 : 0xFFFF;
+		DWORD dcount = digCount;
+		do
+		{
+			WORD* lpDig = (WORD*)counters[fps % 10];
+
+			WORD* idx = (WORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
+			WORD* pix = (WORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
+
+			DWORD height = FPS_HEIGHT;
+			do
+			{
+				WORD check = *lpDig++;
+				DWORD width = FPS_WIDTH;
+				do
+				{
+					*pix++ = (check & 1) ? fpsColor : *idx;
+					++idx;
+					check >>= 1;
+				} while (--width);
+
+				idx += slice;
+				pix += slice;
+			} while (--height);
+
+			fps = fps / 10;
+		} while (--dcount);
+
+		dcount = 4;
+		while (dcount != digCount)
+		{
+			WORD* idx = (WORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
+			WORD* pix = (WORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
+
+			DWORD height = FPS_HEIGHT;
+			do
+			{
+				DWORD width = FPS_WIDTH;
+				do
+					*pix++ = *idx++;
+				while (--width);
+
+				idx += slice;
+				pix += slice;
+			} while (--height);
+
+			--dcount;
+		}
+
+		GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, this->tempBuffer);
+	}
 	else
 	{
-		if (glVersion > GL_VER_1_1)
+		DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
+		DWORD dcount = digCount;
+		do
 		{
-			WORD fpsColor = fpsState == FpsBenchmark ? 0xFFE0 : 0xFFFF;
-			DWORD dcount = digCount;
+			WORD* lpDig = (WORD*)counters[fps % 10];
+
+			WORD* idx = (WORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
+			DWORD* pix = (DWORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
+
+			DWORD height = FPS_HEIGHT;
 			do
 			{
-				WORD* lpDig = (WORD*)counters[fps % 10];
-
-				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
+				WORD check = *lpDig++;
+				DWORD width = FPS_WIDTH;
+				do
 				{
-					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-					WORD* pix = (WORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
-
-					WORD check = *lpDig++;
-					DWORD width = FPS_WIDTH;
-					do
+					if (check & 1)
+						*pix = fpsColor;
+					else
 					{
-						*pix++ = (check & 1) ? fpsColor : *idx;
-						++idx;
-						check >>= 1;
-					} while (--width);
-				}
+						WORD px = *idx;
+						*pix = ((px & 0xF800) >> 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 19);
+					}
 
-				fps = fps / 10;
-			} while (--dcount);
+					++pix;
+					++idx;
+					check >>= 1;
+				} while (--width);
 
-			dcount = 4;
-			while (dcount != digCount)
-			{
-				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-				{
-					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-					WORD* pix = (WORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+				idx += slice;
+				pix += slice;
+			} while (--height);
 
-					DWORD width = FPS_WIDTH;
-					do
-						*pix++ = *idx++;
-					while (--width);
-				}
+			fps = fps / 10;
+		} while (--dcount);
 
-				--dcount;
-			}
-
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, this->tempBuffer);
-		}
-		else
+		dcount = 4;
+		while (dcount != digCount)
 		{
-			DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
-			DWORD dcount = digCount;
+			WORD* idx = (WORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
+			DWORD* pix = (DWORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
+
+			DWORD height = FPS_HEIGHT;
 			do
 			{
-				WORD* lpDig = (WORD*)counters[fps % 10];
-
-				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
+				DWORD width = FPS_WIDTH;
+				do
 				{
-					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-					DWORD* pix = (DWORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
+					WORD px = *idx++;
+					*pix++ = ((px & 0xF800) >> 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 19);
+				} while (--width);
 
-					WORD check = *lpDig++;
-					DWORD width = FPS_WIDTH;
-					do
-					{
-						if (check & 1)
-							*pix = fpsColor;
-						else
-						{
-							WORD px = *idx;
-							*pix = ((px & 0xF800) >> 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 19);
-						}
+				idx += slice;
+				pix += slice;
+			} while (--height);
 
-						++pix;
-						++idx;
-						check >>= 1;
-					} while (--width);
-				}
-
-				fps = fps / 10;
-			} while (--dcount);
-
-			dcount = 4;
-			while (dcount != digCount)
-			{
-				for (DWORD y = 0; y < FPS_HEIGHT; ++y)
-				{
-					WORD* idx = (WORD*)srcBuffer + (FPS_Y + y) * frameWidth + FPS_X + FPS_WIDTH * (dcount - 1);
-					DWORD* pix = (DWORD*)this->tempBuffer + y * FPS_WIDTH * 4 + FPS_WIDTH * (dcount - 1);
-
-					DWORD width = FPS_WIDTH;
-					do
-					{
-						WORD px = *idx++;
-						*pix++ = ((px & 0xF800) >> 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 19);
-					} while (--width);
-				}
-
-				--dcount;
-			}
-
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, this->tempBuffer);
+			--dcount;
 		}
+
+		GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, this->tempBuffer);
 	}
 }

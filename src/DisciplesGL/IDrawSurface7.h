@@ -29,6 +29,9 @@
 #include "IDrawClipper.h"
 
 class IDrawSurface7 : public IDrawUnknown {
+public:
+	IDrawSurface7(IDrawUnknown** list);
+
 	// Inherited via IDirectDrawSurface7
 	virtual HRESULT __stdcall AddAttachedSurface(IDrawSurface7*);
 	virtual HRESULT __stdcall AddOverlayDirtyRect(LPRECT);

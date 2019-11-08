@@ -231,8 +231,8 @@ namespace Config
 
 			if (!config.version)
 			{
-				config.showBackBorder = TRUE;
-				Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.showBackBorder);
+				config.border.enabled = TRUE;
+				Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.border.enabled);
 			}
 
 			Config::Set(CONFIG_KEYS, "FpsCounter", "");
@@ -258,7 +258,7 @@ namespace Config
 			config.keys.snapshot = 12;
 			Config::Set(CONFIG_KEYS, "Screenshot", config.keys.snapshot);
 
-			Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderlessMode);
+			Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderless.mode);
 
 			config.speed.index = 5;
 			config.speed.value = 0.1f * (config.speed.index + 10);
@@ -274,8 +274,8 @@ namespace Config
 
 			if (!config.version)
 			{
-				config.wideAllowed = FALSE;
-				Config::Set(CONFIG_WRAPPER, "WideBattle", config.wideAllowed);
+				config.wide.allowed = FALSE;
+				Config::Set(CONFIG_WRAPPER, "WideBattle", config.wide.allowed);
 			}
 
 			config.snapshot.type = ImagePNG;
@@ -284,8 +284,9 @@ namespace Config
 			config.snapshot.level = 9;
 			Config::Set(CONFIG_WRAPPER, "ScreenshotLevel", *(INT*)&config.snapshot.level);
 
-			config.zoomFactor = 1.0f;
-			Config::Set(CONFIG_WRAPPER, "ZoomFactor", 100);
+			config.zoom.value = 100;
+			config.zoom.factor = 0.01f * config.zoom.value;
+			Config::Set(CONFIG_WRAPPER, "ZoomFactor", *(INT*)&config.zoom.value);
 
 			config.locales.current.id = GetUserDefaultLCID();
 			Config::Set(CONFIG_WRAPPER, "Locale", *(INT*)&config.locales.current.id);
@@ -294,8 +295,8 @@ namespace Config
 			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 			Config::Set(CONFIG_WRAPPER, "MessageTimeout", config.msgTimeScale.time);
 
-			config.fastAI = FALSE;
-			Config::Set(CONFIG_WRAPPER, "FastAI", config.fastAI);
+			config.ai.fast = FALSE;
+			Config::Set(CONFIG_WRAPPER, "FastAI", config.ai.fast);
 		}
 		else
 		{
@@ -339,7 +340,7 @@ namespace Config
 				config.image.xBRz = 6;
 
 			if (!config.version)
-				config.showBackBorder = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+				config.border.enabled = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
 
 			// F1 - reserved for "About"
 			CHAR buffer[20];
@@ -418,7 +419,7 @@ namespace Config
 					config.keys.snapshot = 0;
 			}
 
-			config.borderlessReal = config.borderlessMode = (BOOL)Config::Get(CONFIG_WRAPPER, "BorderlessMode", FALSE);
+			config.borderless.real = config.borderless.mode = (BOOL)Config::Get(CONFIG_WRAPPER, "BorderlessMode", FALSE);
 
 			value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
 			config.speed.index = *(DWORD*)&value;
@@ -432,7 +433,7 @@ namespace Config
 			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
 
 			if (!config.version)
-				config.wideAllowed = (BOOL)Config::Get(CONFIG_WRAPPER, "WideBattle", FALSE);
+				config.wide.allowed = (BOOL)Config::Get(CONFIG_WRAPPER, "WideBattle", FALSE);
 
 			value = Config::Get(CONFIG_WRAPPER, "ScreenshotType", ImagePNG);
 			config.snapshot.type = *(ImageType*)&value;
@@ -445,9 +446,10 @@ namespace Config
 				config.snapshot.level = 9;
 
 			value = Config::Get(CONFIG_WRAPPER, "ZoomFactor", 100);
-			if (value < 0 || value > 100)
-				value = 100;
-			config.zoomFactor = (FLOAT)value / 100.0f;
+			config.zoom.value = *(DWORD*)&value;
+			if (!config.zoom.value || config.zoom.value > 100)
+				config.zoom.value = 100;
+			config.zoom.factor = 0.01f * config.zoom.value;
 
 			config.locales.current.id = (LCID)Config::Get(CONFIG_WRAPPER, "Locale", (INT)GetUserDefaultLCID());
 
@@ -458,7 +460,7 @@ namespace Config
 			config.msgTimeScale.time = *(DWORD*)&value;
 			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 
-			config.fastAI = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
+			config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
 		}
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));
@@ -543,7 +545,7 @@ namespace Config
 				{
 					if (*hMenu)
 					{
-						*title = 'A' + i;
+						*title = 'A' + LOBYTE(i);
 						AppendMenu(mData.hMenu, MF_STRING | MF_POPUP, (UINT_PTR)*hMenu, title);
 					}
 				}
@@ -584,10 +586,15 @@ namespace Config
 			SetMenuItemInfo(config.menu, IDM_RES_BORDERS, FALSE, &info);
 		}
 
-		if (config.keys.zoomImage && (info.cch = sizeof(buffer), GetMenuItemInfo(config.menu, IDM_RES_STRETCH, FALSE, &info)))
+		if (config.keys.zoomImage)
 		{
-			StrPrint(buffer, "%sF%d", buffer, config.keys.zoomImage);
-			SetMenuItemInfo(config.menu, IDM_RES_STRETCH, FALSE, &info);
+			MenuItemData mData;
+			mData.childId = IDM_STRETCH_OFF;
+			if (Window::GetMenuByChildID(&mData) && (info.cch = sizeof(buffer), GetMenuItemInfo(mData.hParent, mData.index, TRUE, &info)))
+			{
+				StrPrint(buffer, "%sF%d", buffer, config.keys.zoomImage);
+				SetMenuItemInfo(mData.hParent, mData.index, TRUE, &info);
+			}
 		}
 
 		MenuItemData mData;
@@ -638,11 +645,11 @@ namespace Config
 
 	BOOL __fastcall IsZoomed()
 	{
-		if (config.zoomImage && config.isBorder)
+		if (config.zoom.enabled && config.border.active)
 		{
-			if (config.isBattle)
+			if (config.battle.active)
 			{
-				if (!config.isWideBattle || config.isWideZoomable)
+				if (!config.battle.wide || config.battle.zoomable)
 					return TRUE;
 			}
 			else
@@ -688,10 +695,10 @@ namespace Config
 
 	VOID __fastcall CalcZoomed()
 	{
-		CalcZoomed(&config.zoomed, (Size*)config.mode, config.zoomFactor);
+		CalcZoomed(&config.zoom.size, (Size*)config.mode, config.zoom.factor);
 
 		SizeFloat size = { (FLOAT)config.mode->width, (FLOAT)config.mode->height };
-		CalcZoomed(&config.zoomedFloat, &size, config.zoomFactor);
+		CalcZoomed(&config.zoom.sizeFloat, &size, config.zoom.factor);
 	}
 
 	VOID __fastcall UpdateLocale()

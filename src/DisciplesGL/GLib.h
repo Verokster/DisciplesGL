@@ -136,6 +136,7 @@ typedef VOID(__stdcall* GLCLEAR)(GLbitfield mask);
 typedef VOID(__stdcall* GLCLEARCOLOR)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
 typedef VOID(__stdcall* GLBLENDFUNC)(GLenum sfactor, GLenum dfactor);
 typedef VOID(__stdcall* GLREADPIXELS)(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data);
+typedef VOID(__stdcall* GLPIXELSTOREI)(GLenum pname, GLint param);
 
 #ifdef _DEBUG
 typedef GLenum(__stdcall* GLGETERROR)();
@@ -146,6 +147,7 @@ typedef VOID(__stdcall* GLGENBUFFERS)(GLsizei n, GLuint* buffers);
 typedef VOID(__stdcall* GLDELETEBUFFERS)(GLsizei n, const GLuint* buffers);
 typedef VOID(__stdcall* GLBINDBUFFER)(GLenum target, GLuint buffer);
 typedef VOID(__stdcall* GLBUFFERDATA)(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+typedef VOID(__stdcall* GLBUFFERSUBDATA)(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data);
 typedef VOID(__stdcall* GLDRAWARRAYS)(GLenum mode, GLint first, GLsizei count);
 
 typedef VOID(__stdcall* GLENABLEVERTEXATTRIBARRAY)(GLuint index);
@@ -216,6 +218,7 @@ extern GLCLEAR GLClear;
 extern GLCLEARCOLOR GLClearColor;
 extern GLBLENDFUNC GLBlendFunc;
 extern GLREADPIXELS GLReadPixels;
+extern GLPIXELSTOREI GLPixelStorei;
 
 #ifdef _DEBUG
 extern GLGETERROR GLGetError;
@@ -226,6 +229,7 @@ extern GLGENBUFFERS GLGenBuffers;
 extern GLDELETEBUFFERS GLDeleteBuffers;
 extern GLBINDBUFFER GLBindBuffer;
 extern GLBUFFERDATA GLBufferData;
+extern GLBUFFERSUBDATA GLBufferSubData;
 extern GLDRAWARRAYS GLDrawArrays;
 
 extern GLENABLEVERTEXATTRIBARRAY GLEnableVertexAttribArray;

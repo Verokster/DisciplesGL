@@ -25,6 +25,11 @@
 #include "stdafx.h"
 #include "IDrawPalette.h"
 
+IDrawPalette::IDrawPalette(IDrawUnknown** list)
+	: IDrawUnknown(list)
+{
+}
+
 // Inherited via IDrawPalette
 HRESULT __stdcall IDrawPalette::GetCaps(LPDWORD) { return DD_OK; }
 HRESULT __stdcall IDrawPalette::GetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY) { return DD_OK; }

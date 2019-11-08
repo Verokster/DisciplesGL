@@ -66,5 +66,5 @@ public:
 	VOID Reset();
 	VOID Init();
 	VOID Calculate();
-	VOID Draw(VOID*, DWORD);
+	VOID Draw(VOID*);
 };

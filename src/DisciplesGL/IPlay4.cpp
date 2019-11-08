@@ -120,16 +120,16 @@ HRESULT IPlay4::EnumSessionsDecorated(LPDPSESSIONDESC2 lpsd, DWORD dwTimeout, LP
 HRESULT __stdcall IPlay4::EnumSessions(LPDPSESSIONDESC2 lpsd, DWORD dwTimeout, LPDPENUMSESSIONSCALLBACK2 lpEnumSessionsCallback2, LPVOID lpContext, DWORD dwFlags)
 {
 	OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-	if (ddraw && !config.windowedMode && !config.borderlessReal)
+	if (ddraw && !config.windowedMode && !config.borderless.real)
 	{
 		ddraw->RenderStop();
-		config.borderlessMode = TRUE;
+		config.borderless.mode = TRUE;
 		ddraw->RenderStart();
 
 		HRESULT res = this->EnumSessionsDecorated(lpsd, dwTimeout, lpEnumSessionsCallback2, lpContext, dwFlags);
 
 		ddraw->RenderStop();
-		config.borderlessMode = FALSE;
+		config.borderless.mode = FALSE;
 		ddraw->RenderStart();
 
 		return res;

@@ -30,6 +30,9 @@
 #include "IDrawSurface7.h"
 
 class IDraw7 : public IDrawUnknown {
+public:
+	IDraw7(IDrawUnknown** list);
+
 	// Inherited via IDirectDraw7
 	virtual HRESULT __stdcall Compact();
 	virtual HRESULT __stdcall CreateClipper(DWORD, IDrawClipper**, IUnknown*);

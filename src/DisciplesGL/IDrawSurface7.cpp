@@ -25,6 +25,11 @@
 #include "stdafx.h"
 #include "IDrawSurface7.h"
 
+IDrawSurface7::IDrawSurface7(IDrawUnknown** list)
+	: IDrawUnknown(list)
+{
+}
+
 // Inherited via IDrawSurface7
 HRESULT __stdcall IDrawSurface7::AddAttachedSurface(IDrawSurface7*) { return DD_OK; }
 HRESULT __stdcall IDrawSurface7::AddOverlayDirtyRect(LPRECT) { return DD_OK; }

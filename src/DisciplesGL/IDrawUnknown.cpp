@@ -30,28 +30,44 @@ VOID* IDrawUnknown::operator new(size_t size) { return MemoryNew(size); }
 VOID IDrawUnknown::operator delete(VOID* p)
 {
 	IDrawUnknown* item = (IDrawUnknown*)p;
-	IDrawUnknown* entry = *item->list;
-	if (entry)
+	if (item->list)
 	{
-		if (entry == item)
+		IDrawUnknown* entry = *item->list;
+		if (entry)
 		{
-			*item->list = entry->last;
-			MemoryDelete(p);
-			return;
-		}
-		else
-			while (entry->last)
+			if (entry == item)
 			{
-				if (entry->last == item)
-				{
-					entry->last = item->last;
-					MemoryDelete(p);
-					return;
-				}
-
-				entry = entry->last;
+				*item->list = entry->last;
+				MemoryFree(p);
+				return;
 			}
+			else
+				while (entry->last)
+				{
+					if (entry->last == item)
+					{
+						entry->last = item->last;
+						MemoryFree(p);
+						return;
+					}
+
+					entry = entry->last;
+				}
+		}
 	}
+}
+
+IDrawUnknown::IDrawUnknown(IDrawUnknown** list)
+{
+	this->refCount = 1;
+	this->list = list;
+	if (list)
+	{
+		this->last = *list;
+		*list = this;
+	}
+	else
+		this->last = NULL;
 }
 
 HRESULT __stdcall IDrawUnknown::QueryInterface(REFIID, LPVOID*) { return DD_OK; }

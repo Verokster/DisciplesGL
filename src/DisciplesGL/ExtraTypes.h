@@ -138,8 +138,6 @@ struct ConfigItems {
 	BOOL isEditor;
 	BOOL windowedMode;
 	DisplayMode* mode;
-	Size zoomed;
-	SizeFloat zoomedFloat;
 	Resolution resolution;
 
 	HCURSOR cursor;
@@ -149,29 +147,50 @@ struct ConfigItems {
 	BOOL hd;
 	BOOL bpp32Hooked;
 	BOOL resHooked;
-	BOOL isBorder;
-	BOOL showBackBorder;
-	BOOL zoomable;
-	BOOL zoomImage;
-	BOOL menuZoomImage;
-	BOOL gameBorders;
 	BOOL alwaysActive;
 	BOOL coldCPU;
-	BOOL borderlessMode;
-	BOOL borderlessReal;
-	BOOL wideHooked;
-	BOOL wideAllowed;
-	BOOL isBattle;
-	BOOL isWideBattle;
-	BOOL isWideZoomable;
 	BOOL singleWindow;
 	BOOL singleThread;
-	BOOL isAiThinking;
-	BOOL isWaiting;
 	DOUBLE syncStep;
 	POINT randPos;
-	FLOAT zoomFactor;
-	BOOL fastAI;
+
+	struct {
+		BOOL fast;
+		BOOL thinking;
+		BOOL waiting;
+	} ai;
+
+	struct {
+		BOOL active;
+		BOOL wide;
+		BOOL zoomable;
+	} battle;
+
+	struct {
+		BOOL allowed;
+		BOOL enabled;
+		BOOL menu;
+		DWORD value;
+		FLOAT factor;
+		Size size;
+		SizeFloat sizeFloat;
+	} zoom;
+
+	struct {
+		BOOL real;
+		BOOL mode;
+	} borderless;
+
+	struct {
+		BOOL allowed;
+		BOOL enabled;
+		BOOL active;
+	} border;
+
+	struct {
+		BOOL hooked;
+		BOOL allowed;
+	} wide;
 
 	struct {
 		BOOL hooked;

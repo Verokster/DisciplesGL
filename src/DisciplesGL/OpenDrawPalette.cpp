@@ -27,14 +27,9 @@
 #include "OpenDraw.h"
 
 OpenDrawPalette::OpenDrawPalette(IDrawUnknown** list, OpenDraw* lpDD)
+	: IDrawPalette(list)
 {
-	this->refCount = 1;
-	this->list = list;
-	this->last = *list;
-	*list = this;
-
 	this->ddraw = lpDD;
-
 	this->entries = (DWORD*)AlignedAlloc(256 * sizeof(DWORD));
 }
 

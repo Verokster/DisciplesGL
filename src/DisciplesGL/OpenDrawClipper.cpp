@@ -27,12 +27,8 @@
 #include "OpenDraw.h"
 
 OpenDrawClipper::OpenDrawClipper(IDrawUnknown** list, OpenDraw* lpDD)
+	: IDrawClipper(list)
 {
-	this->refCount = 1;
-	this->list = list;
-	this->last = *list;
-	*list = this;
-
 	this->ddraw = lpDD;
 	this->hWnd = NULL;
 }

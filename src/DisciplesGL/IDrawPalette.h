@@ -27,6 +27,9 @@
 #include "IDrawUnknown.h"
 
 class IDrawPalette : public IDrawUnknown {
+public:
+	IDrawPalette(IDrawUnknown** list);
+
 	// Inherited via IDirectDrawPalette
 	virtual HRESULT __stdcall GetCaps(LPDWORD);
 	virtual HRESULT __stdcall GetEntries(DWORD, DWORD, DWORD, LPPALETTEENTRY);

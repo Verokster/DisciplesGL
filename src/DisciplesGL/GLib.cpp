@@ -60,6 +60,7 @@ GLCLEAR GLClear;
 GLCLEARCOLOR GLClearColor;
 GLBLENDFUNC GLBlendFunc;
 GLREADPIXELS GLReadPixels;
+GLPIXELSTOREI GLPixelStorei;
 
 #ifdef _DEBUG
 GLGETERROR GLGetError;
@@ -70,6 +71,7 @@ GLGENBUFFERS GLGenBuffers;
 GLDELETEBUFFERS GLDeleteBuffers;
 GLBINDBUFFER GLBindBuffer;
 GLBUFFERDATA GLBufferData;
+GLBUFFERSUBDATA GLBufferSubData;
 GLDRAWARRAYS GLDrawArrays;
 
 GLENABLEVERTEXATTRIBARRAY GLEnableVertexAttribArray;
@@ -214,6 +216,7 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "ClearColor", (PROC*)&GLClearColor);
 		LoadFunction(buffer, PREFIX_GL, "BlendFunc", (PROC*)&GLBlendFunc);
 		LoadFunction(buffer, PREFIX_GL, "ReadPixels", (PROC*)&GLReadPixels);
+		LoadFunction(buffer, PREFIX_GL, "PixelStorei", (PROC*)&GLPixelStorei);
 
 #ifdef _DEBUG
 		LoadFunction(buffer, PREFIX_GL, "GetError", (PROC*)&GLGetError);
@@ -224,6 +227,7 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "DeleteBuffers", (PROC*)&GLDeleteBuffers);
 		LoadFunction(buffer, PREFIX_GL, "BindBuffer", (PROC*)&GLBindBuffer);
 		LoadFunction(buffer, PREFIX_GL, "BufferData", (PROC*)&GLBufferData);
+		LoadFunction(buffer, PREFIX_GL, "BufferSubData", (PROC*)&GLBufferSubData);
 		LoadFunction(buffer, PREFIX_GL, "DrawArrays", (PROC*)&GLDrawArrays);
 
 		LoadFunction(buffer, PREFIX_GL, "EnableVertexAttribArray", (PROC*)&GLEnableVertexAttribArray);

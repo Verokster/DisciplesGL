@@ -66,7 +66,7 @@ BEGIN
 	IDS_ASPECT_KEEP					"Original"
 	IDS_ASPECT_STRETCH				"Stretch"
 
-	IDS_RES_STRETCH					"Zoom window"
+	IDS_STRETCH						"Stretch windows"
 	IDS_RES_BORDERS					"Background"
 
 	IDS_SPEED						"Speed"
@@ -178,7 +178,21 @@ BEGIN
 			END
 		END
 		MENUITEM SEPARATOR
-		MENUITEM "&Zoom Window\a",					IDM_RES_STRETCH
+		POPUP "&Stretch Windows\a"
+		BEGIN
+			MENUITEM "Off",							IDM_STRETCH_OFF
+			MENUITEM SEPARATOR
+			MENUITEM "10%",							IDM_STRETCH_10
+			MENUITEM "20%",							IDM_STRETCH_20
+			MENUITEM "30%",							IDM_STRETCH_30
+			MENUITEM "40%",							IDM_STRETCH_40
+			MENUITEM "50%",							IDM_STRETCH_50
+			MENUITEM "60%",							IDM_STRETCH_60
+			MENUITEM "70%",							IDM_STRETCH_70
+			MENUITEM "80%",							IDM_STRETCH_80
+			MENUITEM "90%",							IDM_STRETCH_90
+			MENUITEM "100%",						IDM_STRETCH_100
+		END
 		MENUITEM "Show &Background\a",				IDM_RES_BORDERS
 		MENUITEM SEPARATOR
 		MENUITEM "Keep &Aspect Ratio\a",			IDM_ASPECT_RATIO
@@ -336,7 +350,21 @@ BEGIN
 			END
 		END
 		MENUITEM SEPARATOR
-		MENUITEM "&Zoom Window\a",					IDM_RES_STRETCH
+		POPUP "&Stretch Windows\a"
+		BEGIN
+			MENUITEM "Off",							IDM_STRETCH_OFF
+			MENUITEM SEPARATOR
+			MENUITEM "10%",							IDM_STRETCH_10
+			MENUITEM "20%",							IDM_STRETCH_20
+			MENUITEM "30%",							IDM_STRETCH_30
+			MENUITEM "40%",							IDM_STRETCH_40
+			MENUITEM "50%",							IDM_STRETCH_50
+			MENUITEM "60%",							IDM_STRETCH_60
+			MENUITEM "70%",							IDM_STRETCH_70
+			MENUITEM "80%",							IDM_STRETCH_80
+			MENUITEM "90%",							IDM_STRETCH_90
+			MENUITEM "100%",						IDM_STRETCH_100
+		END
 		MENUITEM "Show &Background\a",				IDM_RES_BORDERS
 		MENUITEM SEPARATOR
 		MENUITEM "Keep &Aspect Ratio\a",			IDM_ASPECT_RATIO
@@ -500,8 +528,8 @@ IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,10,26,1153
- PRODUCTVERSION 1,4,8,0
+ FILEVERSION 2019,11,9,1190
+ PRODUCTVERSION 1,5,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -517,10 +545,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2019.10.26.1153"
+			VALUE "FileVersion", "2019.11.09.1190"
 			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4dll-R.dll"
-			VALUE "ProductVersion", "1.4.8"
+			VALUE "ProductVersion", "1.5.0"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

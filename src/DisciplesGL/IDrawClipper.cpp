@@ -25,6 +25,11 @@
 #include "stdafx.h"
 #include "IDrawClipper.h"
 
+IDrawClipper::IDrawClipper(IDrawUnknown** list)
+	: IDrawUnknown(list)
+{
+}
+
 // Inherited via IDrawClipper
 HRESULT __stdcall IDrawClipper::GetClipList(LPRECT, LPRGNDATA, LPDWORD) { return DD_OK; }
 HRESULT __stdcall IDrawClipper::GetHWnd(HWND*) { return DD_OK; }

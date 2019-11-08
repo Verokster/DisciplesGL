@@ -32,20 +32,19 @@
 
 class PixelBuffer : public Allocation {
 private:
-	Size lastSize;
+	Size last;
 	Size size;
 
 	BOOL isTrue;
-	VOID* tempBuffer;
 	VOID* primaryBuffer;
 	VOID* secondaryBuffer;
-	BOOL UpdateBlock(Size* newSize, RECT* newRect);
+	BOOL UpdateBlock(RECT*);
 
 public:
-	PixelBuffer(DWORD width, DWORD height, BOOL isTrue, VOID* tempBuffer);
+	PixelBuffer(Size*, BOOL);
 	~PixelBuffer();
 
 	VOID Reset();
-	BOOL Check(Size* newSize, StateBuffer* stateBuffer);
-	BOOL Update(Size* newSize, StateBuffer* stateBuffer);
+	BOOL Check(StateBufferAligned*);
+	BOOL Update(StateBufferAligned*);
 };

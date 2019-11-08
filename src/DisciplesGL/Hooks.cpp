@@ -870,16 +870,16 @@ namespace Hooks
 		LRESULT res;
 		if (uMsg == WM_TIMER)
 		{
-			if (config.isAiThinking)
+			if (config.ai.thinking)
 			{
 				MSG msg;
-				if (!config.fastAI || !PeekMessage(&msg, hWnd, NULL, NULL, PM_NOREMOVE))
+				if (!config.ai.fast || !PeekMessage(&msg, hWnd, NULL, NULL, PM_NOREMOVE))
 				{
 					res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 
 					if (timeGetTime() - aiTime >= 2000)
-						config.isAiThinking = FALSE;
-					else if (config.fastAI)
+						config.ai.thinking = FALSE;
+					else if (config.ai.fast)
 					{
 						Sleep(0);
 						PostMessage(hWnd, uMsg, wParam, lParam);
@@ -897,7 +897,7 @@ namespace Hooks
 
 			if (uMsg == uAiMsg)
 			{
-				config.isAiThinking = TRUE;
+				config.ai.thinking = TRUE;
 				aiTime = timeGetTime();
 			}
 		}
@@ -1074,7 +1074,7 @@ namespace Hooks
 				RECT rect;
 				if (GetClientRect(hWndMain, &rect) && ClientToScreen(hWndMain, (LPPOINT)&rect))
 				{
-					if (!config.windowedMode && config.borderlessMode)
+					if (!config.windowedMode && config.borderless.mode)
 						rect.bottom -= BORDERLESS_OFFSET;
 
 					FLOAT fx = (FLOAT)config.mode->width / rect.right;
@@ -1131,7 +1131,7 @@ namespace Hooks
 			RECT rect;
 			if (GetClientRect(hWndMain, &rect) && ClientToScreen(hWndMain, (LPPOINT)&rect))
 			{
-				if (!config.windowedMode && config.borderlessMode)
+				if (!config.windowedMode && config.borderless.mode)
 					rect.bottom -= BORDERLESS_OFFSET;
 
 				FLOAT fx = (FLOAT)config.mode->width / rect.right;
@@ -1159,11 +1159,11 @@ namespace Hooks
 				}
 				else
 				{
-					FLOAT kx = config.zoomedFloat.width / config.mode->width;
-					FLOAT ky = config.zoomedFloat.height / config.mode->height;
+					FLOAT kx = config.zoom.sizeFloat.width / config.mode->width;
+					FLOAT ky = config.zoom.sizeFloat.height / config.mode->height;
 
-					lpPoint->x = LONG(fx * kx * (FLOAT(lpPoint->x - rect.left) - offset.x) + ((FLOAT)config.mode->width - config.zoomedFloat.width) * 0.5f) + rect.left;
-					lpPoint->y = LONG(fy * kx * (FLOAT(lpPoint->y - rect.top) - offset.y) + ((FLOAT)config.mode->height - config.zoomedFloat.height) * 0.5f) + rect.top;
+					lpPoint->x = LONG(fx * kx * (FLOAT(lpPoint->x - rect.left) - offset.x) + ((FLOAT)config.mode->width - config.zoom.sizeFloat.width) * 0.5f) + rect.left;
+					lpPoint->y = LONG(fy * kx * (FLOAT(lpPoint->y - rect.top) - offset.y) + ((FLOAT)config.mode->height - config.zoom.sizeFloat.height) * 0.5f) + rect.top;
 				}
 			}
 
@@ -1220,7 +1220,7 @@ namespace Hooks
 		RECT rect;
 		if (GetClientRect(hWndMain, &rect) && ClientToScreen(hWndMain, (LPPOINT)&rect))
 		{
-			if (!config.windowedMode && config.borderlessMode)
+			if (!config.windowedMode && config.borderless.mode)
 				rect.bottom -= BORDERLESS_OFFSET;
 
 			FLOAT fx = (FLOAT)rect.right / config.mode->width;
@@ -1248,11 +1248,11 @@ namespace Hooks
 			}
 			else
 			{
-				FLOAT kx = (FLOAT)config.mode->width / config.zoomedFloat.width;
-				FLOAT ky = (FLOAT)config.mode->height / config.zoomedFloat.height;
+				FLOAT kx = (FLOAT)config.mode->width / config.zoom.sizeFloat.width;
+				FLOAT ky = (FLOAT)config.mode->height / config.zoom.sizeFloat.height;
 
-				X = LONG(fx * kx * (FLOAT(X - rect.left) - ((FLOAT)config.mode->width - config.zoomedFloat.width) * 0.5f) + offset.x) + rect.left;
-				Y = LONG(fy * ky * (FLOAT(Y - rect.top) - ((FLOAT)config.mode->height - config.zoomedFloat.height) * 0.5f) + offset.y) + rect.top;
+				X = LONG(fx * kx * (FLOAT(X - rect.left) - ((FLOAT)config.mode->width - config.zoom.sizeFloat.width) * 0.5f) + offset.x) + rect.left;
+				Y = LONG(fy * ky * (FLOAT(Y - rect.top) - ((FLOAT)config.mode->height - config.zoom.sizeFloat.height) * 0.5f) + offset.y) + rect.top;
 			}
 		}
 
@@ -2683,9 +2683,9 @@ namespace Hooks
 	DWORD battleAddress;
 	VOID __stdcall CheckBorders(DWORD* object, BOOL isborder)
 	{
-		config.isBorder = isborder & 1;
+		config.border.active = isborder & 1;
 		if (*(object + 2) != 0xFFFFFFFF)
-			config.isBattle = *object == battleAddress;
+			config.battle.active = *object == battleAddress;
 	}
 
 	VOID __declspec(naked) hook_00538FEB()
@@ -2708,20 +2708,20 @@ namespace Hooks
 		__asm {
 			CMP [ESI + 0x68] , EBX
 			JE lbl_success
-			CMP config.isBorder, EBX
+			CMP config.border.active, EBX
 			JE lbl_back
 
 			lbl_success : MOV EAX, [ECX]
 						  ADD ESI, 0x64
 
 						  MOV EDX, [ESI + 0x4]
-						  CMP config.isBorder, EBX
+						  CMP config.border.active, EBX
 						  JE lbl_continue
 						  SHR EDX, 0x1
 
 						  lbl_continue : PUSH EDX
 										 MOV EDX, [ESI]
-										 CMP config.isBorder, EBX
+										 CMP config.border.active, EBX
 										 JE lbl_continue2
 										 SHR EDX, 0x1
 
@@ -2902,7 +2902,7 @@ namespace Hooks
 		if (PeekMessage(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg))
 			return TRUE;
 
-		if (config.coldCPU && !config.isAiThinking)
+		if (config.coldCPU && !config.ai.thinking)
 			Sleep(1);
 
 		return FALSE;
@@ -2924,7 +2924,7 @@ namespace Hooks
 			if (dlgOld)
 				((VOID(__thiscall*)(DWORD, BOOL))(**(DWORD**)dlgOld))(dlgOld, TRUE);
 
-			config.isWaiting = dlgNew && *(DWORD*)dlgNew == waitAddress;
+			config.ai.waiting = dlgNew && *(DWORD*)dlgNew == waitAddress;
 		}
 	}
 
@@ -2970,11 +2970,11 @@ namespace Hooks
 		__asm {
 			CMP ECX, waitObject
 			JNE lbl_non
-			MOV config.isWaiting, 0x1
+			MOV config.ai.waiting, 0x1
 			JMP lbl_cont
 			
 			lbl_non:
-			MOV config.isWaiting, 0x0
+			MOV config.ai.waiting, 0x0
 
 			lbl_cont:
 			MOV EAX, [ESP+0x8]
@@ -2993,7 +2993,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062891A()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 			RETN 0x4
@@ -3011,7 +3011,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062F524()
 	{
 		__asm {
- 			MOV EAX, config.isWideBattle
+ 			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 			RETN
@@ -3028,7 +3028,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_00625683()
 	{
 		__asm {
- 			MOV EAX, config.isWideBattle
+ 			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 			RETN 0x4
@@ -3045,7 +3045,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_00624F2F()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 
@@ -3061,7 +3061,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062ED48()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 
@@ -3077,7 +3077,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062521D()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 			
@@ -3101,7 +3101,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062DAA8()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 			
@@ -3126,7 +3126,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062F5B8()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 			RETN
@@ -3139,7 +3139,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_00625EAE()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			POP EAX
 			ADD ECX, 0x30
@@ -3162,7 +3162,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_00625EFD()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 
@@ -3178,7 +3178,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062635D()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			POP EAX
 			ADD EDX, 0x30
@@ -3201,7 +3201,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_006263AC()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 
@@ -3217,7 +3217,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062E7FB()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			POP EAX
 			ADD ECX, 0x30
@@ -3238,7 +3238,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062E848()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 
@@ -3254,7 +3254,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062ECA9()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			POP EAX
 			ADD EDX, 0x30
@@ -3275,7 +3275,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062ECFC()
 	{
 		__asm {
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 
@@ -3295,13 +3295,13 @@ namespace Hooks
 
 	VOID __stdcall CalcWideBattle()
 	{
-		if (config.wideAllowed)
+		if (config.wide.allowed)
 		{
-			config.isWideZoomable = config.zoomed.width >= WIDE_WIDTH;
-			config.isWideBattle = config.zoomImage ? config.isWideZoomable : TRUE;
+			config.battle.zoomable = TRUE;
+			config.battle.wide = config.zoom.enabled ? config.zoom.size.width >= WIDE_WIDTH : TRUE;
 		}
 		else
-			config.isWideBattle = config.isWideZoomable = FALSE;
+			config.battle.wide = config.battle.zoomable = FALSE;
 	}
 
 	VOID __declspec(naked) hook_006244CA()
@@ -3311,7 +3311,7 @@ namespace Hooks
 
 			LEA ECX, dlgNames
 
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 
@@ -3328,7 +3328,7 @@ namespace Hooks
 		__asm {
 			LEA EDX, dlgNames
 
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 
@@ -3370,7 +3370,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_00625387()
 	{
 		__asm {
-			MOV EDX, config.isWideBattle
+			MOV EDX, config.battle.wide
 			TEST EDX, EDX
 			JZ non_wide
 
@@ -3389,7 +3389,7 @@ namespace Hooks
 		__asm {
 			SUB ESI, [EAX]
 
-			MOV EAX, config.isWideBattle
+			MOV EAX, config.battle.wide
 			TEST EAX, EAX
 			JZ non_wide
 
@@ -3549,8 +3549,8 @@ namespace Hooks
 	{
 		if (Config::IsZoomed())
 		{
-			point->x = (config.mode->width - config.zoomed.width) >> 1;
-			point->y = (config.mode->height - config.zoomed.height) >> 1;
+			point->x = (config.mode->width - config.zoom.size.width) >> 1;
+			point->y = (config.mode->height - config.zoom.size.height) >> 1;
 		}
 		else
 		{
@@ -3580,8 +3580,8 @@ namespace Hooks
 		if (Config::IsZoomed())
 		{
 			POINT offset = {
-				LONG((config.mode->width - config.zoomed.width) >> 1),
-				LONG((config.mode->height - config.zoomed.height) >> 1)
+				LONG((config.mode->width - config.zoom.size.width) >> 1),
+				LONG((config.mode->height - config.zoom.size.height) >> 1)
 			};
 
 			point->x += offset.x;
@@ -3605,7 +3605,7 @@ namespace Hooks
 			
 			POP ECX
 			MOV EAX, [ECX]
-			JMP [EAX+0x14]
+			JMP DWORD PTR [EAX+0x14]
 		}
 	}
 
@@ -4706,7 +4706,7 @@ namespace Hooks
 				size.width = (DWORD)GetSystemMetrics(SM_CXSCREEN);
 				size.height = (DWORD)GetSystemMetrics(SM_CYSCREEN);
 
-				Config::CalcZoomed(&size, &size, config.zoomFactor);
+				Config::CalcZoomed(&size, &size, config.zoom.factor);
 
 				Config::Set(CONFIG_WRAPPER, "DisplayWidth", *(INT*)&size.width);
 				Config::Set(CONFIG_WRAPPER, "DisplayHeight", *(INT*)&size.height);
@@ -4945,13 +4945,13 @@ namespace Hooks
 					size.width = (DWORD)GetSystemMetrics(SM_CXSCREEN);
 					size.height = (DWORD)GetSystemMetrics(SM_CYSCREEN);
 
-					Config::CalcZoomed(&size, &size, config.zoomFactor);
+					Config::CalcZoomed(&size, &size, config.zoom.factor);
 
 					Config::Set(CONFIG_WRAPPER, "DisplayWidth", *(INT*)&size.width);
 					Config::Set(CONFIG_WRAPPER, "DisplayHeight", *(INT*)&size.height);
 
-					config.menuZoomImage = TRUE;
-					config.zoomImage = size.width > *(DWORD*)&GAME_WIDTH && size.height > *(DWORD*)&GAME_HEIGHT;
+					config.zoom.menu = TRUE;
+					config.zoom.enabled = size.width > *(DWORD*)&GAME_WIDTH && size.height > *(DWORD*)&GAME_HEIGHT;
 					Config::Set(CONFIG_DISCIPLE, "EnableZoom", TRUE);
 				}
 				else
@@ -4965,9 +4965,9 @@ namespace Hooks
 						size.height = *(DWORD*)&GAME_HEIGHT;
 					}
 
-					config.menuZoomImage = Config::Get(CONFIG_DISCIPLE, "EnableZoom", TRUE);
+					config.zoom.menu = Config::Get(CONFIG_DISCIPLE, "EnableZoom", TRUE);
 					if (size.width > *(DWORD*)&GAME_WIDTH && size.height > *(DWORD*)&GAME_HEIGHT)
-						config.zoomImage = config.menuZoomImage;
+						config.zoom.enabled = config.zoom.menu;
 				}
 
 				config.mode = &modesList[1];
@@ -4996,15 +4996,15 @@ namespace Hooks
 					if (hookSpace->border_nop)
 					{
 						PatchNop(hookSpace->border_nop, 2);
-						config.zoomable = TRUE;
-						config.gameBorders = TRUE;
+						config.zoom.allowed = TRUE;
+						config.border.allowed = TRUE;
 					}
 					else
 					{
-						config.zoomable = FALSE;
-						config.gameBorders = FALSE;
-						config.menuZoomImage = FALSE;
-						config.zoomImage = FALSE;
+						config.zoom.allowed = FALSE;
+						config.border.allowed = FALSE;
+						config.zoom.menu = FALSE;
+						config.zoom.enabled = FALSE;
 					}
 
 					PatchByte(hookSpace->border_nop + 0x16, 0xEB); // remove internal borders
@@ -5069,12 +5069,12 @@ namespace Hooks
 				// Widescreen Battle
 				if (hookSpace->btlClass && config.mode->width >= WIDE_WIDTH && ReadDWord(hookSpace->btlClass + 2, &battleAddress))
 				{
-					config.wideHooked = TRUE;
+					config.wide.hooked = TRUE;
 
 					if (!config.isExist)
 					{
-						config.wideAllowed = TRUE;
-						Config::Set(CONFIG_WRAPPER, "WideBattle", config.wideAllowed);
+						config.wide.allowed = TRUE;
+						Config::Set(CONFIG_WRAPPER, "WideBattle", config.wide.allowed);
 					}
 
 					PatchNop(hookSpace->btlCentrBack, 2);

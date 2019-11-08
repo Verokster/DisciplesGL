@@ -25,37 +25,64 @@
 #include "stdafx.h"
 #include "StateBuffer.h"
 
-StateBuffer::StateBuffer(DWORD width, DWORD height, DWORD size, BOOL isAligned)
+StateBuffer::StateBuffer()
 {
-	this->width = LOWORD(width);
-	this->height = LOWORD(height);
+	this->data = NULL;
+	this->isAllocated = FALSE;
+}
 
-	this->data = isAligned ? AlignedAlloc(size) : MemoryAlloc(size);
+StateBuffer::StateBuffer(DWORD size)
+{
+	this->data = MemoryAlloc(size);
+	this->isAllocated = TRUE;
+
+	MemoryZero(this->data, size);
+}
+
+StateBuffer::StateBuffer(VOID* data)
+{
+	this->data = data;
+	this->isAllocated = FALSE;
+}
+
+StateBuffer::~StateBuffer()
+{
+	if (this->isAllocated)
+		MemoryFree(this->data);
+}
+
+StateBufferAligned::StateBufferAligned(DWORD size)
+{
+	this->size = { 0, 0 };
+
+	this->data = AlignedAlloc(size);
 	MemoryZero(this->data, size);
 
 	this->isReady = FALSE;
 	this->isZoomed = FALSE;
 	this->isBorder = FALSE;
 	this->isAllocated = TRUE;
-	this->isAligned = isAligned;
 }
 
-StateBuffer::StateBuffer(DWORD width, DWORD height, VOID* data)
+StateBufferAligned::~StateBufferAligned()
+{
+	if (this->isAllocated)
+	{
+		this->isAllocated = FALSE;
+		AlignedFree(this->data);
+	}
+}
+
+StateBufferBorder::StateBufferBorder(DWORD width, DWORD height, DWORD size)
+	: StateBuffer(size)
 {
 	this->width = LOWORD(width);
 	this->height = LOWORD(height);
-
-	this->data = data;
-
-	this->isReady = FALSE;
-	this->isZoomed = FALSE;
-	this->isBorder = FALSE;
-	this->isAllocated = FALSE;
-	this->isAligned = FALSE;
 }
 
-StateBuffer::~StateBuffer()
+StateBufferBorder::StateBufferBorder(DWORD width, DWORD height, VOID* data)
+	: StateBuffer(data)
 {
-	if (this->isAllocated)
-		this->isAligned ? AlignedFree(this->data) : MemoryFree(this->data);
+	this->width = LOWORD(width);
+	this->height = LOWORD(height);
 }
