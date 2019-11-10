@@ -135,6 +135,37 @@ BOOL PixelBuffer::Update(StateBufferAligned* stateBuffer)
 
 		res = TRUE;
 	}
+	else if (this->last.width == this->size.width && this->last.height == this->size.height)
+	{
+		DWORD width = this->last.width;
+		if (!this->isTrue)
+			width >>= 1;
+
+		DWORD length = width * this->last.height;
+		DWORD index = ForwardCompare((DWORD*)this->secondaryBuffer, (DWORD*)this->primaryBuffer, 0, length);
+		if (index)
+		{
+			DWORD top = (length - index) / width;
+			for (DWORD y = top; y < this->last.height; y += BLOCK_SIZE)
+			{
+				DWORD bottom = y + BLOCK_SIZE;
+				if (bottom > this->last.height)
+					bottom = this->last.height;
+
+				for (DWORD x = 0; x < this->last.width; x += BLOCK_SIZE)
+				{
+					DWORD right = x + BLOCK_SIZE;
+					if (right > this->last.width)
+						right = this->last.width;
+
+					RECT rc = { *(LONG*)&x, *(LONG*)&y, *(LONG*)&right, *(LONG*)&bottom };
+					this->UpdateBlock(&rc);
+				}
+			}
+		}
+
+		res = TRUE;
+	}
 	else
 	{
 		for (DWORD y = 0; y < this->last.height; y += BLOCK_SIZE)

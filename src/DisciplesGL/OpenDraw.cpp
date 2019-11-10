@@ -698,6 +698,8 @@ DWORD __stdcall RenderThread(LPVOID lpParameter)
 						glVersion = GL_VER_1_1;
 				}
 
+				GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
+
 				if (glVersion >= GL_VER_3_0)
 					ddraw->RenderNew();
 				else if (glVersion >= GL_VER_2_0)
@@ -750,7 +752,6 @@ VOID OpenDraw::RenderOld()
 
 	SetEvent(this->hCheckEvent);
 
-	GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 	Frame* frames = (Frame*)MemoryAlloc(frameCount * sizeof(Frame));
 	{
 		VOID* frameBuffer = AlignedAlloc(config.mode->width * config.mode->height * (!isTrueColor && glVersion > GL_VER_1_1 ? sizeof(WORD) : sizeof(DWORD)));
@@ -1101,7 +1102,6 @@ VOID OpenDraw::RenderMid()
 		{ 0, GLSL_VER_1_10, IDR_CUBIC_VERTEX_DOUBLE, IDR_CUBIC_FRAGMENT_DOUBLE }
 	};
 
-	GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 	{
 		GLuint bufferName;
 		GLGenBuffers(1, &bufferName);
@@ -1414,7 +1414,6 @@ VOID OpenDraw::RenderNew()
 		{ 0, GLSL_VER_1_30, IDR_SCALENX_VERTEX_3X, IDR_SCALENX_FRAGMENT_3X }
 	};
 
-	GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 	{
 		GLuint arrayName;
 		GLGenVertexArrays(1, &arrayName);
