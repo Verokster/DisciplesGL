@@ -29,6 +29,7 @@
 #include "StateBuffer.h"
 
 #define BLOCK_SIZE 256
+//#define BLOCK_DEBUG
 
 class PixelBuffer : public Allocation {
 private:
@@ -36,9 +37,14 @@ private:
 	Size size;
 
 	BOOL isTrue;
-	VOID* primaryBuffer;
-	VOID* secondaryBuffer;
-	BOOL UpdateBlock(RECT*);
+	DWORD* primaryBuffer;
+	DWORD* secondaryBuffer;
+
+#ifdef BLOCK_DEBUG
+	VOID* tempBuffer;
+#endif
+
+	BOOL UpdateBlock(RECT*, POINT*);
 
 public:
 	PixelBuffer(Size*, BOOL);

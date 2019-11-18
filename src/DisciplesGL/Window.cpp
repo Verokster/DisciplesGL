@@ -855,13 +855,13 @@ namespace Window
 			PAINTSTRUCT paint;
 			HDC hDc = BeginPaint(hWnd, &paint);
 			if (hDc)
-			{
 				EndPaint(hWnd, &paint);
-				return NULL;
-			}
 
-			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+			return NULL;
 		}
+
+		case WM_ERASEBKGND:
+			return TRUE;
 
 		case WM_WINDOWPOSCHANGED:
 		{
@@ -1812,6 +1812,19 @@ namespace Window
 	{
 		switch (uMsg)
 		{
+		case WM_PAINT:
+		{
+			PAINTSTRUCT paint;
+			HDC hDc = BeginPaint(hWnd, &paint);
+			if (hDc)
+				EndPaint(hWnd, &paint);
+
+			return NULL;
+		}
+
+		case WM_ERASEBKGND:
+			return TRUE;
+
 		case WM_NCHITTEST:
 		case WM_SETCURSOR:
 

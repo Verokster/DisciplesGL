@@ -2086,13 +2086,7 @@ VOID OpenDraw::RenderStart()
 				NULL);
 		}
 		Window::SetCapturePanel(this->hDraw);
-
-		SetClassLongPtr(this->hDraw, GCLP_HBRBACKGROUND, NULL);
-		RedrawWindow(this->hDraw, NULL, NULL, RDW_INVALIDATE);
 	}
-
-	SetClassLongPtr(this->hWnd, GCLP_HBRBACKGROUND, NULL);
-	RedrawWindow(this->hWnd, NULL, NULL, RDW_INVALIDATE);
 
 	this->viewport.width = rect.right;
 	this->viewport.height = rect.bottom - this->viewport.offset;
@@ -2130,6 +2124,9 @@ VOID OpenDraw::RenderStop()
 	}
 
 	this->hDraw = NULL;
+
+	/*SetClassLongPtr(this->hWnd, GCLP_HBRBACKGROUND, NULL);
+	RedrawWindow(this->hWnd, NULL, NULL, RDW_INVALIDATE);*/
 
 	ClipCursor(NULL);
 }

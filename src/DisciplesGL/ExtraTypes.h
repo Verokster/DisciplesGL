@@ -27,15 +27,15 @@
 #include "GLib.h"
 
 struct Rect {
-	INT x;
-	INT y;
-	INT width;
-	INT height;
+	LONG x;
+	LONG y;
+	LONG width;
+	LONG height;
 };
 
 struct VecSize {
-	INT width;
-	INT height;
+	LONG width;
+	LONG height;
 };
 
 struct TexSize {
@@ -53,9 +53,9 @@ struct Frame {
 
 struct Viewport {
 	BOOL refresh;
-	INT width;
-	INT height;
-	INT offset;
+	LONG width;
+	LONG height;
+	LONG offset;
 	Rect rectangle;
 	POINTFLOAT viewFactor;
 	POINTFLOAT clipFactor;
