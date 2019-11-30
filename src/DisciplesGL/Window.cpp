@@ -137,15 +137,14 @@ namespace Window
 
 		case MenuAspect:
 		{
-			EnableMenuItem(config.menu, IDM_ASPECT_RATIO, MF_BYCOMMAND | (glVersion ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-			CheckMenuItem(config.menu, IDM_ASPECT_RATIO, MF_BYCOMMAND | (glVersion && config.image.aspect ? MF_CHECKED : MF_UNCHECKED));
+			CheckMenuItem(config.menu, IDM_ASPECT_RATIO, MF_BYCOMMAND | (config.image.aspect ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
 		case MenuVSync:
 		{
-			EnableMenuItem(config.menu, IDM_VSYNC, MF_BYCOMMAND | (glVersion && WGLSwapInterval ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-			CheckMenuItem(config.menu, IDM_VSYNC, MF_BYCOMMAND | (glVersion && WGLSwapInterval && config.image.vSync ? MF_CHECKED : MF_UNCHECKED));
+			EnableMenuItem(config.menu, IDM_VSYNC, MF_BYCOMMAND | (config.gl.version.value && WGLSwapInterval ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_VSYNC, MF_BYCOMMAND | (config.gl.version.value && WGLSwapInterval && config.image.vSync ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
@@ -153,29 +152,27 @@ namespace Window
 		{
 			CheckMenuItem(config.menu, IDM_FILT_OFF, MF_BYCOMMAND | MF_UNCHECKED);
 
-			EnableMenuItem(config.menu, IDM_FILT_LINEAR, MF_BYCOMMAND | (glVersion ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			EnableMenuItem(config.menu, IDM_FILT_LINEAR, MF_BYCOMMAND | (config.gl.version.value ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			CheckMenuItem(config.menu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_UNCHECKED);
 
-			DWORD isFilters = glVersion >= GL_VER_2_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
-
-			EnableMenuItem(config.menu, IDM_FILT_HERMITE, MF_BYCOMMAND | isFilters);
+			EnableMenuItem(config.menu, IDM_FILT_HERMITE, MF_BYCOMMAND | (config.gl.version.value >= GL_VER_2_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			CheckMenuItem(config.menu, IDM_FILT_HERMITE, MF_BYCOMMAND | MF_UNCHECKED);
 
-			EnableMenuItem(config.menu, IDM_FILT_CUBIC, MF_BYCOMMAND | isFilters);
+			EnableMenuItem(config.menu, IDM_FILT_CUBIC, MF_BYCOMMAND | (config.gl.version.value >= GL_VER_2_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			CheckMenuItem(config.menu, IDM_FILT_CUBIC, MF_BYCOMMAND | MF_UNCHECKED);
 
 			switch (config.image.interpolation)
 			{
 			case InterpolateLinear:
-				CheckMenuItem(config.menu, IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
+				CheckMenuItem(config.menu, (config.gl.version.value ? IDM_FILT_LINEAR : IDM_FILT_OFF), MF_BYCOMMAND | MF_CHECKED);
 				break;
 
 			case InterpolateHermite:
-				CheckMenuItem(config.menu, isFilters == MF_ENABLED ? IDM_FILT_HERMITE : IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
+				CheckMenuItem(config.menu, config.gl.version.value >= GL_VER_2_0 ? IDM_FILT_HERMITE : (config.gl.version.value ? IDM_FILT_LINEAR : IDM_FILT_OFF), MF_BYCOMMAND | MF_CHECKED);
 				break;
 
 			case InterpolateCubic:
-				CheckMenuItem(config.menu, isFilters == MF_ENABLED ? IDM_FILT_CUBIC : IDM_FILT_LINEAR, MF_BYCOMMAND | MF_CHECKED);
+				CheckMenuItem(config.menu, config.gl.version.value >= GL_VER_2_0 ? IDM_FILT_CUBIC : (config.gl.version.value ? IDM_FILT_LINEAR : IDM_FILT_OFF), MF_BYCOMMAND | MF_CHECKED);
 				break;
 
 			default:
@@ -189,7 +186,7 @@ namespace Window
 		{
 			CheckMenuItem(config.menu, IDM_FILT_NONE, MF_BYCOMMAND | MF_UNCHECKED);
 
-			DWORD isFilters = glVersion >= GL_VER_3_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
+			DWORD isFilters = config.gl.version.value >= GL_VER_3_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
 
 			MenuItemData mScaleNx, mEagle, mXSal, mScaleHQ, mXBRZ;
 
@@ -310,8 +307,9 @@ namespace Window
 			DWORD count = sizeof(resolutionsList) / sizeof(Resolution);
 			const Resolution* resItem = resolutionsList;
 			DWORD id = IDM_RES_640_480;
-			while (count--)
+			while (count)
 			{
+				--count;
 				BOOL enabled;
 				if (config.version)
 				{
@@ -341,8 +339,9 @@ namespace Window
 		{
 			DWORD count = IDM_SPEED_3_0 - IDM_SPEED_1_0 + 1;
 			DWORD id = IDM_SPEED_1_0;
-			while (count--)
+			while (count)
 			{
+				--count;
 				CheckMenuItem(config.menu, id, MF_BYCOMMAND | (config.speed.enabled && id - IDM_SPEED_1_0 == config.speed.index || !config.speed.enabled && id == IDM_SPEED_1_0 ? MF_CHECKED : MF_UNCHECKED));
 				++id;
 			}
@@ -351,20 +350,15 @@ namespace Window
 
 		case MenuBorders:
 		{
-			if (config.version)
-			{
-				EnableMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_UNCHECKED);
-			}
-			else if (!config.resHooked || !config.zoom.allowed)
+			if (config.border.allowed)
 			{
 				EnableMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_ENABLED);
 				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | (config.border.enabled ? MF_CHECKED : MF_UNCHECKED));
 			}
 			else
 			{
-				EnableMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_ENABLED);
-				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | (config.border.enabled ? MF_CHECKED : MF_UNCHECKED));
+				EnableMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_UNCHECKED);
 			}
 		}
 		break;
@@ -375,7 +369,7 @@ namespace Window
 			mData.childId = IDM_STRETCH_OFF;
 			if (GetMenuByChildID(&mData))
 			{
-				if (config.version || !config.resHooked || !config.zoom.allowed)
+				if (!config.zoom.allowed || !config.zoom.glallow)
 				{
 					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
 					CheckMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_UNCHECKED);
@@ -383,9 +377,9 @@ namespace Window
 				else
 				{
 					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_ENABLED);
-					CheckMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (config.zoom.menu ? MF_CHECKED : MF_UNCHECKED));
+					CheckMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (config.zoom.enabled ? MF_CHECKED : MF_UNCHECKED));
 
-					UINT check = IDM_STRETCH_OFF + (config.zoom.menu ? config.zoom.value : 0);
+					UINT check = IDM_STRETCH_OFF + (config.zoom.enabled ? config.zoom.value : 0);
 					UINT count = (UINT)GetMenuItemCount(mData.hMenu);
 					for (UINT i = 0; i < count; ++i)
 					{
@@ -405,8 +399,16 @@ namespace Window
 
 		case MenuWindowType:
 		{
-			CheckMenuItem(config.menu, IDM_MODE_BORDERLESS, MF_BYCOMMAND | (config.borderless.mode ? MF_CHECKED : MF_UNCHECKED));
-			CheckMenuItem(config.menu, IDM_MODE_EXCLUSIVE, MF_BYCOMMAND | (!config.borderless.mode ? MF_CHECKED : MF_UNCHECKED));
+			MenuItemData mData;
+			mData.childId = IDM_MODE_BORDERLESS;
+			if (GetMenuByChildID(&mData))
+				EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (config.renderer != RendererGDI ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+
+			if (config.renderer != RendererGDI)
+			{
+				CheckMenuItem(config.menu, IDM_MODE_BORDERLESS, MF_BYCOMMAND | (config.borderless.mode ? MF_CHECKED : MF_UNCHECKED));
+				CheckMenuItem(config.menu, IDM_MODE_EXCLUSIVE, MF_BYCOMMAND | (!config.borderless.mode ? MF_CHECKED : MF_UNCHECKED));
+			}
 		}
 		break;
 
@@ -424,42 +426,41 @@ namespace Window
 
 		case MenuCpu:
 		{
-			CheckMenuItem(config.menu, IDM_PATCH_CPU, MF_BYCOMMAND | (config.coldCPU ? MF_CHECKED : MF_UNCHECKED));
+			EnableMenuItem(config.menu, IDM_PATCH_CPU, MF_BYCOMMAND | (config.renderer != RendererGDI && !config.singleThread ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_PATCH_CPU, MF_BYCOMMAND | (config.renderer != RendererGDI && !config.singleThread && config.coldCPU ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
 		case MenuBattle:
 		{
 			EnableMenuItem(config.menu, IDM_MODE_WIDEBATTLE, MF_BYCOMMAND | (config.wide.hooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-			CheckMenuItem(config.menu, IDM_MODE_WIDEBATTLE, MF_BYCOMMAND | (config.wide.allowed ? MF_CHECKED : MF_UNCHECKED));
+			CheckMenuItem(config.menu, IDM_MODE_WIDEBATTLE, MF_BYCOMMAND | (config.wide.hooked && config.wide.allowed ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
-		case MenuSnapshotType:
+		case MenuSnapshot:
 		{
 			EnableMenuItem(config.menu, IDM_SCR_PNG, MF_BYCOMMAND | (pnglib_create_write_struct ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-			BOOL pngChecked = config.snapshot.type == ImagePNG && pnglib_create_write_struct;
-			CheckMenuItem(config.menu, IDM_SCR_BMP, MF_BYCOMMAND | (!pngChecked ? MF_CHECKED : MF_UNCHECKED));
-			CheckMenuItem(config.menu, IDM_SCR_PNG, MF_BYCOMMAND | (pngChecked ? MF_CHECKED : MF_UNCHECKED));
-		}
-		break;
 
-		case MenuSnapshotLevel:
-		{
-			if (!pnglib_create_write_struct)
-			{
-				MenuItemData mData;
-				mData.childId = IDM_SCR_1;
-				if (GetMenuByChildID(&mData))
-					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
-			}
+			BOOL enabled = config.snapshot.type == ImagePNG && pnglib_create_write_struct;
+			CheckMenuItem(config.menu, IDM_SCR_BMP, MF_BYCOMMAND | (!enabled ? MF_CHECKED : MF_UNCHECKED));
+			CheckMenuItem(config.menu, IDM_SCR_PNG, MF_BYCOMMAND | (enabled ? MF_CHECKED : MF_UNCHECKED));
 
-			DWORD count = IDM_SCR_9 - IDM_SCR_1 + 1;
-			DWORD id = IDM_SCR_1;
-			while (count--)
+			MenuItemData mData;
+			mData.childId = IDM_SCR_1;
+			if (GetMenuByChildID(&mData))
+				EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+
+			if (enabled)
 			{
-				CheckMenuItem(config.menu, id, MF_BYCOMMAND | (pnglib_create_write_struct && id - IDM_SCR_PNG == config.snapshot.level ? MF_CHECKED : MF_UNCHECKED));
-				++id;
+				DWORD count = IDM_SCR_9 - IDM_SCR_1 + 1;
+				DWORD id = IDM_SCR_1;
+				while (count)
+				{
+					--count;
+					CheckMenuItem(config.menu, id, MF_BYCOMMAND | (pnglib_create_write_struct && id - IDM_SCR_PNG == config.snapshot.level ? MF_CHECKED : MF_UNCHECKED));
+					++id;
+				}
 			}
 		}
 		break;
@@ -487,6 +488,41 @@ namespace Window
 		}
 		break;
 
+		case MenuRenderer:
+		{
+			EnableMenuItem(config.menu, IDM_REND_GL2, MF_BYCOMMAND | (config.gl.version.real >= GL_VER_2_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			EnableMenuItem(config.menu, IDM_REND_GL3, MF_BYCOMMAND | (config.gl.version.real >= GL_VER_3_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+
+			CheckMenuItem(config.menu, IDM_REND_AUTO, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(config.menu, IDM_REND_GL1, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(config.menu, IDM_REND_GL2, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(config.menu, IDM_REND_GL3, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(config.menu, IDM_REND_GDI, MF_BYCOMMAND | MF_UNCHECKED);
+
+			switch (config.renderer)
+			{
+			case RendererOpenGL1:
+				CheckMenuItem(config.menu, IDM_REND_GL1, MF_BYCOMMAND | MF_CHECKED);
+				break;
+
+			case RendererOpenGL2:
+				CheckMenuItem(config.menu, IDM_REND_GL2, MF_BYCOMMAND | MF_CHECKED);
+				break;
+
+			case RendererOpenGL3:
+				CheckMenuItem(config.menu, IDM_REND_GL3, MF_BYCOMMAND | MF_CHECKED);
+				break;
+
+			case RendererGDI:
+				CheckMenuItem(config.menu, IDM_REND_GDI, MF_BYCOMMAND | MF_CHECKED);
+				break;
+
+			default:
+				CheckMenuItem(config.menu, IDM_REND_AUTO, MF_BYCOMMAND | MF_CHECKED);
+				break;
+			}
+		}
+
 		default:
 			break;
 		}
@@ -509,8 +545,7 @@ namespace Window
 		CheckMenu(MenuActive);
 		CheckMenu(MenuCpu);
 		CheckMenu(MenuBattle);
-		CheckMenu(MenuSnapshotType);
-		CheckMenu(MenuSnapshotLevel);
+		CheckMenu(MenuSnapshot);
 		CheckMenu(MenuMsgTimeScale);
 	}
 
@@ -522,13 +557,13 @@ namespace Window
 		if (ddraw)
 		{
 			ddraw->LoadFilterState();
-			SetEvent(ddraw->hDrawEvent);
+			ddraw->Redraw();
 		}
 	}
 
 	VOID __fastcall InterpolationChanged(HWND hWnd, InterpolationFilter filter)
 	{
-		config.image.interpolation = glVersion >= GL_VER_2_0 || filter < InterpolateHermite ? filter : InterpolateLinear;
+		config.image.interpolation = config.gl.version.value >= GL_VER_2_0 || filter < InterpolateHermite ? filter : InterpolateLinear;
 
 		{
 			CHAR format[32];
@@ -559,13 +594,13 @@ namespace Window
 			Hooks::PrintText(text);
 		}
 
-		FilterChanged(hWnd, "Interpolation", *(INT*)&config.image.interpolation);
+		FilterChanged(hWnd, "Interpolation", (INT)config.image.interpolation);
 		CheckMenu(MenuInterpolate);
 	}
 
 	VOID __fastcall UpscalingChanged(HWND hWnd, UpscalingFilter filter)
 	{
-		config.image.upscaling = glVersion >= GL_VER_3_0 ? filter : UpscaleNone;
+		config.image.upscaling = config.gl.version.value >= GL_VER_3_0 ? filter : UpscaleNone;
 
 		{
 			CHAR format[32];
@@ -612,7 +647,7 @@ namespace Window
 			Hooks::PrintText(text);
 		}
 
-		FilterChanged(hWnd, "Upscaling", *(INT*)&config.image.upscaling);
+		FilterChanged(hWnd, "Upscaling", (INT)config.image.upscaling);
 		CheckMenu(MenuUpscale);
 	}
 
@@ -651,6 +686,70 @@ namespace Window
 		UpscalingChanged(hWnd, UpscaleXRBZ);
 	}
 
+	VOID __fastcall SelectRenderer(HWND hWnd, RendererType renderer)
+	{
+		if (renderer == config.renderer)
+			return;
+
+		if (renderer == RendererGDI || config.renderer == RendererGDI)
+		{
+			Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&renderer);
+			Main::ShowInfo(IDS_INFO_RESTART);
+		}
+		else
+		{
+			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+			if (ddraw)
+				ddraw->RenderStop();
+
+			{
+				config.renderer = renderer;
+				Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&renderer);
+
+				{
+					CHAR str1[32];
+					LoadString(hDllModule, IDS_TEXT_RENDERER, str1, sizeof(str1));
+
+					DWORD id;
+					switch (config.renderer)
+					{
+					case RendererOpenGL1:
+						id = IDS_REND_GL1;
+						break;
+
+					case RendererOpenGL2:
+						id = IDS_REND_GL2;
+						break;
+
+					case RendererOpenGL3:
+						id = IDS_REND_GL3;
+						break;
+
+					case RendererGDI:
+						id = IDS_REND_GDI;
+						break;
+
+					default:
+						id = IDS_REND_AUTO;
+						break;
+					}
+
+					CHAR str2[32];
+					LoadString(hDllModule, id, str2, sizeof(str2));
+
+					CHAR text[64];
+					StrPrint(text, "%s: %s", str1, str2);
+					Hooks::PrintText(text);
+				}
+
+				CheckMenu(MenuRenderer);
+			}
+
+			if (ddraw)
+				ddraw->RenderStart();
+		}
+	}
+
 	BOOL __stdcall EnumChildProc(HWND hDlg, LPARAM lParam)
 	{
 		if ((GetWindowLong(hDlg, GWL_STYLE) & SS_ICON) == SS_ICON)
@@ -673,8 +772,7 @@ namespace Window
 				if (ddraw && !config.windowedMode)
 				{
 					ddraw->isTakeSnapshot = SnapshotClipboard;
-					if (ddraw)
-						SetEvent(ddraw->hDrawEvent);
+					ddraw->Redraw();
 
 					return TRUE;
 				}
@@ -855,13 +953,26 @@ namespace Window
 			PAINTSTRUCT paint;
 			HDC hDc = BeginPaint(hWnd, &paint);
 			if (hDc)
+			{
+				if (config.renderer == RendererGDI)
+				{
+					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+					if (ddraw)
+					{
+						ddraw->hDc = hDc;
+						ddraw->RenderGDI();
+						ddraw->hDc = NULL;
+					}
+				}
+
 				EndPaint(hWnd, &paint);
+			}
 
 			return NULL;
 		}
 
 		case WM_ERASEBKGND:
-			return TRUE;
+			return config.renderer == RendererGDI ? DefWindowProc(hWnd, uMsg, wParam, lParam) : TRUE;
 
 		case WM_WINDOWPOSCHANGED:
 		{
@@ -873,7 +984,9 @@ namespace Window
 				ddraw->viewport.width = rect.right;
 				ddraw->viewport.height = rect.bottom - ddraw->viewport.offset;
 				ddraw->viewport.refresh = TRUE;
-				SetEvent(ddraw->hDrawEvent);
+
+				if (config.renderer != RendererGDI)
+					ddraw->Redraw();
 			}
 
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
@@ -881,9 +994,12 @@ namespace Window
 
 		case WM_MOVE:
 		{
-			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-			if (ddraw)
-				SetEvent(ddraw->hDrawEvent);
+			if (config.renderer != RendererGDI)
+			{
+				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+				if (ddraw)
+					ddraw->Redraw();
+			}
 
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
@@ -899,7 +1015,9 @@ namespace Window
 				ddraw->viewport.width = LOWORD(lParam);
 				ddraw->viewport.height = HIWORD(lParam) - ddraw->viewport.offset;
 				ddraw->viewport.refresh = TRUE;
-				SetEvent(ddraw->hDrawEvent);
+
+				if (config.renderer != RendererGDI)
+					ddraw->Redraw();
 			}
 
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
@@ -915,6 +1033,7 @@ namespace Window
 			RECT max = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
 			if (!config.windowedMode && config.borderless.mode)
 				max.bottom += BORDERLESS_OFFSET;
+
 			AdjustWindowRect(&max, style, config.windowedMode);
 
 			MINMAXINFO* mmi = (MINMAXINFO*)lParam;
@@ -945,7 +1064,7 @@ namespace Window
 			{
 				ddraw->viewport.refresh = TRUE;
 
-				if (!config.windowedMode && (!config.borderless.real || !config.alwaysActive))
+				if (!config.windowedMode && config.renderer != RendererGDI && (!config.borderless.real || !config.alwaysActive))
 				{
 					if (!config.borderless.real)
 					{
@@ -1052,9 +1171,10 @@ namespace Window
 					}
 
 					isFpsChanged = TRUE;
+
 					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 					if (ddraw)
-						SetEvent(ddraw->hDrawEvent);
+						ddraw->Redraw();
 
 					return NULL;
 				}
@@ -1067,11 +1187,11 @@ namespace Window
 						break;
 
 					case InterpolateLinear:
-						InterpolationChanged(hWnd, glVersion >= GL_VER_2_0 ? InterpolateHermite : InterpolateNearest);
+						InterpolationChanged(hWnd, config.gl.version.value >= GL_VER_2_0 ? InterpolateHermite : InterpolateNearest);
 						break;
 
 					case InterpolateHermite:
-						InterpolationChanged(hWnd, glVersion >= GL_VER_2_0 ? InterpolateCubic : InterpolateNearest);
+						InterpolationChanged(hWnd, config.gl.version.value >= GL_VER_2_0 ? InterpolateCubic : InterpolateNearest);
 						break;
 
 					default:
@@ -1103,7 +1223,7 @@ namespace Window
 				}
 				else if (config.keys.zoomImage && config.keys.zoomImage + VK_F1 - 1 == wParam)
 				{
-					return WindowProc(hWnd, WM_COMMAND, IDM_STRETCH_OFF + (!config.zoom.menu ? config.zoom.value : 0), NULL);
+					return WindowProc(hWnd, WM_COMMAND, IDM_STRETCH_OFF + (!config.zoom.enabled ? config.zoom.value : 0), NULL);
 					return NULL;
 				}
 				else if (config.keys.speedToggle && config.keys.speedToggle + VK_F1 - 1 == wParam)
@@ -1282,7 +1402,7 @@ namespace Window
 				if (ddraw)
 				{
 					ddraw->viewport.refresh = TRUE;
-					SetEvent(ddraw->hDrawEvent);
+					ddraw->Redraw();
 				}
 
 				CheckMenu(MenuAspect);
@@ -1309,7 +1429,7 @@ namespace Window
 
 				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 				if (ddraw)
-					SetEvent(ddraw->hDrawEvent);
+					ddraw->Redraw();
 
 				CheckMenu(MenuVSync);
 
@@ -1414,7 +1534,7 @@ namespace Window
 
 			case IDM_RES_BORDERS:
 			{
-				if (!config.version)
+				if (config.border.allowed)
 				{
 					config.border.enabled = !config.border.enabled;
 					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.border.enabled);
@@ -1435,17 +1555,15 @@ namespace Window
 
 						OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 						if (ddraw)
-							SetEvent(ddraw->hDrawEvent);
+							ddraw->Redraw();
 					}
 					else
 						Main::ShowInfo(IDS_INFO_RESTART);
 
 					CheckMenu(MenuBorders);
-
-					return NULL;
 				}
-				else
-					return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+
+				return NULL;
 			}
 
 			case IDM_MODE_BORDERLESS:
@@ -1532,7 +1650,7 @@ namespace Window
 					Hooks::PrintText(text);
 				}
 
-				Window::CheckMenu(MenuCpu);
+				CheckMenu(MenuCpu);
 				return NULL;
 			}
 
@@ -1543,7 +1661,7 @@ namespace Window
 
 				Main::ShowInfo(IDS_INFO_NEXT_BATTLE);
 
-				Window::CheckMenu(MenuBattle);
+				CheckMenu(MenuBattle);
 				return NULL;
 			}
 
@@ -1568,9 +1686,39 @@ namespace Window
 						Hooks::PrintText(text);
 					}
 
-					Window::CheckMenu(MenuSnapshotType);
+					CheckMenu(MenuSnapshot);
 				}
 
+				return NULL;
+			}
+
+			case IDM_REND_AUTO:
+			{
+				SelectRenderer(hWnd, RendererAuto);
+				return NULL;
+			}
+
+			case IDM_REND_GL1:
+			{
+				SelectRenderer(hWnd, RendererOpenGL1);
+				return NULL;
+			}
+
+			case IDM_REND_GL2:
+			{
+				SelectRenderer(hWnd, RendererOpenGL2);
+				return NULL;
+			}
+
+			case IDM_REND_GL3:
+			{
+				SelectRenderer(hWnd, RendererOpenGL3);
+				return NULL;
+			}
+
+			case IDM_REND_GDI:
+			{
+				SelectRenderer(hWnd, RendererGDI);
 				return NULL;
 			}
 
@@ -1610,13 +1758,13 @@ namespace Window
 				}
 				else if (wParam >= IDM_STRETCH_OFF && wParam <= IDM_STRETCH_OFF + 100)
 				{
-					if (!config.version && config.resHooked && config.zoom.allowed)
+					if (config.zoom.allowed)
 					{
 						DWORD value = wParam - IDM_STRETCH_OFF;
 
 						if (value)
 						{
-							config.zoom.menu = TRUE;
+							config.zoom.enabled = TRUE;
 
 							config.zoom.value = value;
 							Config::Set(CONFIG_WRAPPER, "ZoomFactor", *(INT*)&config.zoom.value);
@@ -1625,20 +1773,16 @@ namespace Window
 							Config::CalcZoomed();
 						}
 						else
-							config.zoom.menu = FALSE;
+							config.zoom.enabled = FALSE;
 
-						config.zoom.menu = value != 0;
-						Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.zoom.menu);
-
-						if (config.mode->width > *(DWORD*)&GAME_WIDTH && config.mode->height > *(DWORD*)&GAME_HEIGHT)
-							config.zoom.enabled = config.zoom.menu;
+						Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.zoom.enabled);
 
 						{
 							CHAR str1[32];
 							LoadString(hDllModule, IDS_STRETCH, str1, sizeof(str1));
 
 							CHAR text[64];
-							if (!config.zoom.menu)
+							if (!config.zoom.enabled)
 							{
 								CHAR str2[32];
 								LoadString(hDllModule, IDS_OFF, str2, sizeof(str2));
@@ -1652,7 +1796,7 @@ namespace Window
 
 						OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 						if (ddraw)
-							SetEvent(ddraw->hDrawEvent);
+							ddraw->Redraw();
 
 						CheckMenu(MenuStretch);
 					}
@@ -1703,7 +1847,7 @@ namespace Window
 						config.snapshot.level = index;
 						Config::Set(CONFIG_WRAPPER, "ScreenshotLevel", *(INT*)&config.snapshot.level);
 
-						CheckMenu(MenuSnapshotLevel);
+						CheckMenu(MenuSnapshot);
 					}
 
 					return NULL;
@@ -1792,7 +1936,7 @@ namespace Window
 		}
 
 		default:
-			if (uMsg == WM_SNAPSHOT)
+			if (uMsg == config.msgSnapshot)
 			{
 				CHAR str[32];
 				LoadString(hDllModule, IDS_SCR_FILE, str, sizeof(str));
@@ -1800,6 +1944,18 @@ namespace Window
 				CHAR text[MAX_PATH + 36];
 				StrPrint(text, "%s: %s", str, snapshotName);
 				Hooks::PrintText(text);
+
+				return NULL;
+			}
+			else if (uMsg == config.msgMenu)
+			{
+				CheckMenu(MenuRenderer);
+				CheckMenu(MenuAspect);
+				CheckMenu(MenuVSync);
+				CheckMenu(MenuInterpolate);
+				CheckMenu(MenuUpscale);
+				CheckMenu(MenuStretch);
+				CheckMenu(MenuWindowType);
 
 				return NULL;
 			}
@@ -1812,16 +1968,6 @@ namespace Window
 	{
 		switch (uMsg)
 		{
-		case WM_PAINT:
-		{
-			PAINTSTRUCT paint;
-			HDC hDc = BeginPaint(hWnd, &paint);
-			if (hDc)
-				EndPaint(hWnd, &paint);
-
-			return NULL;
-		}
-
 		case WM_ERASEBKGND:
 			return TRUE;
 

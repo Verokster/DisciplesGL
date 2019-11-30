@@ -26,6 +26,8 @@
 #include "Main.h"
 #include "Config.h"
 #include "Hooks.h"
+#include "PngLib.h"
+#include "Resource.h"
 
 OpenDraw* drawList;
 
@@ -174,4 +176,197 @@ namespace Main
 		}
 	}
 #endif
+
+	VOID __fastcall LoadBack(VOID* buffer, DWORD width, DWORD height)
+	{
+		if (config.version || !config.resHooked)
+			return;
+
+		Stream stream;
+		MemoryZero(&stream, sizeof(Stream));
+		if (Main::LoadResource(MAKEINTRESOURCE(IDR_BACK), &stream))
+		{
+			png_structp png_ptr = pnglib_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+			png_infop info_ptr = pnglib_create_info_struct(png_ptr);
+
+			if (info_ptr)
+			{
+				pnglib_set_read_fn(png_ptr, &stream, PngLib::ReadDataFromInputStream);
+				pnglib_read_info(png_ptr, info_ptr);
+
+				if (info_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
+				{
+					DWORD infoWidth = info_ptr->width << 1;
+					DWORD infoHeight = info_ptr->height;
+					DWORD bytesInRow = (info_ptr->width << (info_ptr->pixel_depth == 4 ? 0 : 1));
+
+					BYTE* data = (BYTE*)MemoryAlloc(infoHeight * bytesInRow);
+					if (data)
+					{
+						BYTE** list = (BYTE**)MemoryAlloc(infoHeight * sizeof(BYTE*));
+						if (list)
+						{
+							BYTE** item = list;
+							BYTE* row = data;
+							DWORD count = infoHeight;
+							while (count)
+							{
+								--count;
+
+								*item++ = (BYTE*)row;
+								row += bytesInRow;
+							}
+
+							pnglib_read_image(png_ptr, list);
+							MemoryFree(list);
+
+							// tile images
+							{
+								BYTE* dstData = data + (bytesInRow >> 1);
+
+								DWORD hHeight = info_ptr->height >> 1;
+								for (DWORD i = 0; i < 2; ++i)
+								{
+									BYTE* srcData = data + !i * hHeight * bytesInRow;
+
+									DWORD count = hHeight;
+									do
+									{
+										MemoryCopy(dstData, srcData, bytesInRow >> 1);
+
+										srcData += bytesInRow;
+										dstData += bytesInRow;
+									} while (--count);
+								}
+							}
+
+							DWORD palette[256];
+							{
+								BYTE* src = (BYTE*)info_ptr->palette;
+								BYTE* dst = (BYTE*)palette;
+								DWORD count = (DWORD)info_ptr->num_palette;
+								if (count > 256)
+									count = 256;
+								while (count)
+								{
+									--count;
+									*dst++ = *src++;
+									*dst++ = *src++;
+									*dst++ = *src++;
+									*dst++ = 0xFF;
+								}
+
+								if (config.renderer == RendererGDI)
+								{
+									DWORD* pal = palette;
+									count = (DWORD)info_ptr->num_palette;
+									while (count)
+									{
+										--count;
+										*pal++ = _byteswap_ulong(_rotl(*pal, 8));
+									}
+								}
+							}
+
+							DWORD startX = DWORD(config.randPos.x % infoWidth);
+							DWORD startY = DWORD(config.randPos.y % infoHeight);
+
+							DWORD divX = width / (DWORD)infoWidth;
+							DWORD modX = width % (DWORD)infoWidth;
+							if (modX)
+								++divX;
+
+							DWORD divY = height / (DWORD)infoHeight;
+							DWORD modY = height % (DWORD)infoHeight;
+							if (modY)
+								++divY;
+
+							DWORD* dstH = (DWORD*)buffer;
+
+							DWORD divH = divY;
+							while (divH)
+							{
+								--divH;
+								DWORD cheight = !divH && modY ? modY : (DWORD)infoHeight;
+
+								DWORD* dstW = dstH;
+
+								DWORD divW = divX;
+								while (divW)
+								{
+									--divW;
+									DWORD cwidth = !divW && modX ? modX : (DWORD)infoWidth;
+
+									BYTE* srcData = data + bytesInRow * startY;
+									DWORD* dstData = dstW;
+
+									DWORD copyY = startY;
+									DWORD copyHeight = cheight;
+									while (copyHeight)
+									{
+										--copyHeight;
+										if (copyY == (DWORD)infoHeight)
+										{
+											copyY = 0;
+											srcData = data;
+										}
+										++copyY;
+
+										BYTE* src = srcData + (info_ptr->pixel_depth == 4 ? (startX >> 1) : startX);
+										DWORD* dst = dstData;
+
+										DWORD copyX = startX;
+										DWORD copyWidth = cwidth;
+										if (info_ptr->pixel_depth == 4)
+										{
+											BOOL tick = startX & 1;
+											while (copyWidth)
+											{
+												--copyWidth;
+												if (copyX == (DWORD)infoWidth)
+												{
+													copyX = 0;
+													src = srcData;
+													tick = FALSE;
+												}
+												++copyX;
+
+												*dst++ = palette[!tick ? (*src >> 4) : (*src++ & 0xF)];
+												tick = !tick;
+											}
+										}
+										else
+										{
+											while (copyWidth)
+											{
+												--copyWidth;
+												if (copyX == (DWORD)infoWidth)
+												{
+													copyX = 0;
+													src = srcData;
+												}
+												++copyX;
+
+												*dst++ = palette[*src++];
+											}
+										}
+
+										srcData += bytesInRow;
+										dstData += width;
+									}
+
+									dstW += cwidth;
+								}
+
+								dstH += cheight * width;
+							}
+						}
+						MemoryFree(data);
+					}
+				}
+			}
+
+			pnglib_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+		}
+	}
 }

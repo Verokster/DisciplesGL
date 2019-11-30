@@ -269,9 +269,6 @@ extern GLBINDRENDERBUFFER GLBindRenderbuffer;
 extern GLRENDERBUFFERSTORAGE GLRenderbufferStorage;
 extern GLFRAMEBUFFERRENDERBUFFER GLFramebufferRenderbuffer;
 
-extern DWORD glVersion;
-extern DWORD glCapsClampToEdge;
-
 namespace GL
 {
 	VOID __fastcall CreateContextAttribs(HDC hDc, HGLRC* hRc);

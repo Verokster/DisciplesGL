@@ -28,6 +28,8 @@
 #include "OpenDrawSurface.h"
 #include "OpenDrawClipper.h"
 #include "OpenDrawPalette.h"
+#include "PixelBuffer.h"
+#include "GDIData.h"
 
 class OpenDraw : public IDraw7 {
 public:
@@ -45,7 +47,6 @@ public:
 
 	HANDLE hDrawThread;
 	HANDLE hDrawEvent;
-	HANDLE hCheckEvent;
 
 	Viewport viewport;
 	DWORD clearStage;
@@ -54,6 +55,8 @@ public:
 	SnapshotType isTakeSnapshot;
 	BOOL bufferIndex;
 	DOUBLE flushTime;
+
+	GDIData* gdi;
 
 	OpenDraw(IDrawUnknown**);
 	~OpenDraw();
@@ -70,9 +73,11 @@ public:
 	VOID RenderOld();
 	VOID RenderMid();
 	VOID RenderNew();
+	VOID RenderGDI();
+	VOID Redraw();
 	VOID LoadFilterState();
 
-	VOID __fastcall ReadFrameBufer(BYTE*, DWORD, BOOL, BOOL);
+	VOID __fastcall ReadFrameBufer(BYTE*, DWORD, BOOL);
 	VOID __fastcall ReadDataBuffer(BYTE*, VOID*, Size*, DWORD, BOOL, BOOL);
 	VOID __fastcall TakeSnapshot(Size*, VOID*, BOOL);
 

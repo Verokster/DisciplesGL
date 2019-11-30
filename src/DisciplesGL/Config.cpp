@@ -112,7 +112,7 @@ namespace Config
 
 			CHAR title[256];
 			StrPrint(title, "%s (%s)", name, country);
-			
+
 			CHAR temp[256];
 			BOOL inserted = FALSE;
 			INT count = GetMenuItemCount(*hPopup);
@@ -120,7 +120,6 @@ namespace Config
 			{
 				if (GetMenuString(*hPopup, i, temp, sizeof(temp), MF_BYPOSITION))
 				{
-					INT c = StrCompare(title, temp);
 					if (StrCompare(title, temp) < 0)
 					{
 						InsertMenu(*hPopup, i, MF_STRING | MF_BYPOSITION, IDM_LOCALE_DEFAULT + localeIndex, title);
@@ -139,8 +138,6 @@ namespace Config
 
 	BOOL __fastcall Load()
 	{
-		WM_SNAPSHOT = RegisterWindowMessage("SCREENSHOT");
-
 		HMODULE hModule = GetModuleHandle(NULL);
 
 		GetModuleFileName(hModule, config.file, MAX_PATH - 1);
@@ -158,7 +155,6 @@ namespace Config
 			for (DWORD idx = 0; imports->Name; ++idx, ++imports)
 			{
 				CHAR* libraryName = (CHAR*)(base + imports->Name);
-
 				if (!StrCompareInsensitive(libraryName, "smackw32.dll"))
 				{
 					config.version = TRUE;
@@ -199,6 +195,9 @@ namespace Config
 				Config::Set(CONFIG_DISCIPLE, "DisplayMode", config.windowedMode);
 			}
 
+			config.renderer = RendererAuto;
+			Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&config.renderer);
+
 			config.hd = 1;
 			Config::Set(CONFIG_WRAPPER, "HD", config.hd);
 
@@ -209,10 +208,10 @@ namespace Config
 			Config::Set(CONFIG_WRAPPER, "ImageVSync", config.image.vSync);
 
 			config.image.interpolation = InterpolateHermite;
-			Config::Set(CONFIG_WRAPPER, "Interpolation", *(INT*)&config.image.interpolation);
+			Config::Set(CONFIG_WRAPPER, "Interpolation", (INT)config.image.interpolation);
 
 			config.image.upscaling = UpscaleNone;
-			Config::Set(CONFIG_WRAPPER, "Upscaling", *(INT*)&config.image.upscaling);
+			Config::Set(CONFIG_WRAPPER, "Upscaling", (INT)config.image.upscaling);
 
 			config.image.scaleNx = 2;
 			Config::Set(CONFIG_WRAPPER, "ScaleNx", config.image.scaleNx);
@@ -233,6 +232,9 @@ namespace Config
 			{
 				config.border.enabled = TRUE;
 				Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.border.enabled);
+
+				config.zoom.enabled = TRUE;
+				Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.zoom.enabled);
 			}
 
 			Config::Set(CONFIG_KEYS, "FpsCounter", "");
@@ -304,12 +306,18 @@ namespace Config
 				return FALSE;
 
 			config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", TRUE);
+
+			INT value = Config::Get(CONFIG_WRAPPER, "Renderer", RendererAuto);
+			config.renderer = *(RendererType*)&value;
+			if (config.renderer < RendererAuto || config.renderer > RendererGDI)
+				config.renderer = RendererAuto;
+
 			config.hd = (BOOL)Config::Get(CONFIG_WRAPPER, "HD", TRUE);
 
 			config.image.aspect = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageAspect", TRUE);
 			config.image.vSync = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageVSync", TRUE);
 
-			INT value = Config::Get(CONFIG_WRAPPER, "Interpolation", InterpolateHermite);
+			value = Config::Get(CONFIG_WRAPPER, "Interpolation", InterpolateHermite);
 			config.image.interpolation = *(InterpolationFilter*)&value;
 			if (config.image.interpolation < InterpolateNearest || config.image.interpolation > InterpolateCubic)
 				config.image.interpolation = InterpolateHermite;
@@ -340,7 +348,10 @@ namespace Config
 				config.image.xBRz = 6;
 
 			if (!config.version)
-				config.border.enabled = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+			{
+				config.border.enabled = (BOOL)Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+				config.zoom.enabled = (BOOL)Config::Get(CONFIG_DISCIPLE, "EnableZoom", TRUE);
+			}
 
 			// F1 - reserved for "About"
 			CHAR buffer[20];
@@ -467,6 +478,8 @@ namespace Config
 		config.font = (HFONT)CreateFont(16, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET,
 			OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
 			DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
+		config.msgSnapshot = RegisterWindowMessage(WM_SNAPSHOT);
+		config.msgMenu = RegisterWindowMessage(WM_CHECK_MENU);
 
 		if (config.version)
 			config.mode = modesList;
@@ -483,13 +496,18 @@ namespace Config
 
 		Config::CalcZoomed();
 
-		HMODULE hLibrary = LoadLibrary("NTDLL.dll");
-		if (hLibrary)
+		if (config.renderer != RendererGDI)
 		{
-			if (GetProcAddress(hLibrary, "wine_get_version"))
-				config.singleWindow = TRUE;
-			FreeLibrary(hLibrary);
+			HMODULE hLibrary = LoadLibrary("NTDLL.dll");
+			if (hLibrary)
+			{
+				if (GetProcAddress(hLibrary, "wine_get_version"))
+					config.singleWindow = TRUE;
+				FreeLibrary(hLibrary);
+			}
 		}
+		else
+			config.singleWindow = TRUE;
 
 		config.singleThread = TRUE;
 		DWORD processMask, systemMask;
@@ -516,6 +534,13 @@ namespace Config
 
 				processMask >>= 1;
 			} while (--count);
+		}
+
+		if (config.renderer == RendererGDI || config.singleThread)
+		{
+			config.coldCPU = FALSE;
+			config.borderless.real = FALSE;
+			config.borderless.mode = FALSE;
 		}
 
 		DEVMODE devMode;
@@ -645,18 +670,7 @@ namespace Config
 
 	BOOL __fastcall IsZoomed()
 	{
-		if (config.zoom.enabled && config.border.active)
-		{
-			if (config.battle.active)
-			{
-				if (!config.battle.wide || config.battle.zoomable)
-					return TRUE;
-			}
-			else
-				return TRUE;
-		}
-
-		return FALSE;
+		return config.zoom.glallow && config.zoom.enabled && config.border.active && (!config.battle.active || !config.battle.wide || config.battle.zoomable);
 	}
 
 	VOID __fastcall CalcZoomed(Size* dst, Size* src, FLOAT scale)

@@ -49,4 +49,6 @@ namespace Main
 #ifdef _DEBUG
 	VOID __fastcall CheckError(CHAR* file, DWORD line);
 #endif
+
+	VOID __fastcall LoadBack(VOID* buffer, DWORD width, DWORD height);
 }

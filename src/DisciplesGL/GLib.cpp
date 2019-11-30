@@ -26,6 +26,7 @@
 #include "Main.h"
 #include "Resource.h"
 #include "GLib.h"
+#include "Config.h"
 
 #define PREFIX_GL "gl"
 #define PREFIX_WGL "wgl"
@@ -112,9 +113,6 @@ GLRENDERBUFFERSTORAGE GLRenderbufferStorage;
 GLFRAMEBUFFERRENDERBUFFER GLFramebufferRenderbuffer;
 
 HMODULE hGLModule;
-
-DWORD glVersion;
-DWORD glCapsClampToEdge;
 
 namespace GL
 {
@@ -267,13 +265,13 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "RenderbufferStorage", (PROC*)&GLRenderbufferStorage);
 		LoadFunction(buffer, PREFIX_GL, "FramebufferRenderbuffer", (PROC*)&GLFramebufferRenderbuffer);
 
-		glVersion = NULL;
+		config.gl.version.value = NULL;
 		if (GLGetString)
 		{
 			CHAR* strVer = (CHAR*)GLGetString(GL_VERSION);
 			if (strVer && *strVer >= '0' && *strVer <= '9')
 			{
-				BYTE* ver = (BYTE*)&glVersion;
+				BYTE* ver = (BYTE*)&config.gl.version.value;
 
 				BOOL appears = FALSE;
 				CHAR* p = strVer;
@@ -289,38 +287,40 @@ namespace GL
 					{
 						if (*p != '.' || appears)
 						{
-							if (glVersion)
+							if (config.gl.version.value)
 							{
-								BYTE* ver = (BYTE*)&glVersion + 3;
+								BYTE* ver = (BYTE*)&config.gl.version.value + 3;
 								while (!*ver)
-									glVersion <<= 8;
+									config.gl.version.value <<= 8;
 							}
 
 							break;
 						}
 
 						appears = TRUE;
-						glVersion <<= 8;
+						config.gl.version.value <<= 8;
 						++byteIdx;
 						charIdx = 0;
 					}
 				}
 			}
 			else
-				glVersion = GL_VER_1_1;
+				config.gl.version.value = GL_VER_1_1;
 
-			if (glVersion < GL_VER_1_2)
+			if (config.gl.version.value < GL_VER_1_2)
 			{
 				CHAR* extensions = (CHAR*)GLGetString(GL_EXTENSIONS);
 				if (extensions)
-					glCapsClampToEdge = (StrStr(extensions, "GL_EXT_texture_edge_clamp") || StrStr(extensions, "GL_SGIS_texture_edge_clamp")) ? GL_CLAMP_TO_EDGE : GL_CLAMP;
+					config.gl.caps.clampToEdge = (StrStr(extensions, "GL_EXT_texture_edge_clamp") || StrStr(extensions, "GL_SGIS_texture_edge_clamp")) ? GL_CLAMP_TO_EDGE : GL_CLAMP;
 			}
 			else
-				glCapsClampToEdge = GL_CLAMP_TO_EDGE;
+				config.gl.caps.clampToEdge = GL_CLAMP_TO_EDGE;
 		}
 
-		if (!glVersion)
-			glVersion = GL_VER_1_1;
+		if (!config.gl.version.value)
+			config.gl.version.value = GL_VER_1_1;
+
+		config.gl.version.real = config.gl.version.value;
 	}
 
 	VOID __fastcall ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)

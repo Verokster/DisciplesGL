@@ -24,281 +24,349 @@
 
 #include "stdafx.h"
 #include "PixelBuffer.h"
+#include "Config.h"
 
-DWORD __forceinline ForwardCompare(DWORD* ptr1, DWORD* ptr2, DWORD slice, DWORD count)
+DWORD __declspec(naked) __fastcall ForwardCompare(DWORD count, DWORD slice, VOID* ptr1, VOID* ptr2)
 {
 	__asm {
-		MOV ECX, count
+		push ebp
+		mov ebp, esp
+		push esi
+		push edi
 
-		MOV ESI, ptr1
-		MOV EDI, ptr2
+		mov esi, ptr1
+		mov edi, ptr2
 
-		MOV EAX, slice
-		SAL EAX, 2
+		sal edx, 2
+		add esi, edx
+		add edi, edx
 
-		ADD ESI, EAX
-		ADD EDI, EAX
-
-		REPE CMPSD
-		JZ lbl_ret
-		INC ECX
+		repe cmpsd
+		jz lbl_ret
+		inc ecx
 
 		lbl_ret:
-		MOV EAX, ECX
+		mov eax, ecx
+
+		pop edi
+		pop esi
+		mov esp, ebp
+		pop ebp
+
+		retn 8
 	}
 }
 
-DWORD __forceinline BackwardCompare(DWORD* ptr1, DWORD* ptr2, DWORD slice, DWORD count)
+DWORD __declspec(naked) __fastcall BackwardCompare(DWORD count, DWORD slice, VOID* ptr1, VOID* ptr2)
 {
 	__asm {
-		MOV ECX, count
+		push ebp
+		mov ebp, esp
+		push esi
+		push edi
 
-		MOV ESI, ptr1
-		MOV EDI, ptr2
+		mov esi, ptr1
+		mov edi, ptr2
 
-		MOV EAX, slice
-		SAL EAX, 2
+		sal edx, 2
+		add esi, edx
+		add edi, edx
 
-		ADD ESI, EAX
-		ADD EDI, EAX
-
-		STD
-		REPE CMPSD
-		CLD
-		JZ lbl_ret
-		INC ECX
+		std
+		repe cmpsd
+		cld
+		jz lbl_ret
+		inc ecx
 
 		lbl_ret:
-		MOV EAX, ECX
+		mov eax, ecx
+
+		pop edi
+		pop esi
+		mov esp, ebp
+		pop ebp
+
+		retn 8
 	}
 }
 
-DWORD __forceinline ForwardCompare(DWORD* ptr1, DWORD* ptr2, DWORD slice, DWORD width, DWORD height, DWORD pitch, POINT* p)
+BOOL __declspec(naked) __fastcall ForwardCompare(DWORD width, DWORD height, DWORD pitch, DWORD slice, VOID* ptr1, VOID* ptr2, POINT* p)
 {
 	__asm {
-		MOV EAX, width
-		MOV EDX, height
+		push ebp
+		mov ebp, esp
+		sub esp, __LOCAL_SIZE
+		push ebx
+		push esi
+		push edi
 
-		MOV EBX, pitch
-		SUB EBX, EAX
-		SAL EBX, 2
+		mov height, edx
+		mov eax, ecx
 
-		MOV ESI, ptr1
-		MOV EDI, ptr2
+		mov ebx, pitch
+		sub ebx, eax
+		sal ebx, 2
 
-		MOV ECX, slice
-		SAL ECX, 2
+		mov esi, ptr1
+		mov edi, ptr2
 
-		ADD ESI, ECX
-		ADD EDI, ECX
+		mov ecx, slice
+		sal ecx, 2
+
+		add esi, ecx
+		add edi, ecx
 
 		lbl_cycle:
-			MOV ECX, EAX
-			REPE CMPSD
-			JNE lbl_break
+			mov ecx, eax
+			repe cmpsd
+			jne lbl_break
 
-			ADD ESI, EBX
-			ADD EDI, EBX
-		DEC EDX
-		JNZ lbl_cycle
+			add esi, ebx
+			add edi, ebx
+		dec edx
+		jnz lbl_cycle
 
-		XOR EAX, EAX
-		JMP lbl_ret
+		xor eax, eax
+		jmp lbl_ret
 
 		lbl_break:
-		MOV EBX, p
+		mov ebx, p
 		
-		INC ECX
-		SUB EAX, ECX
-		MOV [EBX], EAX
+		inc ecx
+		sub eax, ecx
+		mov [ebx], eax
 
-		MOV EAX, height
-		SUB EAX, EDX
-		MOV [EBX+4], EAX
+		mov eax, height
+		sub eax, edx
+		mov [ebx+4], eax
 
-		XOR EAX, EAX
-		INC EAX
+		xor eax, eax
+		inc eax
 
 		lbl_ret:
+		pop edi
+		pop esi
+		pop ebx
+		mov esp, ebp
+		pop ebp
+
+		retn 20
 	}
 }
 
-DWORD __forceinline BackwardCompare(DWORD* ptr1, DWORD* ptr2, DWORD slice, DWORD width, DWORD height, DWORD pitch, POINT* p)
+BOOL __declspec(naked) __fastcall BackwardCompare(DWORD width, DWORD height, DWORD pitch, DWORD slice, VOID* ptr1, VOID* ptr2, POINT* p)
 {
 	__asm {
-		MOV EAX, width
-		MOV EDX, height
+		push ebp
+		mov ebp, esp
+		push ebx
+		push esi
+		push edi
 
-		MOV EBX, pitch
-		SUB EBX, EAX
-		SAL EBX, 2
+		mov eax, ecx
 
-		MOV ESI, ptr1
-		MOV EDI, ptr2
+		mov ebx, pitch
+		sub ebx, eax
+		sal ebx, 2
 
-		MOV ECX, slice
-		SAL ECX, 2
+		mov esi, ptr1
+		mov edi, ptr2
 
-		ADD ESI, ECX
-		ADD EDI, ECX
+		mov ecx, slice
+		sal ecx, 2
 
-		STD
+		add esi, ecx
+		add edi, ecx
+
+		std
 
 		lbl_cycle:
-			MOV ECX, EAX
-			REPE CMPSD
-			JNZ lbl_break
+			mov ecx, eax
+			repe cmpsd
+			jnz lbl_break
 
-			SUB ESI, EBX
-			SUB EDI, EBX
-		DEC EDX
-		JNZ lbl_cycle
+			sub esi, ebx
+			sub edi, ebx
+		dec edx
+		jnz lbl_cycle
 
-		XOR EAX, EAX
-		JMP lbl_ret
+		xor eax, eax
+		jmp lbl_ret
 
 		lbl_break:
-		MOV EBX, p
+		mov ebx, p
 		
-		MOV [EBX], ECX
+		mov [ebx], ecx
 
-		DEC EDX
-		MOV [EBX+4], EDX
+		dec edx
+		mov [ebx+4], edx
 
-		XOR EAX, EAX
-		INC EAX
+		xor eax, eax
+		inc eax
 
 		lbl_ret:
-		CLD
+		cld
+		pop edi
+		pop esi
+		pop ebx
+		mov esp, ebp
+		pop ebp
+
+		retn 20
 	}
 }
 
-DWORD __forceinline ForwardCompare(DWORD* ptr1, DWORD* ptr2, DWORD slice, DWORD width, DWORD height, DWORD pitch)
+DWORD __declspec(naked) __fastcall ForwardCompare(DWORD width, DWORD height, DWORD pitch, DWORD slice, VOID* ptr1, VOID* ptr2)
 {
 	__asm {
-		MOV EAX, width
-		MOV EDX, height
+		push ebp
+		mov ebp, esp
+		sub esp, __LOCAL_SIZE
+		push ebx
+		push esi
+		push edi
 
-		MOV EBX, pitch
-		SUB EBX, EAX
-		SAL EBX, 2
+		mov width, ecx
+		mov eax, ecx
 
-		MOV ESI, ptr1
-		MOV EDI, ptr2
+		mov ebx, pitch
+		sub ebx, eax
+		sal ebx, 2
 
-		MOV ECX, slice
-		SAL ECX, 2
+		mov esi, ptr1
+		mov edi, ptr2
 
-		ADD ESI, ECX
-		ADD EDI, ECX
+		mov ecx, slice
+		sal ecx, 2
+
+		add esi, ecx
+		add edi, ecx
 
 		lbl_cycle:
-			MOV ECX, EAX
-			REPE CMPSD
-			JZ lbl_inc
+			mov ecx, eax
+			repe cmpsd
+			jz lbl_inc
 			
-			SUB EAX, ECX
-			DEC EAX
-			JZ lbl_ret
+			sub eax, ecx
+			dec eax
+			jz lbl_ret
 
-			SAL ECX, 2
-			ADD EBX, ECX
-			ADD ESI, EBX
-			ADD EDI, EBX
-			ADD EBX, 4
-			JMP lbl_cont
+			sal ecx, 2
+			add ebx, ecx
+			add esi, ebx
+			add edi, ebx
+			add ebx, 4
+			jmp lbl_cont
 
 			lbl_inc:
-			ADD ESI, EBX
-			ADD EDI, EBX
+			add esi, ebx
+			add edi, ebx
 			
 			lbl_cont:
-		DEC EDX
-		JNZ lbl_cycle
+		dec edx
+		jnz lbl_cycle
 
 		lbl_ret:
-		MOV ECX, width
-		SUB ECX, EAX
-		MOV EAX, ECX
+		mov ecx, width
+		sub ecx, eax
+		mov eax, ecx
+
+		pop edi
+		pop esi
+		pop ebx
+		mov esp, ebp
+		pop ebp
+
+		retn 16
 	}
 }
 
-DWORD __forceinline BackwardCompare(DWORD* ptr1, DWORD* ptr2, DWORD slice, DWORD width, DWORD height, DWORD pitch)
+DWORD __declspec(naked) __fastcall BackwardCompare(DWORD width, DWORD height, DWORD pitch, DWORD slice, VOID* ptr1, VOID* ptr2)
 {
 	__asm {
-		MOV EAX, width
-		MOV EDX, height
+		push ebp
+		mov ebp, esp
+		sub esp, __LOCAL_SIZE
+		push ebx
+		push esi
+		push edi
 
-		MOV EBX, pitch
-		SUB EBX, EAX
-		SAL EBX, 2
+		mov width, ecx
+		mov eax, ecx
 
-		MOV ESI, ptr1
-		MOV EDI, ptr2
+		mov ebx, pitch
+		sub ebx, eax
+		sal ebx, 2
 
-		MOV ECX, slice
-		SAL ECX, 2
+		mov esi, ptr1
+		mov edi, ptr2
 
-		ADD ESI, ECX
-		ADD EDI, ECX
+		mov ecx, slice
+		sal ecx, 2
 
-		STD
+		add esi, ecx
+		add edi, ecx
+
+		std
 
 		lbl_cycle:
-			MOV ECX, EAX
-			REPE CMPSD
-			JZ lbl_inc
+			mov ecx, eax
+			repe cmpsd
+			jz lbl_inc
 			
-			SUB EAX, ECX
-			DEC EAX
-			JZ lbl_ret
+			sub eax, ecx
+			dec eax
+			jz lbl_ret
 
-			SAL ECX, 2
-			ADD EBX, ECX
-			SUB ESI, EBX
-			SUB EDI, EBX
-			ADD EBX, 4
-			JMP lbl_cont
+			sal ecx, 2
+			add ebx, ecx
+			sub esi, ebx
+			sub edi, ebx
+			add ebx, 4
+			jmp lbl_cont
 
 			lbl_inc:
-			SUB ESI, EBX
-			SUB EDI, EBX
+			sub esi, ebx
+			sub edi, ebx
 			
 			lbl_cont:
-		DEC EDX
-		JNZ lbl_cycle
+		dec edx
+		jnz lbl_cycle
 
 		lbl_ret:
-		MOV ECX, width
-		SUB ECX, EAX
-		MOV EAX, ECX
+		mov ecx, width
+		sub ecx, eax
+		mov eax, ecx
 
-		CLD
+		cld
+
+		pop edi
+		pop esi
+		pop ebx
+		mov esp, ebp
+		pop ebp
+
+		retn 16
 	}
 }
 
-PixelBuffer::PixelBuffer(Size* size, BOOL isTrue)
+PixelBuffer::PixelBuffer(BOOL isTrue)
 {
 	this->last = { 0, 0 };
-	this->size = *size;
 	this->isTrue = isTrue;
+	this->pitch = config.mode->width;
+	if (!isTrue)
+		this->pitch >>= 1;
 
-	DWORD length = size->width * size->height * (isTrue ? sizeof(DWORD) : sizeof(WORD));
-	this->secondaryBuffer = (DWORD*)AlignedAlloc(length);
+	this->secondaryBuffer = new StateBufferAligned();
 
-#ifdef BLOCK_DEBUG
-	this->tempBuffer = AlignedAlloc(length);
-	MemoryZero(this->tempBuffer, length);
-#endif
+	this->fpsCounter = new FpsCounter(isTrue);
 }
 
 PixelBuffer::~PixelBuffer()
 {
-	AlignedFree(this->secondaryBuffer);
-
-#ifdef BLOCK_DEBUG
-	AlignedFree(this->tempBuffer);
-#endif
+	delete this->secondaryBuffer;
+	delete fpsCounter;
 }
 
 VOID PixelBuffer::Reset()
@@ -306,96 +374,92 @@ VOID PixelBuffer::Reset()
 	this->last = { 0, 0 };
 }
 
-BOOL PixelBuffer::Check(StateBufferAligned* stateBuffer)
+BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL checkOnly)
 {
+	this->primaryBuffer = *lpStateBuffer;
+
+	if (fpsState)
+		fpsCounter->Draw(this->primaryBuffer);
+
 	BOOL res = FALSE;
-	this->primaryBuffer = (DWORD*)stateBuffer->data;
-
-	if (stateBuffer->size.width != this->last.width || stateBuffer->size.height != this->last.height)
+	if (checkOnly)
 	{
-		this->last = stateBuffer->size;
-		res = TRUE;
-	}
-	else if (MemoryCompare(this->secondaryBuffer, this->primaryBuffer, stateBuffer->size.width * stateBuffer->size.height * (this->isTrue ? sizeof(DWORD) : sizeof(WORD))))
-		res = TRUE;
-
-	if (res)
-	{
-		stateBuffer->data = this->secondaryBuffer;
-		this->secondaryBuffer = this->primaryBuffer;
-	}
-
-	return res;
-}
-
-BOOL PixelBuffer::Update(StateBufferAligned* stateBuffer)
-{
-	BOOL res = FALSE;
-	this->primaryBuffer = (DWORD*)stateBuffer->data;
-
-	if (stateBuffer->size.width != this->last.width || stateBuffer->size.height != this->last.height)
-	{
-		this->last = stateBuffer->size;
-
-		if (!this->isTrue)
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)this->primaryBuffer + ((this->size.height - this->last.height) >> 1) * this->size.width + ((this->size.width - this->last.width) >> 1));
-		else
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGBA, GL_UNSIGNED_BYTE, this->primaryBuffer + ((this->size.height - this->last.height) >> 1) * this->size.width + ((this->size.width - this->last.width) >> 1));
-
-		res = TRUE;
-	}
-	else if (this->last.width == this->size.width && this->last.height == this->size.height)
-	{
-		DWORD width = this->last.width;
-		if (!this->isTrue)
-			width >>= 1;
-
-		DWORD length = width * this->last.height;
-		DWORD index = ForwardCompare((DWORD*)this->secondaryBuffer, (DWORD*)this->primaryBuffer, 0, length);
-		if (index)
+		if (this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
 		{
-#ifdef BLOCK_DEBUG
+			this->last = this->primaryBuffer->size;
+			res = TRUE;
+		}
+		else if (this->last.width == config.mode->width && this->last.height == config.mode->height)
+		{
+			if (MemoryCompare(this->secondaryBuffer->data, this->primaryBuffer->data, config.mode->width * config.mode->height * (this->isTrue ? sizeof(DWORD) : sizeof(WORD))))
+				res = TRUE;
+		}
+		else
+		{
+			DWORD left = (config.mode->width - this->last.width) >> 1;
+			DWORD top = (config.mode->height - this->last.height) >> 1;
+
+			DWORD width = this->last.width;
 			if (!this->isTrue)
-				GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, this->tempBuffer);
-			else
-				GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGBA, GL_UNSIGNED_BYTE, this->tempBuffer);
-#endif
+			{
+				width >>= 1;
+				left >>= 1;
+			}
+
+			POINT p;
+			if (ForwardCompare(width, this->last.height, this->pitch, 
+				top * this->pitch + left,
+				this->primaryBuffer->data, this->secondaryBuffer->data, &p))
+				res = TRUE;
+		}
+	}
+	else if (this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
+	{
+		this->last = this->primaryBuffer->size;
+
+		if (!this->isTrue)
+			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)this->primaryBuffer->data + ((config.mode->height - this->last.height) >> 1) * config.mode->width + ((config.mode->width - this->last.width) >> 1));
+		else
+			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGBA, GL_UNSIGNED_BYTE, (DWORD*)this->primaryBuffer->data + ((config.mode->height - this->last.height) >> 1) * config.mode->width + ((config.mode->width - this->last.width) >> 1));
+
+		res = TRUE;
+	}
+	else if (this->last.width == config.mode->width && this->last.height == config.mode->height)
+	{
+		DWORD left, right;
+		DWORD length = this->pitch * config.mode->height;
+		if ((left = ForwardCompare(length, 0, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data))
+			&& (right = BackwardCompare(length, length - 1, (DWORD*) this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data)))
+		{
+			DWORD top = (length - left) / this->pitch;
+			DWORD bottom = (right - 1) / this->pitch + 1;
 
 			POINT offset = { 0, 0 };
-
-			DWORD top = (length - index) / width;
-			for (DWORD y = top; y < this->last.height; y += BLOCK_SIZE)
+			for (DWORD y = top; y < bottom; y += BLOCK_SIZE)
 			{
-				DWORD bottom = y + BLOCK_SIZE;
-				if (bottom > this->last.height)
-					bottom = this->last.height;
+				DWORD bt = y + BLOCK_SIZE;
+				if (bt > bottom)
+					bt = bottom;
 
 				for (DWORD x = 0; x < this->last.width; x += BLOCK_SIZE)
 				{
-					DWORD right = x + BLOCK_SIZE;
-					if (right > this->last.width)
-						right = this->last.width;
+					DWORD rt = x + BLOCK_SIZE;
+					if (rt > this->last.width)
+						rt = this->last.width;
 
-					RECT rc = { *(LONG*)&x, *(LONG*)&y, *(LONG*)&right, *(LONG*)&bottom };
+					RECT rc = { *(LONG*)&x, *(LONG*)&y, *(LONG*)&rt, *(LONG*)&bt };
 					this->UpdateBlock(&rc, &offset);
 				}
 			}
-		}
 
-		res = TRUE;
+			res = TRUE;
+		}
 	}
 	else
 	{
-#ifdef BLOCK_DEBUG
-		if (!this->isTrue)
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, this->tempBuffer);
-		else
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGBA, GL_UNSIGNED_BYTE, this->tempBuffer);
-#endif
-
 		RECT offset;
-		offset.left = (this->size.width - this->last.width) >> 1;
-		offset.top = (this->size.height - this->last.height) >> 1;
+		offset.left = (config.mode->width - this->last.width) >> 1;
+		offset.top = (config.mode->height - this->last.height) >> 1;
 		offset.right = offset.left + this->last.width;
 		offset.bottom = offset.top + this->last.height;
 
@@ -420,31 +484,38 @@ BOOL PixelBuffer::Update(StateBufferAligned* stateBuffer)
 
 	if (res)
 	{
-		stateBuffer->data = this->secondaryBuffer;
+		*lpStateBuffer = this->secondaryBuffer;
 		this->secondaryBuffer = this->primaryBuffer;
+
+		if (fpsState)
+			fpsCounter->Calculate();
+		return TRUE;
+	}
+	else if (fpsState == FpsBenchmark)
+	{
+		fpsCounter->Calculate();
+		return TRUE;
 	}
 
-	return res;
+	return FALSE;
 }
 
 BOOL PixelBuffer::UpdateBlock(RECT* rect, POINT* offset)
 {
-	DWORD width = this->size.width;
 	if (!this->isTrue)
 	{
-		width >>= 1;
 		rect->left >>= 1;
 		rect->right >>= 1;
 	}
 
 	RECT rc;
-	Size dim = { rect->right - rect->left, rect->bottom - rect->top };
-	if (ForwardCompare(this->primaryBuffer, this->secondaryBuffer,
-			rect->top * width + rect->left,
-			dim.width, dim.height, width, (POINT*)&rc.left)
-		&& BackwardCompare(this->primaryBuffer, this->secondaryBuffer,
-			(rect->bottom - 1) * width + (rect->right - 1),
-			dim.width, dim.height, width, (POINT*)&rc.right))
+	Size dim = { rect->right-- - rect->left, rect->bottom-- - rect->top };
+	if (ForwardCompare(dim.width, dim.height, this->pitch, 
+		rect->top * this->pitch + rect->left,
+		this->primaryBuffer->data, this->secondaryBuffer->data, (POINT*)&rc.left)
+		&& BackwardCompare(dim.width, dim.height, this->pitch, 
+			rect->bottom * this->pitch + rect->right,
+			this->primaryBuffer->data, this->secondaryBuffer->data, (POINT*)&rc.right))
 	{
 		if (rc.left > rc.right)
 		{
@@ -458,22 +529,22 @@ BOOL PixelBuffer::UpdateBlock(RECT* rect, POINT* offset)
 		rc.top += rect->top;
 		rc.bottom += rect->top;
 
-		if (rc.bottom != rc.top)
+		LONG height = rc.bottom - rc.top;
+		if (height > 1)
 		{
 			if (rc.left != rect->left)
-				rc.left -= ForwardCompare(this->primaryBuffer, this->secondaryBuffer,
-					(rc.top + 1) * width + rect->left,
-					rc.left - rect->left, rc.bottom - rc.top, width);
+				rc.left -= ForwardCompare(rc.left - rect->left, height, this->pitch,
+					(rc.top + 1) * this->pitch + rect->left,
+					this->primaryBuffer->data, this->secondaryBuffer->data);
 
-			if (rc.right != (rect->right - 1))
-				rc.right += BackwardCompare(this->primaryBuffer, this->secondaryBuffer,
-								(rc.bottom - 1) * width + (rect->right - 1),
-								rect->right - rc.right, rc.bottom - rc.top, width)
-					- 1;
+			if (rc.right != rect->right)
+				rc.right += BackwardCompare(rect->right - rc.right, height, this->pitch,
+					(rc.bottom - 1) * this->pitch + rect->right,
+					this->primaryBuffer->data, this->secondaryBuffer->data);
 		}
 
-		Rect rect = { rc.left, rc.top, rc.right - rc.left + 1, rc.bottom - rc.top + 1 };
-		DWORD* ptr = this->primaryBuffer + rect.y * width + rect.x;
+		Rect rect = { rc.left, rc.top, rc.right - rc.left + 1, height + 1 };
+		DWORD* ptr = (DWORD*)this->primaryBuffer->data + rect.y * this->pitch + rect.x;
 
 		rect.x -= offset->x;
 		rect.y -= offset->y;

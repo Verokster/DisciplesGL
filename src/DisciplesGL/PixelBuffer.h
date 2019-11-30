@@ -27,30 +27,26 @@
 #include "Allocation.h"
 #include "ExtraTypes.h"
 #include "StateBuffer.h"
+#include "FpsCounter.h"
 
 #define BLOCK_SIZE 256
-//#define BLOCK_DEBUG
 
 class PixelBuffer : public Allocation {
 private:
 	Size last;
-	Size size;
 
 	BOOL isTrue;
-	DWORD* primaryBuffer;
-	DWORD* secondaryBuffer;
-
-#ifdef BLOCK_DEBUG
-	VOID* tempBuffer;
-#endif
+	DWORD pitch;
+	StateBufferAligned* primaryBuffer;
+	StateBufferAligned* secondaryBuffer;
+	FpsCounter* fpsCounter;
 
 	BOOL UpdateBlock(RECT*, POINT*);
 
 public:
-	PixelBuffer(Size*, BOOL);
+	PixelBuffer(BOOL);
 	~PixelBuffer();
 
 	VOID Reset();
-	BOOL Check(StateBufferAligned*);
-	BOOL Update(StateBufferAligned*);
+	BOOL Update(StateBufferAligned**, BOOL = FALSE);
 };

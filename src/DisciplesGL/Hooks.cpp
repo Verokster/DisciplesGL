@@ -37,6 +37,7 @@
 #include "IPlay4.h"
 
 #define CHECKVALUE (WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX)
+#define ALPHA_COMPONENT 0xFF000000
 
 namespace Hooks
 {
@@ -783,8 +784,10 @@ namespace Hooks
 
 					nameThunk = NULL;
 					DWORD sCount = headNT->FileHeader.NumberOfSections;
-					while (sCount--)
+					while (sCount)
 					{
+						--sCount;
+
 						if (imports->FirstThunk >= sh->VirtualAddress && imports->FirstThunk < sh->VirtualAddress + sh->Misc.VirtualSize)
 						{
 							nameThunk = PIMAGE_THUNK_DATA((DWORD)file->address + sh->PointerToRawData + imports->FirstThunk - sh->VirtualAddress);
@@ -1302,7 +1305,7 @@ namespace Hooks
 	INT __stdcall BinkCopyToBufferHook(VOID* hBnk, VOID* dest, INT pitch, DWORD height, DWORD x, DWORD y, DWORD flags)
 	{
 		isBink = TRUE;
-		return ((INT(__stdcall*)(VOID*, VOID*, INT, DWORD, DWORD, DWORD, DWORD))pBinkCopyToBuffer)(hBnk, dest, pitch << 1, height, x, y, BINKCOPYALL | BINKSURFACE32R);
+		return ((INT(__stdcall*)(VOID*, VOID*, INT, DWORD, DWORD, DWORD, DWORD))pBinkCopyToBuffer)(hBnk, dest, pitch << 1, height, x, y, BINKCOPYALL | (config.renderer == RendererGDI ? BINKSURFACE32 : BINKSURFACE32R));
 	}
 
 	BlendData blendList[32];
@@ -1364,6 +1367,19 @@ namespace Hooks
 		SIZE size;
 	} battleBgIndices;
 
+	DWORD __fastcall ConvertToRGB(DWORD color)
+	{
+		return ((color & 0x001F) << 19) | ((color & 0x07E0) << 5) | ((color & 0xF800) >> 8);
+	}
+
+	DWORD __fastcall ConvertToBGR(DWORD color)
+	{
+		return ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8);
+	}
+
+	DWORD(__fastcall* Convert565toRGB)
+	(DWORD color);
+
 	VOID __stdcall Pixel_Blit_Indexed_to_565(BYTE* srcData, DWORD srcPitch, DWORD* palette, DWORD* dstData, DWORD dstPitch, RECT* rect)
 	{
 		BYTE* lpSrc = srcData + rect->top * srcPitch;
@@ -1393,26 +1409,48 @@ namespace Hooks
 
 		DWORD width = rect->right - rect->left;
 		DWORD height = rect->bottom - rect->top;
-		do
-		{
-			BYTE* src = lpSrc;
-			DWORD* dst = lpDst;
 
-			DWORD count = width;
+		if (config.renderer == RendererGDI)
+		{
 			do
 			{
-				*dst++ = palette[*src] & 0x00FFFFFF | 0xFF000000;
-				src += srcInc;
-			} while (--count);
+				BYTE* src = lpSrc;
+				DWORD* dst = lpDst;
 
-			lpSrc += srcPitch;
-			lpDst += dstPitch;
-		} while (--height);
+				DWORD count = width;
+				do
+				{
+					*dst++ = _byteswap_ulong(_rotl(palette[*src], 8)) | ALPHA_COMPONENT;
+					src += srcInc;
+				} while (--count);
+
+				lpSrc += srcPitch;
+				lpDst += dstPitch;
+			} while (--height);
+		}
+		else
+		{
+			do
+			{
+				BYTE* src = lpSrc;
+				DWORD* dst = lpDst;
+
+				DWORD count = width;
+				do
+				{
+					*dst++ = palette[*src] | ALPHA_COMPONENT;
+					src += srcInc;
+				} while (--count);
+
+				lpSrc += srcPitch;
+				lpDst += dstPitch;
+			} while (--height);
+		}
 	}
 
 	DWORD __stdcall Pixel_ConvertPixel_565(BYTE red, BYTE green, BYTE blue)
 	{
-		return (red >> 3) | (green >> 3 << 6) | (blue >> 3 << 11);
+		return (blue >> 3) | (green >> 3 << 6) | (red >> 3 << 11);
 	}
 
 	VOID __stdcall Pixel_Blit_By_Masks(DWORD* srcData, LONG srcPitch, DWORD redMask, DWORD greenMask, DWORD blueMask, DWORD alphaMask, BYTE* dstData, LONG dstPitch, RECT* rect)
@@ -1430,18 +1468,17 @@ namespace Hooks
 		LONG height = rect->bottom - rect->top;
 		do
 		{
-			DWORD* src = srcData;
+			BYTE* src = (BYTE*)srcData;
 			BYTE* dst = dstData;
 
 			LONG width = rect->right - rect->left;
 			do
 			{
-				DWORD color = _byteswap_ulong(*src++);
-				BYTE* px = (BYTE*)&color;
+				*dst++ = *++src;
+				*dst++ = *++src;
+				*dst++ = *++src;
 
-				*dst++ = *++px;
-				*dst++ = *++px;
-				*dst++ = *++px;
+				++src;
 			} while (--width);
 
 			srcData += srcPitch;
@@ -1487,23 +1524,29 @@ namespace Hooks
 
 	VOID __stdcall Pixel_RGB_Swap(BYTE* data, LONG pitch, SIZE* size)
 	{
-		/*DWORD height = size->cy;
-  while (height--)
-  {
-          BYTE* px = data;
+		if (config.renderer == RendererGDI)
+		{
+			DWORD height = size->cy;
+			while (height)
+			{
+				--height;
 
-          DWORD width = size->cx;
-          while (width--)
-          {
-                  BYTE temp = *(px + 2);
-                  *(px + 2) = *px;
-                  *px = temp;
+				BYTE* px = data;
 
-                  px += 3;
-          }
+				DWORD width = size->cx;
+				while (width)
+				{
+					--width;
+					BYTE temp = *(px + 2);
+					*(px + 2) = *px;
+					*px = temp;
 
-          data += pitch;
-  }*/
+					px += 3;
+				}
+
+				data += pitch;
+			}
+		}
 	}
 
 	DWORD __stdcall Pixel_Blend(DWORD dstData, DWORD srcData, DWORD msk)
@@ -1533,7 +1576,7 @@ namespace Hooks
 		else
 			res = dstData;
 
-		return res | 0xFF000000;
+		return res | ALPHA_COMPONENT;
 	}
 
 	DWORD __stdcall Pixel_BlendSome(DWORD pix, BYTE b, BYTE g, BYTE r, BYTE msk)
@@ -1544,8 +1587,9 @@ namespace Hooks
 
 	VOID __stdcall Pixel_BlitBlend(DWORD* srcData, DWORD* dstData, DWORD count, BYTE* mskData)
 	{
-		while (count--)
+		while (count)
 		{
+			--count;
 			*dstData = Pixel_Blend(*dstData, *srcData, *(BYTE*)mskData);
 
 			++srcData;
@@ -1556,16 +1600,18 @@ namespace Hooks
 
 	VOID __stdcall Pixel_BlitBlendWithColorKey(BlendData* blendItem, DWORD count, DWORD colorKey)
 	{
-		colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
-		while (count--)
+		colorKey = Convert565toRGB(colorKey);
+		while (count)
 		{
+			--count;
 			DWORD* srcData = blendItem->srcData;
 			DWORD* dstData = blendItem->dstData;
 			BYTE* mskData = (BYTE*)blendItem->mskData;
 
 			DWORD length = blendItem->length;
-			while (length--)
+			while (length)
 			{
+				--length;
 				if ((*dstData & COLORKEY_AND) != colorKey)
 					*dstData = Pixel_Blend(*dstData, *srcData, *(BYTE*)mskData);
 
@@ -1583,7 +1629,7 @@ namespace Hooks
 		if (!flag || flag == 0xFF || !dst)
 			return;
 
-		colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
+		colorKey = Convert565toRGB(colorKey);
 		srcPitch >>= 1;
 		dstPitch >>= 1;
 
@@ -1594,11 +1640,13 @@ namespace Hooks
 		dstPitch -= size->cx;
 
 		DWORD height = size->cy;
-		while (height--)
+		while (height)
 		{
+			--height;
 			DWORD width = size->cx;
-			while (width--)
+			while (width)
 			{
+				--width;
 				if ((*src & COLORKEY_AND) != colorKey)
 				{
 					DWORD s = *src & 0x000000FF;
@@ -1613,7 +1661,7 @@ namespace Hooks
 					d = *dst & 0x00FF0000;
 					res |= (d + (s - d) / 2) & 0x00FF0000;
 
-					*dst = res | 0xFF000000;
+					*dst = res | ALPHA_COMPONENT;
 				}
 
 				++src;
@@ -1640,11 +1688,13 @@ namespace Hooks
 		dstPitch -= size->cx;
 
 		DWORD height = size->cy;
-		while (height--)
+		while (height)
 		{
+			--height;
 			DWORD width = size->cx;
-			while (width--)
+			while (width)
 			{
+				--width;
 				DWORD cs = *src++;
 				DWORD cd = *dst;
 
@@ -1660,7 +1710,7 @@ namespace Hooks
 				if (b > 0x00FF0000)
 					b = 0x00FF0000;
 
-				*dst++ = r | g | b | 0xFF000000;
+				*dst++ = r | g | b | ALPHA_COMPONENT;
 			}
 
 			src += srcPitch;
@@ -1683,11 +1733,13 @@ namespace Hooks
 		dstPitch -= size->cx;
 
 		DWORD height = size->cy;
-		while (height--)
+		while (height)
 		{
+			--height;
 			DWORD width = size->cx;
-			while (width--)
+			while (width)
 			{
+				--width;
 				DWORD cs = *src++;
 				DWORD cd = *dst;
 
@@ -1703,7 +1755,7 @@ namespace Hooks
 				if (b < 0)
 					b = 0;
 
-				*dst++ = r | g | b | 0xFF000000;
+				*dst++ = r | g | b | ALPHA_COMPONENT;
 			}
 
 			src += srcPitch;
@@ -1716,7 +1768,7 @@ namespace Hooks
 		if (!flag || flag == 0xFF || !dstData)
 			return;
 
-		colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
+		colorKey = Convert565toRGB(colorKey);
 		srcPitch >>= 1;
 		dstPitch >>= 1;
 
@@ -1726,8 +1778,9 @@ namespace Hooks
 		BOOL check = (~dstPos->y ^ dstPos->x) & 1;
 
 		DWORD height = size->cy;
-		while (height--)
+		while (height)
 		{
+			--height;
 			DWORD* src = srcData;
 			DWORD* dst = dstData;
 
@@ -1740,8 +1793,9 @@ namespace Hooks
 			}
 
 			width = (width + 1) >> 1;
-			while (width--)
+			while (width)
 			{
+				--width;
 				if ((*src & COLORKEY_AND) != colorKey)
 					*dst = *src;
 
@@ -1770,8 +1824,9 @@ namespace Hooks
 		BOOL check = (~dstPos->y ^ dstPos->x) & 1;
 
 		DWORD height = size->cy;
-		while (height--)
+		while (height)
 		{
+			--height;
 			DWORD* src = srcData;
 			DWORD* dst = dstData;
 
@@ -1784,8 +1839,9 @@ namespace Hooks
 			}
 
 			width = (width + 1) >> 1;
-			while (width--)
+			while (width)
 			{
+				--width;
 				if (*src & COLORKEY_AND)
 					*dst = *src;
 
@@ -1802,16 +1858,18 @@ namespace Hooks
 
 	VOID __stdcall Pixel_DoubleLighter(DWORD* data, LONG pitch, SIZE* size, DWORD colorKey, BYTE flag)
 	{
-		colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
+		colorKey = Convert565toRGB(colorKey);
 		pitch >>= 1;
 		pitch -= size->cx;
 
 		DWORD height = size->cy;
-		while (height--)
+		while (height)
 		{
+			--height;
 			DWORD width = size->cx;
-			while (width--)
+			while (width)
 			{
+				--width;
 				if ((*data & COLORKEY_AND) == colorKey)
 					*data = 0;
 				else if (flag)
@@ -1943,7 +2001,7 @@ namespace Hooks
 				{
 					if (obj->isTrueColor)
 					{
-						colorKey = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
+						colorKey = Convert565toRGB(colorKey);
 
 						DWORD srcPitch = pitch >> 1;
 						DWORD dstPitch = obj->pitch >> 1;
@@ -1951,24 +2009,48 @@ namespace Hooks
 						DWORD* srcData = (DWORD*)data + shiftY * srcPitch + shiftX;
 						DWORD* dstData = (DWORD*)obj->data + top * dstPitch + left;
 
-						do
+						if (config.renderer == RendererGDI)
 						{
-							DWORD* src = srcData;
-							DWORD* dst = dstData;
-
-							DWORD count = width;
 							do
 							{
-								if ((*src & COLORKEY_AND) != colorKey)
-									*dst = _byteswap_ulong(_rotl(*src, 8)); // swap for map objects
+								DWORD* src = srcData;
+								DWORD* dst = dstData;
 
-								++src;
-								++dst;
-							} while (--count);
+								DWORD count = width;
+								do
+								{
+									if ((*src & COLORKEY_AND) != colorKey)
+										*dst = *src;
 
-							dstData += dstPitch;
-							srcData += srcPitch;
-						} while (--height);
+									++src;
+									++dst;
+								} while (--count);
+
+								dstData += dstPitch;
+								srcData += srcPitch;
+							} while (--height);
+						}
+						else
+						{
+							do
+							{
+								DWORD* src = srcData;
+								DWORD* dst = dstData;
+
+								DWORD count = width;
+								do
+								{
+									if ((*src & COLORKEY_AND) != colorKey)
+										*dst = _byteswap_ulong(_rotl(*src, 8)); // swap for map objects
+
+									++src;
+									++dst;
+								} while (--count);
+
+								dstData += dstPitch;
+								srcData += srcPitch;
+							} while (--height);
+						}
 					}
 					else
 					{
@@ -2018,16 +2100,20 @@ namespace Hooks
 		if (obj->isTrueColor)
 		{
 			DWORD pitch = obj->pitch >> 1;
-			color = ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8) | 0xFF000000;
+			color = Convert565toRGB(color) | ALPHA_COMPONENT;
 
 			DWORD* data = (DWORD*)obj->data + rect->top * pitch + rect->left;
 			DWORD height = rect->bottom - rect->top;
-			while (height--)
+			while (height)
 			{
+				--height;
 				DWORD* ptr = data;
 				DWORD width = rect->right - rect->left;
-				while (width--)
+				while (width)
+				{
+					--width;
 					*ptr++ = color;
+				}
 
 				data += pitch;
 			}
@@ -2038,12 +2124,16 @@ namespace Hooks
 
 			BYTE* data = (BYTE*)obj->data + rect->top * pitch + rect->left;
 			DWORD height = rect->bottom - rect->top;
-			while (height--)
+			while (height)
 			{
+				--height;
 				BYTE* ptr = data;
 				DWORD width = rect->right - rect->left;
-				while (width--)
+				while (width)
+				{
+					--width;
 					*ptr++ = LOBYTE(color);
+				}
 
 				data += pitch;
 			}
@@ -2289,7 +2379,7 @@ namespace Hooks
 				{
 					DWORD* dst = dstData + dstX;
 					do
-						*dst++ = 0xFF000000;
+						*dst++ = ALPHA_COMPONENT;
 					while (--size);
 				}
 			}
@@ -2323,8 +2413,8 @@ namespace Hooks
 
 			if (Clip(&shift.x, &shift.y, &left, &top, &size.cx, &size.cy, clipper))
 			{
-				colorFill = ((colorFill & 0x001F) << 3) | ((colorFill & 0x07E0) << 5) | ((colorFill & 0xF800) << 8) | 0xFF000000;
-				colorShadow = ((colorShadow & 0x001F) << 3) | ((colorShadow & 0x07E0) << 5) | ((colorShadow & 0xF800) << 8) | 0xFF000000;
+				colorFill = Convert565toRGB(colorFill) | ALPHA_COMPONENT;
+				colorShadow = Convert565toRGB(colorShadow) | ALPHA_COMPONENT;
 
 				DWORD srcPitch = font[3];
 				BYTE* src = (BYTE*)font[4] + shift.y * srcPitch + (shift.x >> 3);
@@ -2344,8 +2434,11 @@ namespace Hooks
 					BYTE srcVal = *srcPtr;
 
 					DWORD count = 8 - mod;
-					while (count--)
+					while (count)
+					{
+						--count;
 						srcVal <<= 1;
+					}
 					DWORD mask = mod;
 
 					DWORD* dstPtr = dst;
@@ -2414,7 +2507,7 @@ namespace Hooks
 
 		if (Clip(&shift.x, &shift.y, &left, &top, &width, &height, &clipper))
 		{
-			colorFill = ((colorFill & 0x001F) << 3) | ((colorFill & 0x07E0) << 5) | ((colorFill & 0xF800) << 8) | 0xFF000000;
+			colorFill = Convert565toRGB(colorFill) | ALPHA_COMPONENT;
 
 			DWORD* dst = (DWORD*)data + top * sizePitch->cx + left;
 			do
@@ -2436,7 +2529,7 @@ namespace Hooks
 
 		if (Clip(&shift.x, &shift.y, &left, &top, &width, &height, &clipper))
 		{
-			colorFill = ((colorFill & 0x001F) << 3) | ((colorFill & 0x07E0) << 5) | ((colorFill & 0xF800) << 8) | 0xFF000000;
+			colorFill = Convert565toRGB(colorFill) | ALPHA_COMPONENT;
 
 			DWORD* dst = (DWORD*)data + top * sizePitch->cx + left;
 			do
@@ -2475,24 +2568,49 @@ namespace Hooks
 			DWORD* dstData = (DWORD*)obj->data + top * dstPitch + left;
 
 			DWORD y = 1;
-			do
-			{
-				DWORD* src = srcData;
-				DWORD* dst = dstData;
 
-				DWORD x = 3;
+			if (config.renderer == RendererGDI)
+			{
 				do
 				{
-					if ((0x4E >> ((y << 2) + x)) & 1)
-						*dst = _byteswap_ulong(_rotl(*src, 8));
+					DWORD* src = srcData;
+					DWORD* dst = dstData;
 
-					++src;
-					++dst;
-				} while (x--);
+					DWORD x = 3;
+					do
+					{
+						if ((0x4E >> ((y << 2) + x)) & 1)
+							*dst = *src;
 
-				srcData += srcPitch;
-				dstData += dstPitch;
-			} while (y--);
+						++src;
+						++dst;
+					} while (x--);
+
+					srcData += srcPitch;
+					dstData += dstPitch;
+				} while (y--);
+			}
+			else
+			{
+				do
+				{
+					DWORD* src = srcData;
+					DWORD* dst = dstData;
+
+					DWORD x = 3;
+					do
+					{
+						if ((0x4E >> ((y << 2) + x)) & 1)
+							*dst = _byteswap_ulong(_rotl(*src, 8));
+
+						++src;
+						++dst;
+					} while (x--);
+
+					srcData += srcPitch;
+					dstData += dstPitch;
+				} while (y--);
+			}
 		}
 	}
 
@@ -2512,17 +2630,17 @@ namespace Hooks
 			{
 			case 1: // selected line
 				isBlend = TRUE;
-				blend = 0xC40000;
+				blend = config.renderer == RendererGDI ? 0x000000C4 : 0x00C40000;
 				break;
 
 			case 2: // unavailable yet
 				isBlend = TRUE;
-				blend = 0x0000FF;
+				blend = config.renderer == RendererGDI ? 0x00FF0000 : 0x000000FF;
 				break;
 
 			case 3: // other line
 				isBlend = TRUE;
-				blend = 0x000000;
+				blend = 0x00000000;
 				break;
 
 			default:
@@ -2536,14 +2654,16 @@ namespace Hooks
 			DWORD* srcData = *((DWORD**)thisObj[11] + 1);
 			DWORD* dstData = (DWORD*)obj->data;
 
-			while (height--)
+			while (height)
 			{
+				--height;
 				DWORD* src = srcData;
 				DWORD* dst = dstData;
 
 				INT count = width;
-				while (count--)
+				while (count)
 				{
+					--count;
 					DWORD pix = *src;
 					if ((pix & COLORKEY_AND) != COLORKEY_CHECK)
 					{
@@ -2574,54 +2694,101 @@ namespace Hooks
 		DWORD idx = 0;
 
 		DWORD height = bottom - top;
-		while (height--)
+
+		if (config.renderer == RendererGDI)
 		{
-			DWORD* src = source;
-			DWORD* msk = mask;
-			DWORD* dst = destination;
-
-			LONG count = width;
-			while (count--)
+			while (height)
 			{
-				DWORD pix = *src;
-				if (mskData || pixData_1->exists)
-					pix = Pixel_Blend(pix, mskData ? *msk : pixData_1->color, k);
+				--height;
+				DWORD* src = source;
+				DWORD* msk = mask;
+				DWORD* dst = destination;
 
-				if (idx >= minIdx && pixData_2->exists) // color
-					pix = Pixel_Blend(pix, pixData_2->color, k);
+				LONG count = width;
+				while (count)
+				{
+					--count;
+					DWORD pix = *src;
+					if (mskData || pixData_1->exists)
+						pix = Pixel_Blend(pix, mskData ? *msk : _byteswap_ulong(_rotl(pixData_1->color, 8)), k);
 
-				*dst = pix;
+					if (idx >= minIdx && pixData_2->exists) // color
+						pix = Pixel_Blend(pix, _byteswap_ulong(_rotl(pixData_2->color, 8)), k);
 
-				++src;
-				++msk;
+					*dst = pix;
 
-				if (isMirror)
-					--dst;
-				else
-					++dst;
+					++src;
+					++msk;
+
+					if (isMirror)
+						--dst;
+					else
+						++dst;
+				}
+
+				source += srcPitch;
+				mask += mskPitch;
+				destination += dstPitch;
+
+				++idx;
 			}
+		}
+		else
+		{
+			while (height)
+			{
+				--height;
+				DWORD* src = source;
+				DWORD* msk = mask;
+				DWORD* dst = destination;
 
-			source += srcPitch;
-			mask += mskPitch;
-			destination += dstPitch;
+				LONG count = width;
+				while (count)
+				{
+					--count;
+					DWORD pix = *src;
+					if (mskData || pixData_1->exists)
+						pix = Pixel_Blend(pix, mskData ? *msk : pixData_1->color, k);
 
-			++idx;
+					if (idx >= minIdx && pixData_2->exists) // color
+						pix = Pixel_Blend(pix, pixData_2->color, k);
+
+					*dst = pix;
+
+					++src;
+					++msk;
+
+					if (isMirror)
+						--dst;
+					else
+						++dst;
+				}
+
+				source += srcPitch;
+				mask += mskPitch;
+				destination += dstPitch;
+
+				++idx;
+			}
 		}
 	}
 
 	VOID __stdcall DrawLine(BlitObject* obj, POINT* loc, DWORD count, DWORD color)
 	{
 		DWORD pitch = obj->pitch >> 1;
-		color = ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8) | 0xFF000000;
+		color = Convert565toRGB(color) | ALPHA_COMPONENT;
 
 		DWORD* data = (DWORD*)obj->data + loc->y * pitch + loc->x;
-		while (count--)
+		while (count)
+		{
+			--count;
 			*data++ = color;
+		}
 	}
 
 	DWORD __stdcall Color565toRGB(DWORD color)
 	{
-		return ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8) | 0xFF000000;
+		return Convert565toRGB(color) | ALPHA_COMPONENT;
 	}
 
 	DWORD back_005383AA;
@@ -3507,8 +3674,9 @@ namespace Hooks
 			{
 				SpritePosition* pos = (SpritePosition*)indices->lpIndices;
 				DWORD count = indices->count;
-				while (count--)
+				while (count)
 				{
+					--count;
 					pos->dstPos.x = indices->size.width - (pos->dstPos.x + pos->srcRect.width);
 					pos->srcRect.x = size->cx - (pos->srcRect.x + pos->srcRect.width);
 					++pos;
@@ -4660,8 +4828,9 @@ namespace Hooks
 		DWORD total = 0;
 		DWORD* item = lineList;
 		DWORD count = size->height;
-		while (count--)
+		while (count)
 		{
+			--count;
 			*item++ = total;
 			total += size->width;
 		}
@@ -4881,6 +5050,7 @@ namespace Hooks
 			config.randPos.y = Random();
 
 			pBinkCopyToBuffer = PatchFunction(file, "_BinkCopyToBuffer@28", BinkCopyToBufferHook);
+			Convert565toRGB = config.renderer == RendererGDI ? ConvertToBGR : ConvertToRGB;
 
 			PatchBlock(hookSpace->pixel, (VOID*)pixelFunctions, sizeof(pixelFunctions));
 
@@ -4949,10 +5119,6 @@ namespace Hooks
 
 					Config::Set(CONFIG_WRAPPER, "DisplayWidth", *(INT*)&size.width);
 					Config::Set(CONFIG_WRAPPER, "DisplayHeight", *(INT*)&size.height);
-
-					config.zoom.menu = TRUE;
-					config.zoom.enabled = size.width > *(DWORD*)&GAME_WIDTH && size.height > *(DWORD*)&GAME_HEIGHT;
-					Config::Set(CONFIG_DISCIPLE, "EnableZoom", TRUE);
 				}
 				else
 				{
@@ -4964,10 +5130,6 @@ namespace Hooks
 						size.width = *(DWORD*)&GAME_WIDTH;
 						size.height = *(DWORD*)&GAME_HEIGHT;
 					}
-
-					config.zoom.menu = Config::Get(CONFIG_DISCIPLE, "EnableZoom", TRUE);
-					if (size.width > *(DWORD*)&GAME_WIDTH && size.height > *(DWORD*)&GAME_HEIGHT)
-						config.zoom.enabled = config.zoom.menu;
 				}
 
 				config.mode = &modesList[1];
@@ -4996,19 +5158,26 @@ namespace Hooks
 					if (hookSpace->border_nop)
 					{
 						PatchNop(hookSpace->border_nop, 2);
-						config.zoom.allowed = TRUE;
-						config.border.allowed = TRUE;
+						PatchByte(hookSpace->border_nop + 0x16, 0xEB); // remove internal borders
+
+						if (config.mode->width > *(DWORD*)&GAME_WIDTH || config.mode->height > *(DWORD*)&GAME_HEIGHT)
+						{
+							config.border.inside = TRUE;
+							config.border.allowed = TRUE;
+							config.zoom.allowed = TRUE;
+						}
 					}
 					else
-					{
-						config.zoom.allowed = FALSE;
-						config.border.allowed = FALSE;
-						config.zoom.menu = FALSE;
-						config.zoom.enabled = FALSE;
-					}
+						config.border.allowed = TRUE;
 
-					PatchByte(hookSpace->border_nop + 0x16, 0xEB); // remove internal borders
-					PatchCall(hookSpace->border_hook - 3, hook_00538FEB); // ini
+					if (!config.border.allowed)
+						config.border.enabled = FALSE;
+
+					if (!config.zoom.allowed)
+						config.zoom.enabled = FALSE;
+
+					if (!hookSpace->border_nop || config.mode->width > *(DWORD*)&GAME_WIDTH || config.mode->height > *(DWORD*)&GAME_HEIGHT)
+						PatchCall(hookSpace->border_hook - 3, hook_00538FEB); // detect border
 				}
 
 				// Blit count
@@ -5153,13 +5322,7 @@ namespace Hooks
 		PIMAGE_NT_HEADERS headNT = (PIMAGE_NT_HEADERS)((BYTE*)hModule + ((PIMAGE_DOS_HEADER)hModule)->e_lfanew);
 		baseOffset = (INT)hModule - (INT)headNT->OptionalHeader.ImageBase;
 
-		{
-			CHAR path[MAX_PATH];
-			GetModuleFileName(hModule, path, MAX_PATH - 1);
-			CHAR* p = StrLastChar(path, '\\');
-			StrCopy(p, "\\DDRAW.dll");
-			PatchEntryPoint(path, FakeEntryPoint);
-		}
+		PatchEntryPoint("DDRAW.dll", FakeEntryPoint);
 
 		MappedFile file = { hModule, NULL, NULL, NULL };
 		{

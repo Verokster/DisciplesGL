@@ -24,44 +24,20 @@
 
 #pragma once
 
-#include "Allocation.h"
-#include "ExtraTypes.h"
-#include "StateBuffer.h"
+#include "FpsCounter.h"
 
-#define FPS_X 3
-#define FPS_Y 5
-#define FPS_WIDTH 16
-#define FPS_HEIGHT 24
-#define FPS_COUNT 120
-#define FPS_ACCURACY 2000
+class OpenDraw;
 
-extern FpsState fpsState;
-extern BOOL isFpsChanged;
-
-extern const WORD counters[10][FPS_HEIGHT];
-
-struct FrameItem {
-	DWORD tick;
-	DWORD span;
-};
-
-class FpsCounter : public Allocation {
+class GDIData {
 private:
-	BOOL isTrue;
-	DWORD count;
-	DWORD checkIndex;
-	DWORD currentIndex;
-	DWORD summary;
-	DWORD lastTick;
-	FrameItem* tickQueue;
-
+	HBITMAP hBmp;
+	HBITMAP hBmpBack;
+	
 public:
-	DWORD value;
+	HDC hDc;
+	HDC hDcBack;
+	FpsCounter* fpsCounter;
 
-	FpsCounter(BOOL);
-	~FpsCounter();
-
-	VOID Reset();
-	VOID Calculate();
-	VOID Draw(StateBufferAligned*);
+	GDIData();
+	~GDIData();
 };

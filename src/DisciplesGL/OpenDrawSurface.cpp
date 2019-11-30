@@ -115,8 +115,9 @@ VOID __fastcall DrawBorders(VOID* data, DWORD width, DWORD height, StateBufferBo
 	{
 		DWORD* srcData = (DWORD*)srcBuffer->data + srcY * srcBuffer->width + srcX;
 
-		while (cHeight--)
+		while (cHeight)
 		{
+			--cHeight;
 			MemoryCopy(dstData, srcData, cWidth * sizeof(DWORD));
 
 			srcData += srcBuffer->width;
@@ -125,13 +126,17 @@ VOID __fastcall DrawBorders(VOID* data, DWORD width, DWORD height, StateBufferBo
 	}
 	else
 	{
-		while (cHeight--)
+		while (cHeight)
 		{
+			--cHeight;
 			DWORD* dst = dstData;
 
 			DWORD count = cWidth;
-			while (count--)
+			while (count)
+			{
+				--count;
 				*dst++ = 0xFF000000;
+			}
 
 			dstData += width;
 		}
@@ -166,8 +171,9 @@ StateBufferBorder* __fastcall LoadBufferImage(LPSTR resourceId)
 							BYTE** item = list;
 							BYTE* row = data;
 							DWORD count = info_ptr->height;
-							while (count--)
+							while (count)
 							{
+								--count;
 								*item++ = (BYTE*)row;
 								row += info_ptr->rowbytes;
 							}
@@ -184,8 +190,9 @@ StateBufferBorder* __fastcall LoadBufferImage(LPSTR resourceId)
 
 							DWORD colors = (DWORD)info_ptr->num_palette;
 							DWORD trans = (DWORD)info_ptr->num_trans;
-							while (colors--)
+							while (colors)
 							{
+								--colors;
 								*dst++ = *src++;
 								*dst++ = *src++;
 								*dst++ = *src++;
@@ -197,6 +204,17 @@ StateBufferBorder* __fastcall LoadBufferImage(LPSTR resourceId)
 								}
 								else
 									*dst++ = 0xFF;
+							}
+
+							if (config.renderer == RendererGDI)
+							{
+								DWORD* pal = palette;
+								colors = (DWORD)info_ptr->num_palette;
+								while (colors)
+								{
+									--colors;
+									*pal++ = _byteswap_ulong(_rotl(*pal, 8));
+								}
 							}
 						}
 
@@ -253,15 +271,9 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 		this->indexBuffer = new StateBuffer(buffer);
 	else
 	{
-		bpp >>= 3;
-		if (bpp == sizeof(BYTE) && this->type == SurfacePrimary || bpp == sizeof(WORD) && config.bpp32Hooked)
-			bpp = sizeof(DWORD);
-
-		DWORD size = width * height * bpp;
-
 		if (this->type == SurfacePrimary || this->type == SurfaceSecondary)
 		{
-			StateBufferAligned* buffer = new StateBufferAligned(size);
+			StateBufferAligned* buffer = new StateBufferAligned();
 			this->indexBuffer = buffer;
 
 			buffer->isZoomed = Config::IsZoomed();
@@ -269,14 +281,20 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 				buffer->isBorder = TRUE;
 		}
 		else
-			this->indexBuffer = new StateBuffer(size);
+		{
+			bpp >>= 3;
+			if (bpp == sizeof(BYTE) && this->type == SurfacePrimary || bpp == sizeof(WORD) && config.bpp32Hooked)
+				bpp = sizeof(DWORD);
+
+			this->indexBuffer = new StateBuffer(width * height * bpp);
+		}
 
 		if (this->type == SurfacePrimary)
 		{
-			this->secondaryBuffer = new StateBufferAligned(size);
-			this->backBuffer = new StateBufferAligned(size);
+			this->secondaryBuffer = new StateBufferAligned();
+			this->backBuffer = new StateBufferAligned();
 		}
-		else if (this->type == SurfaceSecondary && config.border.allowed)
+		else if (this->type == SurfaceSecondary && config.border.inside)
 		{
 			this->secondaryBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_BORDER));
 			this->backBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_BORDER_WIDE));
@@ -311,6 +329,8 @@ VOID OpenDrawSurface::SwapBuffers()
 	*lpBuffer = this->backBuffer;
 
 	this->backBuffer = buffer;
+
+	this->ddraw->Redraw();
 }
 
 VOID OpenDrawSurface::Flush()
@@ -323,14 +343,23 @@ VOID OpenDrawSurface::Flush()
 		DWORD* dest = (DWORD*)this->backBuffer->data;
 
 		DWORD count = this->mode.width * this->mode.height;
-		do
-			*dest++ = this->attachedPalette->entries[*src++];
-		while (--count);
+
+		if (config.renderer == RendererGDI)
+		{
+			do
+				*dest++ = _byteswap_ulong(_rotl(this->attachedPalette->entries[*src++], 8));
+			while (--count);
+		}
+		else
+		{
+			do
+				*dest++ = this->attachedPalette->entries[*src++];
+			while (--count);
+		}
 
 		((StateBufferAligned*)this->backBuffer)->size = *(Size*)config.mode;
 
 		this->SwapBuffers();
-		SetEvent(this->ddraw->hDrawEvent);
 		Sleep(0);
 	}
 	else
@@ -428,7 +457,6 @@ VOID OpenDrawSurface::Flush()
 				((StateBufferAligned*)this->backBuffer)->size = surfaceBuffer->isZoomed ? config.zoom.size : *(Size*)config.mode;
 
 				this->SwapBuffers();
-				SetEvent(this->ddraw->hDrawEvent);
 
 				if (isSync)
 				{

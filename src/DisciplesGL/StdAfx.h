@@ -35,6 +35,8 @@
 #include "ExtraTypes.h"
 
 #define WC_DRAW "7903f211-51ca-4a51-9ec5-e1301db2d24d"
+#define WM_SNAPSHOT "WM_SNAPSHOT"
+#define WM_CHECK_MENU "WM_CHECK_MENU"
 #define WS_WINDOWED (WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS)
 #define WS_FULLSCREEN (WS_POPUP | WS_SYSMENU | WS_VISIBLE | WS_CLIPSIBLINGS | WS_MAXIMIZE)
 
@@ -106,8 +108,8 @@ VOID __fastcall AlignedFree(VOID* block);
 
 extern HMODULE hDllModule;
 extern HANDLE hActCtx;
-extern UINT WM_SNAPSHOT;
 extern CHAR snapshotName[];
 
 VOID LoadKernel32();
+VOID LoadGDI32();
 VOID LoadShcore();

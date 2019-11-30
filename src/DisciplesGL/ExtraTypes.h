@@ -61,6 +61,15 @@ struct Viewport {
 	POINTFLOAT clipFactor;
 };
 
+enum RendererType
+{
+	RendererAuto = 0,
+	RendererOpenGL1 = 1,
+	RendererOpenGL2 = 2,
+	RendererOpenGL3 = 3,
+	RendererGDI = 4
+};
+
 enum InterpolationFilter : BYTE
 {
 	InterpolateNearest = 0,
@@ -144,6 +153,9 @@ struct ConfigItems {
 	HMENU menu;
 	HICON icon;
 	HFONT font;
+	UINT msgSnapshot;
+	UINT msgMenu;
+	RendererType renderer;
 	BOOL hd;
 	BOOL bpp32Hooked;
 	BOOL resHooked;
@@ -161,6 +173,16 @@ struct ConfigItems {
 	} ai;
 
 	struct {
+		struct {
+			DWORD real;
+			DWORD value;
+		} version;
+		struct {
+			BOOL clampToEdge;
+		} caps;
+	} gl;
+
+	struct {
 		BOOL active;
 		BOOL wide;
 		BOOL zoomable;
@@ -168,8 +190,8 @@ struct ConfigItems {
 
 	struct {
 		BOOL allowed;
+		BOOL glallow;
 		BOOL enabled;
-		BOOL menu;
 		DWORD value;
 		FLOAT factor;
 		Size size;
@@ -177,15 +199,16 @@ struct ConfigItems {
 	} zoom;
 
 	struct {
-		BOOL real;
-		BOOL mode;
-	} borderless;
-
-	struct {
+		BOOL inside;
 		BOOL allowed;
 		BOOL enabled;
 		BOOL active;
 	} border;
+
+	struct {
+		BOOL real;
+		BOOL mode;
+	} borderless;
 
 	struct {
 		BOOL hooked;
@@ -306,9 +329,9 @@ enum MenuType
 	MenuActive,
 	MenuCpu,
 	MenuBattle,
-	MenuSnapshotType,
-	MenuSnapshotLevel,
-	MenuMsgTimeScale
+	MenuSnapshot,
+	MenuMsgTimeScale,
+	MenuRenderer
 };
 
 struct SpritePosition {
@@ -329,4 +352,9 @@ struct TimeScale {
 	DWORD lastReal;
 	DWORD lastVirt;
 	DOUBLE scale;
+};
+
+struct GdiObject {
+	HBITMAP hBmp;
+	VOID* data;
 };

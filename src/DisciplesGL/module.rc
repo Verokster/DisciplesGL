@@ -52,6 +52,8 @@ BEGIN
 	IDS_TEXT_FILT_SCALEHQ			"ScaleHQ"
 	IDS_TEXT_FILT_XBRZ				"xBRz"
 
+	IDS_TEXT_RENDERER				"Renderer"
+
 	IDS_ON							"On"
 	IDS_OFF							"Off"
 
@@ -80,10 +82,16 @@ BEGIN
 	IDS_LOCALE						"Locale"
 	IDS_LOCALE_DEFAULT				"Default"
 
-	IDS_SCR_TYPE					"Screenshots type"
+	IDS_SCR_TYPE					"Screenshot"
 	IDS_SCR_BMP						"BMP"
 	IDS_SCR_PNG						"PNG"
 	IDS_SCR_FILE					"Screenshot created"
+
+	IDS_REND_AUTO					"Auto"
+	IDS_REND_GL1					"OpenGL 1"
+	IDS_REND_GL2					"OpenGL 2"
+	IDS_REND_GL3					"OpenGL 3"
+	IDS_REND_GDI					"GDI"
 END
 
 /////////////////////////////////////////////////////////////////////////////
@@ -101,7 +109,17 @@ BEGIN
 	END
 	POPUP "&Display"
 	BEGIN
-		MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
+		POPUP "&Renderer"
+		BEGIN
+			MENUITEM "Auto",						IDM_REND_AUTO
+			MENUITEM SEPARATOR
+			MENUITEM "GDI",							IDM_REND_GDI
+			MENUITEM SEPARATOR
+			MENUITEM "OpenGL 1",					IDM_REND_GL1
+			MENUITEM "OpenGL 2",					IDM_REND_GL2
+			MENUITEM "OpenGL 3",					IDM_REND_GL3
+		END
+		MENUITEM SEPARATOR
 		POPUP "&Resolution"
 		BEGIN
 			MENUITEM "640 x 480\a(4x3)",			IDM_RES_640_480
@@ -133,6 +151,7 @@ BEGIN
 			MENUITEM "3840 x 2160\a(16x9)",			IDM_RES_3840_2160
 			MENUITEM "7680 x 4320\a(16x9)",		    IDM_RES_7680_4320
 		END
+		MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
 		MENUITEM SEPARATOR
 		MENUITEM "Enable &VSync\a",					IDM_VSYNC
 	END
@@ -247,23 +266,23 @@ BEGIN
 			MENUITEM "Default",						IDM_LOCALE_DEFAULT
 			MENUITEM SEPARATOR
 		END
-		MENUITEM SEPARATOR
-		POPUP "Screenshot &Type"
+		POPUP "Screenshot"
 		BEGIN
-			MENUITEM "BMP",							IDM_SCR_BMP
-			MENUITEM "PNG",							IDM_SCR_PNG
-		END
-		POPUP "&Compression Level"
-		BEGIN
-			MENUITEM "1 - lowest",					IDM_SCR_1
-			MENUITEM "2",							IDM_SCR_2
-			MENUITEM "3",							IDM_SCR_3
-			MENUITEM "4",							IDM_SCR_4
-			MENUITEM "5",							IDM_SCR_5
-			MENUITEM "6",							IDM_SCR_6
-			MENUITEM "7",							IDM_SCR_7
-			MENUITEM "8",							IDM_SCR_8
-			MENUITEM "9 - highest",					IDM_SCR_9
+			MENUITEM "&BMP",						IDM_SCR_BMP
+			MENUITEM "&PNG",						IDM_SCR_PNG
+			MENUITEM SEPARATOR
+			POPUP "&Level"
+			BEGIN
+				MENUITEM "1 - lowest",				IDM_SCR_1
+				MENUITEM "2",						IDM_SCR_2
+				MENUITEM "3",						IDM_SCR_3
+				MENUITEM "4",						IDM_SCR_4
+				MENUITEM "5",						IDM_SCR_5
+				MENUITEM "6",						IDM_SCR_6
+				MENUITEM "7",						IDM_SCR_7
+				MENUITEM "8",						IDM_SCR_8
+				MENUITEM "9 - highest",				IDM_SCR_9
+			END
 		END
 	END
 	POPUP "&Help"
@@ -283,7 +302,17 @@ BEGIN
 	END
 	POPUP "&Display"
 	BEGIN
-		MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
+		POPUP "&Renderer"
+		BEGIN
+			MENUITEM "Auto",						IDM_REND_AUTO
+			MENUITEM SEPARATOR
+			MENUITEM "GDI",							IDM_REND_GDI
+			MENUITEM SEPARATOR
+			MENUITEM "OpenGL 1",					IDM_REND_GL1
+			MENUITEM "OpenGL 2",					IDM_REND_GL2
+			MENUITEM "OpenGL 3",					IDM_REND_GL3
+		END
+		MENUITEM SEPARATOR
 		POPUP "&Resolution"
 		BEGIN
 			MENUITEM "640 x 480\a(4x3)",			IDM_RES_640_480
@@ -305,6 +334,7 @@ BEGIN
 			MENUITEM "1920 x 1080\a(16x9)",			IDM_RES_1920_1080
 			MENUITEM "1920 x 1200\a(16x10)",		IDM_RES_1920_1200
 		END
+		MENUITEM "Full &Screen\a",					IDM_RES_FULL_SCREEN
 		MENUITEM SEPARATOR
 		MENUITEM "Enable &VSync\a",					IDM_VSYNC
 	END
@@ -409,23 +439,23 @@ BEGIN
 			MENUITEM "Default",						IDM_LOCALE_DEFAULT
 			MENUITEM SEPARATOR
 		END
-		MENUITEM SEPARATOR
-		POPUP "Screenshot &Type"
+		POPUP "Screenshot"
 		BEGIN
-			MENUITEM "BMP",							IDM_SCR_BMP
-			MENUITEM "PNG",							IDM_SCR_PNG
-		END
-		POPUP "&Compression Level"
-		BEGIN
-			MENUITEM "1 - lowest",					IDM_SCR_1
-			MENUITEM "2",							IDM_SCR_2
-			MENUITEM "3",							IDM_SCR_3
-			MENUITEM "4",							IDM_SCR_4
-			MENUITEM "5",							IDM_SCR_5
-			MENUITEM "6",							IDM_SCR_6
-			MENUITEM "7",							IDM_SCR_7
-			MENUITEM "8",							IDM_SCR_8
-			MENUITEM "9 - highest",					IDM_SCR_9
+			MENUITEM "&BMP",						IDM_SCR_BMP
+			MENUITEM "&PNG",						IDM_SCR_PNG
+			MENUITEM SEPARATOR
+			POPUP "&Level"
+			BEGIN
+				MENUITEM "1 - lowest",				IDM_SCR_1
+				MENUITEM "2",						IDM_SCR_2
+				MENUITEM "3",						IDM_SCR_3
+				MENUITEM "4",						IDM_SCR_4
+				MENUITEM "5",						IDM_SCR_5
+				MENUITEM "6",						IDM_SCR_6
+				MENUITEM "7",						IDM_SCR_7
+				MENUITEM "8",						IDM_SCR_8
+				MENUITEM "9 - highest",				IDM_SCR_9
+			END
 		END
 	END
 	POPUP "&Help"
@@ -528,8 +558,8 @@ IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2019,11,18,1200
- PRODUCTVERSION 1,5,0,0
+ FILEVERSION 2019,11,30,1269
+ PRODUCTVERSION 1,5,2,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -545,10 +575,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2019.11.18.1200"
+			VALUE "FileVersion", "2019.11.30.1269"
 			VALUE "LegalCopyright", "© 2019 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4dll-R.dll"
-			VALUE "ProductVersion", "1.5.0"
+			VALUE "ProductVersion", "1.5.2"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

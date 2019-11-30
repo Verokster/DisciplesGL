@@ -283,12 +283,10 @@ const WORD counters[10][FPS_HEIGHT] = {
 		0xFFFC }
 };
 
-FpsCounter::FpsCounter(DWORD accuracy, VOID* tempBuffer)
+FpsCounter::FpsCounter(BOOL isTrue)
 {
-	this->accuracy = accuracy;
-	this->tempBuffer = tempBuffer;
-
-	this->count = accuracy * 10;
+	this->isTrue = isTrue;
+	this->count = FPS_ACCURACY * 10;
 	this->tickQueue = (FrameItem*)MemoryAlloc(this->count * sizeof(FrameItem));
 	this->Reset();
 }
@@ -308,12 +306,8 @@ VOID FpsCounter::Reset()
 	MemoryZero(this->tickQueue, this->count * sizeof(FrameItem));
 }
 
-VOID FpsCounter::Init()
+VOID FpsCounter::Calculate()
 {
-	this->state = fpsState;
-	if (!this->state)
-		return;
-
 	if (isFpsChanged)
 	{
 		isFpsChanged = FALSE;
@@ -321,24 +315,16 @@ VOID FpsCounter::Init()
 	}
 
 	FrameItem* tickItem = &tickQueue[this->currentIndex];
-	tickItem->init = fpsState == FpsBenchmark ? timeGetTime() : this->lastTick;
-}
+	tickItem->tick = timeGetTime();
 
-VOID FpsCounter::Calculate()
-{
-	if (!this->state)
-		return;
-
-	FrameItem* tickItem = &tickQueue[this->currentIndex];
-	tickItem->tick = this->lastTick = timeGetTime();
-
-	if (tickItem->init)
+	if (this->lastTick)
 	{
-		tickItem->span = tickItem->tick - tickItem->init;
+		tickItem->span = tickItem->tick - this->lastTick;
 		this->summary += tickItem->span;
 	}
+	this->lastTick = tickItem->tick;
 
-	DWORD check = tickItem->tick - accuracy;
+	DWORD check = tickItem->tick - FPS_ACCURACY;
 
 	DWORD total = 0;
 	if (this->checkIndex > this->currentIndex)
@@ -388,11 +374,8 @@ VOID FpsCounter::Calculate()
 	this->value = this->summary ? 1000 * total / this->summary : 0;
 }
 
-VOID FpsCounter::Draw(VOID* srcBuffer)
+VOID FpsCounter::Draw(StateBufferAligned* buffer)
 {
-	if (!this->state)
-		return;
-
 	DWORD fps = this->value;
 	DWORD digCount = 0;
 	DWORD current = fps;
@@ -402,124 +385,16 @@ VOID FpsCounter::Draw(VOID* srcBuffer)
 		current = current / 10;
 	} while (current);
 
+	Size offset = { (config.mode->width - buffer->size.width) >> 1, (config.mode->height - buffer->size.height) >> 1 };
 	DWORD slice = config.mode->width - FPS_WIDTH;
-
-	if (config.mode->bpp != 16 || config.bpp32Hooked)
+	if (this->isTrue)
 	{
-		DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
+		DWORD fpsColor = fpsState == FpsBenchmark ? (config.renderer == RendererGDI ? 0xFFFFFF00 : 0xFF00FFFF) : 0xFFFFFFFF;
 		DWORD dcount = digCount;
 		do
 		{
 			WORD* lpDig = (WORD*)counters[fps % 10];
-
-			DWORD* idx = (DWORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
-			DWORD* pix = (DWORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
-
-			DWORD height = FPS_HEIGHT;
-			do
-			{
-				WORD check = *lpDig++;
-				DWORD width = FPS_WIDTH;
-				do
-				{
-					*pix++ = (check & 1) ? fpsColor : *idx;
-					++idx;
-					check >>= 1;
-				} while (--width);
-
-				idx += slice;
-				pix += slice;
-			} while (--height);
-
-			fps = fps / 10;
-		} while (--dcount);
-
-		dcount = 4;
-		while (dcount != digCount)
-		{
-			DWORD* idx = (DWORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
-			DWORD* pix = (DWORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
-
-			DWORD height = FPS_HEIGHT;
-			do
-			{
-				DWORD width = FPS_WIDTH;
-				do
-					*pix++ = *idx++;
-				while (--width);
-
-				idx += slice;
-				pix += slice;
-			} while (--height);
-
-			--dcount;
-		}
-
-		GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, this->tempBuffer);
-	}
-	else if (glVersion > GL_VER_1_1)
-	{
-		WORD fpsColor = fpsState == FpsBenchmark ? 0xFFE0 : 0xFFFF;
-		DWORD dcount = digCount;
-		do
-		{
-			WORD* lpDig = (WORD*)counters[fps % 10];
-
-			WORD* idx = (WORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
-			WORD* pix = (WORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
-
-			DWORD height = FPS_HEIGHT;
-			do
-			{
-				WORD check = *lpDig++;
-				DWORD width = FPS_WIDTH;
-				do
-				{
-					*pix++ = (check & 1) ? fpsColor : *idx;
-					++idx;
-					check >>= 1;
-				} while (--width);
-
-				idx += slice;
-				pix += slice;
-			} while (--height);
-
-			fps = fps / 10;
-		} while (--dcount);
-
-		dcount = 4;
-		while (dcount != digCount)
-		{
-			WORD* idx = (WORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
-			WORD* pix = (WORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
-
-			DWORD height = FPS_HEIGHT;
-			do
-			{
-				DWORD width = FPS_WIDTH;
-				do
-					*pix++ = *idx++;
-				while (--width);
-
-				idx += slice;
-				pix += slice;
-			} while (--height);
-
-			--dcount;
-		}
-
-		GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, this->tempBuffer);
-	}
-	else
-	{
-		DWORD fpsColor = fpsState == FpsBenchmark ? 0xFF00FFFF : 0xFFFFFFFF;
-		DWORD dcount = digCount;
-		do
-		{
-			WORD* lpDig = (WORD*)counters[fps % 10];
-
-			WORD* idx = (WORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
-			DWORD* pix = (DWORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
+			DWORD* idx = (DWORD*)buffer->data + (offset.height + FPS_Y) * config.mode->width + offset.width + FPS_X + FPS_WIDTH * (dcount - 1);
 
 			DWORD height = FPS_HEIGHT;
 			do
@@ -529,48 +404,45 @@ VOID FpsCounter::Draw(VOID* srcBuffer)
 				do
 				{
 					if (check & 1)
-						*pix = fpsColor;
-					else
-					{
-						WORD px = *idx;
-						*pix = ((px & 0xF800) >> 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 19);
-					}
+						*idx = fpsColor;
 
-					++pix;
 					++idx;
 					check >>= 1;
 				} while (--width);
 
 				idx += slice;
-				pix += slice;
 			} while (--height);
 
 			fps = fps / 10;
 		} while (--dcount);
-
-		dcount = 4;
-		while (dcount != digCount)
+	}
+	else if (config.gl.version.value > GL_VER_1_1)
+	{
+		WORD fpsColor = fpsState == FpsBenchmark ? 0xFFE0 : 0xFFFF;
+		DWORD dcount = digCount;
+		do
 		{
-			WORD* idx = (WORD*)srcBuffer + FPS_Y * config.mode->width + FPS_X + FPS_WIDTH * (dcount - 1);
-			DWORD* pix = (DWORD*)this->tempBuffer + FPS_WIDTH * (dcount - 1);
+			WORD* lpDig = (WORD*)counters[fps % 10];
+			WORD* idx = (WORD*)buffer->data + (offset.height + FPS_Y) * config.mode->width + offset.width + FPS_X + FPS_WIDTH * (dcount - 1);
 
 			DWORD height = FPS_HEIGHT;
 			do
 			{
+				WORD check = *lpDig++;
 				DWORD width = FPS_WIDTH;
 				do
 				{
-					WORD px = *idx++;
-					*pix++ = ((px & 0xF800) >> 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 19);
+					if (check & 1)
+						*idx = fpsColor;
+
+					++idx;
+					check >>= 1;
 				} while (--width);
 
 				idx += slice;
-				pix += slice;
 			} while (--height);
 
-			--dcount;
-		}
-
-		GLTexSubImage2D(GL_TEXTURE_2D, 0, FPS_X, FPS_Y, FPS_WIDTH * 4, FPS_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, this->tempBuffer);
+			fps = fps / 10;
+		} while (--dcount);
 	}
 }

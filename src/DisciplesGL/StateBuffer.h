@@ -38,14 +38,18 @@ public:
 };
 
 class StateBufferAligned : public StateBuffer {
+private:
+	HBITMAP hBmp;
+
 public:
 	BOOL isReady;
 	BOOL isZoomed;
 	BOOL isBorder;
+	HDC hDc;
 
 	Size size;
 
-	StateBufferAligned(DWORD size);
+	StateBufferAligned();
 	~StateBufferAligned();
 };
 
