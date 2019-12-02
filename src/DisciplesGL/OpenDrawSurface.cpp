@@ -135,7 +135,7 @@ VOID __fastcall DrawBorders(VOID* data, DWORD width, DWORD height, StateBufferBo
 			while (count)
 			{
 				--count;
-				*dst++ = 0xFF000000;
+				*dst++ = ALPHA_COMPONENT;
 			}
 
 			dstData += width;
@@ -622,7 +622,7 @@ HRESULT __stdcall OpenDrawSurface::SetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDC
 	{
 		DWORD colorKey = lpDDColorKey->dwColorSpaceLowValue;
 		this->colorKey.dwColorSpaceLowValue = colorKey;
-		this->colorKey.dwColorSpaceHighValue = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8);
+		this->colorKey.dwColorSpaceHighValue = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8) | ALPHA_COMPONENT;
 	}
 	else
 	{
@@ -729,7 +729,7 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 				{
 					DWORD cWidth = width;
 					do
-						*dst++ = *src++ | 0xFF000000;
+						*dst++ = *src++ | ALPHA_COMPONENT;
 					while (--cWidth);
 
 					src += sWidth;
@@ -812,7 +812,7 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 					DWORD count = width;
 					do
 					{
-						if ((*src & 0x00F8FCF8) != colorKey)
+						if ((*src & COLORKEY_AND) != colorKey)
 							*dst = *src;
 
 						++src;

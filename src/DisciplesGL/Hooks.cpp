@@ -37,7 +37,6 @@
 #include "IPlay4.h"
 
 #define CHECKVALUE (WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX)
-#define ALPHA_COMPONENT 0xFF000000
 
 namespace Hooks
 {
@@ -1297,9 +1296,6 @@ namespace Hooks
 	}
 
 #pragma region 32 BPP
-#define COLORKEY_AND 0x00F8FCF8
-#define COLORKEY_CHECK 0x00F800F8
-
 	BOOL isBink;
 	DWORD pBinkCopyToBuffer;
 	INT __stdcall BinkCopyToBufferHook(VOID* hBnk, VOID* dest, INT pitch, DWORD height, DWORD x, DWORD y, DWORD flags)
@@ -1369,12 +1365,12 @@ namespace Hooks
 
 	DWORD __fastcall ConvertToRGB(DWORD color)
 	{
-		return ((color & 0x001F) << 19) | ((color & 0x07E0) << 5) | ((color & 0xF800) >> 8);
+		return ((color & 0x001F) << 19) | ((color & 0x07E0) << 5) | ((color & 0xF800) >> 8) | ALPHA_COMPONENT;
 	}
 
 	DWORD __fastcall ConvertToBGR(DWORD color)
 	{
-		return ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8);
+		return ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8) | ALPHA_COMPONENT;
 	}
 
 	DWORD(__fastcall* Convert565toRGB)
@@ -2100,7 +2096,7 @@ namespace Hooks
 		if (obj->isTrueColor)
 		{
 			DWORD pitch = obj->pitch >> 1;
-			color = Convert565toRGB(color) | ALPHA_COMPONENT;
+			color = Convert565toRGB(color);
 
 			DWORD* data = (DWORD*)obj->data + rect->top * pitch + rect->left;
 			DWORD height = rect->bottom - rect->top;
@@ -2413,8 +2409,8 @@ namespace Hooks
 
 			if (Clip(&shift.x, &shift.y, &left, &top, &size.cx, &size.cy, clipper))
 			{
-				colorFill = Convert565toRGB(colorFill) | ALPHA_COMPONENT;
-				colorShadow = Convert565toRGB(colorShadow) | ALPHA_COMPONENT;
+				colorFill = Convert565toRGB(colorFill);
+				colorShadow = Convert565toRGB(colorShadow);
 
 				DWORD srcPitch = font[3];
 				BYTE* src = (BYTE*)font[4] + shift.y * srcPitch + (shift.x >> 3);
@@ -2507,7 +2503,7 @@ namespace Hooks
 
 		if (Clip(&shift.x, &shift.y, &left, &top, &width, &height, &clipper))
 		{
-			colorFill = Convert565toRGB(colorFill) | ALPHA_COMPONENT;
+			colorFill = Convert565toRGB(colorFill);
 
 			DWORD* dst = (DWORD*)data + top * sizePitch->cx + left;
 			do
@@ -2529,7 +2525,7 @@ namespace Hooks
 
 		if (Clip(&shift.x, &shift.y, &left, &top, &width, &height, &clipper))
 		{
-			colorFill = Convert565toRGB(colorFill) | ALPHA_COMPONENT;
+			colorFill = Convert565toRGB(colorFill);
 
 			DWORD* dst = (DWORD*)data + top * sizePitch->cx + left;
 			do
@@ -2776,7 +2772,7 @@ namespace Hooks
 	VOID __stdcall DrawLine(BlitObject* obj, POINT* loc, DWORD count, DWORD color)
 	{
 		DWORD pitch = obj->pitch >> 1;
-		color = Convert565toRGB(color) | ALPHA_COMPONENT;
+		color = Convert565toRGB(color);
 
 		DWORD* data = (DWORD*)obj->data + loc->y * pitch + loc->x;
 		while (count)
@@ -2788,7 +2784,7 @@ namespace Hooks
 
 	DWORD __stdcall Color565toRGB(DWORD color)
 	{
-		return Convert565toRGB(color) | ALPHA_COMPONENT;
+		return Convert565toRGB(color);
 	}
 
 	DWORD back_005383AA;
