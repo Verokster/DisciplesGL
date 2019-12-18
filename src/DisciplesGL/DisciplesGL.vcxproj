@@ -80,6 +80,7 @@
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2|Win32'">
     <Midl>
@@ -226,6 +227,9 @@
       <SetChecksum>true</SetChecksum>
     </Link>
     <Bscmake />
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Allocation.cpp" />
@@ -237,6 +241,7 @@
     <ClCompile Include="IDrawSurface7.cpp" />
     <ClCompile Include="IDrawUnknown.cpp" />
     <ClCompile Include="IPlay4.cpp" />
+    <ClCompile Include="MappedFile.cpp" />
     <ClCompile Include="OpenDraw.cpp" />
     <ClCompile Include="OpenDrawClipper.cpp" />
     <ClCompile Include="OpenDrawPalette.cpp" />
@@ -265,6 +270,7 @@
     <ClInclude Include="IDrawSurface7.h" />
     <ClInclude Include="IDrawUnknown.h" />
     <ClInclude Include="IPlay4.h" />
+    <ClInclude Include="MappedFile.h" />
     <ClInclude Include="OpenDraw.h" />
     <ClInclude Include="OpenDrawClipper.h" />
     <ClInclude Include="OpenDrawPalette.h" />

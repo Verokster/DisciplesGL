@@ -156,10 +156,10 @@ namespace Config
 			{
 				CHAR* libraryName = (CHAR*)(base + imports->Name);
 				if (!StrCompareInsensitive(libraryName, "smackw32.dll"))
-				{
 					config.version = TRUE;
-					break;
-				}
+
+				if (!StrCompareInsensitive(libraryName, "comdlg32.dll"))
+					config.isEditor = TRUE;
 			}
 		}
 
@@ -471,7 +471,8 @@ namespace Config
 			config.msgTimeScale.time = *(DWORD*)&value;
 			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 
-			config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
+			if (!config.isEditor)
+				config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
 		}
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));

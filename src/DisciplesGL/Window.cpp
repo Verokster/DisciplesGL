@@ -414,7 +414,8 @@ namespace Window
 
 		case MenuFastAI:
 		{
-			CheckMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (config.ai.fast ? MF_CHECKED : MF_UNCHECKED));
+			EnableMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (!config.isEditor ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (!config.isEditor && config.ai.fast ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
@@ -1068,9 +1069,12 @@ namespace Window
 				{
 					if (!config.borderless.real)
 					{
-						ddraw->RenderStop();
-						config.borderless.mode = !(BOOL)wParam;
-						ddraw->RenderStart();
+						if (!ddraw->isFinish)
+						{
+							ddraw->RenderStop();
+							config.borderless.mode = !(BOOL)wParam;
+							ddraw->RenderStart();
+						}
 					}
 					else
 					{

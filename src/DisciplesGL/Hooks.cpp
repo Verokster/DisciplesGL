@@ -35,6 +35,7 @@
 #include "Window.h"
 #include "PngLib.h"
 #include "IPlay4.h"
+#include "MappedFile.h"
 
 #define CHECKVALUE (WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX)
 
@@ -47,22 +48,22 @@ namespace Hooks
 
 	const AddressSpaceV1 addressArrayV1[] = {
 		// v99.12.15.1
-		FALSE, 0x004CD137, WS_POPUP, 0x004DFFA4, 0x00000000, 0x004E06D3,
+		0x004CD137, WS_POPUP, 0x004DFFA4, 0x00000000, 0x004E06D3,
 		0x0058F7E3,
 		0x005E6320, 0x005DB2A0, 0x004E21B5, 0x00550B69, 0x00465296, 0x004F07F5, 0x004F1006, 0x004F12AA,
 
 		// v2000.6.22.1 - Eng
-		FALSE, 0x004CD13E, WS_POPUP, 0x004DFF9C, 0x00000000, 0x004E0759,
+		0x004CD13E, WS_POPUP, 0x004DFF9C, 0x00000000, 0x004E0759,
 		0x0058F0D3,
 		0x005E6358, 0x005DB2D8, 0x004E225C, 0x0055037A, 0x0046523E, 0x004F07B0, 0x004F0FB6, 0x004F125A,
 
 		// v2000.6.22.1 - Rus1
-		FALSE, 0x004CD408, WS_POPUP, 0x004E0323, 0x00000000, 0x004E0AA8,
+		0x004CD408, WS_POPUP, 0x004E0323, 0x00000000, 0x004E0AA8,
 		0x00590E03,
 		0x005E8430, 0x005DD278, 0x004E2565, 0x0055106A, 0x0046541D, 0x004F0B39, 0x004F12D6, 0x004F157A,
 
 		// v2000.6.22.1 Editor
-		TRUE, 0x00443EDE, WS_POPUP, 0x0045147D, 0x004265E3, 0x00451BE8,
+		0x00443EDE, WS_POPUP, 0x0045147D, 0x004265E3, 0x00451BE8,
 		0x00000000,
 		0x00519568, 0x00000000, 0x004E2565, 0x004A041A, 0x00000000, 0x0046229D, 0x00462AF6, 0x00462D9A
 	};
@@ -96,7 +97,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00480A18,
 		0x00487F80, 0x004059C7, 0x004857C7,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x005094B1, 0x00509575,
 #pragma endregion
 
 #pragma region v1 .40
@@ -127,7 +128,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00482654,
 		0x0048A53D, 0x004059F2, 0x00487CEB,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x0050E461, 0x0050E525,
 #pragma endregion
 
 #pragma region v2 .01
@@ -158,7 +159,7 @@ namespace Hooks
 		0x0052FD28, 0x00484900, 0x00484922, 0x004847FF,
 		0x0048CD6F, 0x00405F03, 0x0048A44F,
 
-		0x00450226, 0x004502B3, 0x0040A789,
+		0x00450226, 0x004502B3, 0x0040A789, 0x00513981, 0x00513A45,
 #pragma endregion
 
 #pragma region v2 .01 - Steam
@@ -189,7 +190,7 @@ namespace Hooks
 		0x00530462, 0x00484960, 0x00484982, 0x0048485F,
 		0x0048CE0E, 0x00405B80, 0x0048A4EE,
 
-		0x0045010A, 0x00450197, 0x0040A4AE,
+		0x0045010A, 0x00450197, 0x0040A4AE, 0x005141A1, 0x00514265,
 #pragma endregion
 
 #pragma region v2 .02
@@ -220,7 +221,7 @@ namespace Hooks
 		0x0052EAAE, 0x00484DD1, 0x00484DF3, 0x00484CD0,
 		0x0048D25C, 0x00405A1A, 0x0048A93C,
 
-		0x00450417, 0x004504A4, 0x0040A438,
+		0x00450417, 0x004504A4, 0x0040A438, 0x00512D71, 0x00512E35,
 #pragma endregion
 
 #pragma region v2 .02 - Crack
@@ -251,7 +252,7 @@ namespace Hooks
 		0x005301F8, 0x00484FB5, 0x00484FD7, 0x00484EB4,
 		0x0048D424, 0x00405F19, 0x0048AB04,
 
-		0x004506BD, 0x0045074A, 0x0040A79F,
+		0x004506BD, 0x0045074A, 0x0040A79F, 0x00513EB1, 0x00513F75,
 #pragma endregion
 
 #pragma region v3 .00 - Steam
@@ -282,7 +283,7 @@ namespace Hooks
 		0x00533515, 0x00487AAD, 0x00487ACF, 0x004879AC,
 		0x00490052, 0x00405929, 0x0048D732,
 
-		0x0045257F, 0x0045260C, 0x0040A3D9,
+		0x0045257F, 0x0045260C, 0x0040A3D9, 0x00517311, 0x005173D5,
 #pragma endregion
 
 #pragma region v3 .01a
@@ -313,7 +314,7 @@ namespace Hooks
 		0x005335EC, 0x00487AB9, 0x00487ADB, 0x004879B8,
 		0x004900C8, 0x00405C95, 0x0048D7A8,
 
-		0x004526E8, 0x00452775, 0x0040A79D,
+		0x004526E8, 0x00452775, 0x0040A79D, 0x00517111, 0x005171D5,
 #pragma endregion
 
 #pragma region v3 .01b
@@ -344,7 +345,7 @@ namespace Hooks
 		0x00532B79, 0x0048768A, 0x004876AC, 0x00487589,
 		0x0048FBCC, 0x00405921, 0x0048D2E2,
 
-		0x004520B4, 0x00452141, 0x0040A3F9,
+		0x004520B4, 0x00452141, 0x0040A3F9, 0x00516621, 0x005166E5,
 #pragma endregion
 
 #pragma region v1 .10 Editor
@@ -375,7 +376,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x004947C1, 0x00494885,
 #pragma endregion
 
 #pragma region v1 .41 Editor
@@ -406,7 +407,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00495941, 0x00495A05,
 #pragma endregion
 
 #pragma region v2 .00 Editor - Steam
@@ -437,7 +438,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x004AD0E1, 0x004AD1A5,
 #pragma endregion
 
 #pragma region v2 .01 Editor
@@ -468,7 +469,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
 #pragma endregion
 
 #pragma region v2 .02 Editor
@@ -499,13 +500,13 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
 #pragma endregion
 
 #pragma region v3 .00 Editor - Steam
 		// v3.00 Editor - Steam
 		3, 0x0048C842, CHECKVALUE, 0x00000000, 0x00000000, 144, 0x004D71D0,
-		0x004B7025,
+		0x004B9C35,
 
 		0x0056234B, 0x005527FA, 0x00562FDC, 0x00597EDA, 0x00598050, 0x005526EE,
 		0x005E6700, 0x00585176, 0x005993B6, 0x0058530C, 0x005E3E24, 0x0055C7D0,
@@ -530,7 +531,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x004AFD41, 0x004AFE05,
 #pragma endregion
 
 #pragma region v3 .01 Editor
@@ -561,7 +562,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000
+		0x00000000, 0x00000000, 0x00000000, 0x004AED61, 0x004AEE25
 #pragma endregion
 	};
 
@@ -755,25 +756,9 @@ namespace Hooks
 					nameThunk = (PIMAGE_THUNK_DATA)(base + imports->OriginalFirstThunk);
 				else
 				{
-					if (!file->hFile)
-					{
-						CHAR filePath[MAX_PATH];
-						GetModuleFileName(file->hModule, filePath, MAX_PATH);
-						file->hFile = CreateFile(filePath, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-						if (!file->hFile)
-							return res;
-					}
-
-					if (!file->hMap)
-					{
-						file->hMap = CreateFileMapping(file->hFile, NULL, PAGE_READONLY, 0, 0, NULL);
-						if (!file->hMap)
-							return res;
-					}
-
 					if (!file->address)
 					{
-						file->address = MapViewOfFile(file->hMap, FILE_MAP_READ, 0, 0, 0);
+						file->Load();
 						if (!file->address)
 							return res;
 					}
@@ -807,8 +792,9 @@ namespace Hooks
 					WORD hint;
 					if (ReadWord((INT)name - baseOffset, &hint) && !StrCompare((CHAR*)name->Name, function))
 					{
-						if (ReadDWord((INT)&addressThunk->u1.AddressOfData - baseOffset, &res))
-							PatchDWord((INT)&addressThunk->u1.AddressOfData - baseOffset, (DWORD)addr);
+						INT address = (INT)&addressThunk->u1.AddressOfData - baseOffset;
+						if (ReadDWord(address, &res))
+							PatchDWord(address, (DWORD)addr);
 
 						return res;
 					}
@@ -4833,6 +4819,32 @@ namespace Hooks
 	}
 #pragma endregion
 
+#pragma region Skip Draw
+	DWORD sub_00512BF0;
+	VOID __declspec(naked) hook_00512BF0()
+	{
+		__asm {
+			MOV EAX, config.drawEnabled
+			TEST EAX, EAX
+			JNZ lbl_draw
+
+			MOV EDX, [ECX]
+			MOV EAX, [EDX+48]
+			MOV ECX, [EAX+20]
+			MOV EAX, [ECX+8]
+			PUSH 1
+			PUSH 0
+			PUSH EAX
+			MOV ECX, [EAX]
+			CALL [ECX+44]
+			RETN
+
+			lbl_draw:
+			JMP sub_00512BF0
+		}
+	}
+#pragma endregion
+
 	BOOL __stdcall FakeEntryPoint(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	{
 		return TRUE;
@@ -4841,8 +4853,6 @@ namespace Hooks
 #pragma optimize("s", on)
 	VOID __fastcall LoadV1(const AddressSpaceV1* hookSpace, MappedFile* file)
 	{
-		config.isEditor = hookSpace->isEditor;
-
 		PatchCall(hookSpace->scroll_speed, hook_004E0323);
 		scrollSpeed.multi = 14.0;
 		scrollSpeed.offset.y = 14;
@@ -5038,6 +5048,10 @@ namespace Hooks
 			sub_GetType = hookSpace->ai_list_get_type + baseOffset;
 		}
 
+		// Skip draw
+		RedirectCall(hookSpace->draw_hook_1, hook_00512BF0, &sub_00512BF0);
+		PatchCall(hookSpace->draw_hook_2, hook_00512BF0);
+
 		if (config.hd)
 		{
 			config.bpp32Hooked = TRUE;
@@ -5189,7 +5203,7 @@ namespace Hooks
 					PatchDWord(hookSpace->blit_patch_2 + 0x17 + 6, count);
 				}
 
-				// Minimap  rectangle
+				// Minimap rectangle
 				{
 					PatchByte(hookSpace->mini_rect_jmp, 0xEB);
 					PatchByte(hookSpace->mini_rect_jmp + 23, 0xEB);
@@ -5320,69 +5334,69 @@ namespace Hooks
 
 		PatchEntryPoint("DDRAW.dll", FakeEntryPoint);
 
-		MappedFile file = { hModule, NULL, NULL, NULL };
+		MappedFile* file = new MappedFile(hModule);
 		{
 			{
-				PatchFunction(&file, "GetDeviceCaps", GetDeviceCapsHook);
-				PatchFunction(&file, "GetForegroundWindow", GetForegroundWindowHook);
+				PatchFunction(file, "GetDeviceCaps", GetDeviceCapsHook);
+				PatchFunction(file, "GetForegroundWindow", GetForegroundWindowHook);
 
-				PatchFunction(&file, "CreateWindowExA", CreateWindowExHook);
-				PatchFunction(&file, "RegisterClassA", RegisterClassHook);
+				PatchFunction(file, "CreateWindowExA", CreateWindowExHook);
+				PatchFunction(file, "RegisterClassA", RegisterClassHook);
 
-				PatchFunction(&file, "SetWindowLongA", SetWindowLongHook);
+				PatchFunction(file, "SetWindowLongA", SetWindowLongHook);
 
-				PatchFunction(&file, "MessageBoxA", MessageBoxHook);
+				PatchFunction(file, "MessageBoxA", MessageBoxHook);
 
-				if (!PatchFunction(&file, "RegisterWindowMessageA", RegisterWindowMessageHook))
-					PatchFunction(&file, "RegisterClipboardFormatA", RegisterWindowMessageHook); // for cracks
+				if (!PatchFunction(file, "RegisterWindowMessageA", RegisterWindowMessageHook))
+					PatchFunction(file, "RegisterClipboardFormatA", RegisterWindowMessageHook); // for cracks
 
-				PatchFunction(&file, "SetThreadPriority", SetThreadPriorityHook);
+				PatchFunction(file, "SetThreadPriority", SetThreadPriorityHook);
 
-				PatchFunction(&file, "ShowCursor", ShowCursorHook);
-				PatchFunction(&file, "ClipCursor", ClipCursorHook);
+				PatchFunction(file, "ShowCursor", ShowCursorHook);
+				PatchFunction(file, "ClipCursor", ClipCursorHook);
 
-				PatchFunction(&file, "GetClientRect", GetClientRectHook);
-				PatchFunction(&file, "GetWindowRect", GetWindowRectHook);
+				PatchFunction(file, "GetClientRect", GetClientRectHook);
+				PatchFunction(file, "GetWindowRect", GetWindowRectHook);
 
-				PatchFunction(&file, "timeGetTime", timeGetTimeHook);
+				PatchFunction(file, "timeGetTime", timeGetTimeHook);
 
-				PatchFunction(&file, "GetOpenFileNameA", GetOpenFileNameHook);
-				PatchFunction(&file, "GetSaveFileNameA", GetSaveFileNameHook);
+				PatchFunction(file, "GetOpenFileNameA", GetOpenFileNameHook);
+				PatchFunction(file, "GetSaveFileNameA", GetSaveFileNameHook);
 
-				PatchFunction(&file, "isalpha", IsAlphaHook);
-				PatchFunction(&file, "isalnum", IsAlNumHook);
-				PatchFunction(&file, "isdigit", IsDigitHook);
-				PatchFunction(&file, "isspace", IsSpaceHook);
-				PatchFunction(&file, "ispunct", IsPunctHook);
-				PatchFunction(&file, "iscntrl", IsCntrlHook);
-				PatchFunction(&file, "isupper", IsUpperHook);
-				PatchFunction(&file, "toupper", ToUpperHook);
-				PatchFunction(&file, "tolower", ToLowerHook);
-				PatchFunction(&file, "strchr", StrCharHook);
-				PatchFunction(&file, "memchr", MemoryCharHook);
+				PatchFunction(file, "isalpha", IsAlphaHook);
+				PatchFunction(file, "isalnum", IsAlNumHook);
+				PatchFunction(file, "isdigit", IsDigitHook);
+				PatchFunction(file, "isspace", IsSpaceHook);
+				PatchFunction(file, "ispunct", IsPunctHook);
+				PatchFunction(file, "iscntrl", IsCntrlHook);
+				PatchFunction(file, "isupper", IsUpperHook);
+				PatchFunction(file, "toupper", ToUpperHook);
+				PatchFunction(file, "tolower", ToLowerHook);
+				PatchFunction(file, "strchr", StrCharHook);
+				PatchFunction(file, "memchr", MemoryCharHook);
 
 				if (config.locales.current.oem && config.locales.current.ansi)
 				{
-					PatchFunction(&file, "OemToCharA", OemToCharHook);
-					PatchFunction(&file, "CharToOemA", CharToOemHook);
+					PatchFunction(file, "OemToCharA", OemToCharHook);
+					PatchFunction(file, "CharToOemA", CharToOemHook);
 				}
 
-				PatchFunction(&file, "CoCreateInstance", CoCreateInstanceHook);
+				PatchFunction(file, "CoCreateInstance", CoCreateInstanceHook);
 
 				if (config.version)
 				{
-					PatchFunction(&file, "PeekMessageA", PeekMessageHook);
-					PatchFunction(&file, "GetCursorPos", GetCursorPosHookV1);
-					PatchFunction(&file, "ClientToScreen", ClientToScreenHook);
-					PatchFunction(&file, "GetDoubleClickTime", GetDoubleClickTimeHook);
+					PatchFunction(file, "PeekMessageA", PeekMessageHook);
+					PatchFunction(file, "GetCursorPos", GetCursorPosHookV1);
+					PatchFunction(file, "ClientToScreen", ClientToScreenHook);
+					PatchFunction(file, "GetDoubleClickTime", GetDoubleClickTimeHook);
 				}
 				else
 				{
-					PatchFunction(&file, "DirectDrawEnumerateExA", Main::DrawEnumerateEx);
-					PatchFunction(&file, "DirectDrawCreate", Main::DrawCreate);
-					PatchFunction(&file, "DirectDrawCreateEx", Main::DrawCreateEx);
-					PatchFunction(&file, "GetCursorPos", GetCursorPosHookV2);
-					PatchFunction(&file, "SetCursorPos", SetCursorPosHook);
+					PatchFunction(file, "DirectDrawEnumerateExA", Main::DrawEnumerateEx);
+					PatchFunction(file, "DirectDrawCreate", Main::DrawCreate);
+					PatchFunction(file, "DirectDrawCreateEx", Main::DrawCreateEx);
+					PatchFunction(file, "GetCursorPos", GetCursorPosHookV2);
+					PatchFunction(file, "SetCursorPos", SetCursorPosHook);
 				}
 			}
 
@@ -5395,7 +5409,7 @@ namespace Hooks
 					DWORD check;
 					if (ReadDWord(hookSpace->check + 1, &check) && check == hookSpace->value)
 					{
-						LoadV1(hookSpace, &file);
+						LoadV1(hookSpace, file);
 						break;
 					}
 
@@ -5418,7 +5432,8 @@ namespace Hooks
 							defaultSpace = hookSpace;
 						else if (ReadDWord(hookSpace->check_2, &check) && check == hookSpace->value_2)
 						{
-							LoadV2(hookSpace, &file);
+							LoadV2(hookSpace, file);
+							defaultSpace = NULL;
 							break;
 						}
 					}
@@ -5427,18 +5442,10 @@ namespace Hooks
 				} while (--hookCount);
 
 				if (defaultSpace)
-					LoadV2(defaultSpace, &file);
+					LoadV2(defaultSpace, file);
 			}
 		}
-
-		if (file.address)
-			UnmapViewOfFile(file.address);
-
-		if (file.hMap)
-			CloseHandle(file.hMap);
-
-		if (file.hFile)
-			CloseHandle(file.hFile);
+		delete file;
 	}
 #pragma optimize("", on)
 }

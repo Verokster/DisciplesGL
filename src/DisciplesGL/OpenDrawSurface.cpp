@@ -54,6 +54,8 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, SurfaceTyp
 	this->mode.bpp = 0;
 
 	this->drawEnabled = TRUE;
+	if (type == SurfaceSecondary)
+		config.drawEnabled = TRUE;
 
 	this->colorKey.dwColorSpaceLowValue = 0;
 	this->colorKey.dwColorSpaceHighValue = 0;
@@ -379,7 +381,7 @@ VOID OpenDrawSurface::Flush()
 		}
 
 		BOOL isSync = !config.ai.thinking && !config.ai.waiting && config.coldCPU;
-		surface->drawEnabled = isSync || config.singleThread || this->drawEnabled;
+		config.drawEnabled = surface->drawEnabled = isSync || config.singleThread || this->drawEnabled;
 		if (surface->drawEnabled)
 		{
 			LONGLONG qp;
@@ -472,7 +474,7 @@ VOID OpenDrawSurface::Flush()
 					Sleep(0);
 			}
 			else
-				surface->drawEnabled = FALSE;
+				config.drawEnabled = surface->drawEnabled = FALSE;
 		}
 	}
 }

@@ -70,6 +70,9 @@
     <ClCompile Include="GDIData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MappedFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -142,6 +145,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GDIData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MappedFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -166,6 +166,8 @@ struct ConfigItems {
 	DOUBLE syncStep;
 	POINT randPos;
 
+	BOOL drawEnabled;
+
 	struct {
 		BOOL fast;
 		BOOL thinking;
@@ -269,13 +271,6 @@ struct ConfigItems {
 
 	BOOL isExist;
 	CHAR file[MAX_PATH];
-};
-
-struct MappedFile {
-	HMODULE hModule;
-	HANDLE hFile;
-	HANDLE hMap;
-	VOID* address;
 };
 
 enum SurfaceType

@@ -82,8 +82,6 @@ namespace Hooks
 	extern BOOL isBink;
 
 	struct AddressSpaceV1 {
-		BOOL isEditor;
-
 		DWORD check;
 		DWORD value;
 		DWORD scroll_speed;
@@ -226,6 +224,9 @@ namespace Hooks
 		DWORD ai_list_hook_1;
 		DWORD ai_list_hook_2;
 		DWORD ai_list_get_type;
+
+		DWORD draw_hook_1;
+		DWORD draw_hook_2;
 	};
 
 	struct BlendData {
