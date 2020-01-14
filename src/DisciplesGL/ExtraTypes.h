@@ -195,7 +195,6 @@ struct ConfigItems {
 		BOOL glallow;
 		BOOL enabled;
 		DWORD value;
-		FLOAT factor;
 		Size size;
 		SizeFloat sizeFloat;
 	} zoom;

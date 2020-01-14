@@ -4881,7 +4881,7 @@ namespace Hooks
 				size.width = (DWORD)GetSystemMetrics(SM_CXSCREEN);
 				size.height = (DWORD)GetSystemMetrics(SM_CYSCREEN);
 
-				Config::CalcZoomed(&size, &size, config.zoom.factor);
+				Config::CalcZoomed(&size, &size, config.zoom.value);
 
 				Config::Set(CONFIG_WRAPPER, "DisplayWidth", *(INT*)&size.width);
 				Config::Set(CONFIG_WRAPPER, "DisplayHeight", *(INT*)&size.height);
@@ -5125,7 +5125,7 @@ namespace Hooks
 					size.width = (DWORD)GetSystemMetrics(SM_CXSCREEN);
 					size.height = (DWORD)GetSystemMetrics(SM_CYSCREEN);
 
-					Config::CalcZoomed(&size, &size, config.zoom.factor);
+					Config::CalcZoomed(&size, &size, config.zoom.value);
 
 					Config::Set(CONFIG_WRAPPER, "DisplayWidth", *(INT*)&size.width);
 					Config::Set(CONFIG_WRAPPER, "DisplayHeight", *(INT*)&size.height);

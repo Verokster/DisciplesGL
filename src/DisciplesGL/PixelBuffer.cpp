@@ -26,7 +26,10 @@
 #include "PixelBuffer.h"
 #include "Config.h"
 
-DWORD __declspec(naked) __fastcall ForwardCompare(DWORD count, DWORD slice, VOID* ptr1, VOID* ptr2)
+//#define PIXASM
+
+#ifdef PIXASM
+DWORD __declspec(naked) __fastcall ForwardCompare(DWORD count, DWORD slice, DWORD* ptr1, DWORD* ptr2)
 {
 	__asm {
 		push ebp
@@ -57,7 +60,7 @@ DWORD __declspec(naked) __fastcall ForwardCompare(DWORD count, DWORD slice, VOID
 	}
 }
 
-DWORD __declspec(naked) __fastcall BackwardCompare(DWORD count, DWORD slice, VOID* ptr1, VOID* ptr2)
+DWORD __declspec(naked) __fastcall BackwardCompare(DWORD count, DWORD slice, DWORD* ptr1, DWORD* ptr2)
 {
 	__asm {
 		push ebp
@@ -90,7 +93,7 @@ DWORD __declspec(naked) __fastcall BackwardCompare(DWORD count, DWORD slice, VOI
 	}
 }
 
-BOOL __declspec(naked) __fastcall ForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, VOID* ptr1, VOID* ptr2, POINT* p)
+BOOL __declspec(naked) __fastcall ForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2, POINT* p)
 {
 	__asm {
 		push ebp
@@ -153,7 +156,7 @@ BOOL __declspec(naked) __fastcall ForwardCompare(LONG width, LONG height, DWORD 
 	}
 }
 
-BOOL __declspec(naked) __fastcall BackwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, VOID* ptr1, VOID* ptr2, POINT* p)
+BOOL __declspec(naked) __fastcall BackwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2, POINT* p)
 {
 	__asm {
 		push ebp
@@ -215,7 +218,7 @@ BOOL __declspec(naked) __fastcall BackwardCompare(LONG width, LONG height, DWORD
 	}
 }
 
-DWORD __declspec(naked) __fastcall ForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, VOID* ptr1, VOID* ptr2)
+DWORD __declspec(naked) __fastcall ForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2)
 {
 	__asm {
 		push ebp
@@ -279,7 +282,7 @@ DWORD __declspec(naked) __fastcall ForwardCompare(LONG width, LONG height, DWORD
 	}
 }
 
-DWORD __declspec(naked) __fastcall BackwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, VOID* ptr1, VOID* ptr2)
+DWORD __declspec(naked) __fastcall BackwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2)
 {
 	__asm {
 		push ebp
@@ -346,6 +349,136 @@ DWORD __declspec(naked) __fastcall BackwardCompare(LONG width, LONG height, DWOR
 		retn 16
 	}
 }
+#else
+DWORD ForwardCompare(DWORD count, DWORD slice, DWORD* ptr1, DWORD* ptr2)
+{
+	ptr1 += slice;
+	ptr2 += slice;
+
+	for (DWORD i = 0; i < count; ++i)
+		if (ptr1[i] != ptr2[i])
+			return count - i;
+
+	return 0;
+}
+
+DWORD BackwardCompare(DWORD count, DWORD slice, DWORD* ptr1, DWORD* ptr2)
+{
+	ptr1 += slice;
+	ptr2 += slice;
+
+	DWORD i = count;
+	for (DWORD i = 0; i < count; ++i)
+		if (ptr1[-i] != ptr2[-i])
+			return count - i;
+
+	return i;
+}
+
+BOOL ForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2, POINT* p)
+{
+	ptr1 += slice;
+	ptr2 += slice;
+
+	for (LONG y = 0; y < height; ++y)
+	{
+		for (LONG x = 0; x < width; ++x)
+		{
+			if (ptr1[x] != ptr2[x])
+			{
+				p->x = x;
+				p->y = y;
+				return TRUE;
+			}
+		}
+
+		ptr1 += pitch;
+		ptr2 += pitch;
+	}
+
+	return FALSE;
+}
+
+BOOL BackwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2, POINT* p)
+{
+	ptr1 += slice;
+	ptr2 += slice;
+
+	for (LONG y = 0; y < height; ++y)
+	{
+		for (LONG x = 0; x < width; ++x)
+		{
+			if (ptr1[-x] != ptr2[-x])
+			{
+				p->x = width - x - 1;
+				p->y = height - y - 1;
+				return TRUE;
+			}
+		}
+
+		ptr1 -= pitch;
+		ptr2 -= pitch;
+	}
+
+	return FALSE;
+}
+
+DWORD ForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2)
+{
+	DWORD count = width;
+
+	ptr1 += slice;
+	ptr2 += slice;
+
+	for (LONG y = 0; y < height; ++y)
+	{
+		for (LONG x = 0; x < width; ++x)
+		{
+			if (ptr1[x] != ptr2[x])
+			{
+				width = x;
+				if (!width)
+					return count;
+
+				break;
+			}
+		}
+
+		ptr1 += pitch;
+		ptr2 += pitch;
+	}
+
+	return count - width;
+}
+
+DWORD BackwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2)
+{
+	DWORD count = width;
+
+	ptr1 += slice;
+	ptr2 += slice;
+
+	for (LONG y = 0; y < height; ++y)
+	{
+		for (LONG x = 0; x < width; ++x)
+		{
+			if (ptr1[-x] != ptr2[-x])
+			{
+				width = x;
+				if (!width)
+					return count;
+
+				break;
+			}
+		}
+
+		ptr1 -= pitch;
+		ptr2 -= pitch;
+	}
+
+	return count - width;
+}
+#endif
 
 PixelBuffer::PixelBuffer(BOOL isTrue)
 {
@@ -404,9 +537,9 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL checkOnly)
 			}
 
 			POINT p;
-			if (ForwardCompare(width, this->last.height, this->pitch, 
-				top * this->pitch + left,
-				this->primaryBuffer->data, this->secondaryBuffer->data, &p))
+			if (ForwardCompare(width, this->last.height, this->pitch,
+					top * this->pitch + left,
+					(DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data, &p))
 				res = TRUE;
 		}
 	}
@@ -426,7 +559,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL checkOnly)
 		DWORD left, right;
 		DWORD length = this->pitch * config.mode->height;
 		if ((left = ForwardCompare(length, 0, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data))
-			&& (right = BackwardCompare(length, length - 1, (DWORD*) this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data)))
+			&& (right = BackwardCompare(length, length - 1, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data)))
 		{
 			DWORD top = (length - left) / this->pitch;
 			DWORD bottom = (right - 1) / this->pitch + 1;
@@ -508,12 +641,12 @@ BOOL PixelBuffer::UpdateBlock(RECT* rect, POINT* offset)
 	RECT rc;
 	LONG width = rect->right-- - rect->left;
 	LONG height = rect->bottom-- - rect->top;
-	if (ForwardCompare(width, height, this->pitch, 
-		rect->top * this->pitch + rect->left,
-		this->primaryBuffer->data, this->secondaryBuffer->data, (POINT*)&rc.left)
-		&& BackwardCompare(width, height, this->pitch, 
+	if (ForwardCompare(width, height, this->pitch,
+			rect->top * this->pitch + rect->left,
+			(DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data, (POINT*)&rc.left)
+		&& BackwardCompare(width, height, this->pitch,
 			rect->bottom * this->pitch + rect->right,
-			this->primaryBuffer->data, this->secondaryBuffer->data, (POINT*)&rc.right))
+			(DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data, (POINT*)&rc.right))
 	{
 		if (rc.left > rc.right)
 		{
@@ -534,13 +667,13 @@ BOOL PixelBuffer::UpdateBlock(RECT* rect, POINT* offset)
 			if (width)
 				rc.left -= ForwardCompare(width, height, this->pitch,
 					(rc.top + 1) * this->pitch + rect->left,
-					this->primaryBuffer->data, this->secondaryBuffer->data);
+					(DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data);
 
 			width = rect->right - rc.right;
 			if (width)
 				rc.right += BackwardCompare(width, height, this->pitch,
 					(rc.bottom - 1) * this->pitch + rect->right,
-					this->primaryBuffer->data, this->secondaryBuffer->data);
+					(DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data);
 		}
 
 		Rect rect = { rc.left, rc.top, rc.right - rc.left + 1, height + 1 };

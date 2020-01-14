@@ -57,38 +57,46 @@ StateBufferAligned::StateBufferAligned()
 	this->size = { 0, 0 };
 
 	BOOL isTrue = config.mode->bpp != 16 || config.bpp32Hooked;
-	HDC hDc = GetDC(NULL);
+	DWORD length = config.mode->width * config.mode->height * (isTrue ? sizeof(DWORD) : sizeof(WORD));
+
+	if (config.renderer != RendererGDI)
+		this->data = AlignedAlloc(length);
+	else
 	{
-		this->hDc = CreateCompatibleDC(hDc);
-
-		BITMAPV5HEADER hdr;
-		MemoryZero(&hdr, sizeof(BITMAPV5HEADER));
-
-		BITMAPV4HEADER bmi = *(BITMAPV4HEADER*)&hdr;
-		bmi.bV4Size = sizeof(BITMAPINFOHEADER);
-		bmi.bV4Width = *(LONG*)&config.mode->width;
-		bmi.bV4Height = -*(LONG*)&config.mode->height;
-		bmi.bV4Planes = 1;
-		bmi.bV4XPelsPerMeter = 1;
-		bmi.bV4YPelsPerMeter = 1;
-
-		if (isTrue)
-			bmi.bV4BitCount = 32;
-		else
+		BOOL isTrue = config.mode->bpp != 16 || config.bpp32Hooked;
+		HDC hDc = GetDC(NULL);
 		{
-			bmi.bV4BitCount = 16;
-			bmi.bV4V4Compression = BI_BITFIELDS;
-			bmi.bV4RedMask = 0xF800;
-			bmi.bV4GreenMask = 0x07E0;
-			bmi.bV4BlueMask = 0x001F;
+			this->hDc = CreateCompatibleDC(hDc);
+
+			BITMAPV5HEADER hdr;
+			MemoryZero(&hdr, sizeof(BITMAPV5HEADER));
+
+			BITMAPV4HEADER bmi = *(BITMAPV4HEADER*)&hdr;
+			bmi.bV4Size = sizeof(BITMAPINFOHEADER);
+			bmi.bV4Width = *(LONG*)&config.mode->width;
+			bmi.bV4Height = -*(LONG*)&config.mode->height;
+			bmi.bV4Planes = 1;
+			bmi.bV4XPelsPerMeter = 1;
+			bmi.bV4YPelsPerMeter = 1;
+
+			if (isTrue)
+				bmi.bV4BitCount = 32;
+			else
+			{
+				bmi.bV4BitCount = 16;
+				bmi.bV4V4Compression = BI_BITFIELDS;
+				bmi.bV4RedMask = 0xF800;
+				bmi.bV4GreenMask = 0x07E0;
+				bmi.bV4BlueMask = 0x001F;
+			}
+
+			this->hBmp = CreateDIBSection(hDc, (BITMAPINFO*)&bmi, DIB_RGB_COLORS, &this->data, NULL, 0);
+			SelectObject(this->hDc, this->hBmp);
 		}
-
-		this->hBmp = CreateDIBSection(hDc, (BITMAPINFO*)&bmi, DIB_RGB_COLORS, &this->data, NULL, 0);
-		SelectObject(this->hDc, this->hBmp);
+		ReleaseDC(NULL, hDc);
 	}
-	ReleaseDC(NULL, hDc);
 
-	MemoryZero(this->data, config.mode->width * config.mode->height * (isTrue ? sizeof(DWORD) : sizeof(WORD)));
+	MemoryZero(this->data, length);
 
 	this->isReady = FALSE;
 	this->isZoomed = FALSE;
@@ -101,8 +109,14 @@ StateBufferAligned::~StateBufferAligned()
 	if (this->isAllocated)
 	{
 		this->isAllocated = FALSE;
-		DeleteObject(this->hBmp);
-		DeleteDC(this->hDc);
+
+		if (config.renderer != RendererGDI)
+			AlignedFree(this->data);
+		else
+		{
+			DeleteObject(this->hBmp);
+			DeleteDC(this->hDc);
+		}
 	}
 }
 

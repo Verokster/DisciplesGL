@@ -287,7 +287,6 @@ namespace Config
 			Config::Set(CONFIG_WRAPPER, "ScreenshotLevel", *(INT*)&config.snapshot.level);
 
 			config.zoom.value = 100;
-			config.zoom.factor = 0.01f * config.zoom.value;
 			Config::Set(CONFIG_WRAPPER, "ZoomFactor", *(INT*)&config.zoom.value);
 
 			config.locales.current.id = GetUserDefaultLCID();
@@ -460,7 +459,6 @@ namespace Config
 			config.zoom.value = *(DWORD*)&value;
 			if (!config.zoom.value || config.zoom.value > 100)
 				config.zoom.value = 100;
-			config.zoom.factor = 0.01f * config.zoom.value;
 
 			config.locales.current.id = (LCID)Config::Get(CONFIG_WRAPPER, "Locale", (INT)GetUserDefaultLCID());
 
@@ -674,46 +672,46 @@ namespace Config
 		return config.zoom.glallow && config.zoom.enabled && config.border.active && (!config.battle.active || !config.battle.wide || config.battle.zoomable);
 	}
 
-	VOID __fastcall CalcZoomed(Size* dst, Size* src, FLOAT scale)
+	VOID __fastcall CalcZoomed(Size* dst, Size* src, DWORD scale)
 	{
 		FLOAT k = (FLOAT)src->width / src->height;
 		if (k >= 4.0f / 3.0f)
 		{
 			FLOAT width = GAME_HEIGHT_FLOAT * k;
-			dst->width = src->width - DWORD(scale * ((FLOAT)src->width - width));
-			dst->height = src->height - DWORD(scale * (src->height - GAME_HEIGHT));
+			dst->width = src->width - DWORD(((FLOAT)src->width - width) * scale * 0.01);
+			dst->height = src->height - DWORD((src->height - GAME_HEIGHT) * scale * 0.01);
 		}
 		else
 		{
 			FLOAT height = GAME_WIDTH_FLOAT / k;
-			dst->width = src->width - DWORD(scale * (src->width - GAME_WIDTH));
-			dst->height = src->height - DWORD(scale * ((FLOAT)src->height - height));
+			dst->width = src->width - DWORD((src->width - GAME_WIDTH) * scale * 0.01);
+			dst->height = src->height - DWORD(((FLOAT)src->height - height) * scale * 0.01);
 		}
 	}
 
-	VOID __fastcall CalcZoomed(SizeFloat* dst, SizeFloat* src, FLOAT scale)
+	VOID __fastcall CalcZoomed(SizeFloat* dst, SizeFloat* src, DWORD scale)
 	{
 		FLOAT k = src->width / src->height;
 		if (k >= 4.0f / 3.0f)
 		{
 			FLOAT width = GAME_HEIGHT_FLOAT * k;
-			dst->width = src->width - scale * (src->width - width);
-			dst->height = src->height - scale * (src->height - GAME_HEIGHT);
+			dst->width = src->width - (src->width - width) * scale * 0.01;
+			dst->height = src->height - (src->height - GAME_HEIGHT) * scale * 0.01;
 		}
 		else
 		{
 			FLOAT height = GAME_WIDTH_FLOAT / k;
-			dst->width = src->width - scale * (src->width - GAME_WIDTH);
-			dst->height = src->height - scale * (src->height - height);
+			dst->width = src->width - (src->width - GAME_WIDTH) * scale * 0.01;
+			dst->height = src->height - (src->height - height) * scale * 0.01;
 		}
 	}
 
 	VOID __fastcall CalcZoomed()
 	{
-		CalcZoomed(&config.zoom.size, (Size*)config.mode, config.zoom.factor);
+		CalcZoomed(&config.zoom.size, (Size*)config.mode, config.zoom.value);
 
 		SizeFloat size = { (FLOAT)config.mode->width, (FLOAT)config.mode->height };
-		CalcZoomed(&config.zoom.sizeFloat, &size, config.zoom.factor);
+		CalcZoomed(&config.zoom.sizeFloat, &size, config.zoom.value);
 	}
 
 	VOID __fastcall UpdateLocale()

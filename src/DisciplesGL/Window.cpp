@@ -1772,7 +1772,6 @@ namespace Window
 
 							config.zoom.value = value;
 							Config::Set(CONFIG_WRAPPER, "ZoomFactor", *(INT*)&config.zoom.value);
-							config.zoom.factor = 0.01f * config.zoom.value;
 
 							Config::CalcZoomed();
 						}

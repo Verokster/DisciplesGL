@@ -58,7 +58,7 @@ namespace Config
 	BOOL __fastcall Set(const CHAR* app, const CHAR* key, INT value);
 	BOOL __fastcall Set(const CHAR* app, const CHAR* key, CHAR* value);
 	BOOL __fastcall IsZoomed();
-	VOID __fastcall CalcZoomed(Size* dst, Size* src, FLOAT scale);
+	VOID __fastcall CalcZoomed(Size* dst, Size* src, DWORD scale);
 	VOID __fastcall CalcZoomed();
 	VOID __fastcall UpdateLocale();
 }
