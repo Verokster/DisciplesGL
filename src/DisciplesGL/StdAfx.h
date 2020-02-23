@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -60,12 +60,12 @@ extern SETPROCESSDPIAWARENESS SetProcessDpiAwarenessC;
 
 extern "C"
 {
-	_CRTIMP int __cdecl sprintf(char*, const char*, ...);
-	_CRTIMP int __cdecl vsprintf(char*, const char*, va_list);
-	_CRTIMP void* __cdecl shi_new(size_t size);
-	_CRTIMP void __cdecl shi_delete(void* block);
-	_CRTIMP void* __cdecl shi_malloc(size_t size);
-	_CRTIMP void __cdecl shi_free(void* block);
+	_CRTIMP int __CRTDECL sprintf(char*, const char*, ...);
+	_CRTIMP int __CRTDECL vsprintf(char*, const char*, va_list);
+	_CRTIMP void* __CRTDECL shi_new(size_t size);
+	_CRTIMP void __CRTDECL shi_delete(void* block);
+	_CRTIMP void* __CRTDECL shi_malloc(size_t size);
+	_CRTIMP void __CRTDECL shi_free(void* block);
 }
 
 #define MemoryNew(size) shi_new(size)

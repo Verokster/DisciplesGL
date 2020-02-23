@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -100,6 +100,13 @@ namespace Hooks
 		DWORD res_LoadImage;
 		DWORD res_StartDecodeImage;
 		DWORD res_EndDecodeImage;
+
+		DWORD dlg_Create;
+		DWORD dlg_Delete;
+
+		DWORD interlockFix;
+
+		DWORD speed_anim;
 	};
 
 	struct AddressSpaceV2 {
@@ -207,6 +214,12 @@ namespace Hooks
 		DWORD btlLoadBack_3;
 		DWORD btlBackHeight;
 
+		DWORD pkg_size;
+		DWORD pkg_load;
+		DWORD pkg_sub;
+		DWORD pkg_entry_load;
+		DWORD pkg_entry_sub;
+
 		DWORD waitClass;
 		DWORD waitHook;
 		DWORD waitLoadCursor;
@@ -227,6 +240,13 @@ namespace Hooks
 
 		DWORD draw_hook_1;
 		DWORD draw_hook_2;
+
+		DWORD interlockFix;
+		DWORD startAiTurn;
+		DWORD endAiTurn;
+
+		DWORD speed_anim;
+		DWORD speed_map;
 	};
 
 	struct BlendData {
@@ -257,6 +277,8 @@ namespace Hooks
 	INT __stdcall MessageBoxHook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType);
 
 	VOID __fastcall PrintText(CHAR* str);
+
+	VOID __fastcall SetGameSpeed();
 
 	VOID Load();
 }

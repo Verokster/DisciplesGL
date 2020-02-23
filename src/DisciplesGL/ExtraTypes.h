@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -142,6 +142,19 @@ enum ImageType
 	ImagePNG
 };
 
+struct Level {
+	FLOAT r;
+	FLOAT g;
+	FLOAT b;
+};
+
+enum BordersType
+{
+	BordersNone = 0,
+	BordersClassic = 1,
+	BordersAlternative = 2
+};
+
 struct ConfigItems {
 	BOOL version;
 	BOOL isEditor;
@@ -163,6 +176,7 @@ struct ConfigItems {
 	BOOL coldCPU;
 	BOOL singleWindow;
 	BOOL singleThread;
+	DWORD* package;
 	DOUBLE syncStep;
 	POINT randPos;
 
@@ -170,7 +184,14 @@ struct ConfigItems {
 
 	struct {
 		BOOL fast;
-		BOOL thinking;
+		union
+		{
+			DWORD thinking;
+			struct {
+				BYTE timeout;
+				BYTE turn;
+			};
+		};
 		BOOL waiting;
 	} ai;
 
@@ -188,6 +209,7 @@ struct ConfigItems {
 		BOOL active;
 		BOOL wide;
 		BOOL zoomable;
+		BOOL mirror;
 	} battle;
 
 	struct {
@@ -200,11 +222,15 @@ struct ConfigItems {
 	} zoom;
 
 	struct {
-		BOOL inside;
+		BOOL allowed;
+		BordersType type;
+		BOOL active;
+	} borders;
+
+	struct {
 		BOOL allowed;
 		BOOL enabled;
-		BOOL active;
-	} border;
+	} background;
 
 	struct {
 		BOOL real;
@@ -242,6 +268,7 @@ struct ConfigItems {
 		DWORD index;
 		DOUBLE value;
 		BOOL enabled;
+		BOOL hooked;
 	} speed;
 
 	struct {
@@ -262,11 +289,20 @@ struct ConfigItems {
 		BYTE windowedMode;
 		BYTE aspectRatio;
 		BYTE vSync;
-		BYTE showBorders;
 		BYTE zoomImage;
 		BYTE speedToggle;
 		BYTE snapshot;
 	} keys;
+
+	struct {
+		struct {
+			Level min;
+			Level max;
+			Level gamma;
+		} levels;
+		FLOAT hueShift;
+		FLOAT saturation;
+	} adjust;
 
 	BOOL isExist;
 	CHAR file[MAX_PATH];
@@ -316,6 +352,7 @@ enum MenuType
 	MenuResolution,
 	MenuSpeed,
 	MenuBorders,
+	MenuBackground,
 	MenuStretch,
 	MenuWindowMode,
 	MenuWindowType,

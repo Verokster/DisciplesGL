@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -50,6 +50,7 @@ public:
 	StateBuffer* indexBuffer;
 	StateBuffer* secondaryBuffer;
 	
+	BOOL redraw;
 	BOOL drawEnabled;
 
 	SurfaceType type;
@@ -59,6 +60,7 @@ public:
 
 	VOID CreateBuffer(DWORD, DWORD, DWORD, VOID*);
 	VOID ReleaseBuffer();
+	VOID DrawBorders(VOID*, DWORD, DWORD);
 	
 	// Inherited via IDrawSurface
 	ULONG __stdcall Release() override;

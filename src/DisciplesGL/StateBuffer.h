@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,8 @@ public:
 	VOID* data;
 
 	StateBuffer();
-	StateBuffer(DWORD size);
-	StateBuffer(VOID* data);
+	StateBuffer(DWORD);
+	StateBuffer(VOID*);
 	virtual ~StateBuffer();
 };
 
@@ -44,7 +44,8 @@ private:
 public:
 	BOOL isReady;
 	BOOL isZoomed;
-	BOOL isBorder;
+	BordersType borders;
+	BOOL isBack;
 	HDC hDc;
 
 	Size size;
@@ -57,7 +58,8 @@ class StateBufferBorder : public StateBuffer {
 public:
 	DWORD width;
 	DWORD height;
+	BordersType type;
 
-	StateBufferBorder(DWORD width, DWORD height, DWORD size);
-	StateBufferBorder(DWORD width, DWORD height, VOID* data);
+	StateBufferBorder(DWORD, DWORD, DWORD);
+	StateBufferBorder(DWORD, DWORD, VOID*);
 };

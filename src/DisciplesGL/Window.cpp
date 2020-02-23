@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -95,8 +95,7 @@ namespace Window
 	{
 		switch (type)
 		{
-		case MenuLocale:
-		{
+		case MenuLocale: {
 			CheckMenuItem(config.menu, IDM_LOCALE_DEFAULT, MF_BYCOMMAND | (!config.locales.current.id ? MF_CHECKED : MF_UNCHECKED));
 
 			MenuItemData mData;
@@ -135,21 +134,18 @@ namespace Window
 		}
 		break;
 
-		case MenuAspect:
-		{
+		case MenuAspect: {
 			CheckMenuItem(config.menu, IDM_ASPECT_RATIO, MF_BYCOMMAND | (config.image.aspect ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
-		case MenuVSync:
-		{
+		case MenuVSync: {
 			EnableMenuItem(config.menu, IDM_VSYNC, MF_BYCOMMAND | (config.gl.version.value && WGLSwapInterval ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			CheckMenuItem(config.menu, IDM_VSYNC, MF_BYCOMMAND | (config.gl.version.value && WGLSwapInterval && config.image.vSync ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
-		case MenuInterpolate:
-		{
+		case MenuInterpolate: {
 			CheckMenuItem(config.menu, IDM_FILT_OFF, MF_BYCOMMAND | MF_UNCHECKED);
 
 			EnableMenuItem(config.menu, IDM_FILT_LINEAR, MF_BYCOMMAND | (config.gl.version.value ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
@@ -182,8 +178,7 @@ namespace Window
 		}
 		break;
 
-		case MenuUpscale:
-		{
+		case MenuUpscale: {
 			CheckMenuItem(config.menu, IDM_FILT_NONE, MF_BYCOMMAND | MF_UNCHECKED);
 
 			DWORD isFilters = config.gl.version.value >= GL_VER_3_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
@@ -302,8 +297,7 @@ namespace Window
 		}
 		break;
 
-		case MenuResolution:
-		{
+		case MenuResolution: {
 			DWORD count = sizeof(resolutionsList) / sizeof(Resolution);
 			const Resolution* resItem = resolutionsList;
 			DWORD id = IDM_RES_640_480;
@@ -335,8 +329,7 @@ namespace Window
 		}
 		break;
 
-		case MenuSpeed:
-		{
+		case MenuSpeed: {
 			DWORD count = IDM_SPEED_3_0 - IDM_SPEED_1_0 + 1;
 			DWORD id = IDM_SPEED_1_0;
 			while (count)
@@ -348,23 +341,48 @@ namespace Window
 		}
 		break;
 
-		case MenuBorders:
-		{
-			if (config.border.allowed)
+		case MenuBorders: {
+			MenuItemData mData;
+			mData.childId = IDM_BORDERS_OFF;
+			if (GetMenuByChildID(&mData))
 			{
-				EnableMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_ENABLED);
-				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | (config.border.enabled ? MF_CHECKED : MF_UNCHECKED));
-			}
-			else
-			{
-				EnableMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-				CheckMenuItem(config.menu, IDM_RES_BORDERS, MF_BYCOMMAND | MF_UNCHECKED);
+				if (!config.borders.allowed)
+				{
+					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
+					CheckMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_UNCHECKED);
+				}
+				else
+				{
+					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_ENABLED);
+					CheckMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (config.borders.type != BordersNone ? MF_CHECKED : MF_UNCHECKED));
+
+					UINT check = IDM_BORDERS_OFF + config.borders.type;
+					UINT count = (UINT)GetMenuItemCount(mData.hMenu);
+					for (UINT i = 0; i < count; ++i)
+					{
+						UINT id = GetMenuItemID(mData.hMenu, i);
+						CheckMenuItem(mData.hMenu, i, MF_BYPOSITION | (id == check ? MF_CHECKED : MF_UNCHECKED));
+					}
+				}
 			}
 		}
 		break;
 
-		case MenuStretch:
-		{
+		case MenuBackground: {
+			if (config.background.allowed)
+			{
+				EnableMenuItem(config.menu, IDM_BACKGROUND, MF_BYCOMMAND | MF_ENABLED);
+				CheckMenuItem(config.menu, IDM_BACKGROUND, MF_BYCOMMAND | (config.background.enabled ? MF_CHECKED : MF_UNCHECKED));
+			}
+			else
+			{
+				EnableMenuItem(config.menu, IDM_BACKGROUND, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+				CheckMenuItem(config.menu, IDM_BACKGROUND, MF_BYCOMMAND | MF_UNCHECKED);
+			}
+		}
+		break;
+
+		case MenuStretch: {
 			MenuItemData mData;
 			mData.childId = IDM_STRETCH_OFF;
 			if (GetMenuByChildID(&mData))
@@ -391,14 +409,12 @@ namespace Window
 		}
 		break;
 
-		case MenuWindowMode:
-		{
+		case MenuWindowMode: {
 			CheckMenuItem(config.menu, IDM_RES_FULL_SCREEN, MF_BYCOMMAND | (!config.windowedMode ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
-		case MenuWindowType:
-		{
+		case MenuWindowType: {
 			MenuItemData mData;
 			mData.childId = IDM_MODE_BORDERLESS;
 			if (GetMenuByChildID(&mData))
@@ -412,35 +428,30 @@ namespace Window
 		}
 		break;
 
-		case MenuFastAI:
-		{
+		case MenuFastAI: {
 			EnableMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (!config.isEditor ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			CheckMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (!config.isEditor && config.ai.fast ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
-		case MenuActive:
-		{
+		case MenuActive: {
 			CheckMenuItem(config.menu, IDM_ALWAYS_ACTIVE, MF_BYCOMMAND | (config.alwaysActive ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
-		case MenuCpu:
-		{
+		case MenuCpu: {
 			EnableMenuItem(config.menu, IDM_PATCH_CPU, MF_BYCOMMAND | (config.renderer != RendererGDI && !config.singleThread ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			CheckMenuItem(config.menu, IDM_PATCH_CPU, MF_BYCOMMAND | (config.renderer != RendererGDI && !config.singleThread && config.coldCPU ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
-		case MenuBattle:
-		{
+		case MenuBattle: {
 			EnableMenuItem(config.menu, IDM_MODE_WIDEBATTLE, MF_BYCOMMAND | (config.wide.hooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			CheckMenuItem(config.menu, IDM_MODE_WIDEBATTLE, MF_BYCOMMAND | (config.wide.hooked && config.wide.allowed ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
-		case MenuSnapshot:
-		{
+		case MenuSnapshot: {
 			EnableMenuItem(config.menu, IDM_SCR_PNG, MF_BYCOMMAND | (pnglib_create_write_struct ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 
 			BOOL enabled = config.snapshot.type == ImagePNG && pnglib_create_write_struct;
@@ -466,8 +477,7 @@ namespace Window
 		}
 		break;
 
-		case MenuMsgTimeScale:
-		{
+		case MenuMsgTimeScale: {
 			MenuItemData mData;
 			mData.childId = IDM_MSG_5;
 			if (GetMenuByChildID(&mData))
@@ -489,8 +499,7 @@ namespace Window
 		}
 		break;
 
-		case MenuRenderer:
-		{
+		case MenuRenderer: {
 			EnableMenuItem(config.menu, IDM_REND_GL2, MF_BYCOMMAND | (config.gl.version.real >= GL_VER_2_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			EnableMenuItem(config.menu, IDM_REND_GL3, MF_BYCOMMAND | (config.gl.version.real >= GL_VER_3_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 
@@ -539,6 +548,7 @@ namespace Window
 		CheckMenu(MenuResolution);
 		CheckMenu(MenuSpeed);
 		CheckMenu(MenuBorders);
+		CheckMenu(MenuBackground);
 		CheckMenu(MenuStretch);
 		CheckMenu(MenuWindowMode);
 		CheckMenu(MenuWindowType);
@@ -787,8 +797,7 @@ namespace Window
 	{
 		switch (uMsg)
 		{
-		case WM_INITDIALOG:
-		{
+		case WM_INITDIALOG: {
 			SetWindowLong(hDlg, GWL_EXSTYLE, NULL);
 			EnumChildWindows(hDlg, EnumChildProc, NULL);
 
@@ -853,8 +862,7 @@ namespace Window
 			break;
 		}
 
-		case WM_COMMAND:
-		{
+		case WM_COMMAND: {
 			if (wParam == IDC_BTN_OK)
 				EndDialog(hDlg, TRUE);
 			break;
@@ -871,8 +879,7 @@ namespace Window
 	{
 		switch (uMsg)
 		{
-		case WM_INITDIALOG:
-		{
+		case WM_INITDIALOG: {
 			SetWindowLong(hDlg, GWL_EXSTYLE, NULL);
 			EnumChildWindows(hDlg, EnumChildProc, NULL);
 
@@ -914,8 +921,7 @@ namespace Window
 			break;
 		}
 
-		case WM_NOTIFY:
-		{
+		case WM_NOTIFY: {
 			if (((NMHDR*)lParam)->code == NM_CLICK && wParam == IDC_LNK_EMAIL)
 			{
 				SHELLEXECUTEINFOW shExecInfo;
@@ -931,8 +937,7 @@ namespace Window
 			break;
 		}
 
-		case WM_COMMAND:
-		{
+		case WM_COMMAND: {
 			if (wParam == IDC_BTN_OK)
 				EndDialog(hDlg, TRUE);
 			break;
@@ -949,8 +954,7 @@ namespace Window
 	{
 		switch (uMsg)
 		{
-		case WM_PAINT:
-		{
+		case WM_PAINT: {
 			PAINTSTRUCT paint;
 			HDC hDc = BeginPaint(hWnd, &paint);
 			if (hDc)
@@ -975,8 +979,7 @@ namespace Window
 		case WM_ERASEBKGND:
 			return config.renderer == RendererGDI ? DefWindowProc(hWnd, uMsg, wParam, lParam) : TRUE;
 
-		case WM_WINDOWPOSCHANGED:
-		{
+		case WM_WINDOWPOSCHANGED: {
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 			if (ddraw)
 			{
@@ -993,8 +996,7 @@ namespace Window
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
 
-		case WM_MOVE:
-		{
+		case WM_MOVE: {
 			if (config.renderer != RendererGDI)
 			{
 				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
@@ -1005,8 +1007,7 @@ namespace Window
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
 
-		case WM_SIZE:
-		{
+		case WM_SIZE: {
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 			if (ddraw)
 			{
@@ -1024,8 +1025,7 @@ namespace Window
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
 
-		case WM_GETMINMAXINFO:
-		{
+		case WM_GETMINMAXINFO: {
 			DWORD style = GetWindowLong(hWnd, GWL_STYLE);
 
 			RECT min = { 0, 0, MIN_WIDTH, MIN_HEIGHT };
@@ -1046,8 +1046,7 @@ namespace Window
 			return NULL;
 		}
 
-		case WM_DESTROY:
-		{
+		case WM_DESTROY: {
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 			if (ddraw)
 			{
@@ -1058,8 +1057,7 @@ namespace Window
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
 
-		case WM_ACTIVATEAPP:
-		{
+		case WM_ACTIVATEAPP: {
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 			if (ddraw)
 			{
@@ -1089,8 +1087,7 @@ namespace Window
 			return !config.alwaysActive || (BOOL)wParam ? CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam) : NULL;
 		}
 
-		case WM_SETCURSOR:
-		{
+		case WM_SETCURSOR: {
 			if (LOWORD(lParam) == HTCLIENT)
 			{
 				OpenDraw* ddraw = Main::FindOpenDrawByWindow(GetForegroundWindow());
@@ -1120,8 +1117,7 @@ namespace Window
 		}
 
 		case WM_SYSKEYDOWN:
-		case WM_KEYDOWN:
-		{
+		case WM_KEYDOWN: {
 			if (!(HIWORD(lParam) & KF_ALTDOWN))
 			{
 				if (wParam == VK_OEM_PLUS || wParam == VK_OEM_MINUS || wParam == VK_ADD || wParam == VK_SUBTRACT)
@@ -1156,6 +1152,7 @@ namespace Window
 							Hooks::PrintText(text);
 						}
 
+						Hooks::SetGameSpeed();
 						CheckMenu(MenuSpeed);
 					}
 				}
@@ -1220,11 +1217,6 @@ namespace Window
 					return WindowProc(hWnd, WM_COMMAND, IDM_RES_FULL_SCREEN, NULL);
 					return NULL;
 				}
-				else if (config.keys.showBorders && config.keys.showBorders + VK_F1 - 1 == wParam)
-				{
-					return WindowProc(hWnd, WM_COMMAND, IDM_RES_BORDERS, NULL);
-					return NULL;
-				}
 				else if (config.keys.zoomImage && config.keys.zoomImage + VK_F1 - 1 == wParam)
 				{
 					return WindowProc(hWnd, WM_COMMAND, IDM_STRETCH_OFF + (!config.zoom.enabled ? config.zoom.value : 0), NULL);
@@ -1285,8 +1277,7 @@ namespace Window
 		case WM_RBUTTONDOWN:
 		case WM_RBUTTONUP:
 		case WM_MBUTTONDOWN:
-		case WM_MBUTTONUP:
-		{
+		case WM_MBUTTONUP: {
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 			if (ddraw)
 			{
@@ -1298,12 +1289,10 @@ namespace Window
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
 
-		case WM_COMMAND:
-		{
+		case WM_COMMAND: {
 			switch (wParam)
 			{
-			case IDM_FILE_RESET:
-			{
+			case IDM_FILE_RESET: {
 				if (Main::ShowWarn(IDS_WARN_RESET))
 				{
 					Config::Set(CONFIG_WRAPPER, "ReInit", TRUE);
@@ -1313,15 +1302,13 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_FILE_QUIT:
-			{
+			case IDM_FILE_QUIT: {
 				SendMessage(hWnd, WM_CLOSE, NULL, NULL);
 				return NULL;
 			}
 
 			case IDM_HELP_ABOUT_APPLICATION:
-			case IDM_HELP_ABOUT_WRAPPER:
-			{
+			case IDM_HELP_ABOUT_WRAPPER: {
 				ULONG_PTR cookie = NULL;
 				if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
 					cookie = NULL;
@@ -1348,8 +1335,7 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_RES_FULL_SCREEN:
-			{
+			case IDM_RES_FULL_SCREEN: {
 				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 				if (ddraw && !ddraw->isFinish)
 				{
@@ -1385,8 +1371,7 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_ASPECT_RATIO:
-			{
+			case IDM_ASPECT_RATIO: {
 				config.image.aspect = !config.image.aspect;
 				Config::Set(CONFIG_WRAPPER, "ImageAspect", config.image.aspect);
 
@@ -1414,8 +1399,7 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_VSYNC:
-			{
+			case IDM_VSYNC: {
 				config.image.vSync = !config.image.vSync;
 				Config::Set(CONFIG_WRAPPER, "ImageVSync", config.image.vSync);
 
@@ -1440,117 +1424,101 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_FILT_OFF:
-			{
+			case IDM_FILT_OFF: {
 				InterpolationChanged(hWnd, InterpolateNearest);
 				return NULL;
 			}
 
-			case IDM_FILT_LINEAR:
-			{
+			case IDM_FILT_LINEAR: {
 				InterpolationChanged(hWnd, InterpolateLinear);
 				return NULL;
 			}
 
-			case IDM_FILT_HERMITE:
-			{
+			case IDM_FILT_HERMITE: {
 				InterpolationChanged(hWnd, InterpolateHermite);
 				return NULL;
 			}
 
-			case IDM_FILT_CUBIC:
-			{
+			case IDM_FILT_CUBIC: {
 				InterpolationChanged(hWnd, InterpolateCubic);
 				return NULL;
 			}
 
-			case IDM_FILT_NONE:
-			{
+			case IDM_FILT_NONE: {
 				UpscalingChanged(hWnd, UpscaleNone);
 				return NULL;
 			}
 
-			case IDM_FILT_SCALENX_2X:
-			{
+			case IDM_FILT_SCALENX_2X: {
 				SelectScaleNxMode(hWnd, 2);
 				return NULL;
 			}
 
-			case IDM_FILT_SCALENX_3X:
-			{
+			case IDM_FILT_SCALENX_3X: {
 				SelectScaleNxMode(hWnd, 3);
 				return NULL;
 			}
 
-			case IDM_FILT_XSAL_2X:
-			{
+			case IDM_FILT_XSAL_2X: {
 				SelectXSalMode(hWnd, 2);
 				return NULL;
 			}
 
-			case IDM_FILT_EAGLE_2X:
-			{
+			case IDM_FILT_EAGLE_2X: {
 				SelectEagleMode(hWnd, 2);
 				return NULL;
 			}
 
-			case IDM_FILT_SCALEHQ_2X:
-			{
+			case IDM_FILT_SCALEHQ_2X: {
 				SelectScaleHQMode(hWnd, 2);
 				return NULL;
 			}
 
-			case IDM_FILT_SCALEHQ_4X:
-			{
+			case IDM_FILT_SCALEHQ_4X: {
 				SelectScaleHQMode(hWnd, 4);
 				return NULL;
 			}
 
-			case IDM_FILT_XRBZ_2X:
-			{
+			case IDM_FILT_XRBZ_2X: {
 				SelectXBRZMode(hWnd, 2);
 				return NULL;
 			}
 
-			case IDM_FILT_XRBZ_3X:
-			{
+			case IDM_FILT_XRBZ_3X: {
 				SelectXBRZMode(hWnd, 3);
 				return NULL;
 			}
 
-			case IDM_FILT_XRBZ_4X:
-			{
+			case IDM_FILT_XRBZ_4X: {
 				SelectXBRZMode(hWnd, 4);
 				return NULL;
 			}
 
-			case IDM_FILT_XRBZ_5X:
-			{
+			case IDM_FILT_XRBZ_5X: {
 				SelectXBRZMode(hWnd, 5);
 				return NULL;
 			}
 
-			case IDM_FILT_XRBZ_6X:
-			{
+			case IDM_FILT_XRBZ_6X: {
 				SelectXBRZMode(hWnd, 6);
 				return NULL;
 			}
 
-			case IDM_RES_BORDERS:
-			{
-				if (config.border.allowed)
+			case IDM_BACKGROUND: {
+				if (config.background.allowed)
 				{
-					config.border.enabled = !config.border.enabled;
-					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.border.enabled);
+					config.background.enabled = !config.background.enabled;
+					Config::Set(CONFIG_WRAPPER, "Background", config.background.enabled);
+					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.background.enabled);
 
 					if (config.resHooked)
 					{
 						{
 							CHAR str1[32];
-							LoadString(hDllModule, IDS_RES_BORDERS, str1, sizeof(str1));
+							LoadString(hDllModule, IDS_BACKGROUND, str1, sizeof(str1));
 
 							CHAR str2[32];
-							LoadString(hDllModule, config.border.enabled ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+							LoadString(hDllModule, config.background.enabled ? IDS_ON : IDS_OFF, str2, sizeof(str2));
 
 							CHAR text[64];
 							StrPrint(text, "%s: %s", str1, str2);
@@ -1564,30 +1532,27 @@ namespace Window
 					else
 						Main::ShowInfo(IDS_INFO_RESTART);
 
-					CheckMenu(MenuBorders);
+					CheckMenu(MenuBackground);
 				}
 
 				return NULL;
 			}
 
-			case IDM_MODE_BORDERLESS:
-			{
+			case IDM_MODE_BORDERLESS: {
 				config.borderless.real = config.borderless.mode = TRUE;
 				Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderless.mode);
 				CheckMenu(MenuWindowType);
 				return NULL;
 			}
 
-			case IDM_MODE_EXCLUSIVE:
-			{
+			case IDM_MODE_EXCLUSIVE: {
 				config.borderless.real = config.borderless.mode = FALSE;
 				Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderless.mode);
 				CheckMenu(MenuWindowType);
 				return NULL;
 			}
 
-			case IDM_FAST_AI:
-			{
+			case IDM_FAST_AI: {
 				if (config.ai.fast || Main::ShowWarn(IDS_WARN_FAST_AI))
 				{
 					config.ai.fast = !config.ai.fast;
@@ -1611,8 +1576,7 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_ALWAYS_ACTIVE:
-			{
+			case IDM_ALWAYS_ACTIVE: {
 				config.alwaysActive = !config.alwaysActive;
 				Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
 
@@ -1632,14 +1596,8 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_PATCH_CPU:
-			{
+			case IDM_PATCH_CPU: {
 				config.coldCPU = !config.coldCPU;
-				if (config.coldCPU)
-					timeBeginPeriod(1);
-				else
-					timeEndPeriod(1);
-
 				Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
 
 				{
@@ -1658,8 +1616,7 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_MODE_WIDEBATTLE:
-			{
+			case IDM_MODE_WIDEBATTLE: {
 				config.wide.allowed = !config.wide.allowed;
 				Config::Set(CONFIG_WRAPPER, "WideBattle", config.wide.allowed);
 
@@ -1670,8 +1627,7 @@ namespace Window
 			}
 
 			case IDM_SCR_BMP:
-			case IDM_SCR_PNG:
-			{
+			case IDM_SCR_PNG: {
 				ImageType type = wParam == IDM_SCR_PNG ? ImagePNG : ImageBMP;
 				if (config.snapshot.type != type)
 				{
@@ -1696,32 +1652,27 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_REND_AUTO:
-			{
+			case IDM_REND_AUTO: {
 				SelectRenderer(hWnd, RendererAuto);
 				return NULL;
 			}
 
-			case IDM_REND_GL1:
-			{
+			case IDM_REND_GL1: {
 				SelectRenderer(hWnd, RendererOpenGL1);
 				return NULL;
 			}
 
-			case IDM_REND_GL2:
-			{
+			case IDM_REND_GL2: {
 				SelectRenderer(hWnd, RendererOpenGL2);
 				return NULL;
 			}
 
-			case IDM_REND_GL3:
-			{
+			case IDM_REND_GL3: {
 				SelectRenderer(hWnd, RendererOpenGL3);
 				return NULL;
 			}
 
-			case IDM_REND_GDI:
-			{
+			case IDM_REND_GDI: {
 				SelectRenderer(hWnd, RendererGDI);
 				return NULL;
 			}
@@ -1778,7 +1729,7 @@ namespace Window
 						else
 							config.zoom.enabled = FALSE;
 
-						Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.zoom.enabled);
+						Config::Set(!config.version ? CONFIG_DISCIPLE : CONFIG_WRAPPER, "EnableZoom", config.zoom.enabled);
 
 						{
 							CHAR str1[32];
@@ -1802,6 +1753,48 @@ namespace Window
 							ddraw->Redraw();
 
 						CheckMenu(MenuStretch);
+					}
+
+					return NULL;
+				}
+				else if (wParam >= IDM_BORDERS_OFF && wParam <= IDM_BORDERS_ALTERNATIVE)
+				{
+					if (config.borders.allowed)
+					{
+						config.borders.type = BordersType(wParam - IDM_BORDERS_OFF);
+						Config::Set(CONFIG_WRAPPER, "Borders", (INT)config.borders.type);
+
+						{
+							CHAR str1[32];
+							LoadString(hDllModule, IDS_BORDERS, str1, sizeof(str1));
+
+							CHAR str2[32];
+							switch (config.borders.type)
+							{
+							case BordersClassic:
+								LoadString(hDllModule, IDS_BORDERS_CLASSIC, str2, sizeof(str2));
+								break;
+
+							case BordersAlternative:
+								LoadString(hDllModule, IDS_BORDERS_ALTERNATIVE, str2, sizeof(str2));
+								break;
+
+							default:
+								LoadString(hDllModule, IDS_OFF, str2, sizeof(str2));
+								break;
+							}
+
+							CHAR text[64];
+							StrPrint(text, "%s: %s", str1, str2);
+
+							Hooks::PrintText(text);
+						}
+
+						OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+						if (ddraw)
+							ddraw->Redraw();
+
+						CheckMenu(MenuBorders);
 					}
 
 					return NULL;
@@ -1837,6 +1830,7 @@ namespace Window
 							Hooks::PrintText(text);
 						}
 
+						Hooks::SetGameSpeed();
 						CheckMenu(MenuSpeed);
 					}
 
@@ -1928,8 +1922,7 @@ namespace Window
 			}
 		}
 
-		case WM_DISPLAYCHANGE:
-		{
+		case WM_DISPLAYCHANGE: {
 			DEVMODE devMode;
 			MemoryZero(&devMode, sizeof(DEVMODE));
 			devMode.dmSize = sizeof(DEVMODE);

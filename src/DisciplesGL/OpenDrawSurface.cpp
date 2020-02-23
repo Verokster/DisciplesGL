@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -76,73 +76,6 @@ OpenDrawSurface::~OpenDrawSurface()
 		this->attachedClipper->Release();
 
 	this->ReleaseBuffer();
-}
-
-VOID __fastcall DrawBorders(VOID* data, DWORD width, DWORD height, StateBufferBorder* srcBuffer)
-{
-	if (!srcBuffer)
-		return;
-
-	LONG srcX, srcY, dstX, dstY;
-	DWORD cWidth, cHeight;
-
-	dstX = ((LONG)width - (LONG)srcBuffer->width) >> 1;
-	if (dstX < 0)
-	{
-		srcX = -dstX;
-		dstX = 0;
-		cWidth = width;
-	}
-	else
-	{
-		srcX = 0;
-		cWidth = srcBuffer->width;
-	}
-
-	dstY = ((LONG)height - (LONG)srcBuffer->height) >> 1;
-	if (dstY < 0)
-	{
-		srcY = -dstY;
-		dstY = 0;
-		cHeight = height;
-	}
-	else
-	{
-		srcY = 0;
-		cHeight = srcBuffer->height;
-	}
-
-	DWORD* dstData = (DWORD*)data + dstY * width + dstX;
-	if (srcBuffer->isAllocated)
-	{
-		DWORD* srcData = (DWORD*)srcBuffer->data + srcY * srcBuffer->width + srcX;
-
-		while (cHeight)
-		{
-			--cHeight;
-			MemoryCopy(dstData, srcData, cWidth * sizeof(DWORD));
-
-			srcData += srcBuffer->width;
-			dstData += width;
-		}
-	}
-	else
-	{
-		while (cHeight)
-		{
-			--cHeight;
-			DWORD* dst = dstData;
-
-			DWORD count = cWidth;
-			while (count)
-			{
-				--count;
-				*dst++ = ALPHA_COMPONENT;
-			}
-
-			dstData += width;
-		}
-	}
 }
 
 StateBufferBorder* __fastcall LoadBufferImage(LPSTR resourceId)
@@ -261,6 +194,103 @@ StateBufferBorder* __fastcall LoadBufferImage(LPSTR resourceId)
 	return buffer;
 }
 
+VOID OpenDrawSurface::DrawBorders(VOID* data, DWORD width, DWORD height)
+{
+	BOOL wide = config.battle.active && config.battle.wide;
+
+	StateBufferBorder** lpBuffer = (StateBufferBorder**)(!wide ? &this->secondaryBuffer : &this->backBuffer);
+	if ((*lpBuffer)->type != config.borders.type)
+	{
+		delete *lpBuffer;
+		*lpBuffer = NULL;
+
+		switch (config.borders.type)
+		{
+		case BordersClassic:
+			*lpBuffer = LoadBufferImage(!wide ? MAKEINTRESOURCE(IDR_BORDER) : MAKEINTRESOURCE(IDR_BORDER_WIDE));
+			break;
+
+		case BordersAlternative:
+			*lpBuffer = LoadBufferImage(!wide ? MAKEINTRESOURCE(IDR_ALT) : MAKEINTRESOURCE(IDR_ALT_WIDE));
+			break;
+
+		default:
+			break;
+		}
+
+		if (!*lpBuffer)
+		{
+			if (wide)
+				*lpBuffer = new StateBufferBorder(GAME_WIDTH, GAME_HEIGHT, (VOID*)NULL);
+			else
+				*lpBuffer = new StateBufferBorder(WIDE_WIDTH, WIDE_HEIGHT, (VOID*)NULL);
+		}
+	}
+
+	StateBufferBorder* srcBuffer = *lpBuffer;
+
+	LONG srcX, srcY, dstX, dstY;
+	DWORD cWidth, cHeight;
+
+	dstX = ((LONG)width - (LONG)srcBuffer->width) >> 1;
+	if (dstX < 0)
+	{
+		srcX = -dstX;
+		dstX = 0;
+		cWidth = width;
+	}
+	else
+	{
+		srcX = 0;
+		cWidth = srcBuffer->width;
+	}
+
+	dstY = ((LONG)height - (LONG)srcBuffer->height) >> 1;
+	if (dstY < 0)
+	{
+		srcY = -dstY;
+		dstY = 0;
+		cHeight = height;
+	}
+	else
+	{
+		srcY = 0;
+		cHeight = srcBuffer->height;
+	}
+
+	DWORD* dstData = (DWORD*)data + dstY * width + dstX;
+	if (srcBuffer->isAllocated)
+	{
+		DWORD* srcData = (DWORD*)srcBuffer->data + srcY * srcBuffer->width + srcX;
+
+		while (cHeight)
+		{
+			--cHeight;
+			MemoryCopy(dstData, srcData, cWidth * sizeof(DWORD));
+
+			srcData += srcBuffer->width;
+			dstData += width;
+		}
+	}
+	else
+	{
+		while (cHeight)
+		{
+			--cHeight;
+			DWORD* dst = dstData;
+
+			DWORD count = cWidth;
+			while (count)
+			{
+				--count;
+				*dst++ = ALPHA_COMPONENT;
+			}
+
+			dstData += width;
+		}
+	}
+}
+
 VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* buffer)
 {
 	this->ReleaseBuffer();
@@ -279,8 +309,8 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 			this->indexBuffer = buffer;
 
 			buffer->isZoomed = Config::IsZoomed();
-			if (config.border.enabled && config.border.active)
-				buffer->isBorder = TRUE;
+			buffer->borders = config.borders.active ? config.borders.type : BordersNone;
+			buffer->isBack = config.background.enabled && config.borders.active;
 		}
 		else
 		{
@@ -296,10 +326,35 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 			this->secondaryBuffer = new StateBufferAligned();
 			this->backBuffer = new StateBufferAligned();
 		}
-		else if (this->type == SurfaceSecondary && config.border.inside)
+		else if (this->type == SurfaceSecondary && config.borders.allowed)
 		{
-			this->secondaryBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_BORDER));
-			this->backBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_BORDER_WIDE));
+			if (this->secondaryBuffer)
+			{
+				delete this->secondaryBuffer;
+				this->secondaryBuffer = NULL;
+			}
+
+			if (this->backBuffer)
+			{
+				delete this->backBuffer;
+				this->backBuffer = NULL;
+			}
+
+			switch (config.borders.type)
+			{
+			case BordersClassic:
+				this->secondaryBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_BORDER));
+				this->backBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_BORDER_WIDE));
+				break;
+
+			case BordersAlternative:
+				this->secondaryBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_ALT));
+				this->backBuffer = LoadBufferImage(MAKEINTRESOURCE(IDR_ALT_WIDE));
+				break;
+
+			default:
+				break;
+			}
 
 			if (!this->secondaryBuffer)
 				this->secondaryBuffer = new StateBufferBorder(GAME_WIDTH, GAME_HEIGHT, (VOID*)NULL);
@@ -349,35 +404,40 @@ VOID OpenDrawSurface::Flush()
 		if (config.renderer == RendererGDI)
 		{
 			do
-				*dest++ = _byteswap_ulong(_rotl(this->attachedPalette->entries[*src++], 8));
+				*dest++ = _byteswap_ulong(_rotl(this->attachedPalette->entries[*src++], 8)) | ALPHA_COMPONENT;
 			while (--count);
 		}
 		else
 		{
 			do
-				*dest++ = this->attachedPalette->entries[*src++];
+				*dest++ = this->attachedPalette->entries[*src++] | ALPHA_COMPONENT;
 			while (--count);
 		}
 
-		((StateBufferAligned*)this->backBuffer)->size = *(Size*)config.mode;
+		StateBufferAligned* surfaceBuffer = (StateBufferAligned*)this->backBuffer;
+
+		surfaceBuffer->isZoomed = Config::IsZoomed();
+		surfaceBuffer->size = surfaceBuffer->isZoomed ? config.zoom.size : *(Size*)config.mode;
 
 		this->SwapBuffers();
 		Sleep(0);
 	}
 	else
 	{
-		BOOL redraw = FALSE;
 		StateBufferAligned* surfaceBuffer = (StateBufferAligned*)surface->indexBuffer;
 		if (surface->drawEnabled)
 		{
 			surfaceBuffer->isZoomed = Config::IsZoomed();
-			if (config.border.enabled && config.border.active)
+
+			if (config.borders.type != BordersNone && config.borders.active)
 			{
-				if (!surfaceBuffer->isBorder)
-					redraw = surfaceBuffer->isBorder = TRUE;
+				surface->redraw = surfaceBuffer->borders != config.borders.type;
+				surfaceBuffer->borders = config.borders.type;
 			}
 			else
-				surfaceBuffer->isBorder = FALSE;
+				surfaceBuffer->borders = BordersNone;
+
+			surfaceBuffer->isBack = config.background.enabled && config.borders.active;
 		}
 
 		BOOL isSync = !config.ai.thinking && !config.ai.waiting && config.coldCPU;
@@ -396,10 +456,12 @@ VOID OpenDrawSurface::Flush()
 
 				this->drawEnabled = FALSE;
 
-				if (redraw)
+				if (surface->redraw)
 				{
+					surface->redraw = FALSE;
+
 					MemoryZero(this->backBuffer->data, this->mode.width * this->mode.height * sizeof(DWORD));
-					DrawBorders(this->backBuffer->data, config.mode->width, config.mode->height, (StateBufferBorder*)(!config.battle.active || !config.battle.wide ? surface->secondaryBuffer : surface->backBuffer));
+					surface->DrawBorders(this->backBuffer->data, config.mode->width, config.mode->height);
 
 					DWORD left = (this->mode.width - config.mode->width) >> 1;
 					DWORD top = (this->mode.height - config.mode->height) >> 1;
@@ -447,7 +509,8 @@ VOID OpenDrawSurface::Flush()
 
 					StateBufferAligned* back = (StateBufferAligned*)this->backBuffer;
 					back->isZoomed = surfaceBuffer->isZoomed;
-					back->isBorder = surfaceBuffer->isBorder;
+					back->borders = surfaceBuffer->borders;
+					back->isBack = surfaceBuffer->isBack;
 				}
 				else
 				{
@@ -656,9 +719,9 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 
 			if (this->type == SurfaceSecondary)
 			{
-				((StateBufferAligned*)this->indexBuffer)->isBorder = config.border.enabled && config.border.active;
-				if (((StateBufferAligned*)this->indexBuffer)->isBorder)
-					DrawBorders(this->indexBuffer->data, this->mode.width, this->mode.height, (StateBufferBorder*)(!config.battle.active || !config.battle.wide ? this->secondaryBuffer : this->backBuffer));
+				((StateBufferAligned*)this->indexBuffer)->borders = config.borders.active ? config.borders.type : BordersNone;
+				if (((StateBufferAligned*)this->indexBuffer)->borders != BordersNone)
+					this->DrawBorders(this->indexBuffer->data, this->mode.width, this->mode.height);
 			}
 		}
 	}

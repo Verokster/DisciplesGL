@@ -69,7 +69,10 @@ BEGIN
 	IDS_ASPECT_STRETCH				"Stretch"
 
 	IDS_STRETCH						"Stretch windows"
-	IDS_RES_BORDERS					"Background"
+	IDS_BORDERS						"Borders"
+	IDS_BORDERS_CLASSIC				"Classic"
+	IDS_BORDERS_ALTERNATIVE			"Alternative"
+	IDS_BACKGROUND					"Background"
 
 	IDS_SPEED						"Speed"
 
@@ -212,9 +215,17 @@ BEGIN
 			MENUITEM "90%",							IDM_STRETCH_90
 			MENUITEM "100%",						IDM_STRETCH_100
 		END
-		MENUITEM "Show &Background\a",				IDM_RES_BORDERS
-		MENUITEM SEPARATOR
 		MENUITEM "Keep &Aspect Ratio\a",			IDM_ASPECT_RATIO
+		MENUITEM SEPARATOR
+		POPUP "Show &Borders"
+		BEGIN
+			MENUITEM "Off",							IDM_BORDERS_OFF
+			MENUITEM SEPARATOR
+			MENUITEM "Classic",						IDM_BORDERS_CLASSIC
+			MENUITEM "Alternative",					IDM_BORDERS_ALTERNATIVE
+		END
+		MENUITEM "Show Back&ground",				IDM_BACKGROUND
+		//MENUITEM "&Color Adjustment...",			IDM_COLOR_ADJUST
 	END
 	POPUP "&Options"
 	BEGIN
@@ -395,9 +406,17 @@ BEGIN
 			MENUITEM "90%",							IDM_STRETCH_90
 			MENUITEM "100%",						IDM_STRETCH_100
 		END
-		MENUITEM "Show &Background\a",				IDM_RES_BORDERS
-		MENUITEM SEPARATOR
 		MENUITEM "Keep &Aspect Ratio\a",			IDM_ASPECT_RATIO
+		MENUITEM SEPARATOR
+		POPUP "Show &Borders"
+		BEGIN
+			MENUITEM "Off",							IDM_BORDERS_OFF
+			MENUITEM SEPARATOR
+			MENUITEM "Classic",						IDM_BORDERS_CLASSIC
+			MENUITEM "Alternative",					IDM_BORDERS_ALTERNATIVE
+		END
+		MENUITEM "Show Back&ground",				IDM_BACKGROUND
+		//MENUITEM "&Color Adjustment...",			IDM_COLOR_ADJUST
 	END
 	POPUP "&Options"
 	BEGIN
@@ -540,6 +559,8 @@ IDR_SCALENX_FRAGMENT_3X		RCDATA		DISCARDABLE			"..\\glsl\\scalenx\\fragment_3x.g
 IDR_BACK					RCDATA		DISCARDABLE			"..\\bmp\\back.png"
 IDR_BORDER					RCDATA		DISCARDABLE			"..\\bmp\\border.png"
 IDR_BORDER_WIDE				RCDATA		DISCARDABLE			"..\\bmp\\border_widest.png"
+IDR_ALT						RCDATA		DISCARDABLE			"..\\bmp\\alt.png"
+IDR_ALT_WIDE				RCDATA		DISCARDABLE			"..\\bmp\\alt_widest.png"
 
 IDR_DLG_BATTLE_B			RCDATA		DISCARDABLE			"..\\files\\DLG_BATTLE_B.dlg"
 IDR_DLG_ISO_NEW				RCDATA		DISCARDABLE			"..\\files\\DLG_ISO_NEW.dlg"
@@ -558,8 +579,8 @@ IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2020,1,14,1288
- PRODUCTVERSION 1,5,3,0
+ FILEVERSION 2020,2,23,1370
+ PRODUCTVERSION 1,5,8,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -575,10 +596,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2020.01.14.1288"
+			VALUE "FileVersion", "2020.02.23.1370"
 			VALUE "LegalCopyright", "© 2020 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4dll-R.dll"
-			VALUE "ProductVersion", "1.5.3"
+			VALUE "ProductVersion", "1.5.8"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

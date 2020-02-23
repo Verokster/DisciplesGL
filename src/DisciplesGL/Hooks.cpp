@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -51,21 +51,29 @@ namespace Hooks
 		0x004CD137, WS_POPUP, 0x004DFFA4, 0x00000000, 0x004E06D3,
 		0x0058F7E3,
 		0x005E6320, 0x005DB2A0, 0x004E21B5, 0x00550B69, 0x00465296, 0x004F07F5, 0x004F1006, 0x004F12AA,
+		0x004E7094, 0x004E70FF, 0x004C9AFD,
+		0x004E1BF7,
 
 		// v2000.6.22.1 - Eng
 		0x004CD13E, WS_POPUP, 0x004DFF9C, 0x00000000, 0x004E0759,
 		0x0058F0D3,
 		0x005E6358, 0x005DB2D8, 0x004E225C, 0x0055037A, 0x0046523E, 0x004F07B0, 0x004F0FB6, 0x004F125A,
+		0x004E712F, 0x004E719A, 0x004C9B9A,
+		0x004E1C9E,
 
-		// v2000.6.22.1 - Rus1
+		// v2000.6.22.1 - Rus
 		0x004CD408, WS_POPUP, 0x004E0323, 0x00000000, 0x004E0AA8,
 		0x00590E03,
 		0x005E8430, 0x005DD278, 0x004E2565, 0x0055106A, 0x0046541D, 0x004F0B39, 0x004F12D6, 0x004F157A,
+		0x004E746D, 0x004E74D8, 0x004C9D9F,
+		0x004E1FA7,
 
 		// v2000.6.22.1 Editor
 		0x00443EDE, WS_POPUP, 0x0045147D, 0x004265E3, 0x00451BE8,
 		0x00000000,
-		0x00519568, 0x00000000, 0x004E2565, 0x004A041A, 0x00000000, 0x0046229D, 0x00462AF6, 0x00462D9A
+		0x00519568, 0x00000000, 0x004537B8, 0x004A041A, 0x00000000, 0x0046229D, 0x00462AF6, 0x00462D9A,
+		0x00458961, 0x004589CC, 0x00440BC6,
+		0x004531FA
 	};
 
 	const AddressSpaceV2 addressArrayV2[] = {
@@ -92,15 +100,18 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x005A3079, 0x005A30C2, 0x005A310B, 0x005200AA,
+		0x0059DB27, 0x0059D63C, 0x0059DBD6, 0x00515DAF, 0x00520744,
 
 		0x0048ACA4, 0x0053607F, 0x005A22B1, 0x00531627,
 		0x00000000, 0x00000000, 0x00000000, 0x00480A18,
 		0x00487F80, 0x004059C7, 0x004857C7,
 
 		0x00000000, 0x00000000, 0x00000000, 0x005094B1, 0x00509575,
+		0x00552D19, 0x0042924B, 0x004292D3,
+		0x00510361, 0x00510419,
 #pragma endregion
 
-#pragma region v1 .40
+#pragma region v1 .41
 		// v1.40
 		1, 0x0055EA82, CHECKVALUE, 0x00000000, 0x00000000, 144, 0x005C293F,
 		0x006665C1,
@@ -123,12 +134,15 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x005A9402, 0x005A944B, 0x005A9494, 0x00525390,
+		0x005A3E43, 0x005A3958, 0x005A3F46, 0x0051B083, 0x00525A19,
 
 		0x0048D187, 0x004C2423, 0x005A863F, 0x00537712,
 		0x00000000, 0x00000000, 0x00000000, 0x00482654,
 		0x0048A53D, 0x004059F2, 0x00487CEB,
 
 		0x00000000, 0x00000000, 0x00000000, 0x0050E461, 0x0050E525,
+		0x00558E25, 0x0042A9E1, 0x0042AA69,
+		0x00515681, 0x00515739,
 #pragma endregion
 
 #pragma region v2 .01
@@ -154,12 +168,15 @@ namespace Hooks
 		0x0062752E, 0x0062757D, 0x006275AB, 0x006279DD, 0x00627A2C, 0x00627A5A,
 		0x00626A07, 0x00625B4A, 0x00625DEC, 0x00000000,
 		0x005B008C, 0x005B00D5, 0x005B011E, 0x0052AB8A,
+		0x005AAACC, 0x005AA5E1, 0x005AAB8D, 0x00520625, 0x0052B1F3,
 
 		0x0048FAB4, 0x0056CEEE, 0x005AF2A4, 0x0053D265,
 		0x0052FD28, 0x00484900, 0x00484922, 0x004847FF,
 		0x0048CD6F, 0x00405F03, 0x0048A44F,
 
 		0x00450226, 0x004502B3, 0x0040A789, 0x00513981, 0x00513A45,
+		0x0055EA01, 0x0042AE78, 0x0042AF00,
+		0x0051ABC1, 0x0051AC79,
 #pragma endregion
 
 #pragma region v2 .01 - Steam
@@ -185,12 +202,15 @@ namespace Hooks
 		0x006278CE, 0x0062791D, 0x0062794B, 0x00627D7D, 0x00627DCC, 0x00627DFA,
 		0x00626DA7, 0x00625EEA, 0x0062618C, 0x0050B3AF,
 		0x005B065B, 0x005B06A4, 0x005B06ED, 0x0052B25E,
+		0x005AB022, 0x005AAB37, 0x005AB149, 0x00520D1B, 0x0052B8F8,
 
 		0x0048FB37, 0x005AA77E, 0x005AF894, 0x0053D936,
 		0x00530462, 0x00484960, 0x00484982, 0x0048485F,
 		0x0048CE0E, 0x00405B80, 0x0048A4EE,
 
 		0x0045010A, 0x00450197, 0x0040A4AE, 0x005141A1, 0x00514265,
+		0x0055F0EF, 0x0042AC9E, 0x0042AD26,
+		0x0051B331, 0x0051B3E9,
 #pragma endregion
 
 #pragma region v2 .02
@@ -216,12 +236,15 @@ namespace Hooks
 		0x00625EAE, 0x00625EFD, 0x00625F2B, 0x0062635D, 0x006263AC, 0x006263DA,
 		0x00625387, 0x006244CA, 0x0062476C, 0x00000000,
 		0x005AEF44, 0x005AEF8D, 0x005AEFD6, 0x00529AEB,
+		0x005A9957, 0x005A946C, 0x005A9A1E, 0x0051F886, 0x0052A14E,
 
 		0x0048FF90, 0x004F146A, 0x005AE161, 0x0053C095,
 		0x0052EAAE, 0x00484DD1, 0x00484DF3, 0x00484CD0,
 		0x0048D25C, 0x00405A1A, 0x0048A93C,
 
 		0x00450417, 0x004504A4, 0x0040A438, 0x00512D71, 0x00512E35,
+		0x0055D726, 0x0042AC64, 0x0042ACEC,
+		0x00519FF1, 0x0051A0A9,
 #pragma endregion
 
 #pragma region v2 .02 - Crack
@@ -247,12 +270,15 @@ namespace Hooks
 		0x0062763E, 0x0062768D, 0x006276BB, 0x00627AED, 0x00627B3C, 0x00627B6A,
 		0x00626B17, 0x00625C5A, 0x00625EFC, 0x00000000,
 		0x005B0852, 0x005B089B, 0x005B08E4, 0x0052B0AA,
+		0x005AB292, 0x005AADA7, 0x005AB353, 0x00520B45, 0x0052B713,
 
 		0x00490169, 0x0056D6B4, 0x005AFA6A, 0x0053D735,
 		0x005301F8, 0x00484FB5, 0x00484FD7, 0x00484EB4,
 		0x0048D424, 0x00405F19, 0x0048AB04,
 
 		0x004506BD, 0x0045074A, 0x0040A79F, 0x00513EB1, 0x00513F75,
+		0x0055F051, 0x0042AE8E, 0x0042AF16,
+		0x0051B0F1, 0x0051B1A9,
 #pragma endregion
 
 #pragma region v3 .00 - Steam
@@ -278,12 +304,15 @@ namespace Hooks
 		0x0062F13B, 0x0062F188, 0x0062F1B6, 0x0062F5E9, 0x0062F63C, 0x0062F670,
 		0x0062E552, 0x0062D5FA, 0x0062D905, 0x0050E535,
 		0x005B3D11, 0x005B3D5A, 0x005B3DA3, 0x0052E569,
+		0x005AE718, 0x005AE22D, 0x005AE82D, 0x00523F93, 0x0052EBD2,
 
 		0x00492DB4, 0x00581521, 0x005B2F1A, 0x00540AC6,
 		0x00533515, 0x00487AAD, 0x00487ACF, 0x004879AC,
 		0x00490052, 0x00405929, 0x0048D732,
 
 		0x0045257F, 0x0045260C, 0x0040A3D9, 0x00517311, 0x005173D5,
+		0x00561961, 0x0042BF1B, 0x0042BFA3,
+		0x0051E501, 0x0051E5B9,
 #pragma endregion
 
 #pragma region v3 .01a
@@ -309,12 +338,15 @@ namespace Hooks
 		0x0062FDBB, 0x0062FE08, 0x0062FE36, 0x00630269, 0x006302BC, 0x006302F0,
 		0x0062F1D2, 0x0062E27A, 0x0062E585, 0x00000000,
 		0x005B4308, 0x005B4351, 0x005B439A, 0x0052E4C0,
+		0x005AED4C, 0x005AE861, 0x005AEDFB, 0x00523D50, 0x0052EB29,
 
 		0x00492EEA, 0x00403FC0, 0x005B3528, 0x00540B48,
 		0x005335EC, 0x00487AB9, 0x00487ADB, 0x004879B8,
 		0x004900C8, 0x00405C95, 0x0048D7A8,
 
 		0x004526E8, 0x00452775, 0x0040A79D, 0x00517111, 0x005171D5,
+		0x00561B61, 0x0042C330, 0x0042C3B8,
+		0x0051E2B1, 0x0051E369,
 #pragma endregion
 
 #pragma region v3 .01b
@@ -340,12 +372,15 @@ namespace Hooks
 		0x0062E7FB, 0x0062E848, 0x0062E876, 0x0062ECA9, 0x0062ECFC, 0x0062ED30,
 		0x0062DC12, 0x0062CCBA, 0x0062CFC5, 0x00000000,
 		0x005B35EA, 0x005B3633, 0x005B367C, 0x0052DA66,
+		0x005ADFD4, 0x005ADAE9, 0x005AE0BF, 0x005231F2, 0x0052E0E7,
 
 		0x00492942, 0x0041B1B3, 0x005B27EE, 0x005401F9,
 		0x00532B79, 0x0048768A, 0x004876AC, 0x00487589,
 		0x0048FBCC, 0x00405921, 0x0048D2E2,
 
 		0x004520B4, 0x00452141, 0x0040A3F9, 0x00516621, 0x005166E5,
+		0x005612FE, 0x0042BD4D, 0x0042BDD5,
+		0x0051D871, 0x0051D929,
 #pragma endregion
 
 #pragma region v1 .10 Editor
@@ -371,12 +406,15 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004947C1, 0x00494885,
+		0x0046DAB2, 0x00000000, 0x00000000,
+		0x0049B711, 0x0049B7C9,
 #pragma endregion
 
 #pragma region v1 .41 Editor
@@ -402,12 +440,15 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00495941, 0x00495A05,
+		0x0046DCE2, 0x00000000, 0x00000000,
+		0x0049CC41, 0x0049CCF9,
 #pragma endregion
 
 #pragma region v2 .00 Editor - Steam
@@ -433,12 +474,15 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AD0E1, 0x004AD1A5,
+		0x00485073, 0x00000000, 0x00000000,
+		0x004B43C1, 0x004B4479,
 #pragma endregion
 
 #pragma region v2 .01 Editor
@@ -464,12 +508,15 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
+		0x00484719, 0x00000000, 0x00000000,
+		0x004B3AE1, 0x004B3B99,
 #pragma endregion
 
 #pragma region v2 .02 Editor
@@ -495,12 +542,15 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
+		0x00484719, 0x00000000, 0x00000000,
+		0x004B3AE1, 0x004B3B99,
 #pragma endregion
 
 #pragma region v3 .00 Editor - Steam
@@ -526,12 +576,15 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AFD41, 0x004AFE05,
+		0x00487C40, 0x00000000, 0x00000000,
+		0x004B7001, 0x004B70B9,
 #pragma endregion
 
 #pragma region v3 .01 Editor
@@ -557,25 +610,28 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x004AED61, 0x004AEE25
+		0x00000000, 0x00000000, 0x00000000, 0x004AED61, 0x004AEE25,
+		0x00486E3C, 0x00000000, 0x00000000,
+		0x004B6051, 0x004B6109
 #pragma endregion
 	};
 
 #pragma region Hook helpers
 #pragma optimize("s", on)
-	BOOL __fastcall PatchNop(DWORD addr, DWORD size)
+	BOOL __fastcall PatchSet(DWORD addr, BYTE byte, DWORD size)
 	{
 		DWORD address = addr + baseOffset;
 
 		DWORD old_prot;
 		if (VirtualProtect((VOID*)address, size, PAGE_EXECUTE_READWRITE, &old_prot))
 		{
-			MemorySet((VOID*)address, 0x90, size);
+			MemorySet((VOID*)address, byte, size);
 			VirtualProtect((VOID*)address, size, old_prot, &old_prot);
 
 			return TRUE;
@@ -583,7 +639,12 @@ namespace Hooks
 		return FALSE;
 	}
 
-	BOOL __fastcall PatchRedirect(DWORD addr, VOID* hook, BYTE instruction, DWORD nop)
+	BOOL __fastcall PatchNop(DWORD addr, DWORD size)
+	{
+		return PatchSet(addr, 0x90, size);
+	}
+
+	BOOL __fastcall PatchRedirect(DWORD addr, DWORD dest, BYTE instruction, DWORD nop)
 	{
 		DWORD address = addr + baseOffset;
 
@@ -595,7 +656,7 @@ namespace Hooks
 			BYTE* jump = (BYTE*)address;
 			*jump = instruction;
 			++jump;
-			*(DWORD*)jump = (DWORD)hook - (DWORD)address - size;
+			*(DWORD*)jump = dest - address - size;
 
 			if (nop)
 				MemorySet((VOID*)(address + size), 0x90, nop);
@@ -610,17 +671,17 @@ namespace Hooks
 	BOOL __fastcall PatchJump(DWORD addr, DWORD dest)
 	{
 		INT relative = dest - addr - baseOffset - 2;
-		return PatchRedirect(addr, (VOID*)dest, relative >= -128 && relative <= 127 ? 0xEB : 0xE9, 0);
+		return PatchRedirect(addr, dest, relative >= -128 && relative <= 127 ? 0xEB : 0xE9, 0);
 	}
 
 	BOOL __fastcall PatchHook(DWORD addr, VOID* hook, DWORD nop = 0)
 	{
-		return PatchRedirect(addr, hook, 0xE9, nop);
+		return PatchRedirect(addr, (DWORD)hook, 0xE9, nop);
 	}
 
 	BOOL __fastcall PatchCall(DWORD addr, VOID* hook, DWORD nop = 0)
 	{
-		return PatchRedirect(addr, hook, 0xE8, nop);
+		return PatchRedirect(addr, (DWORD)hook, 0xE8, nop);
 	}
 
 	BOOL __fastcall PatchBlock(DWORD addr, VOID* block, DWORD size)
@@ -735,7 +796,7 @@ namespace Hooks
 		return FALSE;
 	}
 
-	DWORD __fastcall PatchFunction(MappedFile* file, const CHAR* function, VOID* addr)
+	DWORD __fastcall PatchFunction(MappedFile* file, const CHAR* function, VOID* addr, BOOL deep = FALSE)
 	{
 		DWORD res = NULL;
 
@@ -752,6 +813,7 @@ namespace Hooks
 
 				PIMAGE_THUNK_DATA addressThunk = (PIMAGE_THUNK_DATA)(base + imports->FirstThunk);
 				PIMAGE_THUNK_DATA nameThunk;
+				BOOL nameInternal = imports->OriginalFirstThunk;
 				if (imports->OriginalFirstThunk)
 					nameThunk = (PIMAGE_THUNK_DATA)(base + imports->OriginalFirstThunk);
 				else
@@ -763,7 +825,7 @@ namespace Hooks
 							return res;
 					}
 
-					headNT = (PIMAGE_NT_HEADERS)((BYTE*)file->address + ((PIMAGE_DOS_HEADER)file->address)->e_lfanew);
+					PIMAGE_NT_HEADERS headNT = (PIMAGE_NT_HEADERS)((BYTE*)file->address + ((PIMAGE_DOS_HEADER)file->address)->e_lfanew);
 					PIMAGE_SECTION_HEADER sh = (PIMAGE_SECTION_HEADER)((DWORD)&headNT->OptionalHeader + headNT->FileHeader.SizeOfOptionalHeader);
 
 					nameThunk = NULL;
@@ -792,9 +854,50 @@ namespace Hooks
 					WORD hint;
 					if (ReadWord((INT)name - baseOffset, &hint) && !StrCompare((CHAR*)name->Name, function))
 					{
-						INT address = (INT)&addressThunk->u1.AddressOfData - baseOffset;
-						if (ReadDWord(address, &res))
-							PatchDWord(address, (DWORD)addr);
+						INT address = (INT)&addressThunk->u1.AddressOfData;
+						if (ReadDWord(address - baseOffset, &res) && PatchDWord(address - baseOffset, (DWORD)addr))
+						{
+							if (nameInternal)
+								PatchSet((DWORD)name->Name - baseOffset, NULL, StrLength(function));
+
+							if (deep)
+							{
+								IMAGE_SECTION_HEADER* section = IMAGE_FIRST_SECTION(headNT);
+								for (DWORD idx = 0; idx < headNT->FileHeader.NumberOfSections; ++idx, ++section)
+								{
+									if (section->VirtualAddress == headNT->OptionalHeader.BaseOfCode && section->Misc.VirtualSize)
+									{
+										BYTE block[6];
+										block[0] = 0xFF;
+										block[1] = 0x25;
+										*(DWORD*)&block[2] = address;
+
+										BYTE* entry = (BYTE*)(headNT->OptionalHeader.ImageBase + section->VirtualAddress + baseOffset);
+										DWORD total = section->Misc.VirtualSize;
+										do
+										{
+											BYTE* ptr1 = entry;
+											BYTE* ptr2 = block;
+
+											DWORD count = sizeof(block);
+											do
+											{
+												if (*ptr1++ != *ptr2++)
+													goto lbl_cont;
+											} while (--count);
+
+											PatchJump((DWORD)entry - baseOffset, (DWORD)addr);
+											goto lbl_exit;
+
+										lbl_cont:
+											++entry;
+										} while (--total);
+									}
+								}
+
+							lbl_exit:;
+							}
+						}
 
 						return res;
 					}
@@ -819,9 +922,7 @@ namespace Hooks
 
 	// ===============================================================
 	HWND hWndMain;
-
 	UINT uAiMsg;
-	DWORD aiTime;
 
 	WinMessage* messages;
 	WinMessage* __fastcall FindWinMessage(LPCSTR msg)
@@ -852,43 +953,48 @@ namespace Hooks
 		return NULL;
 	}
 
+	DWORD aiTime;
+	VOID BeginAI()
+	{
+		config.ai.timeout = TRUE;
+		aiTime = timeGetTime();
+	}
+
+	VOID CheckAI()
+	{
+		if (timeGetTime() - aiTime >= 2000)
+			config.ai.timeout = FALSE;
+	}
+
 	WNDPROC OldWindowProc;
 	LRESULT __stdcall WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		LRESULT res;
+		LRESULT res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		if (uMsg == WM_TIMER)
 		{
-			if (config.ai.thinking)
-			{
-				MSG msg;
-				if (!config.ai.fast || !PeekMessage(&msg, hWnd, NULL, NULL, PM_NOREMOVE))
-				{
-					res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+			CheckAI();
 
-					if (timeGetTime() - aiTime >= 2000)
-						config.ai.thinking = FALSE;
-					else if (config.ai.fast)
-					{
-						Sleep(0);
-						PostMessage(hWnd, uMsg, wParam, lParam);
-					}
+			while (config.ai.fast && config.ai.thinking)
+			{
+				Sleep(0);
+				MSG msg;
+				if (PeekMessage(&msg, hWnd, NULL, NULL, PM_REMOVE) && msg.message != WM_TIMER)
+				{
+					res = CallWindowProc(OldWindowProc, hWnd, msg.message, msg.wParam, msg.lParam);
+					if (msg.message == uAiMsg)
+						BeginAI();
+					else if (msg.message == WM_QUIT || msg.message == WM_CLOSE || msg.message == WM_DESTROY)
+						break;
 				}
 				else
-					res = NULL;
-			}
-			else
-				res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
-		}
-		else
-		{
-			res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
-
-			if (uMsg == uAiMsg)
-			{
-				config.ai.thinking = TRUE;
-				aiTime = timeGetTime();
+				{
+					res = CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+					CheckAI();
+				}
 			}
 		}
+		else if (uMsg == uAiMsg)
+			BeginAI();
 
 		return res;
 	}
@@ -1083,8 +1189,19 @@ namespace Hooks
 						}
 					}
 
-					lpPoint->x = LONG(fx * (FLOAT(lpPoint->x - rect.left) - offset.x));
-					lpPoint->y = LONG(fy * (FLOAT(lpPoint->y - rect.top) - offset.y));
+					if (!Config::IsZoomed())
+					{
+						lpPoint->x = LONG(fx * (FLOAT(lpPoint->x - rect.left) - offset.x));
+						lpPoint->y = LONG(fy * (FLOAT(lpPoint->y - rect.top) - offset.y));
+					}
+					else
+					{
+						FLOAT kx = config.zoom.sizeFloat.width / config.mode->width;
+						FLOAT ky = config.zoom.sizeFloat.height / config.mode->height;
+
+						lpPoint->x = LONG(fx * kx * (FLOAT(lpPoint->x - rect.left) - offset.x) + ((FLOAT)config.mode->width - config.zoom.sizeFloat.width) * 0.5f);
+						lpPoint->y = LONG(fy * kx * (FLOAT(lpPoint->y - rect.top) - offset.y) + ((FLOAT)config.mode->height - config.zoom.sizeFloat.height) * 0.5f);
+					}
 
 					if (lpPoint->x < 0)
 						lpPoint->x = 0;
@@ -1343,10 +1460,13 @@ namespace Hooks
 
 #pragma region PIXEL
 	struct {
-		BOOL active;
-		BOOL ready;
 		BOOL mirror;
-		SIZE size;
+		struct MirrorState {
+			BOOL active;
+			BOOL ready;
+			SIZE size;
+			VOID* indices;
+		} states[3];
 	} battleBgIndices;
 
 	DWORD __fastcall ConvertToRGB(DWORD color)
@@ -1368,11 +1488,15 @@ namespace Hooks
 		INT srcInc;
 
 		BOOL found = FALSE;
-		if (battleBgIndices.ready && battleBgIndices.size.cx == rect->right - rect->left && battleBgIndices.size.cy == rect->bottom - rect->top)
+		for (DWORD i = 0; i < 3; ++i)
 		{
-			found = TRUE;
-			battleBgIndices.ready = FALSE;
-			battleBgIndices.active = FALSE;
+			if (battleBgIndices.states[i].ready && battleBgIndices.states[i].size.cx == rect->right - rect->left && battleBgIndices.states[i].size.cy == rect->bottom - rect->top)
+			{
+				battleBgIndices.states[i].ready = FALSE;
+				battleBgIndices.states[i].active = FALSE;
+				found = TRUE;
+				break;
+			}
 		}
 
 		if (found && battleBgIndices.mirror)
@@ -2830,9 +2954,9 @@ namespace Hooks
 	}
 
 	DWORD battleAddress;
-	VOID __stdcall CheckBorders(DWORD* object, BOOL isborder)
+	VOID __stdcall CheckBordersV2(DWORD* object, BOOL isborder)
 	{
-		config.border.active = isborder & 1;
+		config.borders.active = isborder & 1;
 		if (*(object + 2) != 0xFFFFFFFF)
 			config.battle.active = *object == battleAddress;
 	}
@@ -2844,7 +2968,7 @@ namespace Hooks
 
 			PUSH EAX
 			PUSH EDI
-			CALL CheckBorders
+			CALL CheckBordersV2
 
 			XOR EAX, EAX
 			RETN
@@ -2857,20 +2981,20 @@ namespace Hooks
 		__asm {
 			CMP [ESI + 0x68] , EBX
 			JE lbl_success
-			CMP config.border.active, EBX
+			CMP config.borders.active, EBX
 			JE lbl_back
 
 			lbl_success : MOV EAX, [ECX]
 						  ADD ESI, 0x64
 
 						  MOV EDX, [ESI + 0x4]
-						  CMP config.border.active, EBX
+						  CMP config.borders.active, EBX
 						  JE lbl_continue
 						  SHR EDX, 0x1
 
 						  lbl_continue : PUSH EDX
 										 MOV EDX, [ESI]
-										 CMP config.border.active, EBX
+										 CMP config.borders.active, EBX
 										 JE lbl_continue2
 										 SHR EDX, 0x1
 
@@ -2889,6 +3013,10 @@ namespace Hooks
 		}
 	}
 #pragma endregion
+
+#pragma region Game Speed
+	DWORD* animSpeed;
+	DWORD* mapSpeed;
 
 	TimeScale gameSpeed;
 	DWORD __fastcall GetTimeSpeed(TimeScale* time, DOUBLE scale)
@@ -2909,13 +3037,73 @@ namespace Hooks
 
 	DWORD __stdcall timeGetTimeHook()
 	{
-		return GetTimeSpeed(&gameSpeed, config.speed.enabled ? config.speed.value : 1.0);
+		return config.speed.hooked ? timeGetTime() : GetTimeSpeed(&gameSpeed, config.speed.enabled ? config.speed.value : 1.0);
 	}
 
 	DWORD __stdcall GetDoubleClickTimeHook()
 	{
-		return DWORD((FLOAT)GetDoubleClickTime() * (config.speed.enabled ? config.speed.value : 1.0));
+		return config.speed.hooked ? GetDoubleClickTime() : DWORD((FLOAT)GetDoubleClickTime() * (config.speed.enabled ? config.speed.value : 1.0));
 	}
+
+	VOID __stdcall SetAnimSpeed()
+	{
+		if (animSpeed)
+			*animSpeed = DWORD(66.0 / (config.speed.enabled ? config.speed.value : 1.0));
+	}
+
+	VOID __stdcall SetMapSpeed()
+	{
+		if (mapSpeed)
+			*mapSpeed = DWORD(33.0 / (config.speed.enabled ? config.speed.value : 1.0));
+	}
+
+	VOID __fastcall SetGameSpeed()
+	{
+		SetAnimSpeed();
+		SetMapSpeed();
+	}
+
+	VOID __declspec(naked) hook_004E1FA7()
+	{
+		__asm
+		{
+			LEA EAX, [ESI+0x98]
+			MOV animSpeed, EAX
+			CALL SetAnimSpeed
+			RETN
+		}
+	}
+
+	VOID __declspec(naked) hook_00519FF1()
+	{
+		__asm
+		{
+			PUSH ECX
+
+			LEA EAX, [ESI+0x34]
+			MOV animSpeed, EAX
+			CALL SetAnimSpeed
+
+			POP ECX
+			RETN
+		}
+	}
+
+	VOID __declspec(naked) hook_0051A0A9()
+	{
+		__asm
+		{
+			PUSH ECX
+
+			LEA EAX, [ESI+0x34]
+			MOV mapSpeed, EAX
+			CALL SetMapSpeed
+
+			POP ECX
+			RETN
+		}
+	}
+#pragma endregion
 
 	VOID __declspec(naked) hook_0053A73D()
 	{
@@ -2933,7 +3121,7 @@ namespace Hooks
 	DWORD __stdcall GetScrollTime(DWORD time)
 	{
 		scrollTime = time;
-		return DWORD(1000.0 / 60.0 * (config.speed.enabled ? config.speed.value : 1.0));
+		return DWORD(1000.0 / 60.0 * (!config.speed.hooked && config.speed.enabled ? config.speed.value : 1.0));
 	}
 
 	VOID __declspec(naked) hook_004DFC7A()
@@ -3536,6 +3724,7 @@ namespace Hooks
 	VOID __declspec(naked) hook_0063E6B8()
 	{
 		__asm {
+			PUSH [EAX]
 			SUB ESI, [EAX]
 
 			MOV EAX, config.battle.wide
@@ -3543,16 +3732,27 @@ namespace Hooks
 			JZ non_wide
 
 			SAR ESI, 0x1
-			JMP result
+			POP EAX
+			MOV [EBP-0x8], ESI
+			RETN
 
 			non_wide :
-			MOV EAX, [EBP+0x10]
-			TEST AL, AL
-			JNZ result
+			POP EAX
+			SUB EAX, 950
+			SHR EAX, 1
+
+			MOV ECX, [EBP+0x10]
+			TEST CL, CL
+			JNZ mirror
 
 			XOR ESI, ESI
+			SUB ESI, EAX
+			MOV [EBP-0x8], ESI
+			RETN
 
-			result : MOV [EBP-0x8], ESI
+			mirror:
+			ADD ESI, EAX
+			MOV [EBP-0x8], ESI
 			RETN
 		}
 	}
@@ -3630,38 +3830,80 @@ namespace Hooks
 		return GetStr(str, num, stream) ? ((CHAR * (__stdcall*)(CHAR*, INT, FILE*)) sub_fgets)(str, num, stream) : str;
 	}
 
-	DWORD** __stdcall ChangeBattleBgIndices(DWORD** object)
+	DWORD sub_005A9A1E;
+	DWORD** __stdcall GetBattleBg(DWORD* thisObj, CHAR* name)
 	{
+		/*DWORD nl = StrLength(name);
+		const CHAR* nname = "WATER_0";
+		if (!StrCompare(&name[nl - StrLength("BG")], "BG"))
+		{
+			StrCopy(name, nname);
+			StrCat(name, "_BG");
+		}
+		else if (!StrCompare(&name[nl - StrLength("FG")], "FG"))
+		{
+			StrCopy(name, nname);
+			StrCat(name, "_FG");
+		}
+		else
+		{
+			StrCopy(name, nname);
+			StrCat(name, "_SHADOW");
+		}*/
+
+		DWORD** object = ((DWORD**(__stdcall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_005A9A1E)(thisObj[10], name, 0, 0, *thisObj);
 		if (object)
 		{
 			SIZE* size = (SIZE*)object[1][5];
-
-			if (!battleBgIndices.active)
+			DWORD length = StrLength(name);
+			DWORD index;
+			if (!StrCompare(&name[length - StrLength("BG")], "BG"))
 			{
-				battleBgIndices.active = TRUE;
-				battleBgIndices.ready = TRUE;
-				battleBgIndices.mirror = Random() & 1u;
-				battleBgIndices.size = *size;
+				battleBgIndices.mirror = config.battle.mirror ? (Random() & 1u) : FALSE;
+				index = 0;
 			}
+			else if (!StrCompare(&name[length - StrLength("FG")], "FG"))
+				index = 2;
+			else
+				index = 1;
+
+			battleBgIndices.states[index].active = TRUE;
+			battleBgIndices.states[index].ready = TRUE;
+			battleBgIndices.states[index].size = *size;
 
 			ImageIndices* indices = (ImageIndices*)object[1][7];
+			battleBgIndices.states[index].indices = (DWORD*)indices;
 
-			BOOL isReversed = indices->size.height >> 31;
-			if (battleBgIndices.mirror)
-				indices->size.height |= 0x80000000;
-			else
-				indices->size.height &= 0x7FFFFFFF;
-
-			if (battleBgIndices.mirror != isReversed)
+			BOOL found = FALSE;
+			DWORD prev = index;
+			while (prev--)
 			{
-				SpritePosition* pos = (SpritePosition*)indices->lpIndices;
-				DWORD count = indices->count;
-				while (count)
+				if (battleBgIndices.states[prev].active && battleBgIndices.states[prev].indices == battleBgIndices.states[index].indices)
 				{
-					--count;
-					pos->dstPos.x = indices->size.width - (pos->dstPos.x + pos->srcRect.width);
-					pos->srcRect.x = size->cx - (pos->srcRect.x + pos->srcRect.width);
-					++pos;
+					found = TRUE;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				BOOL isReversed = indices->size.height >> 31;
+				if (battleBgIndices.mirror)
+					indices->size.height |= 0x80000000;
+				else
+					indices->size.height &= 0x7FFFFFFF;
+
+				if (battleBgIndices.mirror != isReversed)
+				{
+					SpritePosition* pos = (SpritePosition*)indices->lpIndices;
+					DWORD count = indices->count;
+					while (count)
+					{
+						--count;
+						pos->dstPos.x = indices->size.width - (pos->dstPos.x + pos->srcRect.width);
+						pos->srcRect.x = size->cx - (pos->srcRect.x + pos->srcRect.width);
+						++pos;
+					}
 				}
 			}
 		}
@@ -3675,11 +3917,8 @@ namespace Hooks
 		__asm {
 			MOV EAX, [ESP+0x4]
 			PUSH EAX
-			CALL sub_005A9AE9
-
-			PUSH EAX
-			CALL ChangeBattleBgIndices
-
+			PUSH [ECX]
+			CALL GetBattleBg
 			RETN 0x4
 		}
 	}
@@ -3690,6 +3929,36 @@ namespace Hooks
 			AND ECX, 0x7FFFFFFF
 			MOV [EAX+0x4], ECX
 			RETN 0x4
+		}
+	}
+#pragma endregion
+
+#pragma region Custom Package
+	DWORD sub_LoadImgPackage;
+	DWORD __stdcall LoadImgPackage(DWORD** store, CHAR* dir, CHAR* filename, DWORD unknown)
+	{
+		if (((DWORD(__stdcall*)(DWORD**, CHAR*, CHAR*, DWORD))sub_LoadImgPackage)(store + 24, dir, "Wrapper.ff", unknown))
+			config.package = (DWORD*)store[24][0];
+
+		return ((DWORD(__stdcall*)(DWORD**, CHAR*, CHAR*, DWORD))sub_LoadImgPackage)(store, dir, filename, unknown);
+	}
+
+	DWORD sub_0052A14E;
+	BOOL __stdcall LoadPackageIndex(DWORD* pakObj, CHAR* name, DWORD a3, DWORD a4)
+	{
+		if (config.package && (*(BOOL(__thiscall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_0052A14E)(config.package[3], name, a3, a4, config.package[5]))
+			return TRUE;
+
+		return (*(BOOL(__thiscall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_0052A14E)(pakObj[3], name, a3, a4, pakObj[5]);
+	}
+
+	VOID __declspec(naked) hook_0051F886()
+	{
+		__asm {
+			POP EAX
+			PUSH [ECX]
+			PUSH EAX
+			JMP LoadPackageIndex
 		}
 	}
 #pragma endregion
@@ -3959,10 +4228,53 @@ namespace Hooks
 	}
 #pragma endregion
 
+#pragma region Main interlock fix
+	DWORD sub_EndLock;
+	VOID __declspec(naked) InterlockHook()
+	{
+		__asm {
+			PUSH ECX
+			MOV EAX, [ESP+0x8]
+			PUSH EAX
+			CALL sub_EndLock
+			POP ECX
+			MOV EAX, [ECX]
+			TEST EAX, EAX
+			JZ lbl_retn
+			MOV DWORD PTR [EAX], 0xFFFFFF
+			lbl_retn: RETN 0x4
+		}
+	}
+#pragma endregion
+
+#pragma region AI turn
+	DWORD sub_GetQueueCommands;
+
+	VOID __declspec(naked) StartAiTurnHook()
+	{
+		__asm {
+			CALL sub_GetQueueCommands
+			MOV config.ai.turn, 1
+			RETN
+		}
+	}
+
+	VOID __declspec(naked) EndAiTurnHook()
+	{
+		__asm {
+			CALL sub_GetQueueCommands
+			MOV config.ai.turn, 0
+			RETN
+		}
+	}
+#pragma endregion
+
 #pragma region Sacred Lands
 	HANDLE hInterf;
 	BOOL isStrategic;
 	DWORD* lineList;
+	DWORD dlgObject;
+	DWORD dlgStrategic;
 
 	struct {
 		DWORD pitch;
@@ -4015,6 +4327,14 @@ namespace Hooks
 			Stream except;
 		} editor;
 	} dlgResources;
+
+	VOID __stdcall CheckBordersV1()
+	{
+		if (config.isEditor)
+			config.borders.active = dlgObject;
+		else
+			config.borders.active = !dlgStrategic || dlgObject;
+	}
 
 	DWORD** __stdcall LoadImageV1(DWORD** object, CHAR* name)
 	{
@@ -4550,7 +4870,8 @@ namespace Hooks
 
 	VOID __stdcall CreateIsoDialog(CHAR* name)
 	{
-		isStrategic = !StrCompare(name, "DLG_STRATEGIC");
+		isStrategic = !StrCompare(name, "DLG_STRATEGIC") || !StrCompare(name, "DLG_STRAT_WAIT");
+		CheckBordersV1();
 	}
 
 	DWORD off_0046541D;
@@ -4637,6 +4958,7 @@ namespace Hooks
 
 			POP ECX
 			MOV EAX, off_0055106A
+
 			RETN
 		}
 	}
@@ -4817,6 +5139,153 @@ namespace Hooks
 			total += size->width;
 		}
 	}
+
+	VOID __stdcall DialogCreateHook(DWORD** object, CHAR* name)
+	{
+		if (!config.isEditor)
+		{
+			const CHAR* dialogs[] = {
+				"DLG_CHOOSE_LORD",
+				"DLG_CHOOSE_RACE",
+				"DLG_CHOOSE_SKIRMISH",
+				"DLG_HOST",
+				"DLG_LOAD",
+				"DLG_LOAD_NEW_MULTI",
+				"DLG_LOAD_SKIRMISH",
+				"DLG_LOAD_TOURNEMENT",
+				"DLG_LOBBY",
+				"DLG_MAIN_MENU",
+				"DLG_PROTOCOL",
+				"DLG_SESSION",
+				"DLG_SINGLE_PLAYER",
+				"DLG_WAIT",
+
+				"DLG_CAST_SPELL",
+				"DLG_BATTLE",
+				"DLG_BUILD_STRUCTURE",
+				"DLG_CARRY_ITEM_LEADER",
+				"DLG_CITY_STACK",
+				"DLG_END_WIN_LOSE",
+				"DLG_EXCHANGE",
+				"DLG_FAKE_CARRY_OVER",
+				"DLG_KNOWN_SPELL",
+				"DLG_LOAD_GAME",
+				"DLG_MAGE",
+				"DLG_MANAGE_STACK",
+				"DLG_MERCENARIES",
+				"DLG_MERCHANT",
+				"DLG_OPTIONS",
+				"DLG_PICKUP_DROP",
+				"DLG_RESEARCH_SPELL",
+				"DLG_SAVE_GAME",
+				"DLG_SCENARIO_BRIEFING",
+				"DLG_THIEF_ACTIONS",
+				"DLG_TRADE_ITEM",
+				"DLG_TRADE_SPELL",
+				"DLG_TRAINING_CAMP",
+				"DLG_WAND_SCROLL",
+				"DLG_CAPITAL",
+				"DLG_CITY",
+				"DLG_DIPLOMACY"
+			};
+
+			if (!StrCompare(name, "DLG_STRATEGIC") || !StrCompare(name, "DLG_STRAT_WAIT") || !StrCompare(name, "DLG_STRAT_SPELL"))
+			{
+				dlgStrategic = (DWORD)object;
+				CheckBordersV1();
+			}
+
+			if (dlgStrategic && !dlgObject)
+			{
+				const CHAR** dlg = dialogs;
+				DWORD count = sizeof(dialogs) / sizeof(CHAR*);
+				do
+				{
+					if (!StrCompare(name, *dlg))
+					{
+						dlgObject = (DWORD)object;
+						CheckBordersV1();
+						break;
+					}
+
+					++dlg;
+				} while (--count);
+			}
+		}
+		else
+		{
+			const CHAR* dialogs[] = {
+				"DLG_DELETE_MAP",
+				"DLG_EDIT_MAP",
+				"DLG_EXPORT_MAP",
+				"DLG_IMPORT_MAP",
+				"DLG_MAIN_MENU",
+				"DLG_NEW_MAP"
+			};
+
+			if (!dlgObject)
+			{
+				const CHAR** dlg = dialogs;
+				DWORD count = sizeof(dialogs) / sizeof(CHAR*);
+				do
+				{
+					if (!StrCompare(name, *dlg))
+					{
+						dlgObject = (DWORD)object;
+						CheckBordersV1();
+						break;
+					}
+
+					++dlg;
+				} while (--count);
+			}
+		}
+	}
+
+	VOID __declspec(naked) hook_004E746D()
+	{
+		__asm {
+			MOV EAX, [ECX]
+			CALL DWORD PTR [EAX+0xC]
+			PUSH EAX
+
+			PUSH EAX
+			PUSH ESI
+			CALL DialogCreateHook
+
+			POP EAX
+			RETN
+		}
+	}
+
+	VOID __stdcall DialogDeleteHook(DWORD* object)
+	{
+		if (dlgStrategic == (DWORD)object)
+		{
+			dlgStrategic = NULL;
+			CheckBordersV1();
+		}
+		else if (dlgObject == (DWORD)object)
+		{
+			dlgObject = NULL;
+			CheckBordersV1();
+		}
+	}
+
+	DWORD sub_004E74F1;
+	VOID __declspec(naked) hook_004E74D8()
+	{
+		__asm
+		{
+			PUSH ECX
+
+			PUSH ECX
+			CALL DialogDeleteHook
+
+			POP ECX
+			JMP sub_004E74F1
+		}
+	}
 #pragma endregion
 
 #pragma region Skip Draw
@@ -4853,22 +5322,35 @@ namespace Hooks
 #pragma optimize("s", on)
 	VOID __fastcall LoadV1(const AddressSpaceV1* hookSpace, MappedFile* file)
 	{
-		PatchCall(hookSpace->scroll_speed, hook_004E0323);
-		scrollSpeed.multi = 14.0;
-		scrollSpeed.offset.y = 14;
-		scrollSpeed.offset.x = scrollSpeed.offset.y << 1;
-
-		if (hookSpace->scroll_nop)
+		// Game Speed
+		if (hookSpace->speed_anim)
 		{
-			PatchBlock(hookSpace->scroll_nop, (VOID*)nop4, sizeof(nop4));
-			PatchBlock(hookSpace->scroll_nop + 33, (VOID*)nop4, sizeof(nop4));
+			PatchCall(hookSpace->speed_anim, hook_004E1FA7, 5);
+			config.speed.hooked = TRUE;
 		}
 
-		PatchCall(hookSpace->scroll_hook, hook_004DFC7A);
+		// Scroll
+		{
+			PatchCall(hookSpace->scroll_speed, hook_004E0323);
+			scrollSpeed.multi = 14.0;
+			scrollSpeed.offset.y = 14;
+			scrollSpeed.offset.x = scrollSpeed.offset.y << 1;
+
+			if (hookSpace->scroll_nop)
+			{
+				PatchBlock(hookSpace->scroll_nop, (VOID*)nop4, sizeof(nop4));
+				PatchBlock(hookSpace->scroll_nop + 33, (VOID*)nop4, sizeof(nop4));
+			}
+
+			PatchCall(hookSpace->scroll_hook, hook_004DFC7A);
+		}
 
 		// Random
 		if (hookSpace->random_nop)
 			PatchNop(hookSpace->random_nop, 5);
+
+		// Interlock Fix
+		RedirectCall(hookSpace->interlockFix, InterlockHook, &sub_EndLock);
 
 		// HD
 		if (config.hd)
@@ -4906,6 +5388,24 @@ namespace Hooks
 
 			if (config.mode->width != GAME_WIDTH || config.mode->height != GAME_HEIGHT)
 			{
+				Config::CalcZoomed();
+
+				// Borders
+				{
+					if (hookSpace->dlg_Create && hookSpace->dlg_Delete)
+					{
+						PatchCall(hookSpace->dlg_Create, hook_004E746D);
+						RedirectCall(hookSpace->dlg_Delete, hook_004E74D8, &sub_004E74F1);
+
+						config.zoom.allowed = TRUE;
+					}
+
+					if (!config.zoom.allowed)
+						config.zoom.enabled = FALSE;
+
+					CheckBordersV1();
+				}
+
 				{
 					PatchFunction(file, "CreateFileA", CreateFileHook);
 					PatchFunction(file, "GetFileSize", GetFileSizeHook);
@@ -4946,6 +5446,16 @@ namespace Hooks
 
 	VOID __fastcall LoadV2(const AddressSpaceV2* hookSpace, MappedFile* file)
 	{
+		config.background.allowed = TRUE;
+
+		// Game Speed
+		if (hookSpace->speed_anim && hookSpace->speed_map)
+		{
+			PatchCall(hookSpace->speed_anim, hook_00519FF1, 2);
+			PatchCall(hookSpace->speed_map, hook_0051A0A9, 2);
+			config.speed.hooked = TRUE;
+		}
+
 		// Scroll
 		{
 			if (ReadRedirect(hookSpace->scroll_check, &cursorPos))
@@ -5048,9 +5558,30 @@ namespace Hooks
 			sub_GetType = hookSpace->ai_list_get_type + baseOffset;
 		}
 
+		// Interlock Fix
+		RedirectCall(hookSpace->interlockFix, InterlockHook, &sub_EndLock);
+
+		// AI turn
+		if (hookSpace->startAiTurn && hookSpace->endAiTurn)
+		{
+			RedirectCall(hookSpace->startAiTurn, StartAiTurnHook, &sub_GetQueueCommands);
+			PatchCall(hookSpace->endAiTurn, EndAiTurnHook);
+		}
+
 		// Skip draw
 		RedirectCall(hookSpace->draw_hook_1, hook_00512BF0, &sub_00512BF0);
 		PatchCall(hookSpace->draw_hook_2, hook_00512BF0);
+
+		// Custom Package
+		if (hookSpace->pkg_size)
+		{
+			PatchByte(hookSpace->pkg_size + 1, 104);
+			RedirectCall(hookSpace->pkg_load, LoadImgPackage, &sub_LoadImgPackage);
+			sub_005A9A1E = hookSpace->pkg_sub + baseOffset;
+
+			PatchHook(hookSpace->pkg_entry_load, hook_0051F886);
+			sub_0052A14E = hookSpace->pkg_entry_sub + baseOffset;
+		}
 
 		if (config.hd)
 		{
@@ -5172,16 +5703,19 @@ namespace Hooks
 
 						if (config.mode->width > *(DWORD*)&GAME_WIDTH || config.mode->height > *(DWORD*)&GAME_HEIGHT)
 						{
-							config.border.inside = TRUE;
-							config.border.allowed = TRUE;
+							config.borders.allowed = TRUE;
+							config.background.allowed = TRUE;
 							config.zoom.allowed = TRUE;
 						}
 					}
 					else
-						config.border.allowed = TRUE;
+						config.background.allowed = TRUE;
 
-					if (!config.border.allowed)
-						config.border.enabled = FALSE;
+					if (!config.borders.allowed)
+						config.borders.type = BordersNone;
+
+					if (!config.background.allowed)
+						config.background.enabled = FALSE;
 
 					if (!config.zoom.allowed)
 						config.zoom.enabled = FALSE;
@@ -5245,6 +5779,10 @@ namespace Hooks
 					PatchDWord(hookSpace->maxSize_3 + 2, (DWORD)&config.mode->height);
 				}
 
+				// Centre battle background
+				PatchNop(hookSpace->btlCentrBack, 2);
+				PatchCall(hookSpace->btlCentrBack + 27, hook_0063E6B8);
+
 				// Widescreen Battle
 				if (hookSpace->btlClass && config.mode->width >= WIDE_WIDTH && ReadDWord(hookSpace->btlClass + 2, &battleAddress))
 				{
@@ -5255,9 +5793,6 @@ namespace Hooks
 						config.wide.allowed = TRUE;
 						Config::Set(CONFIG_WRAPPER, "WideBattle", config.wide.allowed);
 					}
-
-					PatchNop(hookSpace->btlCentrBack, 2);
-					PatchCall(hookSpace->btlCentrBack + 27, hook_0063E6B8); // centre battle background
 
 					PatchHook(hookSpace->btlCentrUnits, hook_00625683); // centre battle units
 					back_00625688 = hookSpace->btlCentrUnits + 5 + baseOffset;
@@ -5332,7 +5867,13 @@ namespace Hooks
 		PIMAGE_NT_HEADERS headNT = (PIMAGE_NT_HEADERS)((BYTE*)hModule + ((PIMAGE_DOS_HEADER)hModule)->e_lfanew);
 		baseOffset = (INT)hModule - (INT)headNT->OptionalHeader.ImageBase;
 
-		PatchEntryPoint("DDRAW.dll", FakeEntryPoint);
+		{
+			CHAR path[MAX_PATH];
+			GetModuleFileName(hModule, path, MAX_PATH - 1);
+			CHAR* p = StrLastChar(path, '\\');
+			StrCopy(p, "\\DDRAW.dll");
+			PatchEntryPoint(path, FakeEntryPoint);
+		}
 
 		MappedFile* file = new MappedFile(hModule);
 		{
@@ -5392,9 +5933,9 @@ namespace Hooks
 				}
 				else
 				{
-					PatchFunction(file, "DirectDrawEnumerateExA", Main::DrawEnumerateEx);
-					PatchFunction(file, "DirectDrawCreate", Main::DrawCreate);
-					PatchFunction(file, "DirectDrawCreateEx", Main::DrawCreateEx);
+					PatchFunction(file, "DirectDrawEnumerateExA", Main::DrawEnumerateEx, TRUE);
+					PatchFunction(file, "DirectDrawCreate", Main::DrawCreate, TRUE);
+					PatchFunction(file, "DirectDrawCreateEx", Main::DrawCreateEx, TRUE);
 					PatchFunction(file, "GetCursorPos", GetCursorPosHookV2);
 					PatchFunction(file, "SetCursorPos", SetCursorPosHook);
 				}

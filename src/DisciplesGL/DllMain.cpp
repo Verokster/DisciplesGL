@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -79,8 +79,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 
 			Window::CheckMenu();
 
-			if (config.coldCPU)
-				timeBeginPeriod(1);
+			timeBeginPeriod(1);
 		}
 		else
 			hDllModule = NULL;
@@ -92,8 +91,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	{
 		if (hDllModule)
 		{
-			if (config.coldCPU)
-				timeEndPeriod(1);
+			timeEndPeriod(1);
 
 			if (hActCtx && hActCtx != INVALID_HANDLE_VALUE)
 				ReleaseActCtxC(hActCtx);

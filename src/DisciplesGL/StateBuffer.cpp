@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -100,7 +100,8 @@ StateBufferAligned::StateBufferAligned()
 
 	this->isReady = FALSE;
 	this->isZoomed = FALSE;
-	this->isBorder = FALSE;
+	this->borders = BordersNone;
+	this->isBack = FALSE;
 	this->isAllocated = TRUE;
 }
 
@@ -125,6 +126,7 @@ StateBufferBorder::StateBufferBorder(DWORD width, DWORD height, DWORD size)
 {
 	this->width = LOWORD(width);
 	this->height = LOWORD(height);
+	this->type = config.borders.type;
 }
 
 StateBufferBorder::StateBufferBorder(DWORD width, DWORD height, VOID* data)
@@ -132,4 +134,5 @@ StateBufferBorder::StateBufferBorder(DWORD width, DWORD height, VOID* data)
 {
 	this->width = LOWORD(width);
 	this->height = LOWORD(height);
+	this->type = config.borders.type;
 }

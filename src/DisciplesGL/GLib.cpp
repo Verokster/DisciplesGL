@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -95,7 +95,9 @@ GLBINDATTRIBLOCATION GLBindAttribLocation;
 GLGETUNIFORMLOCATION GLGetUniformLocation;
 
 GLUNIFORM1I GLUniform1i;
+GLUNIFORM1F GLUniform1f;
 GLUNIFORM2F GLUniform2f;
+GLUNIFORM3F GLUniform3f;
 
 GLGENVERTEXARRAYS GLGenVertexArrays;
 GLBINDVERTEXARRAY GLBindVertexArray;
@@ -248,7 +250,9 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "GetUniformLocation", (PROC*)&GLGetUniformLocation);
 
 		LoadFunction(buffer, PREFIX_GL, "Uniform1i", (PROC*)&GLUniform1i);
+		LoadFunction(buffer, PREFIX_GL, "Uniform1f", (PROC*)&GLUniform1f);
 		LoadFunction(buffer, PREFIX_GL, "Uniform2f", (PROC*)&GLUniform2f);
+		LoadFunction(buffer, PREFIX_GL, "Uniform3f", (PROC*)&GLUniform3f);
 
 		LoadFunction(buffer, PREFIX_GL, "GenVertexArrays", (PROC*)&GLGenVertexArrays);
 		LoadFunction(buffer, PREFIX_GL, "BindVertexArray", (PROC*)&GLBindVertexArray);

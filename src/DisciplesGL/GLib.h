@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -171,7 +171,9 @@ typedef VOID(__stdcall* GLBINDATTRIBLOCATION)(GLuint program, GLuint index, cons
 typedef GLint(__stdcall* GLGETUNIFORMLOCATION)(GLuint program, const GLchar* name);
 
 typedef VOID(__stdcall* GLUNIFORM1I)(GLint location, GLint v0);
+typedef VOID(__stdcall* GLUNIFORM1F)(GLint location, GLfloat v0);
 typedef VOID(__stdcall* GLUNIFORM2F)(GLint location, GLfloat v0, GLfloat v1);
+typedef VOID(__stdcall* GLUNIFORM3F)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
 
 typedef VOID(__stdcall* GLGENVERTEXARRAYS)(GLsizei n, GLuint* arrays);
 typedef VOID(__stdcall* GLBINDVERTEXARRAY)(GLuint array);
@@ -252,7 +254,9 @@ extern GLBINDATTRIBLOCATION GLBindAttribLocation;
 extern GLGETUNIFORMLOCATION GLGetUniformLocation;
 
 extern GLUNIFORM1I GLUniform1i;
+extern GLUNIFORM1F GLUniform1f;
 extern GLUNIFORM2F GLUniform2f;
+extern GLUNIFORM3F GLUniform3f;
 
 extern GLGENVERTEXARRAYS GLGenVertexArrays;
 extern GLBINDVERTEXARRAY GLBindVertexArray;

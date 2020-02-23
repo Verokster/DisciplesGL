@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -230,11 +230,21 @@ namespace Config
 
 			if (!config.version)
 			{
-				config.border.enabled = TRUE;
-				Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.border.enabled);
+				BOOL value = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+
+				config.borders.type = value ? BordersClassic : BordersNone;
+				Config::Set(CONFIG_WRAPPER, "Borders", (INT)&config.borders.type);
+
+				config.background.enabled = value;
+				Config::Set(CONFIG_WRAPPER, "Background", config.background.enabled);
 
 				config.zoom.enabled = TRUE;
 				Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.zoom.enabled);
+			}
+			else
+			{
+				config.zoom.enabled = TRUE;
+				Config::Set(CONFIG_WRAPPER, "EnableZoom", config.zoom.enabled);
 			}
 
 			Config::Set(CONFIG_KEYS, "FpsCounter", "");
@@ -249,10 +259,7 @@ namespace Config
 			Config::Set(CONFIG_KEYS, "VSync", "");
 
 			if (!config.version)
-			{
-				Config::Set(CONFIG_KEYS, "ShowBorders", "");
 				Config::Set(CONFIG_KEYS, "ZoomImage", "");
-			}
 
 			config.keys.speedToggle = 5;
 			Config::Set(CONFIG_KEYS, "SpeedToggle", config.keys.speedToggle);
@@ -278,6 +285,9 @@ namespace Config
 			{
 				config.wide.allowed = FALSE;
 				Config::Set(CONFIG_WRAPPER, "WideBattle", config.wide.allowed);
+
+				config.battle.mirror = TRUE;
+				Config::Set(CONFIG_WRAPPER, "MirrorBattle", config.battle.mirror);
 			}
 
 			config.snapshot.type = ImagePNG;
@@ -298,6 +308,33 @@ namespace Config
 
 			config.ai.fast = FALSE;
 			Config::Set(CONFIG_WRAPPER, "FastAI", config.ai.fast);
+
+			config.adjust.levels.min.r = 0.0f;
+			config.adjust.levels.min.g = 0.0f;
+			config.adjust.levels.min.b = 0.0f;
+			Config::Set(CONFIG_WRAPPER, "MinRed", 0);
+			Config::Set(CONFIG_WRAPPER, "MinGreen", 0);
+			Config::Set(CONFIG_WRAPPER, "MinBlue", 0);
+
+			config.adjust.levels.max.r = 1.0f;
+			config.adjust.levels.max.g = 1.0f;
+			config.adjust.levels.max.b = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "MaxRed", 255);
+			Config::Set(CONFIG_WRAPPER, "MaxGreen", 255);
+			Config::Set(CONFIG_WRAPPER, "MaxBlue", 255);
+
+			config.adjust.levels.gamma.r = 1.0f;
+			config.adjust.levels.gamma.g = 1.0f;
+			config.adjust.levels.gamma.b = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "GammaRed", 100);
+			Config::Set(CONFIG_WRAPPER, "GammaGreen", 100);
+			Config::Set(CONFIG_WRAPPER, "GammaBlue", 100);
+
+			config.adjust.saturation = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "Saturation", 100);
+
+			config.adjust.hueShift = 0.0f;
+			Config::Set(CONFIG_WRAPPER, "HueShift", 0);
 		}
 		else
 		{
@@ -348,9 +385,14 @@ namespace Config
 
 			if (!config.version)
 			{
-				config.border.enabled = (BOOL)Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+				BOOL value = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+				config.borders.type = (BordersType)Config::Get(CONFIG_WRAPPER, "Borders", value ? BordersClassic : BordersNone);
+				config.background.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "Background", value);
+
 				config.zoom.enabled = (BOOL)Config::Get(CONFIG_DISCIPLE, "EnableZoom", TRUE);
 			}
+			else
+				config.zoom.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "EnableZoom", TRUE);
 
 			// F1 - reserved for "About"
 			CHAR buffer[20];
@@ -396,14 +438,6 @@ namespace Config
 
 			if (!config.version)
 			{
-				if (Config::Get(CONFIG_KEYS, "ShowBorders", "", buffer, sizeof(buffer)))
-				{
-					value = Config::Get(CONFIG_KEYS, "ShowBorders", 0);
-					config.keys.showBorders = LOBYTE(value);
-					if (config.keys.showBorders > 1 && config.keys.showBorders > 24)
-						config.keys.showBorders = 0;
-				}
-
 				if (Config::Get(CONFIG_KEYS, "ZoomImage", "", buffer, sizeof(buffer)))
 				{
 					value = Config::Get(CONFIG_KEYS, "ZoomImage", 0);
@@ -443,7 +477,10 @@ namespace Config
 			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
 
 			if (!config.version)
+			{
 				config.wide.allowed = (BOOL)Config::Get(CONFIG_WRAPPER, "WideBattle", FALSE);
+				config.battle.mirror = (BOOL)Config::Get(CONFIG_WRAPPER, "MirrorBattle", TRUE);
+			}
 
 			value = Config::Get(CONFIG_WRAPPER, "ScreenshotType", ImagePNG);
 			config.snapshot.type = *(ImageType*)&value;
@@ -471,6 +508,115 @@ namespace Config
 
 			if (!config.isEditor)
 				config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
+
+			{
+				value = Config::Get(CONFIG_WRAPPER, "MinRed", 0);
+				if (value < 0)
+					value = 0;
+				else if (value > 255)
+					value = 255;
+				config.adjust.levels.min.r = (FLOAT)value / 255.0f;
+
+				value = Config::Get(CONFIG_WRAPPER, "MinGreen", 0);
+				if (value < 0)
+					value = 0;
+				else if (value > 255)
+					value = 255;
+				config.adjust.levels.min.g = (FLOAT)value / 255.0f;
+
+				value = Config::Get(CONFIG_WRAPPER, "MinBlue", 0);
+				if (value < 0)
+					value = 0;
+				else if (value > 255)
+					value = 255;
+				config.adjust.levels.min.b = (FLOAT)value / 255.0f;
+			}
+
+			{
+				value = Config::Get(CONFIG_WRAPPER, "MaxRed", 255);
+				if (value < 0)
+					value = 0;
+				else if (value > 255)
+					value = 255;
+				config.adjust.levels.max.r = (FLOAT)value / 255.0f;
+
+				value = Config::Get(CONFIG_WRAPPER, "MaxGreen", 255);
+				if (value < 0)
+					value = 0;
+				else if (value > 255)
+					value = 255;
+				config.adjust.levels.max.g = (FLOAT)value / 255.0f;
+
+				value = Config::Get(CONFIG_WRAPPER, "MaxBlue", 255);
+				if (value < 0)
+					value = 0;
+				else if (value > 255)
+					value = 255;
+				config.adjust.levels.max.b = (FLOAT)value / 255.0f;
+			}
+
+			if (config.adjust.levels.min.r > config.adjust.levels.max.r)
+			{
+				config.adjust.levels.min.r = 0.0f;
+				config.adjust.levels.max.r = 1.0f;
+			}
+
+			if (config.adjust.levels.min.g > config.adjust.levels.max.g)
+			{
+				config.adjust.levels.min.g = 0.0f;
+				config.adjust.levels.max.g = 1.0f;
+			}
+
+			if (config.adjust.levels.min.b > config.adjust.levels.max.b)
+			{
+				config.adjust.levels.min.b = 0.0f;
+				config.adjust.levels.max.b = 1.0f;
+			}
+
+			{
+				value = Config::Get(CONFIG_WRAPPER, "GammaRed", 100);
+				if (value < 1)
+					value = 1;
+				else if (value > 999)
+					value = 999;
+				config.adjust.levels.gamma.r = 0.01f * value;
+
+				value = Config::Get(CONFIG_WRAPPER, "GammaGreen", 100);
+				if (value < 1)
+					value = 1;
+				else if (value > 999)
+					value = 999;
+				config.adjust.levels.gamma.g = 0.01f * value;
+
+				value = Config::Get(CONFIG_WRAPPER, "GammaBlue", 100);
+				if (value < 1)
+					value = 1;
+				else if (value > 999)
+					value = 999;
+				config.adjust.levels.gamma.b = 0.01f * value;
+			}
+
+			{
+				value = Config::Get(CONFIG_WRAPPER, "Saturation", 100);
+				if (value < 0)
+					value = 0;
+				else if (value > 1000)
+					value = 1000;
+				config.adjust.saturation = 0.01f * value;
+			}
+
+			{
+				value = Config::Get(CONFIG_WRAPPER, "HueShift", 0);
+				if (value < -180)
+					value = -180;
+				else if (value > 180)
+					value = 180;
+
+				if (value < 0)
+					value += 360;
+
+				config.adjust.hueShift = (FLOAT)value / 360.0f;
+			}
 		}
 
 		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));
@@ -484,6 +630,8 @@ namespace Config
 			config.mode = modesList;
 		else
 		{
+			Config::Set(CONFIG_DISCIPLE, "ForceD3DPow2", FALSE);
+
 			DWORD modeIdx = Config::Get(CONFIG_DISCIPLE, "DisplaySize", 0);
 			if (modeIdx > 2)
 				modeIdx = 0;
@@ -604,12 +752,6 @@ namespace Config
 			SetMenuItemInfo(config.menu, IDM_VSYNC, FALSE, &info);
 		}
 
-		if (config.keys.showBorders && (info.cch = sizeof(buffer), GetMenuItemInfo(config.menu, IDM_RES_BORDERS, FALSE, &info)))
-		{
-			StrPrint(buffer, "%sF%d", buffer, config.keys.showBorders);
-			SetMenuItemInfo(config.menu, IDM_RES_BORDERS, FALSE, &info);
-		}
-
 		if (config.keys.zoomImage)
 		{
 			MenuItemData mData;
@@ -669,7 +811,7 @@ namespace Config
 
 	BOOL __fastcall IsZoomed()
 	{
-		return config.zoom.glallow && config.zoom.enabled && config.border.active && (!config.battle.active || !config.battle.wide || config.battle.zoomable);
+		return config.zoom.glallow && config.zoom.enabled && config.borders.active && (!config.battle.active || !config.battle.wide || config.battle.zoomable);
 	}
 
 	VOID __fastcall CalcZoomed(Size* dst, Size* src, DWORD scale)
@@ -695,14 +837,14 @@ namespace Config
 		if (k >= 4.0f / 3.0f)
 		{
 			FLOAT width = GAME_HEIGHT_FLOAT * k;
-			dst->width = src->width - (src->width - width) * scale * 0.01;
-			dst->height = src->height - (src->height - GAME_HEIGHT) * scale * 0.01;
+			dst->width = src->width - FLOAT((src->width - width) * scale * 0.01);
+			dst->height = src->height - FLOAT((src->height - GAME_HEIGHT) * scale * 0.01);
 		}
 		else
 		{
 			FLOAT height = GAME_WIDTH_FLOAT / k;
-			dst->width = src->width - (src->width - GAME_WIDTH) * scale * 0.01;
-			dst->height = src->height - (src->height - height) * scale * 0.01;
+			dst->width = src->width - FLOAT((src->width - GAME_WIDTH) * scale * 0.01);
+			dst->height = src->height - FLOAT((src->height - height) * scale * 0.01);
 		}
 	}
 

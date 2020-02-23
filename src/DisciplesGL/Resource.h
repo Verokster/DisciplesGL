@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,8 @@
 #define IDR_BACK 4
 #define IDR_BORDER 5
 #define IDR_BORDER_WIDE 6
+#define IDR_ALT 7
+#define IDR_ALT_WIDE 8
 
 #define IDR_DLG_BATTLE_B 600
 #define IDR_DLG_ISO_NEW 601
@@ -162,7 +164,11 @@
 #define IDM_RES_3840_2160 (IDM_RES_640_480 + 26)
 #define IDM_RES_7680_4320 (IDM_RES_640_480 + 27)
 
-#define IDM_RES_BORDERS 251
+#define IDM_BORDERS_OFF 251
+#define IDM_BORDERS_CLASSIC 252
+#define IDM_BORDERS_ALTERNATIVE 253
+
+#define IDM_BACKGROUND 254
 
 #define IDM_STRETCH_OFF 700
 #define IDM_STRETCH_10 710
@@ -205,11 +211,11 @@
 #define IDS_TEXT_FILT_SCALEHQ 348
 #define IDS_TEXT_FILT_XBRZ 349
 
-#define IDS_TEXT_RENDERER 374
+#define IDS_TEXT_RENDERER 350
 
-#define IDS_ON 350
-#define IDS_OFF 351
-#define IDS_RES_FULL_SCREEN 352
+#define IDS_ON 351
+#define IDS_OFF 352
+#define IDS_RES_FULL_SCREEN 353
 #define IDS_MODE_BORDERLESS 354
 #define IDS_MODE_EXCLUSIVE 355
 #define IDS_VSYNC 356
@@ -217,25 +223,30 @@
 #define IDS_ASPECT_KEEP 358
 #define IDS_ASPECT_STRETCH 359
 #define IDS_STRETCH 360
-#define IDS_RES_BORDERS 361
-#define IDS_SPEED 362
-#define IDS_MSG 363
-#define IDS_MSG_SECONDS 364
-#define IDS_FAST_AI 365
-#define IDS_ALWAYS_ACTIVE 366
-#define IDS_PATCH_CPU 367
-#define IDS_LOCALE 368
-#define IDS_LOCALE_DEFAULT 369
-#define IDS_SCR_TYPE 370
-#define IDS_SCR_BMP 371
-#define IDS_SCR_PNG 372
-#define IDS_SCR_FILE 373
+#define IDS_BORDERS 361
+#define IDS_BORDERS_CLASSIC 362
+#define IDS_BORDERS_ALTERNATIVE 363
+#define IDS_BACKGROUND 364
+#define IDS_SPEED 365
+#define IDS_MSG 366
+#define IDS_MSG_SECONDS 367
+#define IDS_FAST_AI 368
+#define IDS_ALWAYS_ACTIVE 369
+#define IDS_PATCH_CPU 370
+#define IDS_LOCALE 371
+#define IDS_LOCALE_DEFAULT 372
+#define IDS_SCR_TYPE 373
+#define IDS_SCR_BMP 374
+#define IDS_SCR_PNG 375
+#define IDS_SCR_FILE 376
 
-#define IDS_REND_AUTO 375
-#define IDS_REND_GL1 376
-#define IDS_REND_GL2 377
-#define IDS_REND_GL3 378
-#define IDS_REND_GDI 379
+#define IDS_REND_AUTO 377
+#define IDS_REND_GL1 378
+#define IDS_REND_GL2 379
+#define IDS_REND_GL3 380
+#define IDS_REND_GDI 381
+
+#define IDM_COLOR_ADJUST 382
 
 #define IDM_SPEED_1_0 170
 #define IDM_SPEED_1_1 (IDM_SPEED_1_0 + 1)

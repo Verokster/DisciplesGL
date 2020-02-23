@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -88,6 +88,26 @@ VOID __fastcall UseShaderProgram(ShaderProgram* program, DWORD texSize)
 		GLint loc = GLGetUniformLocation(program->id, "tex02");
 		if (loc >= 0)
 			GLUniform1i(loc, 1);
+
+		loc = GLGetUniformLocation(program->id, "minLevel");
+		if (loc >= 0)
+			GLUniform3f(loc, config.adjust.levels.min.r, config.adjust.levels.min.g, config.adjust.levels.min.b);
+
+		loc = GLGetUniformLocation(program->id, "maxLevel");
+		if (loc >= 0)
+			GLUniform3f(loc, config.adjust.levels.max.r, config.adjust.levels.max.g, config.adjust.levels.max.b);
+
+		loc = GLGetUniformLocation(program->id, "gamma");
+		if (loc >= 0)
+			GLUniform3f(loc, config.adjust.levels.gamma.r, config.adjust.levels.gamma.g, config.adjust.levels.gamma.b);
+
+		loc = GLGetUniformLocation(program->id, "saturation");
+		if (loc >= 0)
+			GLUniform1f(loc, config.adjust.saturation);
+
+		loc = GLGetUniformLocation(program->id, "hueShift");
+		if (loc >= 0)
+			GLUniform1f(loc, config.adjust.hueShift);
 
 		program->texSize.location = GLGetUniformLocation(program->id, "texSize");
 		if (program->texSize.location >= 0)
@@ -737,6 +757,7 @@ VOID OpenDraw::RenderOld()
 				GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 				BOOL borderStatus = FALSE;
+				BOOL backStatus = FALSE;
 				BOOL isVSync = config.image.vSync;
 				if (WGLSwapInterval)
 					WGLSwapInterval(isVSync);
@@ -776,7 +797,7 @@ VOID OpenDraw::RenderOld()
 						surface->drawEnabled = TRUE;
 
 						FilterState state = this->filterState;
-						if (pixelBuffer->Update(lpStateBuffer, frameCount != 1 || convert) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->isBorder)
+						if (pixelBuffer->Update(lpStateBuffer, frameCount != 1 || convert) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 						{
 							if (isVSync != config.image.vSync)
 							{
@@ -797,8 +818,9 @@ VOID OpenDraw::RenderOld()
 
 							GLDisable(GL_BLEND);
 
-							borderStatus = stateBuffer->isBorder;
-							if (stateBuffer->isBorder && loadBack)
+							borderStatus = stateBuffer->borders;
+							backStatus = stateBuffer->isBack;
+							if (stateBuffer->isBack && loadBack)
 							{
 								DWORD count = frameCount;
 								Frame* frame = frames;
@@ -1089,6 +1111,7 @@ VOID OpenDraw::RenderMid()
 						GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 						BOOL borderStatus = FALSE;
+						BOOL backStatus = FALSE;
 						Size zoomSize = { 0, 0 };
 
 						BOOL isVSync = config.image.vSync;
@@ -1129,7 +1152,7 @@ VOID OpenDraw::RenderMid()
 								surface->drawEnabled = TRUE;
 
 								FilterState state = this->filterState;
-								if (pixelBuffer->Update(lpStateBuffer) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->isBorder || fpsState == FpsBenchmark)
+								if (pixelBuffer->Update(lpStateBuffer) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack || fpsState == FpsBenchmark)
 								{
 									if (isVSync != config.image.vSync)
 									{
@@ -1141,30 +1164,28 @@ VOID OpenDraw::RenderMid()
 									if (this->CheckView(TRUE))
 										GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
-									if (state.flags || borderStatus != stateBuffer->isBorder)
+									if (state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 									{
-										borderStatus = stateBuffer->isBorder;
-
 										ShaderProgram* program;
 										switch (state.interpolation)
 										{
 										case InterpolateHermite:
-											program = stateBuffer->isBorder ? &shaders.hermite_double : &shaders.hermite;
+											program = stateBuffer->isBack ? &shaders.hermite_double : &shaders.hermite;
 											break;
 										case InterpolateCubic:
-											program = stateBuffer->isBorder ? &shaders.cubic_double : &shaders.cubic;
+											program = stateBuffer->isBack ? &shaders.cubic_double : &shaders.cubic;
 											break;
 										default:
-											program = stateBuffer->isBorder ? &shaders.linear_double : &shaders.linear;
+											program = stateBuffer->isBack ? &shaders.linear_double : &shaders.linear;
 											break;
 										}
 										UseShaderProgram(program, texSize);
 
-										if (state.flags)
+										if (state.flags || backStatus != stateBuffer->isBack)
 										{
 											this->filterState.flags = FALSE;
 
-											if (stateBuffer->isBorder)
+											if (stateBuffer->isBack)
 											{
 												GLActiveTexture(GL_TEXTURE1);
 												GLBindTexFilter(textureId.back, state.interpolation != InterpolateNearest ? GL_LINEAR : GL_NEAREST);
@@ -1173,6 +1194,9 @@ VOID OpenDraw::RenderMid()
 											GLActiveTexture(GL_TEXTURE0);
 											GLBindTexFilter(textureId.primary, state.interpolation == InterpolateLinear || state.interpolation == InterpolateHermite ? GL_LINEAR : GL_NEAREST);
 										}
+
+										borderStatus = stateBuffer->borders;
+										backStatus = stateBuffer->isBack;
 									}
 
 									if (stateBuffer->isZoomed)
@@ -1393,6 +1417,7 @@ VOID OpenDraw::RenderNew()
 								BOOL activeIndex = TRUE;
 								BOOL zoomStatus = FALSE;
 								BOOL borderStatus = FALSE;
+								BOOL backStatus = FALSE;
 								ShaderProgram* upscaleProgram;
 								Size zoomSize = { 0, 0 };
 								Size zoomFbSize = { 0, 0 };
@@ -1452,7 +1477,7 @@ VOID OpenDraw::RenderNew()
 											if (state.flags && newSize != viewSize)
 												pixelBuffer->Reset();
 
-											if (pixelBuffer->Update(lpStateBuffer, TRUE) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->isBorder)
+											if (pixelBuffer->Update(lpStateBuffer, TRUE) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 											{
 												if (isVSync != config.image.vSync)
 												{
@@ -1461,9 +1486,10 @@ VOID OpenDraw::RenderNew()
 														WGLSwapInterval(isVSync);
 												}
 
-												if (state.flags || borderStatus != stateBuffer->isBorder)
+												if (state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 												{
-													borderStatus = stateBuffer->isBorder;
+													borderStatus = stateBuffer->borders;
+													backStatus = stateBuffer->isBack;
 													this->viewport.refresh = TRUE;
 												}
 
@@ -1664,13 +1690,13 @@ VOID OpenDraw::RenderNew()
 												switch (state.interpolation)
 												{
 												case InterpolateHermite:
-													program = stateBuffer->isBorder ? &shaders.hermite_double : &shaders.hermite;
+													program = stateBuffer->isBack ? &shaders.hermite_double : &shaders.hermite;
 													break;
 												case InterpolateCubic:
-													program = stateBuffer->isBorder ? &shaders.cubic_double : &shaders.cubic;
+													program = stateBuffer->isBack ? &shaders.cubic_double : &shaders.cubic;
 													break;
 												default:
-													program = stateBuffer->isBorder ? &shaders.linear_double : &shaders.linear;
+													program = stateBuffer->isBack ? &shaders.linear_double : &shaders.linear;
 													break;
 												}
 
@@ -1679,7 +1705,7 @@ VOID OpenDraw::RenderNew()
 													GLClear(GL_COLOR_BUFFER_BIT);
 													GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
-													if (stateBuffer->isBorder)
+													if (stateBuffer->isBack)
 													{
 														GLActiveTexture(GL_TEXTURE1);
 														GLBindTexFilter(textureId.backBO, state.interpolation != InterpolateNearest ? GL_LINEAR : GL_NEAREST);
@@ -1737,7 +1763,7 @@ VOID OpenDraw::RenderNew()
 												GLBindTexFilter(textureId.primary, state.interpolation == InterpolateLinear || state.interpolation == InterpolateHermite ? GL_LINEAR : GL_NEAREST);
 											}
 
-											if (pixelBuffer->Update(lpStateBuffer) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->isBorder)
+											if (pixelBuffer->Update(lpStateBuffer) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 											{
 												if (isVSync != config.image.vSync)
 												{
@@ -1752,29 +1778,27 @@ VOID OpenDraw::RenderNew()
 												if (this->CheckView(TRUE))
 													GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
-												if (state.flags || borderStatus != stateBuffer->isBorder)
+												if (state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 												{
-													borderStatus = stateBuffer->isBorder;
-
 													ShaderProgram* program;
 													switch (state.interpolation)
 													{
 													case InterpolateHermite:
-														program = stateBuffer->isBorder ? &shaders.hermite_double : &shaders.hermite;
+														program = stateBuffer->isBack ? &shaders.hermite_double : &shaders.hermite;
 														break;
 													case InterpolateCubic:
-														program = stateBuffer->isBorder ? &shaders.cubic_double : &shaders.cubic;
+														program = stateBuffer->isBack ? &shaders.cubic_double : &shaders.cubic;
 														break;
 													default:
-														program = stateBuffer->isBorder ? &shaders.linear_double : &shaders.linear;
+														program = stateBuffer->isBack ? &shaders.linear_double : &shaders.linear;
 														break;
 													}
 
 													UseShaderProgram(program, texSize);
 
-													if (state.flags)
+													if (state.flags || backStatus != stateBuffer->isBack)
 													{
-														if (stateBuffer->isBorder)
+														if (stateBuffer->isBack)
 														{
 															GLActiveTexture(GL_TEXTURE1);
 															GLBindTexFilter(textureId.back, state.interpolation != InterpolateNearest ? GL_LINEAR : GL_NEAREST);
@@ -1783,6 +1807,9 @@ VOID OpenDraw::RenderNew()
 														GLActiveTexture(GL_TEXTURE0);
 														GLBindTexFilter(textureId.primary, state.interpolation == InterpolateLinear || state.interpolation == InterpolateHermite ? GL_LINEAR : GL_NEAREST);
 													}
+
+													borderStatus = stateBuffer->borders;
+													backStatus = stateBuffer->isBack;
 												}
 
 												if (stateBuffer->isZoomed)
@@ -1889,7 +1916,7 @@ VOID OpenDraw::RenderGDI()
 		}
 
 		Rect* rect = &this->viewport.rectangle;
-		if (stateBuffer->isBorder)
+		if (stateBuffer->isBack)
 		{
 			BitBlt(this->gdi->hDc, 0, 0, config.mode->width, config.mode->height, this->gdi->hDcBack, 0, 0, SRCCOPY);
 
