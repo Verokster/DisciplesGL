@@ -1,7 +1,7 @@
 /*
 	MIT License
 
-	Copyright (c) 2019 Oleksiy Ryabchun
+	Copyright (c) 2020 Oleksiy Ryabchun
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,11 @@
 
 uniform sampler2D tex01;
 uniform vec2 texSize;
+uniform vec3 minLevel;
+uniform vec3 maxLevel;
+uniform vec3 gamma;
+uniform float saturation;
+uniform float hueShift;
 
 #if __VERSION__ >= 130
 	#define COMPAT_IN in
@@ -48,6 +53,32 @@ vec4 hermite(sampler2D tex, vec2 coord)
 	return COMPAT_TEXTURE(tex, uv / texSize);
 }
 
+vec3 levels(vec3 color, vec3 minInput, vec3 maxInput, vec3 adjustment)
+{
+	return pow(min(max(color - minInput, vec3(0.0)) / (maxInput - minInput), vec3(1.0)), vec3(1.0 / adjustment));
+}
+
+vec3 adjustSaturation(vec3 color, float adjustment)
+{
+    const vec3 W = vec3(0.2125, 0.7154, 0.0721);
+    vec3 intensity = vec3(dot(color, W));
+    return mix(intensity, color, adjustment);
+}
+
+vec3 shiftHue(vec3 color, float adjustment)
+{
+    vec3 P = vec3(0.55735) * dot(vec3(0.55735), color);
+    vec3 U = color - P;
+    vec3 V = cross(vec3(0.55735), U);    
+    return U * cos(adjustment * 6.2832) + V * sin(adjustment * 6.2832) + P;
+}
+
 void main() {
-	FRAG_COLOR = hermite(tex01, fTex);
+	vec3 color = hermite(tex01, fTex).rgb;
+
+	color = levels(color, minLevel, maxLevel, gamma);
+	color = adjustSaturation(color, saturation);
+	color = shiftHue(color, hueShift);
+
+	FRAG_COLOR = vec4(color, 1.0);
 }
