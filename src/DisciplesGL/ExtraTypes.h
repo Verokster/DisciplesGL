@@ -314,7 +314,10 @@ struct ConfigItems {
 		BYTE snapshot;
 	} keys;
 
-	Adjustment colors;
+	struct {
+		const Adjustment* current;
+		Adjustment active;
+	} colors;
 
 	BOOL isExist;
 	CHAR file[MAX_PATH];

@@ -29,6 +29,7 @@
 #define CONFIG_WRAPPER "Wrapper"
 #define CONFIG_DISCIPLE "Disciple"
 #define CONFIG_SETTINGS "Settings"
+#define CONFIG_COLORS "Colors"
 #define CONFIG_KEYS "FunktionKeys"
 
 #define BORDERLESS_OFFSET 1

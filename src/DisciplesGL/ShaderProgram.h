@@ -34,6 +34,7 @@ private:
 	DWORD vertexName;
 	DWORD fragmentName;
 	DWORD texSize;
+	BOOL update;
 	Adjustment colors;
 	struct {
 		GLint texSize;

@@ -525,7 +525,7 @@ VOID PixelBuffer::Reset()
 	this->last = { 0, 0 };
 }
 
-BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL checkOnly)
+BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL checkOnly)
 {
 	this->primaryBuffer = *lpStateBuffer;
 
@@ -633,11 +633,8 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 
 	if (res)
 	{
-		if (swap)
-		{
-			*lpStateBuffer = this->secondaryBuffer;
-			this->secondaryBuffer = this->primaryBuffer;
-		}
+		*lpStateBuffer = this->secondaryBuffer;
+		this->secondaryBuffer = this->primaryBuffer;
 
 		if (fpsState)
 			fpsCounter->Calculate();

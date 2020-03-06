@@ -59,5 +59,5 @@ public:
 	~PixelBuffer();
 
 	VOID Reset();
-	BOOL Update(StateBufferAligned**, BOOL, BOOL = FALSE);
+	BOOL Update(StateBufferAligned**, BOOL = FALSE);
 };

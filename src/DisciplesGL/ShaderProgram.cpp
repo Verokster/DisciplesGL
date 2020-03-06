@@ -35,56 +35,51 @@ ShaderProgram::ShaderProgram(const CHAR* version, DWORD vertexName, DWORD fragme
 	this->vertexName = vertexName;
 	this->fragmentName = fragmentName;
 	this->texSize = 0;
-	this->colors = config.colors;
 	MemorySet(&this->loc, 0xFF, sizeof(this->loc));
 }
 
 VOID ShaderProgram::UpdateLevels()
 {
+	this->colors = *config.colors.current;
+	this->update = FALSE;
+
 	GLUniform1f(this->loc.hue, (2.0f * this->colors.hueShift - 1.0f) * M_PI);
 	GLUniform1f(this->loc.sat, (FLOAT)MathPower(2.0f * this->colors.saturation, 1.5849625f));
 
 	GLUniform4f(this->loc.input.left,
-		config.colors.input.left.red,
-		config.colors.input.left.green,
-		config.colors.input.left.blue,
-		config.colors.input.left.rgb);
+		this->colors.input.left.red,
+		this->colors.input.left.green,
+		this->colors.input.left.blue,
+		this->colors.input.left.rgb);
 
 	GLUniform4f(this->loc.input.right,
-		config.colors.input.right.red,
-		config.colors.input.right.green,
-		config.colors.input.right.blue,
-		config.colors.input.right.rgb);
+		this->colors.input.right.red,
+		this->colors.input.right.green,
+		this->colors.input.right.blue,
+		this->colors.input.right.rgb);
 
 	GLUniform4f(this->loc.gamma,
-		1.0f / (FLOAT)MathPower(2.0f * config.colors.gamma.red, 3.32f),
-		1.0f / (FLOAT)MathPower(2.0f * config.colors.gamma.green, 3.32f),
-		1.0f / (FLOAT)MathPower(2.0f * config.colors.gamma.blue, 3.32f),
-		1.0f / (FLOAT)MathPower(2.0f * config.colors.gamma.rgb, 3.32f));
+		1.0f / (FLOAT)MathPower(2.0f * this->colors.gamma.red, 3.32f),
+		1.0f / (FLOAT)MathPower(2.0f * this->colors.gamma.green, 3.32f),
+		1.0f / (FLOAT)MathPower(2.0f * this->colors.gamma.blue, 3.32f),
+		1.0f / (FLOAT)MathPower(2.0f * this->colors.gamma.rgb, 3.32f));
 
 	GLUniform4f(this->loc.output.left,
-		config.colors.output.left.red,
-		config.colors.output.left.green,
-		config.colors.output.left.blue,
-		config.colors.output.left.rgb);
+		this->colors.output.left.red,
+		this->colors.output.left.green,
+		this->colors.output.left.blue,
+		this->colors.output.left.rgb);
 
 	GLUniform4f(this->loc.output.right,
-		config.colors.output.right.red,
-		config.colors.output.right.green,
-		config.colors.output.right.blue,
-		config.colors.output.right.rgb);
+		this->colors.output.right.red,
+		this->colors.output.right.green,
+		this->colors.output.right.blue,
+		this->colors.output.right.rgb);
 }
 
 BOOL ShaderProgram::Check()
 {
-	if (this->loc.hue >= 0 && MemoryCompare(&this->colors, &config.colors, sizeof(Adjustment)))
-	{
-		this->colors = config.colors;
-		this->UpdateLevels();
-		return TRUE;
-	}
-
-	return FALSE;
+	return this->update = this->loc.hue >= 0 && MemoryCompare(&this->colors, config.colors.current, sizeof(Adjustment));
 }
 
 VOID ShaderProgram::Use(DWORD texSize)
@@ -136,6 +131,8 @@ VOID ShaderProgram::Use(DWORD texSize)
 
 			this->UpdateLevels();
 		}
+		else
+			this->update = FALSE;
 	}
 	else
 	{
@@ -147,7 +144,8 @@ VOID ShaderProgram::Use(DWORD texSize)
 			GLUniform2f(this->loc.texSize, (FLOAT)LOWORD(texSize), (FLOAT)HIWORD(texSize));
 		}
 
-		this->Check();
+		if (this->update)
+			this->UpdateLevels();
 	}
 }
 

@@ -995,41 +995,41 @@ namespace Window
 
 			SendDlgItemMessage(hDlg, IDC_RAD_RGB, BM_SETCHECK, BST_CHECKED, NULL);
 
-			SendDlgItemMessage(hDlg, IDC_TRK_HUE, TBM_SETPOS, TRUE, DWORD(config.colors.hueShift * 360.0f));
-			SendDlgItemMessage(hDlg, IDC_TRK_SAT, TBM_SETPOS, TRUE, DWORD(config.colors.saturation * 1000.0f));
-			SendDlgItemMessage(hDlg, IDC_TRK_IN_LEFT, TBM_SETPOS, TRUE, DWORD(config.colors.input.left.rgb * 255.0f));
-			SendDlgItemMessage(hDlg, IDC_TRK_IN_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.input.right.rgb * 255.0f));
-			SendDlgItemMessage(hDlg, IDC_TRK_GAMMA, TBM_SETPOS, TRUE, DWORD(config.colors.gamma.rgb * 1000.0f));
-			SendDlgItemMessage(hDlg, IDC_TRK_OUT_LEFT, TBM_SETPOS, TRUE, DWORD(config.colors.output.left.rgb * 255.0f));
-			SendDlgItemMessage(hDlg, IDC_TRK_OUT_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.output.right.rgb * 255.0f));
+			SendDlgItemMessage(hDlg, IDC_TRK_HUE, TBM_SETPOS, TRUE, DWORD(config.colors.active.hueShift * 360.0f));
+			SendDlgItemMessage(hDlg, IDC_TRK_SAT, TBM_SETPOS, TRUE, DWORD(config.colors.active.saturation * 1000.0f));
+			SendDlgItemMessage(hDlg, IDC_TRK_IN_LEFT, TBM_SETPOS, TRUE, DWORD(config.colors.active.input.left.rgb * 255.0f));
+			SendDlgItemMessage(hDlg, IDC_TRK_IN_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.active.input.right.rgb * 255.0f));
+			SendDlgItemMessage(hDlg, IDC_TRK_GAMMA, TBM_SETPOS, TRUE, DWORD(config.colors.active.gamma.rgb * 1000.0f));
+			SendDlgItemMessage(hDlg, IDC_TRK_OUT_LEFT, TBM_SETPOS, TRUE, DWORD(config.colors.active.output.left.rgb * 255.0f));
+			SendDlgItemMessage(hDlg, IDC_TRK_OUT_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.active.output.right.rgb * 255.0f));
 
 			CHAR text[16];
-			FLOAT val = 360.0f * config.colors.hueShift - 180.0f;
+			FLOAT val = 360.0f * config.colors.active.hueShift - 180.0f;
 			StrPrint(text, val ? "%+0.f" : "%0.f", val);
 			SendDlgItemMessage(hDlg, IDC_LBL_HUE, WM_SETTEXT, NULL, (WPARAM)text);
 
-			StrPrint(text, "%.2f", MathPower(2.0f * config.colors.saturation, 1.5849625007211561f));
+			StrPrint(text, "%.2f", MathPower(2.0f * config.colors.active.saturation, 1.5849625007211561f));
 			SendDlgItemMessage(hDlg, IDC_LBL_SAT, WM_SETTEXT, NULL, (WPARAM)text);
 
-			StrPrint(text, "%0.f", 255.0f * config.colors.input.left.rgb);
+			StrPrint(text, "%0.f", 255.0f * config.colors.active.input.left.rgb);
 			SendDlgItemMessage(hDlg, IDC_LBL_IN_LEFT, WM_SETTEXT, NULL, (WPARAM)text);
 
-			StrPrint(text, "%0.f", 255.0f * config.colors.input.right.rgb);
+			StrPrint(text, "%0.f", 255.0f * config.colors.active.input.right.rgb);
 			SendDlgItemMessage(hDlg, IDC_LBL_IN_RIGHT, WM_SETTEXT, NULL, (WPARAM)text);
 
-			StrPrint(text, "%.2f", MathPower(2.0f * config.colors.gamma.rgb, 3.32f));
+			StrPrint(text, "%.2f", MathPower(2.0f * config.colors.active.gamma.rgb, 3.32f));
 			SendDlgItemMessage(hDlg, IDC_LBL_GAMMA, WM_SETTEXT, NULL, (WPARAM)text);
 
-			StrPrint(text, "%0.f", 255.0f * config.colors.output.left.rgb);
+			StrPrint(text, "%0.f", 255.0f * config.colors.active.output.left.rgb);
 			SendDlgItemMessage(hDlg, IDC_LBL_OUT_LEFT, WM_SETTEXT, NULL, (WPARAM)text);
 
-			StrPrint(text, "%0.f", 255.0f * config.colors.output.right.rgb);
+			StrPrint(text, "%0.f", 255.0f * config.colors.active.output.right.rgb);
 			SendDlgItemMessage(hDlg, IDC_LBL_OUT_RIGHT, WM_SETTEXT, NULL, (WPARAM)text);
 
 			LevelsData* levelsData = (LevelsData*)MemoryAlloc(sizeof(LevelsData));
 			MemoryZero(levelsData, sizeof(LevelsData));
 			levelsData->delta = 0.7f;
-			levelsData->values = config.colors;
+			levelsData->values = config.colors.active;
 
 			SetWindowLong(hDlg, GWLP_USERDATA, (LONG)levelsData);
 
@@ -1172,8 +1172,8 @@ namespace Window
 				{
 					LevelColorsFloat prep[258];
 					{
-						FLOAT h = 2.0f * config.colors.hueShift - 1.0f;
-						FLOAT s = (FLOAT)MathPower(2.0f * config.colors.saturation, 1.5849625007211561f);
+						FLOAT h = 2.0f * config.colors.active.hueShift - 1.0f;
+						FLOAT s = (FLOAT)MathPower(2.0f * config.colors.active.saturation, 1.5849625007211561f);
 
 						FLOAT vsu = s * (FLOAT)cos(h * M_PI);
 						FLOAT vsw = s * (FLOAT)sin(h * M_PI);
@@ -1200,9 +1200,9 @@ namespace Window
 
 						for (DWORD i = 0; i < 4; ++i)
 						{
-							levels.input.chanel[i] = config.colors.input.right.chanel[i] - config.colors.input.left.chanel[i];
-							levels.gamma.chanel[i] = 1.0f / (FLOAT)MathPower(2.0f * config.colors.gamma.chanel[i], 3.32f);
-							levels.output.chanel[i] = config.colors.output.right.chanel[i] - config.colors.output.left.chanel[i];
+							levels.input.chanel[i] = config.colors.active.input.right.chanel[i] - config.colors.active.input.left.chanel[i];
+							levels.gamma.chanel[i] = 1.0f / (FLOAT)MathPower(2.0f * config.colors.active.gamma.chanel[i], 3.32f);
+							levels.output.chanel[i] = config.colors.active.output.right.chanel[i] - config.colors.active.output.left.chanel[i];
 						}
 
 						LevelColorsFloat* src = levelsData->colors;
@@ -1217,10 +1217,10 @@ namespace Window
 
 								for (DWORD s = 2, idx = j + 1; s; --s, idx = 0)
 								{
-									k = (k - config.colors.input.left.chanel[idx]) / levels.input.chanel[idx];
+									k = (k - config.colors.active.input.left.chanel[idx]) / levels.input.chanel[idx];
 									k = min(1.0f, max(0.0f, k));
 									k = (FLOAT)MathPower(k, levels.gamma.chanel[idx]);
-									k = k * levels.output.chanel[idx] + config.colors.output.left.chanel[idx];
+									k = k * levels.output.chanel[idx] + config.colors.active.output.left.chanel[idx];
 									k = min(1.0f, max(0.0f, k));
 								}
 
@@ -1410,21 +1410,21 @@ namespace Window
 			{
 			case IDC_BTN_OK: {
 				LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
-				levelsData->values = config.colors;
+				levelsData->values = config.colors.active;
 
-				Config::Set(CONFIG_WRAPPER, "HueSat", MAKELONG(DWORD(config.colors.hueShift * 1000.0f), DWORD(config.colors.saturation * 1000.0f)));
-				Config::Set(CONFIG_WRAPPER, "RgbInput", MAKELONG(DWORD(config.colors.input.left.rgb * 1000.0f), DWORD(config.colors.input.right.rgb * 1000.0f)));
-				Config::Set(CONFIG_WRAPPER, "RedInput", MAKELONG(DWORD(config.colors.input.left.red * 1000.0f), DWORD(config.colors.input.right.red * 1000.0f)));
-				Config::Set(CONFIG_WRAPPER, "GreenInput", MAKELONG(DWORD(config.colors.input.left.green * 1000.0f), DWORD(config.colors.input.right.green * 1000.0f)));
-				Config::Set(CONFIG_WRAPPER, "BlueInput", MAKELONG(DWORD(config.colors.input.left.blue * 1000.0f), DWORD(config.colors.input.right.blue * 1000.0f)));
-				Config::Set(CONFIG_WRAPPER, "RgbGamma", DWORD(config.colors.gamma.rgb * 1000.0f));
-				Config::Set(CONFIG_WRAPPER, "RedGamma", DWORD(config.colors.gamma.red * 1000.0f));
-				Config::Set(CONFIG_WRAPPER, "GreenGamma", DWORD(config.colors.gamma.green * 1000.0f));
-				Config::Set(CONFIG_WRAPPER, "BlueGamma", DWORD(config.colors.gamma.blue * 1000.0f));
-				Config::Set(CONFIG_WRAPPER, "RgbOutput", MAKELONG(DWORD(config.colors.output.left.rgb * 1000.0f), DWORD(config.colors.output.right.rgb * 1000.0f)));
-				Config::Set(CONFIG_WRAPPER, "RedOutput", MAKELONG(DWORD(config.colors.output.left.red * 1000.0f), DWORD(config.colors.output.right.red * 1000.0f)));
-				Config::Set(CONFIG_WRAPPER, "GreenOutput", MAKELONG(DWORD(config.colors.output.left.green * 1000.0f), DWORD(config.colors.output.right.green * 1000.0f)));
-				Config::Set(CONFIG_WRAPPER, "BlueOutput", MAKELONG(DWORD(config.colors.output.left.blue * 1000.0f), DWORD(config.colors.output.right.blue * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "HueSat", MAKELONG(DWORD(config.colors.active.hueShift * 1000.0f), DWORD(config.colors.active.saturation * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "RgbInput", MAKELONG(DWORD(config.colors.active.input.left.rgb * 1000.0f), DWORD(config.colors.active.input.right.rgb * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "RedInput", MAKELONG(DWORD(config.colors.active.input.left.red * 1000.0f), DWORD(config.colors.active.input.right.red * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "GreenInput", MAKELONG(DWORD(config.colors.active.input.left.green * 1000.0f), DWORD(config.colors.active.input.right.green * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "BlueInput", MAKELONG(DWORD(config.colors.active.input.left.blue * 1000.0f), DWORD(config.colors.active.input.right.blue * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "RgbGamma", DWORD(config.colors.active.gamma.rgb * 1000.0f));
+				Config::Set(CONFIG_COLORS, "RedGamma", DWORD(config.colors.active.gamma.red * 1000.0f));
+				Config::Set(CONFIG_COLORS, "GreenGamma", DWORD(config.colors.active.gamma.green * 1000.0f));
+				Config::Set(CONFIG_COLORS, "BlueGamma", DWORD(config.colors.active.gamma.blue * 1000.0f));
+				Config::Set(CONFIG_COLORS, "RgbOutput", MAKELONG(DWORD(config.colors.active.output.left.rgb * 1000.0f), DWORD(config.colors.active.output.right.rgb * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "RedOutput", MAKELONG(DWORD(config.colors.active.output.left.red * 1000.0f), DWORD(config.colors.active.output.right.red * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "GreenOutput", MAKELONG(DWORD(config.colors.active.output.left.green * 1000.0f), DWORD(config.colors.active.output.right.green * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "BlueOutput", MAKELONG(DWORD(config.colors.active.output.left.blue * 1000.0f), DWORD(config.colors.active.output.right.blue * 1000.0f)));
 
 				SendMessage(hDlg, WM_CLOSE, NULL, NULL);
 				return NULL;
@@ -1436,16 +1436,16 @@ namespace Window
 			}
 
 			case IDC_BTN_RESET: {
-				config.colors.hueShift = 0.5f;
-				config.colors.saturation = 0.5f;
+				config.colors.active.hueShift = 0.5f;
+				config.colors.active.saturation = 0.5f;
 
 				for (DWORD i = 0; i < 4; ++i)
 				{
-					config.colors.input.left.chanel[i] = 0.0f;
-					config.colors.input.right.chanel[i] = 1.0f;
-					config.colors.gamma.chanel[i] = 0.5f;
-					config.colors.output.left.chanel[i] = 0.0f;
-					config.colors.output.right.chanel[i] = 1.0f;
+					config.colors.active.input.left.chanel[i] = 0.0f;
+					config.colors.active.input.right.chanel[i] = 1.0f;
+					config.colors.active.gamma.chanel[i] = 0.5f;
+					config.colors.active.output.left.chanel[i] = 0.0f;
+					config.colors.active.output.right.chanel[i] = 1.0f;
 				}
 
 				SendDlgItemMessage(hDlg, IDC_RAD_BLUE, BM_SETCHECK, BST_UNCHECKED, NULL);
@@ -1478,16 +1478,16 @@ namespace Window
 			}
 
 			case IDC_BTN_AUTO: {
-				config.colors.hueShift = 0.5f;
-				config.colors.saturation = 0.5f;
+				config.colors.active.hueShift = 0.5f;
+				config.colors.active.saturation = 0.5f;
 
 				for (DWORD i = 0; i < 4; ++i)
 				{
-					config.colors.input.left.chanel[i] = 0.0f;
-					config.colors.input.right.chanel[i] = 1.0f;
-					config.colors.gamma.chanel[i] = 0.5f;
-					config.colors.output.left.chanel[i] = 0.0f;
-					config.colors.output.right.chanel[i] = 1.0f;
+					config.colors.active.input.left.chanel[i] = 0.0f;
+					config.colors.active.input.right.chanel[i] = 1.0f;
+					config.colors.active.gamma.chanel[i] = 0.5f;
+					config.colors.active.output.left.chanel[i] = 0.0f;
+					config.colors.active.output.right.chanel[i] = 1.0f;
 				}
 
 				SendDlgItemMessage(hDlg, IDC_RAD_BLUE, BM_SETCHECK, BST_UNCHECKED, NULL);
@@ -1531,7 +1531,7 @@ namespace Window
 									{
 										success[j] = TRUE;
 										++exit;
-										config.colors.input.left.chanel[j + 1] = (FLOAT)i / 256.0f;
+										config.colors.active.input.left.chanel[j + 1] = (FLOAT)i / 256.0f;
 									}
 								}
 							}
@@ -1558,7 +1558,7 @@ namespace Window
 									{
 										success[j] = TRUE;
 										++exit;
-										config.colors.input.right.chanel[j + 1] = (FLOAT)i / 256.0f;
+										config.colors.active.input.right.chanel[j + 1] = (FLOAT)i / 256.0f;
 									}
 								}
 							}
@@ -1583,27 +1583,27 @@ namespace Window
 			case IDC_RAD_BLUE: {
 				DWORD index = (DWORD)wParam - IDC_RAD_RGB;
 
-				SendDlgItemMessage(hDlg, IDC_TRK_IN_LEFT, TBM_SETPOS, TRUE, DWORD(config.colors.input.left.chanel[index] * 255.0f));
-				SendDlgItemMessage(hDlg, IDC_TRK_IN_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.input.right.chanel[index] * 255.0f));
-				SendDlgItemMessage(hDlg, IDC_TRK_GAMMA, TBM_SETPOS, TRUE, DWORD(config.colors.gamma.chanel[index] * 1000.0f));
-				SendDlgItemMessage(hDlg, IDC_TRK_OUT_LEFT, TBM_SETPOS, TRUE, DWORD(config.colors.output.left.chanel[index] * 255.0f));
-				SendDlgItemMessage(hDlg, IDC_TRK_OUT_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.output.right.chanel[index] * 255.0f));
+				SendDlgItemMessage(hDlg, IDC_TRK_IN_LEFT, TBM_SETPOS, TRUE, DWORD(config.colors.active.input.left.chanel[index] * 255.0f));
+				SendDlgItemMessage(hDlg, IDC_TRK_IN_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.active.input.right.chanel[index] * 255.0f));
+				SendDlgItemMessage(hDlg, IDC_TRK_GAMMA, TBM_SETPOS, TRUE, DWORD(config.colors.active.gamma.chanel[index] * 1000.0f));
+				SendDlgItemMessage(hDlg, IDC_TRK_OUT_LEFT, TBM_SETPOS, TRUE, DWORD(config.colors.active.output.left.chanel[index] * 255.0f));
+				SendDlgItemMessage(hDlg, IDC_TRK_OUT_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.active.output.right.chanel[index] * 255.0f));
 
 				CHAR text[16];
 
-				StrPrint(text, "%0.f", 255.0f * config.colors.input.left.chanel[index]);
+				StrPrint(text, "%0.f", 255.0f * config.colors.active.input.left.chanel[index]);
 				SendDlgItemMessage(hDlg, IDC_LBL_IN_LEFT, WM_SETTEXT, NULL, (WPARAM)text);
 
-				StrPrint(text, "%0.f", 255.0f * config.colors.input.right.chanel[index]);
+				StrPrint(text, "%0.f", 255.0f * config.colors.active.input.right.chanel[index]);
 				SendDlgItemMessage(hDlg, IDC_LBL_IN_RIGHT, WM_SETTEXT, NULL, (WPARAM)text);
 
-				StrPrint(text, "%.2f", MathPower(2.0f * config.colors.gamma.chanel[index], 3.32f));
+				StrPrint(text, "%.2f", MathPower(2.0f * config.colors.active.gamma.chanel[index], 3.32f));
 				SendDlgItemMessage(hDlg, IDC_LBL_GAMMA, WM_SETTEXT, NULL, (WPARAM)text);
 
-				StrPrint(text, "%0.f", 255.0f * config.colors.output.left.chanel[index]);
+				StrPrint(text, "%0.f", 255.0f * config.colors.active.output.left.chanel[index]);
 				SendDlgItemMessage(hDlg, IDC_LBL_OUT_LEFT, WM_SETTEXT, NULL, (WPARAM)text);
 
-				StrPrint(text, "%0.f", 255.0f * config.colors.output.right.chanel[index]);
+				StrPrint(text, "%0.f", 255.0f * config.colors.active.output.right.chanel[index]);
 				SendDlgItemMessage(hDlg, IDC_LBL_OUT_RIGHT, WM_SETTEXT, NULL, (WPARAM)text);
 
 				SendMessage(hDlg, WM_REDRAW_CANVAS, NULL, NULL);
@@ -1646,7 +1646,7 @@ namespace Window
 			switch (id)
 			{
 			case IDC_TRK_HUE: {
-				config.colors.hueShift = (FLOAT)value / 360.0f;
+				config.colors.active.hueShift = (FLOAT)value / 360.0f;
 
 				DWORD val = value - 180;
 				StrPrint(text, val ? "%+d" : "%d", val);
@@ -1654,7 +1654,7 @@ namespace Window
 				break;
 			}
 			case IDC_TRK_SAT: {
-				config.colors.saturation = 0.001f * value;
+				config.colors.active.saturation = 0.001f * value;
 
 				StrPrint(text, "%.2f", MathPower(0.002f * value, 1.5849625007211561f));
 				SendDlgItemMessage(hDlg, IDC_LBL_SAT, WM_SETTEXT, NULL, (WPARAM)text);
@@ -1681,7 +1681,7 @@ namespace Window
 				StrPrint(text, "%d", value);
 				SendDlgItemMessage(hDlg, IDC_LBL_IN_LEFT, WM_SETTEXT, NULL, (WPARAM)text);
 
-				config.colors.input.left.chanel[idx] = (FLOAT)value / 255.0f;
+				config.colors.active.input.left.chanel[idx] = (FLOAT)value / 255.0f;
 				break;
 			}
 			case IDC_TRK_IN_RIGHT: {
@@ -1705,7 +1705,7 @@ namespace Window
 				StrPrint(text, "%d", value);
 				SendDlgItemMessage(hDlg, IDC_LBL_IN_RIGHT, WM_SETTEXT, NULL, (WPARAM)text);
 
-				config.colors.input.right.chanel[idx] = (FLOAT)value / 255.0f;
+				config.colors.active.input.right.chanel[idx] = (FLOAT)value / 255.0f;
 				break;
 			}
 			case IDC_TRK_GAMMA: {
@@ -1719,7 +1719,7 @@ namespace Window
 				else
 					idx = 0;
 
-				config.colors.gamma.chanel[idx] = 0.001f * value;
+				config.colors.active.gamma.chanel[idx] = 0.001f * value;
 
 				StrPrint(text, "%.2f", MathPower(0.002f * value, 3.32f));
 				SendDlgItemMessage(hDlg, IDC_LBL_GAMMA, WM_SETTEXT, NULL, (WPARAM)text);
@@ -1746,7 +1746,7 @@ namespace Window
 				StrPrint(text, "%d", value);
 				SendDlgItemMessage(hDlg, IDC_LBL_OUT_LEFT, WM_SETTEXT, NULL, (WPARAM)text);
 
-				config.colors.output.left.chanel[idx] = (FLOAT)value / 255.0f;
+				config.colors.active.output.left.chanel[idx] = (FLOAT)value / 255.0f;
 				break;
 			}
 			case IDC_TRK_OUT_RIGHT: {
@@ -1770,7 +1770,7 @@ namespace Window
 				StrPrint(text, "%d", value);
 				SendDlgItemMessage(hDlg, IDC_LBL_OUT_RIGHT, WM_SETTEXT, NULL, (WPARAM)text);
 
-				config.colors.output.right.chanel[idx] = (FLOAT)value / 255.0f;
+				config.colors.active.output.right.chanel[idx] = (FLOAT)value / 255.0f;
 				break;
 			}
 			default:
@@ -1787,7 +1787,7 @@ namespace Window
 
 		case WM_CLOSE: {
 			LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
-			config.colors = levelsData->values;
+			config.colors.active = levelsData->values;
 			if (levelsData->colors)
 			{
 				MemoryFree(levelsData->colors);
@@ -1916,15 +1916,7 @@ namespace Window
 
 		case WM_ACTIVATEAPP: {
 			if (!config.alwaysActive)
-			{
-				if ((BOOL)wParam)
-					config.colors = activeColors;
-				else
-				{
-					activeColors = config.colors;
-					config.colors = inactiveColors;
-				}
-			}
+				config.colors.current = (BOOL)wParam ? &config.colors.active : &inactiveColors;
 
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 			if (ddraw)
@@ -2179,14 +2171,11 @@ namespace Window
 
 			case IDM_HELP_ABOUT_APPLICATION:
 			case IDM_HELP_ABOUT_WRAPPER: {
-				Adjustment colors;
+				config.colors.current = &inactiveColors;
+
 				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
 				if (ddraw)
-				{
-					colors = config.colors;
-					config.colors = inactiveColors;
 					ddraw->Redraw();
-				}
 
 				{
 					ULONG_PTR cookie = NULL;
@@ -2210,15 +2199,14 @@ namespace Window
 
 					if (cookie)
 						DeactivateActCtxC(0, cookie);
-
-					SetForegroundWindow(hWnd);
 				}
+
+				config.colors.current = &config.colors.active;
 
 				if (ddraw)
-				{
-					config.colors = colors;
 					ddraw->Redraw();
-				}
+
+				SetForegroundWindow(hWnd);
 				return NULL;
 			}
 
@@ -2426,14 +2414,21 @@ namespace Window
 			}
 
 			case IDM_COLOR_ADJUST: {
-				ULONG_PTR cookie = NULL;
-				if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
-					cookie = NULL;
+				//BOOL isActive = config.alwaysActive;
+				//config.alwaysActive = TRUE;
 
-				DialogBox(hDllModule, MAKEINTRESOURCE(IDD_COLOR_ADJUSTMENT), hWnd, (DLGPROC)ColorAdjustmentProc);
+				{
+					ULONG_PTR cookie = NULL;
+					if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
+						cookie = NULL;
 
-				if (cookie)
-					DeactivateActCtxC(0, cookie);
+					DialogBox(hDllModule, MAKEINTRESOURCE(IDD_COLOR_ADJUSTMENT), hWnd, (DLGPROC)ColorAdjustmentProc);
+
+					if (cookie)
+						DeactivateActCtxC(0, cookie);
+				}
+
+				//config.alwaysActive = isActive;
 
 				SetForegroundWindow(hWnd);
 				return NULL;

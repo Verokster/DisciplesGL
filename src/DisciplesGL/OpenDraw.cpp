@@ -736,7 +736,7 @@ VOID OpenDraw::RenderOld()
 							stateBuffer->isReady = FALSE;
 
 						FilterState state = this->filterState;
-						if (pixelBuffer->Update(lpStateBuffer, ready, frameCount != 1 || convert) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+						if (!ready || pixelBuffer->Update(lpStateBuffer, frameCount != 1 || convert) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 						{
 							if (isVSync != config.image.vSync)
 							{
@@ -1079,7 +1079,7 @@ VOID OpenDraw::RenderMid()
 							Size* frameSize = &stateBuffer->size;
 
 							BOOL ready = stateBuffer->isReady;
-							BOOL force = program && program->Check() || this->viewport.refresh && frameSize->width && frameSize->height;
+							BOOL force = (program && program->Check() || this->viewport.refresh) && frameSize->width && frameSize->height;
 							if (ready || force)
 							{
 								if (force)
@@ -1104,7 +1104,7 @@ VOID OpenDraw::RenderMid()
 									stateBuffer->isReady = FALSE;
 
 								FilterState state = this->filterState;
-								if (pixelBuffer->Update(lpStateBuffer, ready) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack || fpsState == FpsBenchmark)
+								if (!ready || pixelBuffer->Update(lpStateBuffer) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack || fpsState == FpsBenchmark)
 								{
 									if (isVSync != config.image.vSync)
 									{
@@ -1116,7 +1116,7 @@ VOID OpenDraw::RenderMid()
 									if (this->CheckView(TRUE))
 										GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
-									if (state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+									if (force || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 									{
 										switch (state.interpolation)
 										{
@@ -1394,7 +1394,7 @@ VOID OpenDraw::RenderNew()
 
 									Size* frameSize = &stateBuffer->size;
 									BOOL ready = stateBuffer->isReady;
-									BOOL force = program && program->Check() || this->viewport.refresh && frameSize->width && frameSize->height;
+									BOOL force = (program && program->Check() || this->viewport.refresh) && frameSize->width && frameSize->height;
 									if (ready || force)
 									{
 										if (force)
@@ -1434,7 +1434,7 @@ VOID OpenDraw::RenderNew()
 											if (state.flags && newSize != viewSize)
 												pixelBuffer->Reset();
 
-											if (pixelBuffer->Update(lpStateBuffer, ready, TRUE) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+											if (!ready || pixelBuffer->Update(lpStateBuffer, TRUE) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 											{
 												if (isVSync != config.image.vSync)
 												{
@@ -1719,7 +1719,7 @@ VOID OpenDraw::RenderNew()
 												GLBindTexFilter(textureId.primary, state.interpolation == InterpolateLinear || state.interpolation == InterpolateHermite ? GL_LINEAR : GL_NEAREST);
 											}
 
-											if (pixelBuffer->Update(lpStateBuffer, ready) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+											if (!ready || pixelBuffer->Update(lpStateBuffer) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 											{
 												if (isVSync != config.image.vSync)
 												{
@@ -1734,7 +1734,7 @@ VOID OpenDraw::RenderNew()
 												if (this->CheckView(TRUE))
 													GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
 
-												if (state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+												if (force || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 												{
 													switch (state.interpolation)
 													{
