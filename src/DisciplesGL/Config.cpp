@@ -307,7 +307,7 @@ namespace Config
 			config.speed.enabled = TRUE;
 			Config::Set(CONFIG_WRAPPER, "SpeedEnabled", config.speed.enabled);
 
-			config.alwaysActive = TRUE;
+			config.alwaysActive = FALSE;
 			Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
 
 			Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
@@ -528,7 +528,7 @@ namespace Config
 
 			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", TRUE);
 
-			config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", TRUE);
+			config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
 			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
 
 			if (!config.version)

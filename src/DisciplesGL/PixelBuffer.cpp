@@ -535,9 +535,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 	BOOL res = FALSE;
 	if (checkOnly)
 	{
-		if (config.updateMode == UpdateNone)
-			res = TRUE;
-		else if (this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
+		if (config.updateMode == UpdateNone || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
 		{
 			this->last = this->primaryBuffer->size;
 			res = TRUE;
@@ -564,16 +562,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 				res = TRUE;
 		}
 	}
-	else if (config.updateMode == UpdateNone)
-	{
-		if (!this->isTrue)
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)this->primaryBuffer->data + ((config.mode->height - this->last.height) >> 1) * config.mode->width + ((config.mode->width - this->last.width) >> 1));
-		else
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGBA, GL_UNSIGNED_BYTE, (DWORD*)this->primaryBuffer->data + ((config.mode->height - this->last.height) >> 1) * config.mode->width + ((config.mode->width - this->last.width) >> 1));
-
-		res = TRUE;
-	}
-	else if (this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
+	else if (config.updateMode == UpdateNone || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
 	{
 		this->last = this->primaryBuffer->size;
 
