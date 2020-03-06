@@ -26,38 +26,36 @@
 
 #include "Allocation.h"
 #include "ExtraTypes.h"
-#include "StateBuffer.h"
-#include "FpsCounter.h"
 
-#define BLOCK_SIZE 256
-
-typedef DWORD(__fastcall* COMPARE)(DWORD, DWORD, DWORD*, DWORD*);
-typedef BOOL(__fastcall* BLOCKCOMPARE)(LONG, LONG, DWORD, DWORD, DWORD*, DWORD*, POINT*);
-typedef DWORD(__fastcall* SIDECOMPARE)(LONG, LONG, DWORD, DWORD, DWORD*, DWORD*);
-
-class PixelBuffer : public Allocation {
+class ShaderProgram : public Allocation {
 private:
-	Size last;
+	GLuint id;
+	const CHAR* version;
+	DWORD vertexName;
+	DWORD fragmentName;
+	DWORD texSize;
+	Adjustment colors;
+	struct {
+		GLint texSize;
+		GLint hue;
+		GLint sat;
+		struct {
+			GLint left;
+			GLint right;
+		} input;
+		GLint gamma;
+		struct {
+			GLint left;
+			GLint right;
+		} output;
+	} loc;
 
-	BOOL isTrue;
-	DWORD pitch;
-	StateBufferAligned* primaryBuffer;
-	StateBufferAligned* secondaryBuffer;
-	FpsCounter* fpsCounter;
-
-	COMPARE ForwardCompare;
-	COMPARE BackwardCompare;
-	BLOCKCOMPARE BlockForwardCompare;
-	BLOCKCOMPARE BlockBackwardCompare;
-	SIDECOMPARE SideForwardCompare;
-	SIDECOMPARE SideBackwardCompare;
-
-	BOOL UpdateBlock(RECT*, POINT*);
+	VOID UpdateLevels();
 
 public:
-	PixelBuffer(BOOL);
-	~PixelBuffer();
+	ShaderProgram(const CHAR*, DWORD, DWORD);
 
-	VOID Reset();
-	BOOL Update(StateBufferAligned**, BOOL, BOOL = FALSE);
+	BOOL Check();
+	VOID Use(DWORD);
+	VOID Release();
 };

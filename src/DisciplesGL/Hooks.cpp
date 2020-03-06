@@ -5581,6 +5581,13 @@ namespace Hooks
 
 			PatchHook(hookSpace->pkg_entry_load, hook_0051F886);
 			sub_0052A14E = hookSpace->pkg_entry_sub + baseOffset;
+
+			// Mirror battle bg
+			RedirectCall(hookSpace->btlLoadBack_1, hook_005AEF44, &sub_005A9AE9);
+			PatchCall(hookSpace->btlLoadBack_2, hook_005AEF44);
+			PatchCall(hookSpace->btlLoadBack_3, hook_005AEF44);
+
+			PatchHook(hookSpace->btlBackHeight, hook_00529AEB);
 		}
 
 		if (config.hd)
@@ -5634,16 +5641,6 @@ namespace Hooks
 				PatchCall(hookSpace->memory_4, hook_00674400);
 				PatchCall(hookSpace->memory_5, hook_00674400);
 				PatchCall(hookSpace->memory_6, hook_005A6209);
-			}
-
-			// Mirror battle bg
-			if (hookSpace->btlLoadBack_1)
-			{
-				RedirectCall(hookSpace->btlLoadBack_1, hook_005AEF44, &sub_005A9AE9);
-				PatchCall(hookSpace->btlLoadBack_2, hook_005AEF44);
-				PatchCall(hookSpace->btlLoadBack_3, hook_005AEF44);
-
-				PatchHook(hookSpace->btlBackHeight, hook_00529AEB);
 			}
 
 			if (hookSpace->res_hook)

@@ -97,7 +97,7 @@ GLGETUNIFORMLOCATION GLGetUniformLocation;
 GLUNIFORM1I GLUniform1i;
 GLUNIFORM1F GLUniform1f;
 GLUNIFORM2F GLUniform2f;
-GLUNIFORM3F GLUniform3f;
+GLUNIFORM4F GLUniform4f;
 
 GLGENVERTEXARRAYS GLGenVertexArrays;
 GLBINDVERTEXARRAY GLBindVertexArray;
@@ -252,7 +252,7 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "Uniform1i", (PROC*)&GLUniform1i);
 		LoadFunction(buffer, PREFIX_GL, "Uniform1f", (PROC*)&GLUniform1f);
 		LoadFunction(buffer, PREFIX_GL, "Uniform2f", (PROC*)&GLUniform2f);
-		LoadFunction(buffer, PREFIX_GL, "Uniform3f", (PROC*)&GLUniform3f);
+		LoadFunction(buffer, PREFIX_GL, "Uniform4f", (PROC*)&GLUniform4f);
 
 		LoadFunction(buffer, PREFIX_GL, "GenVertexArrays", (PROC*)&GLGenVertexArrays);
 		LoadFunction(buffer, PREFIX_GL, "BindVertexArray", (PROC*)&GLBindVertexArray);

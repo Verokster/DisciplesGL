@@ -196,6 +196,9 @@ StateBufferBorder* __fastcall LoadBufferImage(LPSTR resourceId)
 
 VOID OpenDrawSurface::DrawBorders(VOID* data, DWORD width, DWORD height)
 {
+	if (!config.borders.allowed)
+		return;
+
 	BOOL wide = config.battle.active && config.battle.wide;
 
 	StateBufferBorder** lpBuffer = (StateBufferBorder**)(!wide ? &this->secondaryBuffer : &this->backBuffer);

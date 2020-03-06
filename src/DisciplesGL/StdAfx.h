@@ -79,6 +79,7 @@ extern "C"
 #define MemoryChar(block, ch, length) memchr(block, ch, length)
 #define MathCeil(x) ceil(x)
 #define MathFloor(x) floor(x)
+#define MathPower(a, b) pow(a, b)
 #define StrPrint(buf, fmt, ...) sprintf(buf, fmt, __VA_ARGS__)
 #define StrPrintVar(buf, fmt, va) vsprintf(buf, fmt, va)
 #define StrLength(str) strlen(str)

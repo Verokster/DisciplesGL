@@ -24,11 +24,13 @@
 
 uniform sampler2D tex01;
 uniform vec2 texSize;
-uniform vec3 minLevel;
-uniform vec3 maxLevel;
-uniform vec3 gamma;
-uniform float saturation;
-uniform float hueShift;
+uniform float hue;
+uniform float sat;
+uniform vec4 in_left;
+uniform vec4 in_right;
+uniform vec4 gamma;
+uniform vec4 out_left;
+uniform vec4 out_right;
 
 #if __VERSION__ >= 130
 	#define COMPAT_IN in
@@ -53,32 +55,40 @@ vec4 hermite(sampler2D tex, vec2 coord)
 	return COMPAT_TEXTURE(tex, uv / texSize);
 }
 
-vec3 levels(vec3 color, vec3 minInput, vec3 maxInput, vec3 adjustment)
+vec3 satHue(vec3 color)
 {
-	return pow(min(max(color - minInput, vec3(0.0)) / (maxInput - minInput), vec3(1.0)), vec3(1.0 / adjustment));
+	const mat3 mrgb = mat3(	  1.0,    1.0,    1.0,
+							0.956, -0.272, -1.107,
+							0.621, -0.647,  1.705 );
+
+	const mat3 myiq = mat3(	0.299,  0.596,  0.211,
+							0.587, -0.274, -0.523,
+							0.114, -0.321,  0.311 );
+
+	float su = sat * cos(hue);
+	float sw = sat * sin(hue);
+
+	mat3 mhsv = mat3(1.0, 0.0,  0.0,
+					 0.0, su, sw,
+					 0.0, -sw,  su );
+
+	return mrgb * mhsv * myiq * color;
 }
 
-vec3 adjustSaturation(vec3 color, float adjustment)
+vec3 levels(vec3 color)
 {
-    const vec3 W = vec3(0.2125, 0.7154, 0.0721);
-    vec3 intensity = vec3(dot(color, W));
-    return mix(intensity, color, adjustment);
-}
+	color = clamp((color - in_left.rgb) / (in_right.rgb - in_left.rgb), 0.0, 1.0);
+	color = pow(color, gamma.rgb);
+	color = clamp(color * (out_right.rgb - out_left.rgb) + out_left.rgb, 0.0, 1.0);
 
-vec3 shiftHue(vec3 color, float adjustment)
-{
-    vec3 P = vec3(0.55735) * dot(vec3(0.55735), color);
-    vec3 U = color - P;
-    vec3 V = cross(vec3(0.55735), U);    
-    return U * cos(adjustment * 6.2832) + V * sin(adjustment * 6.2832) + P;
+	color = clamp((color - in_left.aaa) / (in_right.aaa - in_left.aaa), 0.0, 1.0);
+	color = pow(color, gamma.aaa);
+	return clamp(color * (out_right.aaa - out_left.aaa) + out_left.aaa, 0.0, 1.0);
 }
 
 void main() {
 	vec3 color = hermite(tex01, fTex).rgb;
 
-	color = levels(color, minLevel, maxLevel, gamma);
-	color = adjustSaturation(color, saturation);
-	color = shiftHue(color, hueShift);
-
-	FRAG_COLOR = vec4(color, 1.0);
+	color = satHue(color);
+	FRAG_COLOR = vec4(levels(color), 1.0);
 }

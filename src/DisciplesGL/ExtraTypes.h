@@ -123,17 +123,29 @@ enum FpsState
 	FpsBenchmark
 };
 
-struct Uniform {
-	GLint location;
-	DWORD value;
+union Levels
+{
+	struct {
+		FLOAT rgb;
+		FLOAT red;
+		FLOAT green;
+		FLOAT blue;
+	};
+	FLOAT chanel[4];
 };
 
-struct ShaderProgram {
-	GLuint id;
-	const CHAR* version;
-	DWORD vertexName;
-	DWORD fragmentName;
-	Uniform texSize;
+struct Adjustment {
+	FLOAT hueShift;
+	FLOAT saturation;
+	struct {
+		Levels left;
+		Levels right;
+	} input;
+	Levels gamma;
+	struct {
+		Levels left;
+		Levels right;
+	} output;
 };
 
 enum ImageType
@@ -153,6 +165,13 @@ enum BordersType
 	BordersNone = 0,
 	BordersClassic = 1,
 	BordersAlternative = 2
+};
+
+enum UpdateMode
+{
+	UpdateNone = 0,
+	UpdateCPP = 1,
+	UpdateASM = 2
 };
 
 struct ConfigItems {
@@ -181,6 +200,7 @@ struct ConfigItems {
 	POINT randPos;
 
 	BOOL drawEnabled;
+	UpdateMode updateMode;
 
 	struct {
 		BOOL fast;
@@ -258,7 +278,7 @@ struct ConfigItems {
 		DWORD count;
 		LCID* list;
 	} locales;
-	
+
 	struct {
 		ImageType type;
 		DWORD level;
@@ -294,15 +314,7 @@ struct ConfigItems {
 		BYTE snapshot;
 	} keys;
 
-	struct {
-		struct {
-			Level min;
-			Level max;
-			Level gamma;
-		} levels;
-		FLOAT hueShift;
-		FLOAT saturation;
-	} adjust;
+	Adjustment colors;
 
 	BOOL isExist;
 	CHAR file[MAX_PATH];
@@ -334,7 +346,8 @@ struct WinMessage {
 	CHAR* name;
 };
 
-enum SnapshotType {
+enum SnapshotType
+{
 	SnapshotNone = 0,
 	SnapshotFile,
 	SnapshotClipboard,
@@ -351,6 +364,7 @@ enum MenuType
 	MenuUpscale,
 	MenuResolution,
 	MenuSpeed,
+	MenuColors,
 	MenuBorders,
 	MenuBackground,
 	MenuStretch,
@@ -388,4 +402,33 @@ struct TimeScale {
 struct GdiObject {
 	HBITMAP hBmp;
 	VOID* data;
+};
+
+union LevelColors
+{
+	struct {
+		DWORD red;
+		DWORD green;
+		DWORD blue;
+	};
+	DWORD chanel[3];
+};
+
+union LevelColorsFloat
+{
+	struct {
+		FLOAT red;
+		FLOAT green;
+		FLOAT blue;
+	};
+	FLOAT chanel[3];
+};
+
+struct LevelsData {
+	HDC hDc;
+	HBITMAP hBmp;
+	DWORD* data;
+	LevelColorsFloat* colors;
+	FLOAT delta;
+	Adjustment values;
 };

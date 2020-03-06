@@ -99,7 +99,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -145,7 +145,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -203,6 +203,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <ControlFlowGuard>false</ControlFlowGuard>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile />
     <Link>
@@ -252,6 +253,7 @@
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="PixelBuffer.cpp" />
     <ClCompile Include="PngLib.cpp" />
+    <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="StateBuffer.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 2|Win32'">Create</PrecompiledHeader>
@@ -283,6 +285,7 @@
     <ClInclude Include="PixelBuffer.h" />
     <ClInclude Include="PngLib.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="StateBuffer.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Window.h" />

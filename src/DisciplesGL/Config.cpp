@@ -73,6 +73,37 @@ const Resolution resolutionsList[] = {
 	7680, 4320
 };
 
+Adjustment activeColors;
+const Adjustment inactiveColors = {
+	0.5f,
+	0.0f,
+
+	0.0f,
+	0.15200001f,
+	0.0700000003f,
+	0.0f,
+
+	1.0f,
+	1.0f,
+	1.0f,
+	1.0f,
+
+	0.5f,
+	0.604000032f,
+	0.539000034f,
+	0.478000015f,
+
+	0.0430000015f,
+	0.0f,
+	0.0f,
+	0.0f,
+
+	1.0f,
+	1.0f,
+	1.0f,
+	1.0f
+};
+
 namespace Config
 {
 	BOOL __stdcall EnumLocalesCount(LPTSTR lpLocaleString)
@@ -233,7 +264,7 @@ namespace Config
 				BOOL value = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
 
 				config.borders.type = value ? BordersClassic : BordersNone;
-				Config::Set(CONFIG_WRAPPER, "Borders", (INT)&config.borders.type);
+				Config::Set(CONFIG_WRAPPER, "Borders", *(INT*)&config.borders.type);
 
 				config.background.enabled = value;
 				Config::Set(CONFIG_WRAPPER, "Background", config.background.enabled);
@@ -306,35 +337,59 @@ namespace Config
 			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 			Config::Set(CONFIG_WRAPPER, "MessageTimeout", config.msgTimeScale.time);
 
+			config.updateMode = UpdateCPP;
+			Config::Set(CONFIG_WRAPPER, "UpdateMode", (INT)config.updateMode);
+
 			config.ai.fast = FALSE;
 			Config::Set(CONFIG_WRAPPER, "FastAI", config.ai.fast);
 
-			config.adjust.levels.min.r = 0.0f;
-			config.adjust.levels.min.g = 0.0f;
-			config.adjust.levels.min.b = 0.0f;
-			Config::Set(CONFIG_WRAPPER, "MinRed", 0);
-			Config::Set(CONFIG_WRAPPER, "MinGreen", 0);
-			Config::Set(CONFIG_WRAPPER, "MinBlue", 0);
+			config.colors.hueShift = 0.5f;
+			config.colors.saturation = 0.5f;
+			Config::Set(CONFIG_WRAPPER, "HueSat", 0x01F401F4);
 
-			config.adjust.levels.max.r = 1.0f;
-			config.adjust.levels.max.g = 1.0f;
-			config.adjust.levels.max.b = 1.0f;
-			Config::Set(CONFIG_WRAPPER, "MaxRed", 255);
-			Config::Set(CONFIG_WRAPPER, "MaxGreen", 255);
-			Config::Set(CONFIG_WRAPPER, "MaxBlue", 255);
+			config.colors.input.left.rgb = 0.0f;
+			config.colors.input.right.rgb = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "RgbInput", 0x03E80000);
 
-			config.adjust.levels.gamma.r = 1.0f;
-			config.adjust.levels.gamma.g = 1.0f;
-			config.adjust.levels.gamma.b = 1.0f;
-			Config::Set(CONFIG_WRAPPER, "GammaRed", 100);
-			Config::Set(CONFIG_WRAPPER, "GammaGreen", 100);
-			Config::Set(CONFIG_WRAPPER, "GammaBlue", 100);
+			config.colors.input.left.red = 0.0f;
+			config.colors.input.right.red = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "RedInput", 0x03E80000);
 
-			config.adjust.saturation = 1.0f;
-			Config::Set(CONFIG_WRAPPER, "Saturation", 100);
+			config.colors.input.left.green = 0.0f;
+			config.colors.input.right.green = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "GreenInput", 0x03E80000);
 
-			config.adjust.hueShift = 0.0f;
-			Config::Set(CONFIG_WRAPPER, "HueShift", 0);
+			config.colors.input.left.blue = 0.0f;
+			config.colors.input.right.blue = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "BlueInput", 0x03E80000);
+
+			config.colors.gamma.rgb = 0.5f;
+			Config::Set(CONFIG_WRAPPER, "RgbGamma", 500);
+
+			config.colors.gamma.red = 0.5f;
+			Config::Set(CONFIG_WRAPPER, "RedGamma", 500);
+
+			config.colors.gamma.green = 0.5f;
+			Config::Set(CONFIG_WRAPPER, "GreenGamma", 500);
+
+			config.colors.gamma.blue = 0.5f;
+			Config::Set(CONFIG_WRAPPER, "BlueGamma", 500);
+
+			config.colors.output.left.rgb = 0.0f;
+			config.colors.output.right.rgb = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "RgbOutput", 0x03E80000);
+
+			config.colors.output.left.red = 0.0f;
+			config.colors.output.right.red = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "RedOutput", 0x03E80000);
+
+			config.colors.output.left.green = 0.0f;
+			config.colors.output.right.green = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "GreenOutput", 0x03E80000);
+
+			config.colors.output.left.blue = 0.0f;
+			config.colors.output.right.blue = 1.0f;
+			Config::Set(CONFIG_WRAPPER, "BlueOutput", 0x03E80000);
 		}
 		else
 		{
@@ -506,116 +561,116 @@ namespace Config
 			config.msgTimeScale.time = *(DWORD*)&value;
 			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 
+			config.updateMode = (UpdateMode)Config::Get(CONFIG_WRAPPER, "UpdateMode", (INT)UpdateCPP);
+			if (config.updateMode < UpdateNone || config.updateMode > UpdateASM)
+				config.updateMode = UpdateCPP;
+
 			if (!config.isEditor)
 				config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
 
+			value = Config::Get(CONFIG_WRAPPER, "HueSat", 0x01F401F4);
+			config.colors.hueShift = 0.001f * min(1000, max(0, LOWORD(value)));
+			config.colors.saturation = 0.001f * min(1000, max(0, HIWORD(value)));
+
+			value = Config::Get(CONFIG_WRAPPER, "RgbInput", 0x03E80000);
+			if (LOWORD(value) < HIWORD(value))
 			{
-				value = Config::Get(CONFIG_WRAPPER, "MinRed", 0);
-				if (value < 0)
-					value = 0;
-				else if (value > 255)
-					value = 255;
-				config.adjust.levels.min.r = (FLOAT)value / 255.0f;
-
-				value = Config::Get(CONFIG_WRAPPER, "MinGreen", 0);
-				if (value < 0)
-					value = 0;
-				else if (value > 255)
-					value = 255;
-				config.adjust.levels.min.g = (FLOAT)value / 255.0f;
-
-				value = Config::Get(CONFIG_WRAPPER, "MinBlue", 0);
-				if (value < 0)
-					value = 0;
-				else if (value > 255)
-					value = 255;
-				config.adjust.levels.min.b = (FLOAT)value / 255.0f;
+				config.colors.input.left.rgb = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.input.right.rgb = 0.001f * min(1000, max(0, HIWORD(value)));
+			}
+			else
+			{
+				config.colors.input.left.rgb = 0.0f;
+				config.colors.input.right.rgb = 1.0f;
 			}
 
+			value = Config::Get(CONFIG_WRAPPER, "RedInput", 0x03E80000);
+			if (LOWORD(value) < HIWORD(value))
 			{
-				value = Config::Get(CONFIG_WRAPPER, "MaxRed", 255);
-				if (value < 0)
-					value = 0;
-				else if (value > 255)
-					value = 255;
-				config.adjust.levels.max.r = (FLOAT)value / 255.0f;
-
-				value = Config::Get(CONFIG_WRAPPER, "MaxGreen", 255);
-				if (value < 0)
-					value = 0;
-				else if (value > 255)
-					value = 255;
-				config.adjust.levels.max.g = (FLOAT)value / 255.0f;
-
-				value = Config::Get(CONFIG_WRAPPER, "MaxBlue", 255);
-				if (value < 0)
-					value = 0;
-				else if (value > 255)
-					value = 255;
-				config.adjust.levels.max.b = (FLOAT)value / 255.0f;
+				config.colors.input.left.red = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.input.right.red = 0.001f * min(1000, max(0, HIWORD(value)));
+			}
+			else
+			{
+				config.colors.input.left.red = 0.0f;
+				config.colors.input.right.red = 1.0f;
 			}
 
-			if (config.adjust.levels.min.r > config.adjust.levels.max.r)
+			value = Config::Get(CONFIG_WRAPPER, "GreenInput", 0x03E80000);
+			if (LOWORD(value) < HIWORD(value))
 			{
-				config.adjust.levels.min.r = 0.0f;
-				config.adjust.levels.max.r = 1.0f;
+				config.colors.input.left.green = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.input.right.green = 0.001f * min(1000, max(0, HIWORD(value)));
+			}
+			else
+			{
+				config.colors.input.left.green = 0.0f;
+				config.colors.input.right.green = 1.0f;
 			}
 
-			if (config.adjust.levels.min.g > config.adjust.levels.max.g)
+			value = Config::Get(CONFIG_WRAPPER, "BlueInput", 0x03E80000);
+			if (LOWORD(value) < HIWORD(value))
 			{
-				config.adjust.levels.min.g = 0.0f;
-				config.adjust.levels.max.g = 1.0f;
+				config.colors.input.left.blue = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.input.right.blue = 0.001f * min(1000, max(0, HIWORD(value)));
+			}
+			else
+			{
+				config.colors.input.left.blue = 0.0f;
+				config.colors.input.right.blue = 1.0f;
 			}
 
-			if (config.adjust.levels.min.b > config.adjust.levels.max.b)
+			config.colors.gamma.rgb = 0.001f * min(1000, max(0, Config::Get(CONFIG_WRAPPER, "RgbGamma", 500)));
+			config.colors.gamma.red = 0.001f * min(1000, max(0, Config::Get(CONFIG_WRAPPER, "RedGamma", 500)));
+			config.colors.gamma.green = 0.001f * min(1000, max(0, Config::Get(CONFIG_WRAPPER, "GreenGamma", 500)));
+			config.colors.gamma.blue = 0.001f * min(1000, max(0, Config::Get(CONFIG_WRAPPER, "BlueGamma", 500)));
+
+			value = Config::Get(CONFIG_WRAPPER, "RgbOutput", 0x03E80000);
+			if (LOWORD(value) < HIWORD(value))
 			{
-				config.adjust.levels.min.b = 0.0f;
-				config.adjust.levels.max.b = 1.0f;
+				config.colors.output.left.rgb = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.output.right.rgb = 0.001f * min(1000, max(0, HIWORD(value)));
+			}
+			else
+			{
+				config.colors.output.left.rgb = 0.0f;
+				config.colors.output.right.rgb = 1.0f;
 			}
 
+			value = Config::Get(CONFIG_WRAPPER, "RedOutput", 0x03E80000);
+			if (LOWORD(value) < HIWORD(value))
 			{
-				value = Config::Get(CONFIG_WRAPPER, "GammaRed", 100);
-				if (value < 1)
-					value = 1;
-				else if (value > 999)
-					value = 999;
-				config.adjust.levels.gamma.r = 0.01f * value;
-
-				value = Config::Get(CONFIG_WRAPPER, "GammaGreen", 100);
-				if (value < 1)
-					value = 1;
-				else if (value > 999)
-					value = 999;
-				config.adjust.levels.gamma.g = 0.01f * value;
-
-				value = Config::Get(CONFIG_WRAPPER, "GammaBlue", 100);
-				if (value < 1)
-					value = 1;
-				else if (value > 999)
-					value = 999;
-				config.adjust.levels.gamma.b = 0.01f * value;
+				config.colors.output.left.red = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.output.right.red = 0.001f * min(1000, max(0, HIWORD(value)));
+			}
+			else
+			{
+				config.colors.output.left.red = 0.0f;
+				config.colors.output.right.red = 1.0f;
 			}
 
+			value = Config::Get(CONFIG_WRAPPER, "GreenOutput", 0x03E80000);
+			if (LOWORD(value) < HIWORD(value))
 			{
-				value = Config::Get(CONFIG_WRAPPER, "Saturation", 100);
-				if (value < 0)
-					value = 0;
-				else if (value > 1000)
-					value = 1000;
-				config.adjust.saturation = 0.01f * value;
+				config.colors.output.left.green = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.output.right.green = 0.001f * min(1000, max(0, HIWORD(value)));
+			}
+			else
+			{
+				config.colors.output.left.green = 0.0f;
+				config.colors.output.right.green = 1.0f;
 			}
 
+			value = Config::Get(CONFIG_WRAPPER, "BlueOutput", 0x03E80000);
+			if (LOWORD(value) < HIWORD(value))
 			{
-				value = Config::Get(CONFIG_WRAPPER, "HueShift", 0);
-				if (value < -180)
-					value = -180;
-				else if (value > 180)
-					value = 180;
-
-				if (value < 0)
-					value += 360;
-
-				config.adjust.hueShift = (FLOAT)value / 360.0f;
+				config.colors.output.left.blue = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.output.right.blue = 0.001f * min(1000, max(0, HIWORD(value)));
+			}
+			else
+			{
+				config.colors.output.left.blue = 0.0f;
+				config.colors.output.right.blue = 1.0f;
 			}
 		}
 

@@ -50,6 +50,9 @@ extern ConfigItems config;
 extern DisplayMode modesList[4];
 extern const Resolution resolutionsList[28];
 
+extern Adjustment activeColors;
+extern const Adjustment inactiveColors;
+
 namespace Config
 {
 	BOOL __fastcall Load();

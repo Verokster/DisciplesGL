@@ -32,6 +32,7 @@
 #include "Hooks.h"
 #include "PngLib.h"
 #include "Wingdi.h"
+#include "ShaderProgram.h"
 
 DWORD __fastcall GetPow2(DWORD value)
 {
@@ -57,75 +58,6 @@ VOID __fastcall GLBindTexParameter(GLuint textureId, GLint filter)
 	GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 	GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 	GLTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-}
-
-VOID __fastcall UseShaderProgram(ShaderProgram* program, DWORD texSize)
-{
-	if (!program->id)
-	{
-		program->id = GLCreateProgram();
-
-		GLBindAttribLocation(program->id, 0, "vCoord");
-		GLBindAttribLocation(program->id, 1, "vTex");
-
-		GLuint vShader = GL::CompileShaderSource(program->vertexName, program->version, GL_VERTEX_SHADER);
-		GLuint fShader = GL::CompileShaderSource(program->fragmentName, program->version, GL_FRAGMENT_SHADER);
-		{
-			GLAttachShader(program->id, vShader);
-			GLAttachShader(program->id, fShader);
-			{
-				GLLinkProgram(program->id);
-			}
-			GLDetachShader(program->id, fShader);
-			GLDetachShader(program->id, vShader);
-		}
-		GLDeleteShader(fShader);
-		GLDeleteShader(vShader);
-
-		GLUseProgram(program->id);
-
-		GLUniform1i(GLGetUniformLocation(program->id, "tex01"), 0);
-		GLint loc = GLGetUniformLocation(program->id, "tex02");
-		if (loc >= 0)
-			GLUniform1i(loc, 1);
-
-		loc = GLGetUniformLocation(program->id, "minLevel");
-		if (loc >= 0)
-			GLUniform3f(loc, config.adjust.levels.min.r, config.adjust.levels.min.g, config.adjust.levels.min.b);
-
-		loc = GLGetUniformLocation(program->id, "maxLevel");
-		if (loc >= 0)
-			GLUniform3f(loc, config.adjust.levels.max.r, config.adjust.levels.max.g, config.adjust.levels.max.b);
-
-		loc = GLGetUniformLocation(program->id, "gamma");
-		if (loc >= 0)
-			GLUniform3f(loc, config.adjust.levels.gamma.r, config.adjust.levels.gamma.g, config.adjust.levels.gamma.b);
-
-		loc = GLGetUniformLocation(program->id, "saturation");
-		if (loc >= 0)
-			GLUniform1f(loc, config.adjust.saturation);
-
-		loc = GLGetUniformLocation(program->id, "hueShift");
-		if (loc >= 0)
-			GLUniform1f(loc, config.adjust.hueShift);
-
-		program->texSize.location = GLGetUniformLocation(program->id, "texSize");
-		if (program->texSize.location >= 0)
-		{
-			program->texSize.value = texSize;
-			GLUniform2f(program->texSize.location, (FLOAT)LOWORD(texSize), (FLOAT)HIWORD(texSize));
-		}
-	}
-	else
-	{
-		GLUseProgram(program->id);
-
-		if (program->texSize.location >= 0 && program->texSize.value != texSize)
-		{
-			program->texSize.value = texSize;
-			GLUniform2f(program->texSize.location, (FLOAT)LOWORD(texSize), (FLOAT)HIWORD(texSize));
-		}
-	}
 }
 
 VOID OpenDraw::ReadFrameBufer(BYTE* dstData, DWORD pitch, BOOL isBGR)
@@ -292,8 +224,7 @@ VOID OpenDraw::TakeSnapshot(Size* size, VOID* stateData, BOOL isTrueColor)
 	switch (this->isTakeSnapshot)
 	{
 	case SnapshotClipboard:
-	case SnapshotSurfaceClipboard:
-	{
+	case SnapshotSurfaceClipboard: {
 		if (OpenClipboard(NULL))
 		{
 			EmptyClipboard();
@@ -340,8 +271,7 @@ VOID OpenDraw::TakeSnapshot(Size* size, VOID* stateData, BOOL isTrueColor)
 	break;
 
 	case SnapshotFile:
-	case SnapshotSurfaceFile:
-	{
+	case SnapshotSurfaceFile: {
 		CHAR path[MAX_PATH];
 		GetModuleFileName(NULL, path, sizeof(path));
 		CHAR* ptr = StrLastChar(path, '\\');
@@ -780,24 +710,33 @@ VOID OpenDraw::RenderOld()
 					}
 
 					Size* frameSize = &stateBuffer->size;
-					if (stateBuffer->isReady || this->viewport.refresh && frameSize->width && frameSize->height)
+					BOOL ready = stateBuffer->isReady;
+					BOOL force = this->viewport.refresh && frameSize->width && frameSize->height;
+					if (ready || force)
 					{
-						this->bufferIndex = !this->bufferIndex;
+						if (force)
+							pixelBuffer->Reset();
 
-						lpStateBuffer = (StateBufferAligned**)&(this->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer);
-						stateBuffer = *lpStateBuffer;
-
-						if (!stateBuffer)
+						if (ready)
 						{
-							Sleep(0);
-							continue;
-						}
+							this->bufferIndex = !this->bufferIndex;
 
-						stateBuffer->isReady = FALSE;
-						surface->drawEnabled = TRUE;
+							lpStateBuffer = (StateBufferAligned**)&(this->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer);
+							stateBuffer = *lpStateBuffer;
+							if (!stateBuffer)
+							{
+								Sleep(0);
+								continue;
+							}
+
+							stateBuffer->isReady = FALSE;
+							surface->drawEnabled = TRUE;
+						}
+						else
+							stateBuffer->isReady = FALSE;
 
 						FilterState state = this->filterState;
-						if (pixelBuffer->Update(lpStateBuffer, frameCount != 1 || convert) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+						if (pixelBuffer->Update(lpStateBuffer, ready, frameCount != 1 || convert) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 						{
 							if (isVSync != config.image.vSync)
 							{
@@ -1008,19 +947,19 @@ VOID OpenDraw::RenderMid()
 	DWORD texSize = (maxTexSize & 0xFFFF) | (maxTexSize << 16);
 
 	struct {
-		ShaderProgram linear;
-		ShaderProgram linear_double;
-		ShaderProgram hermite;
-		ShaderProgram hermite_double;
-		ShaderProgram cubic;
-		ShaderProgram cubic_double;
+		ShaderProgram* linear;
+		ShaderProgram* linear_double;
+		ShaderProgram* hermite;
+		ShaderProgram* hermite_double;
+		ShaderProgram* cubic;
+		ShaderProgram* cubic_double;
 	} shaders = {
-		{ 0, GLSL_VER_1_10, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT },
-		{ 0, GLSL_VER_1_10, IDR_LINEAR_VERTEX_DOUBLE, IDR_LINEAR_FRAGMENT_DOUBLE },
-		{ 0, GLSL_VER_1_10, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT },
-		{ 0, GLSL_VER_1_10, IDR_HERMITE_VERTEX_DOUBLE, IDR_HERMITE_FRAGMENT_DOUBLE },
-		{ 0, GLSL_VER_1_10, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT },
-		{ 0, GLSL_VER_1_10, IDR_CUBIC_VERTEX_DOUBLE, IDR_CUBIC_FRAGMENT_DOUBLE }
+		new ShaderProgram(GLSL_VER_1_10, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT),
+		new ShaderProgram(GLSL_VER_1_10, IDR_LINEAR_VERTEX_DOUBLE, IDR_LINEAR_FRAGMENT_DOUBLE),
+		new ShaderProgram(GLSL_VER_1_10, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT),
+		new ShaderProgram(GLSL_VER_1_10, IDR_HERMITE_VERTEX_DOUBLE, IDR_HERMITE_FRAGMENT_DOUBLE),
+		new ShaderProgram(GLSL_VER_1_10, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT),
+		new ShaderProgram(GLSL_VER_1_10, IDR_CUBIC_VERTEX_DOUBLE, IDR_CUBIC_FRAGMENT_DOUBLE)
 	};
 
 	{
@@ -1084,7 +1023,7 @@ VOID OpenDraw::RenderMid()
 					{
 						GLActiveTexture(GL_TEXTURE1);
 						GLBindTexParameter(textureId.back, GL_LINEAR);
-						
+
 						DWORD length = config.mode->width * config.mode->height * sizeof(DWORD);
 						VOID* tempBuffer = MemoryAlloc(length);
 						{
@@ -1109,6 +1048,8 @@ VOID OpenDraw::RenderMid()
 					PixelBuffer* pixelBuffer = new PixelBuffer(isTrueColor);
 					{
 						GLClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+						ShaderProgram* program = NULL;
 
 						BOOL borderStatus = FALSE;
 						BOOL backStatus = FALSE;
@@ -1136,23 +1077,34 @@ VOID OpenDraw::RenderMid()
 							}
 
 							Size* frameSize = &stateBuffer->size;
-							if (stateBuffer->isReady || this->viewport.refresh && frameSize->width && frameSize->height)
+
+							BOOL ready = stateBuffer->isReady;
+							BOOL force = program && program->Check() || this->viewport.refresh && frameSize->width && frameSize->height;
+							if (ready || force)
 							{
-								this->bufferIndex = !this->bufferIndex;
+								if (force)
+									pixelBuffer->Reset();
 
-								lpStateBuffer = (StateBufferAligned**)&(this->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer);
-								stateBuffer = *lpStateBuffer;
-								if (!stateBuffer)
+								if (ready)
 								{
-									Sleep(0);
-									continue;
-								}
+									this->bufferIndex = !this->bufferIndex;
 
-								stateBuffer->isReady = FALSE;
-								surface->drawEnabled = TRUE;
+									lpStateBuffer = (StateBufferAligned**)&(this->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer);
+									stateBuffer = *lpStateBuffer;
+									if (!stateBuffer)
+									{
+										Sleep(0);
+										continue;
+									}
+
+									stateBuffer->isReady = FALSE;
+									surface->drawEnabled = TRUE;
+								}
+								else
+									stateBuffer->isReady = FALSE;
 
 								FilterState state = this->filterState;
-								if (pixelBuffer->Update(lpStateBuffer) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack || fpsState == FpsBenchmark)
+								if (pixelBuffer->Update(lpStateBuffer, ready) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack || fpsState == FpsBenchmark)
 								{
 									if (isVSync != config.image.vSync)
 									{
@@ -1166,20 +1118,19 @@ VOID OpenDraw::RenderMid()
 
 									if (state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 									{
-										ShaderProgram* program;
 										switch (state.interpolation)
 										{
 										case InterpolateHermite:
-											program = stateBuffer->isBack ? &shaders.hermite_double : &shaders.hermite;
+											program = stateBuffer->isBack ? shaders.hermite_double : shaders.hermite;
 											break;
 										case InterpolateCubic:
-											program = stateBuffer->isBack ? &shaders.cubic_double : &shaders.cubic;
+											program = stateBuffer->isBack ? shaders.cubic_double : shaders.cubic;
 											break;
 										default:
-											program = stateBuffer->isBack ? &shaders.linear_double : &shaders.linear;
+											program = stateBuffer->isBack ? shaders.linear_double : shaders.linear;
 											break;
 										}
-										UseShaderProgram(program, texSize);
+										program->Use(texSize);
 
 										if (state.flags || backStatus != stateBuffer->isBack)
 										{
@@ -1245,15 +1196,11 @@ VOID OpenDraw::RenderMid()
 	}
 	GLUseProgram(NULL);
 
-	ShaderProgram* shaderProgram = (ShaderProgram*)&shaders;
-	DWORD count = sizeof(shaders) / sizeof(ShaderProgram);
+	ShaderProgram** shader = (ShaderProgram**)&shaders;
+	DWORD count = sizeof(shaders) / sizeof(ShaderProgram*);
 	do
-	{
-		if (shaderProgram->id)
-			GLDeleteProgram(shaderProgram->id);
-
-		++shaderProgram;
-	} while (--count);
+		(*(shader++))->Release();
+	while (--count);
 }
 
 VOID OpenDraw::RenderNew()
@@ -1272,41 +1219,41 @@ VOID OpenDraw::RenderNew()
 	const CHAR* xbrzVersion = config.bpp32Hooked ? GLSL_VER_1_30_ALPHA : GLSL_VER_1_30;
 
 	struct {
-		ShaderProgram linear;
-		ShaderProgram linear_double;
-		ShaderProgram hermite;
-		ShaderProgram hermite_double;
-		ShaderProgram cubic;
-		ShaderProgram cubic_double;
-		ShaderProgram xBRz_2x;
-		ShaderProgram xBRz_3x;
-		ShaderProgram xBRz_4x;
-		ShaderProgram xBRz_5x;
-		ShaderProgram xBRz_6x;
-		ShaderProgram scaleHQ_2x;
-		ShaderProgram scaleHQ_4x;
-		ShaderProgram xSal_2x;
-		ShaderProgram eagle_2x;
-		ShaderProgram scaleNx_2x;
-		ShaderProgram scaleNx_3x;
+		ShaderProgram* linear;
+		ShaderProgram* linear_double;
+		ShaderProgram* hermite;
+		ShaderProgram* hermite_double;
+		ShaderProgram* cubic;
+		ShaderProgram* cubic_double;
+		ShaderProgram* xBRz_2x;
+		ShaderProgram* xBRz_3x;
+		ShaderProgram* xBRz_4x;
+		ShaderProgram* xBRz_5x;
+		ShaderProgram* xBRz_6x;
+		ShaderProgram* scaleHQ_2x;
+		ShaderProgram* scaleHQ_4x;
+		ShaderProgram* xSal_2x;
+		ShaderProgram* eagle_2x;
+		ShaderProgram* scaleNx_2x;
+		ShaderProgram* scaleNx_3x;
 	} shaders = {
-		{ 0, GLSL_VER_1_30, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT },
-		{ 0, GLSL_VER_1_30, IDR_LINEAR_VERTEX_DOUBLE, IDR_LINEAR_FRAGMENT_DOUBLE },
-		{ 0, GLSL_VER_1_30, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT },
-		{ 0, GLSL_VER_1_30, IDR_HERMITE_VERTEX_DOUBLE, IDR_HERMITE_FRAGMENT_DOUBLE },
-		{ 0, GLSL_VER_1_30, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT },
-		{ 0, GLSL_VER_1_30, IDR_CUBIC_VERTEX_DOUBLE, IDR_CUBIC_FRAGMENT_DOUBLE },
-		{ 0, xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_2X },
-		{ 0, xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_3X },
-		{ 0, xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_4X },
-		{ 0, xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_5X },
-		{ 0, xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_6X },
-		{ 0, GLSL_VER_1_30, IDR_SCALEHQ_VERTEX_2X, IDR_SCALEHQ_FRAGMENT_2X },
-		{ 0, GLSL_VER_1_30, IDR_SCALEHQ_VERTEX_4X, IDR_SCALEHQ_FRAGMENT_4X },
-		{ 0, GLSL_VER_1_30, IDR_XSAL_VERTEX, IDR_XSAL_FRAGMENT },
-		{ 0, GLSL_VER_1_30, IDR_EAGLE_VERTEX, IDR_EAGLE_FRAGMENT },
-		{ 0, GLSL_VER_1_30, IDR_SCALENX_VERTEX_2X, IDR_SCALENX_FRAGMENT_2X },
-		{ 0, GLSL_VER_1_30, IDR_SCALENX_VERTEX_3X, IDR_SCALENX_FRAGMENT_3X }
+		new ShaderProgram(GLSL_VER_1_30, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT),
+		new ShaderProgram(GLSL_VER_1_30, IDR_LINEAR_VERTEX_DOUBLE, IDR_LINEAR_FRAGMENT_DOUBLE),
+		new ShaderProgram(GLSL_VER_1_30, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT),
+		new ShaderProgram(GLSL_VER_1_30, IDR_HERMITE_VERTEX_DOUBLE, IDR_HERMITE_FRAGMENT_DOUBLE),
+		new ShaderProgram(GLSL_VER_1_30, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT),
+		new ShaderProgram(GLSL_VER_1_30, IDR_CUBIC_VERTEX_DOUBLE, IDR_CUBIC_FRAGMENT_DOUBLE),
+		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_2X),
+		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_3X),
+		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_4X),
+		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_5X),
+		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_6X),
+		new ShaderProgram(GLSL_VER_1_30, IDR_SCALEHQ_VERTEX_2X, IDR_SCALEHQ_FRAGMENT_2X),
+		new ShaderProgram(GLSL_VER_1_30, IDR_SCALEHQ_VERTEX_4X, IDR_SCALEHQ_FRAGMENT_4X),
+		new ShaderProgram(GLSL_VER_1_30, IDR_XSAL_VERTEX, IDR_XSAL_FRAGMENT),
+		new ShaderProgram(GLSL_VER_1_30, IDR_EAGLE_VERTEX, IDR_EAGLE_FRAGMENT),
+		new ShaderProgram(GLSL_VER_1_30, IDR_SCALENX_VERTEX_2X, IDR_SCALENX_FRAGMENT_2X),
+		new ShaderProgram(GLSL_VER_1_30, IDR_SCALENX_VERTEX_3X, IDR_SCALENX_FRAGMENT_3X)
 	};
 
 	{
@@ -1353,8 +1300,7 @@ VOID OpenDraw::RenderNew()
 								}
 							}
 
-							GLBufferData(GL_ARRAY_BUFFER, sizeof(buffer) << 1, buffer, GL_STATIC_DRAW);
-
+							GLBufferData(GL_ARRAY_BUFFER, sizeof(buffer) << 1, NULL, GL_STATIC_DRAW);
 							GLBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(buffer) >> 1, buffer);
 							GLBufferSubData(GL_ARRAY_BUFFER, sizeof(buffer) >> 1, sizeof(buffer) >> 1, buffer);
 							GLBufferSubData(GL_ARRAY_BUFFER, sizeof(buffer), sizeof(buffer) >> 1, &buffer[4]);
@@ -1418,6 +1364,7 @@ VOID OpenDraw::RenderNew()
 								BOOL zoomStatus = FALSE;
 								BOOL borderStatus = FALSE;
 								BOOL backStatus = FALSE;
+								ShaderProgram* program = NULL;
 								ShaderProgram* upscaleProgram;
 								Size zoomSize = { 0, 0 };
 								Size zoomFbSize = { 0, 0 };
@@ -1446,20 +1393,30 @@ VOID OpenDraw::RenderNew()
 									}
 
 									Size* frameSize = &stateBuffer->size;
-									if (stateBuffer->isReady || this->viewport.refresh && frameSize->width && frameSize->height)
+									BOOL ready = stateBuffer->isReady;
+									BOOL force = program && program->Check() || this->viewport.refresh && frameSize->width && frameSize->height;
+									if (ready || force)
 									{
-										this->bufferIndex = !this->bufferIndex;
+										if (force)
+											pixelBuffer->Reset();
 
-										lpStateBuffer = (StateBufferAligned**)&(this->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer);
-										stateBuffer = *lpStateBuffer;
-										if (!stateBuffer)
+										if (ready)
 										{
-											Sleep(0);
-											continue;
-										}
+											this->bufferIndex = !this->bufferIndex;
 
-										stateBuffer->isReady = FALSE;
-										surface->drawEnabled = TRUE;
+											lpStateBuffer = (StateBufferAligned**)&(this->bufferIndex ? surface->indexBuffer : surface->secondaryBuffer);
+											stateBuffer = *lpStateBuffer;
+											if (!stateBuffer)
+											{
+												Sleep(0);
+												continue;
+											}
+
+											stateBuffer->isReady = FALSE;
+											surface->drawEnabled = TRUE;
+										}
+										else
+											stateBuffer->isReady = FALSE;
 
 										FilterState state = this->filterState;
 										this->filterState.flags = FALSE;
@@ -1477,7 +1434,7 @@ VOID OpenDraw::RenderNew()
 											if (state.flags && newSize != viewSize)
 												pixelBuffer->Reset();
 
-											if (pixelBuffer->Update(lpStateBuffer, TRUE) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+											if (pixelBuffer->Update(lpStateBuffer, ready, TRUE) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 											{
 												if (isVSync != config.image.vSync)
 												{
@@ -1506,10 +1463,10 @@ VOID OpenDraw::RenderNew()
 															switch (state.value)
 															{
 															case 3:
-																upscaleProgram = &shaders.scaleNx_3x;
+																upscaleProgram = shaders.scaleNx_3x;
 																break;
 															default:
-																upscaleProgram = &shaders.scaleNx_2x;
+																upscaleProgram = shaders.scaleNx_2x;
 																break;
 															}
 
@@ -1519,10 +1476,10 @@ VOID OpenDraw::RenderNew()
 															switch (state.value)
 															{
 															case 4:
-																upscaleProgram = &shaders.scaleHQ_4x;
+																upscaleProgram = shaders.scaleHQ_4x;
 																break;
 															default:
-																upscaleProgram = &shaders.scaleHQ_2x;
+																upscaleProgram = shaders.scaleHQ_2x;
 																break;
 															}
 
@@ -1532,31 +1489,31 @@ VOID OpenDraw::RenderNew()
 															switch (state.value)
 															{
 															case 6:
-																upscaleProgram = &shaders.xBRz_6x;
+																upscaleProgram = shaders.xBRz_6x;
 																break;
 															case 5:
-																upscaleProgram = &shaders.xBRz_5x;
+																upscaleProgram = shaders.xBRz_5x;
 																break;
 															case 4:
-																upscaleProgram = &shaders.xBRz_4x;
+																upscaleProgram = shaders.xBRz_4x;
 																break;
 															case 3:
-																upscaleProgram = &shaders.xBRz_3x;
+																upscaleProgram = shaders.xBRz_3x;
 																break;
 															default:
-																upscaleProgram = &shaders.xBRz_2x;
+																upscaleProgram = shaders.xBRz_2x;
 																break;
 															}
 
 															break;
 
 														case UpscaleXSal:
-															upscaleProgram = &shaders.xSal_2x;
+															upscaleProgram = shaders.xSal_2x;
 
 															break;
 
 														default:
-															upscaleProgram = &shaders.eagle_2x;
+															upscaleProgram = shaders.eagle_2x;
 
 															break;
 														}
@@ -1596,7 +1553,7 @@ VOID OpenDraw::RenderNew()
 															}
 														}
 
-														UseShaderProgram(upscaleProgram, texSize);
+														upscaleProgram->Use(texSize);
 
 														if (!config.version && config.resHooked)
 														{
@@ -1686,21 +1643,20 @@ VOID OpenDraw::RenderNew()
 												}
 												GLBindFramebuffer(GL_DRAW_FRAMEBUFFER, NULL);
 
-												ShaderProgram* program;
 												switch (state.interpolation)
 												{
 												case InterpolateHermite:
-													program = stateBuffer->isBack ? &shaders.hermite_double : &shaders.hermite;
+													program = stateBuffer->isBack ? shaders.hermite_double : shaders.hermite;
 													break;
 												case InterpolateCubic:
-													program = stateBuffer->isBack ? &shaders.cubic_double : &shaders.cubic;
+													program = stateBuffer->isBack ? shaders.cubic_double : shaders.cubic;
 													break;
 												default:
-													program = stateBuffer->isBack ? &shaders.linear_double : &shaders.linear;
+													program = stateBuffer->isBack ? shaders.linear_double : shaders.linear;
 													break;
 												}
 
-												UseShaderProgram(program, texSize);
+												program->Use(texSize);
 												{
 													GLClear(GL_COLOR_BUFFER_BIT);
 													GLViewport(this->viewport.rectangle.x, this->viewport.rectangle.y + this->viewport.offset, this->viewport.rectangle.width, this->viewport.rectangle.height);
@@ -1733,7 +1689,7 @@ VOID OpenDraw::RenderNew()
 													else
 														GLDrawArrays(GL_TRIANGLE_FAN, 8, 4);
 												}
-												UseShaderProgram(upscaleProgram, texSize);
+												upscaleProgram->Use(texSize);
 												isSwap = TRUE;
 											}
 										}
@@ -1763,7 +1719,7 @@ VOID OpenDraw::RenderNew()
 												GLBindTexFilter(textureId.primary, state.interpolation == InterpolateLinear || state.interpolation == InterpolateHermite ? GL_LINEAR : GL_NEAREST);
 											}
 
-											if (pixelBuffer->Update(lpStateBuffer) || state.flags || this->viewport.refresh || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+											if (pixelBuffer->Update(lpStateBuffer, ready) || state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 											{
 												if (isVSync != config.image.vSync)
 												{
@@ -1780,21 +1736,20 @@ VOID OpenDraw::RenderNew()
 
 												if (state.flags || borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 												{
-													ShaderProgram* program;
 													switch (state.interpolation)
 													{
 													case InterpolateHermite:
-														program = stateBuffer->isBack ? &shaders.hermite_double : &shaders.hermite;
+														program = stateBuffer->isBack ? shaders.hermite_double : shaders.hermite;
 														break;
 													case InterpolateCubic:
-														program = stateBuffer->isBack ? &shaders.cubic_double : &shaders.cubic;
+														program = stateBuffer->isBack ? shaders.cubic_double : shaders.cubic;
 														break;
 													default:
-														program = stateBuffer->isBack ? &shaders.linear_double : &shaders.linear;
+														program = stateBuffer->isBack ? shaders.linear_double : shaders.linear;
 														break;
 													}
 
-													UseShaderProgram(program, texSize);
+													program->Use(texSize);
 
 													if (state.flags || backStatus != stateBuffer->isBack)
 													{
@@ -1878,15 +1833,11 @@ VOID OpenDraw::RenderNew()
 	}
 	GLUseProgram(NULL);
 
-	ShaderProgram* shaderProgram = (ShaderProgram*)&shaders;
-	DWORD count = sizeof(shaders) / sizeof(ShaderProgram);
+	ShaderProgram** shader = (ShaderProgram**)&shaders;
+	DWORD count = sizeof(shaders) / sizeof(ShaderProgram*);
 	do
-	{
-		if (shaderProgram->id)
-			GLDeleteProgram(shaderProgram->id);
-
-		++shaderProgram;
-	} while (--count);
+		(*(shader++))->Release();
+	while (--count);
 }
 
 VOID OpenDraw::RenderGDI()
