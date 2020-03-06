@@ -711,8 +711,8 @@ VOID OpenDraw::RenderOld()
 
 					Size* frameSize = &stateBuffer->size;
 					BOOL ready = stateBuffer->isReady;
-					BOOL force = this->viewport.refresh && frameSize->width && frameSize->height;
-					if (ready || force)
+					BOOL force = this->viewport.refresh;
+					if ((ready || force) && frameSize->width && frameSize->height)
 					{
 						if (force)
 							pixelBuffer->Reset();
@@ -1077,10 +1077,9 @@ VOID OpenDraw::RenderMid()
 							}
 
 							Size* frameSize = &stateBuffer->size;
-
 							BOOL ready = stateBuffer->isReady;
-							BOOL force = (program && program->Check() || this->viewport.refresh) && frameSize->width && frameSize->height;
-							if (ready || force)
+							BOOL force = program && program->Check() || this->viewport.refresh;
+							if ((ready || force) && frameSize->width && frameSize->height)
 							{
 								if (force)
 									pixelBuffer->Reset();
@@ -1394,8 +1393,8 @@ VOID OpenDraw::RenderNew()
 
 									Size* frameSize = &stateBuffer->size;
 									BOOL ready = stateBuffer->isReady;
-									BOOL force = (program && program->Check() || this->viewport.refresh) && frameSize->width && frameSize->height;
-									if (ready || force)
+									BOOL force = program && program->Check() || this->viewport.refresh;
+									if ((ready || force) && frameSize->width && frameSize->height)
 									{
 										if (force)
 											pixelBuffer->Reset();
@@ -1851,12 +1850,18 @@ VOID OpenDraw::RenderGDI()
 		return;
 
 	Size* frameSize = &stateBuffer->size;
-	if (stateBuffer->isReady || this->viewport.refresh && frameSize->width && frameSize->height)
+	BOOL ready = stateBuffer->isReady;
+	if ((ready || this->viewport.refresh) && frameSize->width && frameSize->height)
 	{
-		this->bufferIndex = !this->bufferIndex;
+		if (ready)
+		{
+			this->bufferIndex = !this->bufferIndex;
 
-		stateBuffer->isReady = FALSE;
-		surface->drawEnabled = TRUE;
+			stateBuffer->isReady = FALSE;
+			surface->drawEnabled = TRUE;
+		}
+		else
+			stateBuffer->isReady = FALSE;
 
 		this->CheckView(FALSE);
 
@@ -1870,8 +1875,6 @@ VOID OpenDraw::RenderGDI()
 		if (stateBuffer->isBack)
 		{
 			BitBlt(this->gdi->hDc, 0, 0, config.mode->width, config.mode->height, this->gdi->hDcBack, 0, 0, SRCCOPY);
-
-			SetStretchBltMode(this->gdi->hDc, COLORONCOLOR);
 
 			BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
 			AlphaBlend(this->gdi->hDc, 0, 0, config.mode->width, config.mode->height, stateBuffer->hDc, (config.mode->width - stateBuffer->size.width) >> 1, (config.mode->height - stateBuffer->size.height) >> 1, stateBuffer->size.width, stateBuffer->size.height, blend);
@@ -2151,8 +2154,16 @@ BOOL OpenDraw::CheckView(BOOL isDouble)
 		this->clearStage = 0;
 	}
 
-	if (config.renderer != RendererGDI && this->clearStage++ <= *(DWORD*)&isDouble)
-		GLClear(GL_COLOR_BUFFER_BIT);
+	if (this->clearStage++ <= *(DWORD*)&isDouble)
+	{
+		if (config.renderer == RendererGDI)
+		{
+			RECT rc = { 0, 0, this->viewport.width, this->viewport.height };
+			FillRect(this->hDc, &rc, (HBRUSH)GetStockObject(BLACK_BRUSH));
+		}
+		else
+			GLClear(GL_COLOR_BUFFER_BIT);
+	}
 
 	if (this->viewport.refresh)
 	{

@@ -263,7 +263,7 @@ namespace Config
 			{
 				BOOL value = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
 
-				config.borders.type = value ? BordersClassic : BordersNone;
+				config.borders.type = value ? BordersAlternative : BordersNone;
 				Config::Set(CONFIG_WRAPPER, "Borders", *(INT*)&config.borders.type);
 
 				config.background.enabled = value;
@@ -441,7 +441,7 @@ namespace Config
 			if (!config.version)
 			{
 				BOOL value = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
-				config.borders.type = (BordersType)Config::Get(CONFIG_WRAPPER, "Borders", value ? BordersClassic : BordersNone);
+				config.borders.type = (BordersType)Config::Get(CONFIG_WRAPPER, "Borders", value ? BordersAlternative : BordersNone);
 				config.background.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "Background", value);
 
 				config.zoom.enabled = (BOOL)Config::Get(CONFIG_DISCIPLE, "EnableZoom", TRUE);

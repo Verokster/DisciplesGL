@@ -34,6 +34,8 @@ GDIData::GDIData()
 	if (!config.version && config.resHooked)
 	{
 		this->hDc = CreateCompatibleDC(NULL);
+		SetStretchBltMode(this->hDc, COLORONCOLOR);
+
 		this->hDcBack = CreateCompatibleDC(hDc);
 
 		HDC hDc = GetDC(NULL);

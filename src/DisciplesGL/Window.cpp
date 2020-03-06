@@ -1149,6 +1149,61 @@ namespace Window
 			break;
 		}
 
+		case WM_NOTIFY: {
+			if (((NMHDR*)lParam)->code == NM_CUSTOMDRAW)
+			{
+				switch (wParam)
+				{
+				case IDC_TRK_HUE:
+				case IDC_TRK_SAT:
+				case IDC_TRK_IN_LEFT:
+				case IDC_TRK_IN_RIGHT:
+				case IDC_TRK_GAMMA:
+				case IDC_TRK_OUT_LEFT:
+				case IDC_TRK_OUT_RIGHT: {
+					NMCUSTOMDRAW* lpDraw = (NMCUSTOMDRAW*)lParam;
+
+					switch (lpDraw->dwDrawStage)
+					{
+					case CDDS_PREPAINT: {
+						SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW);
+						return CDRF_NOTIFYITEMDRAW;
+					}
+
+					case CDDS_ITEMPREPAINT: {
+
+						switch (lpDraw->dwItemSpec)
+						{
+						case TBCD_THUMB: {
+							lpDraw->rc.left += 1;
+							lpDraw->rc.top += 2;
+							lpDraw->rc.right -= 1;
+							lpDraw->rc.bottom -= 2;
+							break;
+						}
+
+						default:
+							break;
+						}
+
+						return CDRF_DODEFAULT;
+					}
+
+					default:
+						break;
+					}
+
+					break;
+				}
+
+				default:
+					break;
+				}
+			}
+
+			break;
+		}
+
 		case WM_REDRAW_CANVAS: {
 			HWND hImg = GetDlgItem(hDlg, IDC_CANVAS);
 
@@ -1736,13 +1791,6 @@ namespace Window
 				else
 					idx = 0;
 
-				DWORD comp = SendDlgItemMessage(hDlg, IDC_TRK_OUT_RIGHT, TBM_GETPOS, NULL, NULL);
-				if (value > comp)
-				{
-					value = comp;
-					SendDlgItemMessage(hDlg, IDC_TRK_OUT_LEFT, TBM_SETPOS, TRUE, value);
-				}
-
 				StrPrint(text, "%d", value);
 				SendDlgItemMessage(hDlg, IDC_LBL_OUT_LEFT, WM_SETTEXT, NULL, (WPARAM)text);
 
@@ -1759,13 +1807,6 @@ namespace Window
 					idx = 3;
 				else
 					idx = 0;
-
-				DWORD comp = SendDlgItemMessage(hDlg, IDC_TRK_OUT_LEFT, TBM_GETPOS, NULL, NULL);
-				if (value < comp)
-				{
-					value = comp;
-					SendDlgItemMessage(hDlg, IDC_TRK_OUT_RIGHT, TBM_SETPOS, TRUE, value);
-				}
 
 				StrPrint(text, "%d", value);
 				SendDlgItemMessage(hDlg, IDC_LBL_OUT_RIGHT, WM_SETTEXT, NULL, (WPARAM)text);
