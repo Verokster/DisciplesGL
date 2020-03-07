@@ -54,14 +54,6 @@ namespace Window
 		return LOBYTE(d);
 	}
 
-	FLOAT __fastcall SplineInterpolate(FLOAT p0, FLOAT p1, FLOAT p2, FLOAT p3, FLOAT t)
-	{
-		FLOAT s = 1.0f - t;
-		FLOAT t2 = t * t;
-		FLOAT t3 = t2 * t;
-		return (s * s * s * p0 + (3.0f * t3 - 6.0f * t2 + 4.0f) * p1 + (-3.0f * t3 + 3.0f * t2 + 3.0f * t + 1.0f) * p2 + t3 * p3) / 6.0f;
-	}
-
 	BOOL __fastcall GetMenuByChildID(HMENU hParent, MenuItemData* mData, INT index)
 	{
 		HMENU hMenu = GetSubMenu(hParent, index);
@@ -1225,7 +1217,7 @@ namespace Window
 				LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
 				if (levelsData->colors)
 				{
-					LevelColorsFloat prep[258];
+					LevelColorsFloat prep[260];
 					{
 						FLOAT h = 2.0f * config.colors.active.hueShift - 1.0f;
 						FLOAT s = (FLOAT)MathPower(2.0f * config.colors.active.saturation, 1.5849625007211561f);
@@ -1245,7 +1237,7 @@ namespace Window
 								0.114f + 0.886f * vsu - 0.203f * vsw }
 						};
 
-						MemoryZero(prep + 1, sizeof(LevelColorsFloat) * 256);
+						MemoryZero(prep, sizeof(prep));
 
 						struct {
 							Levels input;
@@ -1263,13 +1255,12 @@ namespace Window
 						LevelColorsFloat* src = levelsData->colors;
 						for (DWORD i = 0; i < 256; ++i, ++src)
 						{
-							FLOAT dx = (FLOAT)i / 256.0f;
+							FLOAT dx = (FLOAT)i / 255.0f;
 
 							LevelColorsFloat* mt = mat;
 							for (DWORD j = 0; j < 3; ++j, ++mt)
 							{
 								FLOAT k = dx;
-
 								for (DWORD s = 2, idx = j + 1; s; --s, idx = 0)
 								{
 									k = (k - config.colors.active.input.left.chanel[idx]) / levels.input.chanel[idx];
@@ -1279,23 +1270,58 @@ namespace Window
 									k = min(1.0f, max(0.0f, k));
 								}
 
-								prep[(INT)MathRound(k * 256.0f) + 1].chanel[j] += mt->red * src->red + mt->green * src->green + mt->blue * src->blue;
+								prep[(DWORD)(k * 255.0f) + 2].chanel[j] += mt->red * src->red + mt->green * src->green + mt->blue * src->blue;
 							}
 						}
 					}
 
-					prep[0] = prep[1];
-					prep[257] = prep[256];
+					prep[1] = prep[2];
+					prep[258] = prep[257];
 
-					LevelColorsFloat floats[257];
+					LevelColorsFloat floats[259];
+					for (DWORD y = 4; y; --y)
+					{
+						{
+							LevelColorsFloat* src = prep;
+							LevelColorsFloat* dst = floats + 1;
+							DWORD count = 257;
+							do
+							{
+								for (DWORD i = 0; i < 3; ++i)
+									dst->chanel[i] = (src[0].chanel[i] + src[3].chanel[i]) * (0.125 / 6.0) + (src[1].chanel[i] + src[2].chanel[i]) * (2.875 / 6.0);
+
+								++src;
+								++dst;
+							} while (--count);
+						}
+						floats[0] = floats[1];
+						floats[258] = floats[257];
+
+						{
+							LevelColorsFloat* src = floats;
+							LevelColorsFloat* dst = prep + 2;
+							DWORD count = 256;
+							do
+							{
+								for (DWORD i = 0; i < 3; ++i)
+									dst->chanel[i] = (src[0].chanel[i] + src[3].chanel[i]) * (0.125 / 6.0) + (src[1].chanel[i] + src[2].chanel[i]) * (2.875 / 6.0);
+
+								++src;
+								++dst;
+							} while (--count);
+						}
+						prep[1] = prep[2];
+						prep[258] = prep[257];
+					}
+
 					{
 						LevelColorsFloat* src = prep;
-						LevelColorsFloat* dst = floats;
+						LevelColorsFloat* dst = floats + 1;
 						DWORD count = 257;
 						do
 						{
 							for (DWORD i = 0; i < 3; ++i)
-								dst->chanel[i] = min(1.0f, max(0.0f, SplineInterpolate(src[0].chanel[i], src[1].chanel[i], src[2].chanel[i], src[3].chanel[i], 0.5f)));
+								dst->chanel[i] = min(1.0f, max(0.0f, (src[0].chanel[i] + src[3].chanel[i]) * (0.125 / 6.0) + (src[1].chanel[i] + src[2].chanel[i]) * (2.875 / 6.0)));
 
 							++src;
 							++dst;
@@ -1304,7 +1330,7 @@ namespace Window
 
 					FLOAT max = 0.0;
 					{
-						FLOAT* data = (FLOAT*)floats;
+						FLOAT* data = (FLOAT*)(floats + 1);
 						DWORD count = 257 * 3;
 						do
 						{
@@ -1321,7 +1347,7 @@ namespace Window
 						{
 							max /= FLOAT(256 / 4 * 3);
 
-							FLOAT* src = (FLOAT*)floats;
+							FLOAT* src = (FLOAT*)(floats + 1);
 							DWORD* dst = (DWORD*)(levels + 1);
 							DWORD count = 257 * 3;
 							do
@@ -1586,7 +1612,7 @@ namespace Window
 									{
 										success[j] = TRUE;
 										++exit;
-										config.colors.active.input.left.chanel[j + 1] = (FLOAT)i / 256.0f;
+										config.colors.active.input.left.chanel[j + 1] = (FLOAT)i / 255.0f;
 									}
 								}
 							}
@@ -1613,7 +1639,7 @@ namespace Window
 									{
 										success[j] = TRUE;
 										++exit;
-										config.colors.active.input.right.chanel[j + 1] = (FLOAT)i / 256.0f;
+										config.colors.active.input.right.chanel[j + 1] = (FLOAT)i / 255.0f;
 									}
 								}
 							}

@@ -711,8 +711,8 @@ VOID OpenDraw::RenderOld()
 
 					Size* frameSize = &stateBuffer->size;
 					BOOL ready = stateBuffer->isReady;
-					BOOL force = this->viewport.refresh;
-					if ((ready || force) && frameSize->width && frameSize->height)
+					BOOL force = this->viewport.refresh && frameSize->width && frameSize->height;
+					if (ready || force)
 					{
 						if (force)
 							pixelBuffer->Reset();
@@ -1078,8 +1078,8 @@ VOID OpenDraw::RenderMid()
 
 							Size* frameSize = &stateBuffer->size;
 							BOOL ready = stateBuffer->isReady;
-							BOOL force = program && program->Check() || this->viewport.refresh;
-							if ((ready || force) && frameSize->width && frameSize->height)
+							BOOL force = (program && program->Check() || this->viewport.refresh) && frameSize->width && frameSize->height;
+							if (ready || force)
 							{
 								if (force)
 									pixelBuffer->Reset();
@@ -1393,8 +1393,8 @@ VOID OpenDraw::RenderNew()
 
 									Size* frameSize = &stateBuffer->size;
 									BOOL ready = stateBuffer->isReady;
-									BOOL force = program && program->Check() || this->viewport.refresh;
-									if ((ready || force) && frameSize->width && frameSize->height)
+									BOOL force = (program && program->Check() || this->viewport.refresh) && frameSize->width && frameSize->height;
+									if (ready || force)
 									{
 										if (force)
 											pixelBuffer->Reset();
