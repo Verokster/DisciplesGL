@@ -676,7 +676,7 @@ namespace Config
 
 		config.colors.current = &config.colors.active;
 
-		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(LOBYTE(GetVersion()) > 4 ? IDR_MENU : IDR_MENU_OLD));
+		config.menu = LoadMenu(hDllModule, MAKEINTRESOURCE(IDR_MENU));
 		config.font = (HFONT)CreateFont(16, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET,
 			OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
 			DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));

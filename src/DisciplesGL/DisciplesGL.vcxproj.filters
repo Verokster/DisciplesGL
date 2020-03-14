@@ -67,14 +67,29 @@
     <ClCompile Include="PixelBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GDIData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MappedFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderProgram.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="GDIRenderer.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="OGLRenderer.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="NewRenderer.cpp">
+      <Filter>Source Files\Render\OGL</Filter>
+    </ClCompile>
+    <ClCompile Include="MidRenderer.cpp">
+      <Filter>Source Files\Render\OGL</Filter>
+    </ClCompile>
+    <ClCompile Include="OldRenderer.cpp">
+      <Filter>Source Files\Render\OGL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -147,14 +162,29 @@
     <ClInclude Include="PixelBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GDIData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MappedFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ShaderProgram.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="GDIRenderer.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="OGLRenderer.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="NewRenderer.h">
+      <Filter>Header Files\Render\OGL</Filter>
+    </ClInclude>
+    <ClInclude Include="MidRenderer.h">
+      <Filter>Header Files\Render\OGL</Filter>
+    </ClInclude>
+    <ClInclude Include="OldRenderer.h">
+      <Filter>Header Files\Render\OGL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -190,6 +220,18 @@
     </Filter>
     <Filter Include="Source Files\Play">
       <UniqueIdentifier>{72212ce8-8632-4de7-9446-6a281fac3242}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Render">
+      <UniqueIdentifier>{7f07b90e-79e9-4f7c-9ce4-99edb31b492b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Render">
+      <UniqueIdentifier>{3fef6ba1-1f4c-4583-be7b-ea12e425e185}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Render\OGL">
+      <UniqueIdentifier>{0d3118ae-0b5b-441e-af40-90184d584572}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Render\OGL">
+      <UniqueIdentifier>{bfa9acb6-d47e-4f4b-b139-0478fc0e6b88}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

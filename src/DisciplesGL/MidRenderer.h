@@ -24,20 +24,33 @@
 
 #pragma once
 
-#include "FpsCounter.h"
+#include "OGLRenderer.h"
 
-class OpenDraw;
-
-class GDIData {
+class MidRenderer : public OGLRenderer {
 private:
-	HBITMAP hBmp;
-	HBITMAP hBmpBack;
-	
-public:
-	HDC hDc;
-	HDC hDcBack;
-	FpsCounter* fpsCounter;
+	DWORD texSize;
+	Size zoomSize;
+	FLOAT buffer[4][8];
+	GLuint bufferName;
 
-	GDIData();
-	~GDIData();
+	struct {
+		ShaderProgram* linear;
+		ShaderProgram* linear_double;
+		ShaderProgram* hermite;
+		ShaderProgram* hermite_double;
+		ShaderProgram* cubic;
+		ShaderProgram* cubic_double;
+	} shaders;
+
+	struct {
+		GLuint back;
+		GLuint primary;
+	} textureId;
+
+	VOID Begin();
+	VOID End();
+	BOOL RenderInner(BOOL, BOOL, StateBufferAligned**);
+
+public:
+	MidRenderer(OpenDraw*);
 };

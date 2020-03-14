@@ -275,10 +275,12 @@ extern GLFRAMEBUFFERRENDERBUFFER GLFramebufferRenderbuffer;
 
 namespace GL
 {
-	VOID __fastcall CreateContextAttribs(HDC hDc, HGLRC* hRc);
-	VOID __fastcall ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd);
-	VOID __fastcall PreparePixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd);
-	INT __fastcall PreparePixelFormat(PIXELFORMATDESCRIPTOR* pfd);
+	VOID __fastcall CreateContextAttribs(HDC, HGLRC*);
+	VOID __fastcall ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR*);
+	VOID __fastcall PreparePixelFormatDescription(PIXELFORMATDESCRIPTOR*);
+	INT __fastcall PreparePixelFormat(PIXELFORMATDESCRIPTOR*);
 	VOID __fastcall ResetPixelFormat();
-	GLuint __fastcall CompileShaderSource(DWORD name, const CHAR* version, GLenum type);
+	GLuint __fastcall CompileShaderSource(DWORD, const CHAR*, GLenum);
+	HGLRC __fastcall Init(HWND, HDC*);
+	VOID __fastcall Release(HWND, HDC*, HGLRC*);
 }

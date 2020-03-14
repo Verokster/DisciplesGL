@@ -22,7 +22,7 @@
 	SOFTWARE.
 */
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "OpenDrawSurface.h"
 #include "OpenDraw.h"
 #include "Hooks.h"
@@ -331,17 +331,11 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 		}
 		else if (this->type == SurfaceSecondary && config.borders.allowed)
 		{
-			if (this->secondaryBuffer)
-			{
-				delete this->secondaryBuffer;
-				this->secondaryBuffer = NULL;
-			}
+			delete this->secondaryBuffer;
+			this->secondaryBuffer = NULL;
 
-			if (this->backBuffer)
-			{
-				delete this->backBuffer;
-				this->backBuffer = NULL;
-			}
+			delete this->backBuffer;
+			this->backBuffer = NULL;
 
 			switch (config.borders.type)
 			{
@@ -370,14 +364,12 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 
 VOID OpenDrawSurface::ReleaseBuffer()
 {
-	if (this->indexBuffer)
-		delete this->indexBuffer;
-
-	if (this->secondaryBuffer)
-		delete this->secondaryBuffer;
-
-	if (this->backBuffer)
-		delete this->backBuffer;
+	delete this->indexBuffer;
+	this->indexBuffer = NULL;
+	delete this->secondaryBuffer;
+	this->secondaryBuffer = NULL;
+	delete this->backBuffer;
+	this->backBuffer = NULL;
 }
 
 VOID OpenDrawSurface::SwapBuffers()

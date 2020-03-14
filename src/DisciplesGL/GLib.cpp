@@ -323,6 +323,18 @@ namespace GL
 
 		if (!config.gl.version.value)
 			config.gl.version.value = GL_VER_1_1;
+		else if (config.gl.version.value >= GL_VER_2_0)
+		{
+			DWORD check = max(config.mode->width, config.mode->height);
+			DWORD size = 1;
+			while (size < check)
+				size <<= 1;
+
+			DWORD maxSize;
+			GLGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint*)&maxSize);
+			if (maxSize < size)
+				config.gl.version.value = GL_VER_1_1;
+		}
 
 		config.gl.version.real = config.gl.version.value;
 	}
@@ -501,6 +513,60 @@ namespace GL
 		}
 
 		return shader;
+	}
+
+	HGLRC __fastcall Init(HWND hWnd, HDC* lpHDC)
+	{
+		HGLRC hRc = NULL;
+		*lpHDC = ::GetDC(hWnd);
+		if (*lpHDC)
+		{
+			if (!::GetPixelFormat(*lpHDC))
+			{
+				PIXELFORMATDESCRIPTOR pfd;
+				INT glPixelFormat = GL::PreparePixelFormat(&pfd);
+				if (!glPixelFormat)
+				{
+					glPixelFormat = ::ChoosePixelFormat(*lpHDC, &pfd);
+					if (!glPixelFormat)
+						Main::ShowError(IDS_ERROR_CHOOSE_PF, "OpenDraw.cpp", __LINE__);
+					else if (pfd.dwFlags & PFD_NEED_PALETTE)
+						Main::ShowError(IDS_ERROR_NEED_PALETTE, "OpenDraw.cpp", __LINE__);
+				}
+
+				GL::ResetPixelFormatDescription(&pfd);
+				if (::DescribePixelFormat(*lpHDC, glPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd) == NULL)
+					Main::ShowError(IDS_ERROR_DESCRIBE_PF, "OpenDraw.cpp", __LINE__);
+
+				if (!::SetPixelFormat(*lpHDC, glPixelFormat, &pfd))
+					Main::ShowError(IDS_ERROR_SET_PF, "OpenDraw.cpp", __LINE__);
+
+				if (pfd.iPixelType != PFD_TYPE_RGBA || pfd.cRedBits < 5 || pfd.cGreenBits < 6 || pfd.cBlueBits < 5)
+					Main::ShowError(IDS_ERROR_BAD_PF, "OpenDraw.cpp", __LINE__);
+			}
+
+			hRc = wglCreateContext(*lpHDC);
+			if (hRc && wglMakeCurrent(*lpHDC, hRc))
+				GL::CreateContextAttribs(*lpHDC, &hRc);
+		}
+
+		return hRc;
+	}
+
+	VOID __fastcall Release(HWND hWnd, HDC* lpHDC, HGLRC* lpHRC)
+	{
+		if (*lpHDC)
+		{
+			if (*lpHRC)
+			{
+				wglMakeCurrent(*lpHDC, NULL);
+				wglDeleteContext(*lpHRC);
+				*lpHRC = NULL;
+			}
+
+			::ReleaseDC(hWnd, *lpHDC);
+			*lpHDC = NULL;
+		}
 	}
 #pragma optimize("", on)
 }

@@ -22,7 +22,7 @@
 	SOFTWARE.
 */
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "Shellapi.h"
 #include "Objbase.h"
 #include "Mmsystem.h"
@@ -2261,7 +2261,7 @@ namespace Hooks
 	{
 		DWORD pitch = obj->pitch >> 1;
 
-		DWORD* srcData = (*(DWORD * (__thiscall**)(DWORD*))((*thisObj) + 12))(thisObj);
+		DWORD* srcData = (*(DWORD*(__thiscall**)(DWORD*))((*thisObj) + 12))(thisObj);
 		DWORD* dstData = (DWORD*)obj->data + loc->y * pitch;
 
 		LONG offset = 30;

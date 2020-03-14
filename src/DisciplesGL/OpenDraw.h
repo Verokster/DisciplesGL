@@ -29,40 +29,34 @@
 #include "OpenDrawClipper.h"
 #include "OpenDrawPalette.h"
 #include "PixelBuffer.h"
-#include "GDIData.h"
+#include "Renderer.h"
 
 class OpenDraw : public IDraw7 {
-public:
-	OpenDrawSurface* surfaceEntries;
+private:
 	OpenDrawClipper* clipperEntries;
 	OpenDrawPalette* paletteEntries;
 
+	WINDOWPLACEMENT windowPlacement;
+	DWORD clearStage;
+
+public:
+	OpenDrawSurface* surfaceEntries;
 	OpenDrawSurface* attachedSurface;
 
-	HDC hDc;
 	HWND hWnd;
 	HWND hDraw;
-
-	WINDOWPLACEMENT windowPlacement;
-
-	HANDLE hDrawThread;
-	HANDLE hDrawEvent;
-
+	Renderer* renderer;
 	Viewport viewport;
-	DWORD clearStage;
-	BOOL isFinish;
 	FilterState filterState;
 	SnapshotType isTakeSnapshot;
 	BOOL bufferIndex;
 	DOUBLE flushTime;
 
-	GDIData* gdi;
-
 	OpenDraw(IDrawUnknown**);
 	~OpenDraw();
 
-	BOOL __fastcall CheckView(BOOL);
-	VOID __fastcall ScaleMouse(LPPOINT);
+	BOOL CheckViewport(BOOL);
+	VOID ScaleMouse(LPPOINT);
 
 	VOID SetFullscreenMode();
 	VOID SetWindowedMode();
@@ -70,16 +64,12 @@ public:
 	VOID RenderStart();
 	VOID RenderStop();
 
-	VOID RenderOld();
-	VOID RenderMid();
-	VOID RenderNew();
-	VOID RenderGDI();
 	VOID Redraw();
 	VOID LoadFilterState();
 
-	VOID __fastcall ReadFrameBufer(BYTE*, DWORD, BOOL);
-	VOID __fastcall ReadDataBuffer(BYTE*, VOID*, Size*, DWORD, BOOL, BOOL);
-	VOID __fastcall TakeSnapshot(Size*, VOID*, BOOL);
+	VOID ReadFrameBufer(BYTE*, DWORD, BOOL);
+	VOID ReadDataBuffer(BYTE*, VOID*, Size*, DWORD, BOOL, BOOL);
+	VOID TakeSnapshot(Size*, VOID*, BOOL);
 
 	// Inherited via  IDraw
 	HRESULT __stdcall OpenDraw::QueryInterface(REFIID, LPVOID*) override;

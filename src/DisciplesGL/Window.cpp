@@ -878,6 +878,37 @@ namespace Window
 				MemoryFree(verData);
 			}
 
+			if (lParam == IDD_ABOUT_APPLICATION)
+			{
+				StrPrint(path, "<A HREF=\"%s\">%s</A>", "http://www.strategyfirst.com", "http://www.strategyfirst.com");
+				SetDlgItemText(hDlg, IDC_LNK_WEB, path);
+			}
+			else
+				SetDlgItemText(hDlg, IDC_LNK_WEB, "http://www.strategyfirst.com");
+
+			break;
+		}
+
+		case WM_NOTIFY: {
+			if (((NMHDR*)lParam)->code == NM_CLICK)
+			{
+				switch (wParam)
+				{
+				case IDC_LNK_WEB:
+					SHELLEXECUTEINFOW shExecInfo;
+					MemoryZero(&shExecInfo, sizeof(SHELLEXECUTEINFOW));
+					shExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
+					shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+					shExecInfo.lpFile = ((NMLINK*)lParam)->item.szUrl;
+					shExecInfo.nShow = SW_SHOW;
+					ShellExecuteExW(&shExecInfo);
+					break;
+
+				default:
+					break;
+				}
+			}
+
 			break;
 		}
 
@@ -931,26 +962,53 @@ namespace Window
 				MemoryFree(verData);
 			}
 
-			if (GetDlgItemText(hDlg, IDC_LNK_EMAIL, temp, sizeof(temp)))
+			if (GetDlgItemText(hDlg, IDC_COPYRIGHT, temp, sizeof(temp)))
 			{
-				StrPrint(path, "<A HREF=\"mailto:%s\">%s</A>", temp, temp);
+				StrPrint(path, temp, 2020, "Verok");
+				SetDlgItemText(hDlg, IDC_COPYRIGHT, path);
+			}
+
+			if (lParam == IDD_ABOUT_WRAPPER)
+			{
+				StrPrint(path, "<A HREF=\"mailto:%s\">%s</A>", "verokster@gmail.com", "verokster@gmail.com");
 				SetDlgItemText(hDlg, IDC_LNK_EMAIL, path);
+
+				StrPrint(path, "<A HREF=\"%s\">%s</A>", "https://verokster.blogspot.com/2019/03/disciples-i-ii-gl-wrapper-patch.html", "https://verokster.blogspot.com");
+				SetDlgItemText(hDlg, IDC_LNK_WEB, path);
+
+				StrPrint(path, "<A HREF=\"%s\">%s</A>", "https://www.patreon.com/join/verok", "https://www.patreon.com/join/verok");
+				SetDlgItemText(hDlg, IDC_LNK_PATRON, path);
+			}
+			else
+			{
+				SetDlgItemText(hDlg, IDC_LNK_EMAIL, "verokster@gmail.com");
+				SetDlgItemText(hDlg, IDC_LNK_WEB, "https://verokster.blogspot.com");
+				SetDlgItemText(hDlg, IDC_LNK_PATRON, "https://www.patreon.com/join/verok");
 			}
 
 			break;
 		}
 
 		case WM_NOTIFY: {
-			if (((NMHDR*)lParam)->code == NM_CLICK && wParam == IDC_LNK_EMAIL)
+			if (((NMHDR*)lParam)->code == NM_CLICK)
 			{
-				SHELLEXECUTEINFOW shExecInfo;
-				MemoryZero(&shExecInfo, sizeof(SHELLEXECUTEINFOW));
-				shExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
-				shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-				shExecInfo.lpFile = ((NMLINK*)lParam)->item.szUrl;
-				shExecInfo.nShow = SW_SHOW;
+				switch (wParam)
+				{
+				case IDC_LNK_EMAIL:
+				case IDC_LNK_WEB:
+				case IDC_LNK_PATRON:
+					SHELLEXECUTEINFOW shExecInfo;
+					MemoryZero(&shExecInfo, sizeof(SHELLEXECUTEINFOW));
+					shExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
+					shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+					shExecInfo.lpFile = ((NMLINK*)lParam)->item.szUrl;
+					shExecInfo.nShow = SW_SHOW;
+					ShellExecuteExW(&shExecInfo);
+					break;
 
-				ShellExecuteExW(&shExecInfo);
+				default:
+					break;
+				}
 			}
 
 			break;
@@ -1288,7 +1346,7 @@ namespace Window
 							do
 							{
 								for (DWORD i = 0; i < 3; ++i)
-									dst->chanel[i] = (src[0].chanel[i] + src[3].chanel[i]) * (0.125 / 6.0) + (src[1].chanel[i] + src[2].chanel[i]) * (2.875 / 6.0);
+									dst->chanel[i] = FLOAT((src[0].chanel[i] + src[3].chanel[i]) * (0.125 / 6.0) + (src[1].chanel[i] + src[2].chanel[i]) * (2.875 / 6.0));
 
 								++src;
 								++dst;
@@ -1304,7 +1362,7 @@ namespace Window
 							do
 							{
 								for (DWORD i = 0; i < 3; ++i)
-									dst->chanel[i] = (src[0].chanel[i] + src[3].chanel[i]) * (0.125 / 6.0) + (src[1].chanel[i] + src[2].chanel[i]) * (2.875 / 6.0);
+									dst->chanel[i] = FLOAT((src[0].chanel[i] + src[3].chanel[i]) * (0.125 / 6.0) + (src[1].chanel[i] + src[2].chanel[i]) * (2.875 / 6.0));
 
 								++src;
 								++dst;
@@ -1321,7 +1379,7 @@ namespace Window
 						do
 						{
 							for (DWORD i = 0; i < 3; ++i)
-								dst->chanel[i] = min(1.0f, max(0.0f, (src[0].chanel[i] + src[3].chanel[i]) * (0.125 / 6.0) + (src[1].chanel[i] + src[2].chanel[i]) * (2.875 / 6.0)));
+								dst->chanel[i] = min(1.0f, max(0.0f, FLOAT((src[0].chanel[i] + src[3].chanel[i]) * (0.125 / 6.0) + (src[1].chanel[i] + src[2].chanel[i]) * (2.875 / 6.0))));
 
 							++src;
 							++dst;
@@ -1883,16 +1941,9 @@ namespace Window
 			HDC hDc = BeginPaint(hWnd, &paint);
 			if (hDc)
 			{
-				if (config.renderer == RendererGDI)
-				{
-					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-					if (ddraw)
-					{
-						ddraw->hDc = hDc;
-						ddraw->RenderGDI();
-						ddraw->hDc = NULL;
-					}
-				}
+				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+				if (ddraw)
+					ddraw->Redraw();
 
 				EndPaint(hWnd, &paint);
 			}
@@ -1901,7 +1952,7 @@ namespace Window
 		}
 
 		case WM_ERASEBKGND:
-			return config.renderer == RendererGDI ? DefWindowProc(hWnd, uMsg, wParam, lParam) : TRUE;
+			return TRUE;
 
 		case WM_WINDOWPOSCHANGED: {
 			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
@@ -1996,7 +2047,7 @@ namespace Window
 				{
 					if (!config.borderless.real)
 					{
-						if (!ddraw->isFinish)
+						if (ddraw->renderer)
 						{
 							ddraw->RenderStop();
 							config.borderless.mode = !(BOOL)wParam;
@@ -2249,20 +2300,20 @@ namespace Window
 					if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
 						cookie = NULL;
 
-					LPCSTR id;
+					LPARAM id;
 					DLGPROC proc;
 					if (wParam == IDM_HELP_ABOUT_APPLICATION)
 					{
-						id = MAKEINTRESOURCE(IDD_ABOUT_APPLICATION);
+						id = cookie ? IDD_ABOUT_APPLICATION : IDD_ABOUT_APPLICATION_OLD;
 						proc = (DLGPROC)AboutApplicationProc;
 					}
 					else
 					{
-						id = MAKEINTRESOURCE(cookie ? IDD_ABOUT_WRAPPER : IDD_ABOUT_WRAPPER_OLD);
+						id = cookie ? IDD_ABOUT_WRAPPER : IDD_ABOUT_WRAPPER_OLD;
 						proc = (DLGPROC)AboutWrapperProc;
 					}
 
-					DialogBox(hDllModule, id, hWnd, proc);
+					DialogBoxParam(hDllModule, MAKEINTRESOURCE(id), hWnd, proc, id);
 
 					if (cookie)
 						DeactivateActCtxC(0, cookie);
@@ -2279,7 +2330,7 @@ namespace Window
 
 			case IDM_RES_FULL_SCREEN: {
 				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-				if (ddraw && !ddraw->isFinish)
+				if (ddraw && ddraw->renderer)
 				{
 					ddraw->RenderStop();
 					{
@@ -2481,9 +2532,6 @@ namespace Window
 			}
 
 			case IDM_COLOR_ADJUST: {
-				//BOOL isActive = config.alwaysActive;
-				//config.alwaysActive = TRUE;
-
 				{
 					ULONG_PTR cookie = NULL;
 					if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
@@ -2494,8 +2542,6 @@ namespace Window
 					if (cookie)
 						DeactivateActCtxC(0, cookie);
 				}
-
-				//config.alwaysActive = isActive;
 
 				SetForegroundWindow(hWnd);
 				return NULL;

@@ -235,7 +235,7 @@
   <ItemGroup>
     <ClCompile Include="Allocation.cpp" />
     <ClCompile Include="Config.cpp" />
-    <ClCompile Include="GDIData.cpp" />
+    <ClCompile Include="GDIRenderer.cpp" />
     <ClCompile Include="IDraw7.cpp" />
     <ClCompile Include="IDrawClipper.cpp" />
     <ClCompile Include="IDrawPalette.cpp" />
@@ -243,6 +243,10 @@
     <ClCompile Include="IDrawUnknown.cpp" />
     <ClCompile Include="IPlay4.cpp" />
     <ClCompile Include="MappedFile.cpp" />
+    <ClCompile Include="MidRenderer.cpp" />
+    <ClCompile Include="NewRenderer.cpp" />
+    <ClCompile Include="OGLRenderer.cpp" />
+    <ClCompile Include="OldRenderer.cpp" />
     <ClCompile Include="OpenDraw.cpp" />
     <ClCompile Include="OpenDrawClipper.cpp" />
     <ClCompile Include="OpenDrawPalette.cpp" />
@@ -253,6 +257,7 @@
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="PixelBuffer.cpp" />
     <ClCompile Include="PngLib.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="StateBuffer.cpp" />
     <ClCompile Include="StdAfx.cpp">
@@ -265,7 +270,7 @@
   <ItemGroup>
     <ClInclude Include="Allocation.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="GDIData.h" />
+    <ClInclude Include="GDIRenderer.h" />
     <ClInclude Include="IDraw7.h" />
     <ClInclude Include="IDrawClipper.h" />
     <ClInclude Include="IDrawPalette.h" />
@@ -273,6 +278,10 @@
     <ClInclude Include="IDrawUnknown.h" />
     <ClInclude Include="IPlay4.h" />
     <ClInclude Include="MappedFile.h" />
+    <ClInclude Include="MidRenderer.h" />
+    <ClInclude Include="NewRenderer.h" />
+    <ClInclude Include="OGLRenderer.h" />
+    <ClInclude Include="OldRenderer.h" />
     <ClInclude Include="OpenDraw.h" />
     <ClInclude Include="OpenDrawClipper.h" />
     <ClInclude Include="OpenDrawPalette.h" />
@@ -284,6 +293,7 @@
     <ClInclude Include="Main.h" />
     <ClInclude Include="PixelBuffer.h" />
     <ClInclude Include="PngLib.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="StateBuffer.h" />
