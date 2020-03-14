@@ -54,8 +54,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xsal", "xsal", "{C7909C56-3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bitmaps", "Bitmaps", "{97633516-F438-4749-8B2A-E86AAADD2E2A}"
 	ProjectSection(SolutionItems) = preProject
+		bmp\alt.png = bmp\alt.png
+		bmp\alt_widest.png = bmp\alt_widest.png
 		bmp\back.bmp = bmp\back.bmp
 		bmp\border.bmp = bmp\border.bmp
+		bmp\border_widest.png = bmp\border_widest.png
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hermite", "hermite", "{8C6324D3-BDF6-4CB4-AA40-0115DB11BEE5}"
@@ -66,7 +69,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hermite", "hermite", "{8C63
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{F116CB8C-2F5E-404D-A949-1FCBDD5639CF}"
 	ProjectSection(SolutionItems) = preProject
-		files\Interf.dlg = files\Interf.dlg
+		files\DLG_BATTLE_B.dlg = files\DLG_BATTLE_B.dlg
+		files\DLG_EXCEPTIONAL_EDIT.dlg = files\DLG_EXCEPTIONAL_EDIT.dlg
+		files\DLG_ISO_EDIT.dlg = files\DLG_ISO_EDIT.dlg
+		files\DLG_ISO_NEW.dlg = files\DLG_ISO_NEW.dlg
+		files\DLG_ISO_VIEW_NEW.dlg = files\DLG_ISO_VIEW_NEW.dlg
+		files\DLG_LANDMARK_EDIT.dlg = files\DLG_LANDMARK_EDIT.dlg
+		files\DLG_MAP_EDIT.dlg = files\DLG_MAP_EDIT.dlg
+		files\DLG_STRAT_SPELL_NEW.dlg = files\DLG_STRAT_SPELL_NEW.dlg
+		files\DLG_STRAT_WAIT_NEW.dlg = files\DLG_STRAT_WAIT_NEW.dlg
+		files\DLG_STRATEGIC_NEW.dlg = files\DLG_STRATEGIC_NEW.dlg
 	EndProjectSection
 EndProject
 Global
