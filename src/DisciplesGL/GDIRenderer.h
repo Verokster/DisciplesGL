@@ -25,7 +25,6 @@
 #pragma once
 
 #include "Renderer.h"
-#include "FpsCounter.h"
 
 class GDIRenderer : public Renderer {
 private:
@@ -33,7 +32,6 @@ private:
 	HDC hDcBack;
 	HBITMAP hBmpFront;
 	HBITMAP hBmpBack;
-	FpsCounter* fpsCounter;
 
 	VOID Clear();
 	VOID RenderFrame(BOOL, BOOL, StateBufferAligned**);

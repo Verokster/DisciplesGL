@@ -32,7 +32,6 @@
 #include "Main.h"
 #include "Config.h"
 #include "Hooks.h"
-#include "FpsCounter.h"
 #include "OpenDraw.h"
 #include "PngLib.h"
 
@@ -2043,24 +2042,11 @@ namespace Window
 				if (!config.alwaysActive)
 					ddraw->Redraw();
 
-				if (!config.windowedMode && config.renderer != RendererGDI && (!config.borderless.real || !config.alwaysActive))
+				if (ddraw->renderer && !config.windowedMode && config.renderer != RendererGDI && !config.borderless.real)
 				{
-					if (!config.borderless.real)
-					{
-						if (ddraw->renderer)
-						{
-							ddraw->RenderStop();
-							config.borderless.mode = !(BOOL)wParam;
-							ddraw->RenderStart();
-						}
-					}
-					else
-					{
-						if (wParam)
-							ddraw->RenderStart();
-						else
-							ddraw->RenderStop();
-					}
+					ddraw->RenderStop();
+					config.borderless.mode = !(BOOL)wParam;
+					ddraw->RenderStart();
 				}
 			}
 
@@ -2135,29 +2121,6 @@ namespace Window
 						Hooks::SetGameSpeed();
 						CheckMenu(MenuSpeed);
 					}
-				}
-				else if (config.keys.fpsCounter && config.keys.fpsCounter + VK_F1 - 1 == wParam)
-				{
-					switch (fpsState)
-					{
-					case FpsNormal:
-						fpsState = FpsBenchmark;
-						break;
-					case FpsBenchmark:
-						fpsState = FpsDisabled;
-						break;
-					default:
-						fpsState = FpsNormal;
-						break;
-					}
-
-					isFpsChanged = TRUE;
-
-					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-					if (ddraw)
-						ddraw->Redraw();
-
-					return NULL;
 				}
 				else if (config.keys.imageFilter && config.keys.imageFilter + VK_F1 - 1 == wParam)
 				{

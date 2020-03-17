@@ -72,6 +72,9 @@ VOID OpenDraw::ReadFrameBufer(BYTE* dstData, DWORD pitch, BOOL isBGR)
 
 VOID OpenDraw::ReadDataBuffer(BYTE* dstData, VOID* srcData, Size* size, DWORD pitch, BOOL isTrueColor, BOOL isReverse)
 {
+	if (config.renderer == RendererGDI)
+		isReverse = !isReverse;
+
 	DWORD left = (config.mode->width - size->width) >> 1;
 	DWORD top = (config.mode->height - size->height) >> 1;
 	DWORD offset = (top + size->height - 1) * config.mode->width + left;
@@ -461,6 +464,7 @@ VOID OpenDraw::RenderStart()
 		}
 	}
 
+	config.gl.version.value = config.gl.version.real;
 	switch (config.renderer)
 	{
 	case RendererOpenGL1:

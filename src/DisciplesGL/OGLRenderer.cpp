@@ -88,7 +88,6 @@ BOOL OGLRenderer::Start()
 	if (this->singleThread)
 	{
 		this->hRc = GL::Init(this->ddraw->hDraw, &this->hDc);
-		GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 		this->Begin();
 	}
 	else
@@ -107,10 +106,8 @@ DWORD OGLRenderer::RenderThread(LPVOID lpParameter)
 	OGLRenderer* renderer = (OGLRenderer*)lpParameter;
 	renderer->hRc = GL::Init(renderer->ddraw->hDraw, &renderer->hDc);
 	if (renderer->hRc)
-	{
-		GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 		renderer->Cycle();
-	}
+
 	GL::Release(renderer->ddraw->hDraw, &renderer->hDc, &renderer->hRc);
 	return NULL;
 }

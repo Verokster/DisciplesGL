@@ -278,8 +278,6 @@ namespace Config
 				Config::Set(CONFIG_WRAPPER, "EnableZoom", config.zoom.enabled);
 			}
 
-			Config::Set(CONFIG_KEYS, "FpsCounter", "");
-
 			config.keys.imageFilter = 3;
 			Config::Set(CONFIG_KEYS, "ImageFilter", config.keys.imageFilter);
 
@@ -451,14 +449,6 @@ namespace Config
 
 			// F1 - reserved for "About"
 			CHAR buffer[20];
-			if (Config::Get(CONFIG_KEYS, "FpsCounter", "", buffer, sizeof(buffer)))
-			{
-				value = Config::Get(CONFIG_KEYS, "FpsCounter", 0);
-				config.keys.fpsCounter = LOBYTE(value);
-				if (config.keys.fpsCounter > 1 && config.keys.fpsCounter > 24)
-					config.keys.fpsCounter = 0;
-			}
-
 			if (Config::Get(CONFIG_KEYS, "ImageFilter", "", buffer, sizeof(buffer)))
 			{
 				value = Config::Get(CONFIG_KEYS, "ImageFilter", 0);

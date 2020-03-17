@@ -190,7 +190,7 @@ BOOL OldRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
 	Size* frameSize = &stateBuffer->size;
 	FilterState state = this->ddraw->filterState;
-	if (!ready || this->pixelBuffer->Update(lpStateBuffer, frameCount != 1 || this->convert) || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
+	if (this->pixelBuffer->Update(lpStateBuffer, ready, frameCount != 1 || this->convert) || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
 	{
 		if (this->isVSync != config.image.vSync)
 		{

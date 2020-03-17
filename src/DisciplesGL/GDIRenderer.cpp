@@ -51,8 +51,6 @@ GDIRenderer::~GDIRenderer()
 				DeleteDC(this->hDcFront);
 			}
 		}
-
-		delete this->fpsCounter;
 	}
 }
 
@@ -60,8 +58,6 @@ BOOL GDIRenderer::Start()
 {
 	if (!Renderer::Start())
 		return FALSE;
-
-	this->fpsCounter = new FpsCounter(config.mode->bpp != 16 || config.bpp32Hooked);
 
 	if (!config.version && config.resHooked)
 	{
@@ -123,12 +119,6 @@ VOID GDIRenderer::RenderFrame(BOOL ready, BOOL force, StateBufferAligned** lpSta
 	Size* frameSize = &stateBuffer->size;
 
 	this->CheckView(FALSE);
-
-	if (fpsState)
-	{
-		this->fpsCounter->Draw(stateBuffer);
-		this->fpsCounter->Calculate();
-	}
 
 	Rect* rect = &this->ddraw->viewport.rectangle;
 	if (stateBuffer->isBack)

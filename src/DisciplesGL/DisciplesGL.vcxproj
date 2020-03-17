@@ -252,7 +252,6 @@
     <ClCompile Include="OpenDrawPalette.cpp" />
     <ClCompile Include="OpenDrawSurface.cpp" />
     <ClCompile Include="DllMain.cpp" />
-    <ClCompile Include="FpsCounter.cpp" />
     <ClCompile Include="GLib.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="PixelBuffer.cpp" />
@@ -287,7 +286,6 @@
     <ClInclude Include="OpenDrawPalette.h" />
     <ClInclude Include="OpenDrawSurface.h" />
     <ClInclude Include="ExtraTypes.h" />
-    <ClInclude Include="FpsCounter.h" />
     <ClInclude Include="GLib.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="Main.h" />

@@ -185,7 +185,7 @@ BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
 	Size* frameSize = &stateBuffer->size;
 	FilterState state = this->ddraw->filterState;
-	if (!ready || pixelBuffer->Update(lpStateBuffer) || state.flags || this->borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack || fpsState == FpsBenchmark)
+	if (pixelBuffer->Update(lpStateBuffer, ready) || state.flags || this->borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 	{
 		if (this->isVSync != config.image.vSync)
 		{

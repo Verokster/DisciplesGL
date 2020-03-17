@@ -269,74 +269,74 @@ namespace GL
 		LoadFunction(buffer, PREFIX_GL, "RenderbufferStorage", (PROC*)&GLRenderbufferStorage);
 		LoadFunction(buffer, PREFIX_GL, "FramebufferRenderbuffer", (PROC*)&GLFramebufferRenderbuffer);
 
-		config.gl.version.value = NULL;
-		if (GLGetString)
+		if (!config.gl.version.real)
 		{
-			CHAR* strVer = (CHAR*)GLGetString(GL_VERSION);
-			if (strVer && *strVer >= '0' && *strVer <= '9')
+			if (GLGetString)
 			{
-				BYTE* ver = (BYTE*)&config.gl.version.value;
-
-				BOOL appears = FALSE;
-				CHAR* p = strVer;
-				for (DWORD charIdx = 0, byteIdx = 0; byteIdx < 4; ++p)
+				CHAR* strVer = (CHAR*)GLGetString(GL_VERSION);
+				if (strVer && *strVer >= '0' && *strVer <= '9')
 				{
-					if (*p >= '0' && *p <= '9')
-					{
-						appears = FALSE;
+					BYTE* ver = (BYTE*)&config.gl.version.real;
 
-						*ver = *ver * 10 + (*p - '0');
-					}
-					else
+					BOOL appears = FALSE;
+					CHAR* p = strVer;
+					for (DWORD charIdx = 0, byteIdx = 0; byteIdx < 4; ++p)
 					{
-						if (*p != '.' || appears)
+						if (*p >= '0' && *p <= '9')
 						{
-							if (config.gl.version.value)
+							appears = FALSE;
+
+							*ver = *ver * 10 + (*p - '0');
+						}
+						else
+						{
+							if (*p != '.' || appears)
 							{
-								BYTE* ver = (BYTE*)&config.gl.version.value + 3;
-								while (!*ver)
-									config.gl.version.value <<= 8;
+								if (config.gl.version.real)
+								{
+									BYTE* ver = (BYTE*)&config.gl.version.real + 3;
+									while (!*ver)
+										config.gl.version.real <<= 8;
+								}
+
+								break;
 							}
 
-							break;
+							appears = TRUE;
+							config.gl.version.real <<= 8;
+							++byteIdx;
+							charIdx = 0;
 						}
-
-						appears = TRUE;
-						config.gl.version.value <<= 8;
-						++byteIdx;
-						charIdx = 0;
 					}
 				}
-			}
-			else
-				config.gl.version.value = GL_VER_1_1;
+				else
+					config.gl.version.real = GL_VER_1_1;
 
-			if (config.gl.version.value < GL_VER_1_2)
+				if (config.gl.version.real < GL_VER_1_2)
+				{
+					CHAR* extensions = (CHAR*)GLGetString(GL_EXTENSIONS);
+					if (extensions)
+						config.gl.caps.clampToEdge = (StrStr(extensions, "GL_EXT_texture_edge_clamp") || StrStr(extensions, "GL_SGIS_texture_edge_clamp")) ? GL_CLAMP_TO_EDGE : GL_CLAMP;
+				}
+				else
+					config.gl.caps.clampToEdge = GL_CLAMP_TO_EDGE;
+			}
+
+			if (!config.gl.version.real)
+				config.gl.version.real = GL_VER_1_1;
+			else if (config.gl.version.real >= GL_VER_2_0)
 			{
-				CHAR* extensions = (CHAR*)GLGetString(GL_EXTENSIONS);
-				if (extensions)
-					config.gl.caps.clampToEdge = (StrStr(extensions, "GL_EXT_texture_edge_clamp") || StrStr(extensions, "GL_SGIS_texture_edge_clamp")) ? GL_CLAMP_TO_EDGE : GL_CLAMP;
+				DWORD check = max(config.mode->width, config.mode->height);
+				DWORD size = 1;
+				while (size < check)
+					size <<= 1;
+
+				DWORD maxSize;
+				GLGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint*)&maxSize);
+				if (maxSize < size)
+					config.gl.version.real = GL_VER_1_1;
 			}
-			else
-				config.gl.caps.clampToEdge = GL_CLAMP_TO_EDGE;
 		}
-
-		if (!config.gl.version.value)
-			config.gl.version.value = GL_VER_1_1;
-		else if (config.gl.version.value >= GL_VER_2_0)
-		{
-			DWORD check = max(config.mode->width, config.mode->height);
-			DWORD size = 1;
-			while (size < check)
-				size <<= 1;
-
-			DWORD maxSize;
-			GLGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint*)&maxSize);
-			if (maxSize < size)
-				config.gl.version.value = GL_VER_1_1;
-		}
-
-		config.gl.version.real = config.gl.version.value;
 	}
 
 	VOID __fastcall ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)

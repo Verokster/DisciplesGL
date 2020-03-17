@@ -116,13 +116,6 @@ struct DisplayMode {
 	DWORD bpp;
 };
 
-enum FpsState
-{
-	FpsDisabled = 0,
-	FpsNormal,
-	FpsBenchmark
-};
-
 union Levels
 {
 	struct {
@@ -304,7 +297,6 @@ struct ConfigItems {
 	} image;
 
 	struct {
-		BYTE fpsCounter;
 		BYTE imageFilter;
 		BYTE windowedMode;
 		BYTE aspectRatio;

@@ -246,7 +246,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 		if (state.flags && newSize != this->viewSize)
 			this->pixelBuffer->Reset();
 
-		if (!ready || this->pixelBuffer->Update(lpStateBuffer, TRUE) || state.flags || this->borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+		if (this->pixelBuffer->Update(lpStateBuffer, ready, TRUE) || state.flags || this->borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 		{
 			if (this->isVSync != config.image.vSync)
 			{
@@ -531,7 +531,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 			GLBindTexFilter(textureId.primary, state.interpolation == InterpolateLinear || state.interpolation == InterpolateHermite ? GL_LINEAR : GL_NEAREST);
 		}
 
-		if (!ready || this->pixelBuffer->Update(lpStateBuffer) || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
+		if (this->pixelBuffer->Update(lpStateBuffer, ready) || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
 		{
 			if (this->isVSync != config.image.vSync)
 			{

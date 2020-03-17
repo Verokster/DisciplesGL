@@ -492,8 +492,6 @@ PixelBuffer::PixelBuffer(BOOL isTrue)
 
 	this->secondaryBuffer = new StateBufferAligned();
 
-	this->fpsCounter = new FpsCounter(isTrue);
-
 	if (config.updateMode == UpdateCPP)
 	{
 		this->ForwardCompare = CPP::ForwardCompare;
@@ -517,7 +515,6 @@ PixelBuffer::PixelBuffer(BOOL isTrue)
 PixelBuffer::~PixelBuffer()
 {
 	delete this->secondaryBuffer;
-	delete fpsCounter;
 }
 
 VOID PixelBuffer::Reset()
@@ -525,12 +522,9 @@ VOID PixelBuffer::Reset()
 	this->last = { 0, 0 };
 }
 
-BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL checkOnly)
+BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL checkOnly)
 {
 	this->primaryBuffer = *lpStateBuffer;
-
-	if (fpsState)
-		fpsCounter->Draw(this->primaryBuffer);
 
 	BOOL res = FALSE;
 	if (checkOnly)
@@ -562,91 +556,97 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL checkOnly)
 				res = TRUE;
 		}
 	}
-	else if (config.updateMode == UpdateNone || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
+	else
 	{
-		this->last = this->primaryBuffer->size;
+		GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 
-		if (!this->isTrue)
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)this->primaryBuffer->data + ((config.mode->height - this->last.height) >> 1) * config.mode->width + ((config.mode->width - this->last.width) >> 1));
-		else
-			GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGBA, GL_UNSIGNED_BYTE, (DWORD*)this->primaryBuffer->data + ((config.mode->height - this->last.height) >> 1) * config.mode->width + ((config.mode->width - this->last.width) >> 1));
-
-		res = TRUE;
-	}
-	else if (this->last.width == config.mode->width && this->last.height == config.mode->height)
-	{
-		DWORD left, right;
-		DWORD length = this->pitch * config.mode->height;
-		if ((left = this->ForwardCompare(length, 0, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data))
-			&& (right = this->BackwardCompare(length, length - 1, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data)))
+		if (config.updateMode == UpdateNone || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
 		{
-			DWORD top = (length - left) / this->pitch;
-			DWORD bottom = (right - 1) / this->pitch + 1;
+			this->last = this->primaryBuffer->size;
 
-			POINT offset = { 0, 0 };
-			for (DWORD y = top; y < bottom; y += BLOCK_SIZE)
-			{
-				DWORD bt = y + BLOCK_SIZE;
-				if (bt > bottom)
-					bt = bottom;
-
-				for (DWORD x = 0; x < this->last.width; x += BLOCK_SIZE)
-				{
-					DWORD rt = x + BLOCK_SIZE;
-					if (rt > this->last.width)
-						rt = this->last.width;
-
-					RECT rc = { *(LONG*)&x, *(LONG*)&y, *(LONG*)&rt, *(LONG*)&bt };
-					this->UpdateBlock(&rc, &offset);
-				}
-			}
+			if (!this->isTrue)
+				GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)this->primaryBuffer->data + ((config.mode->height - this->last.height) >> 1) * config.mode->width + ((config.mode->width - this->last.width) >> 1));
+			else
+				GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->last.width, this->last.height, GL_RGBA, GL_UNSIGNED_BYTE, (DWORD*)this->primaryBuffer->data + ((config.mode->height - this->last.height) >> 1) * config.mode->width + ((config.mode->width - this->last.width) >> 1));
 
 			res = TRUE;
 		}
-	}
-	else
-	{
-		RECT offset;
-		offset.left = (config.mode->width - this->last.width) >> 1;
-		offset.top = (config.mode->height - this->last.height) >> 1;
-		offset.right = offset.left + this->last.width;
-		offset.bottom = offset.top + this->last.height;
-
-		for (LONG y = offset.top; y < offset.bottom; y += BLOCK_SIZE)
+		else if (this->last.width == config.mode->width && this->last.height == config.mode->height)
 		{
-			LONG bottom = y + BLOCK_SIZE;
-			if (bottom > offset.bottom)
-				bottom = offset.bottom;
-
-			for (LONG x = offset.left; x < offset.right; x += BLOCK_SIZE)
+			DWORD left, right;
+			DWORD length = this->pitch * config.mode->height;
+			if ((left = this->ForwardCompare(length, 0, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data))
+				&& (right = this->BackwardCompare(length, length - 1, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data)))
 			{
-				LONG right = x + BLOCK_SIZE;
-				if (right > offset.right)
-					right = offset.right;
+				DWORD top = (length - left) / this->pitch;
+				DWORD bottom = (right - 1) / this->pitch + 1;
 
-				RECT rc = { x, y, right, bottom };
-				if (this->UpdateBlock(&rc, (POINT*)&offset))
-					res = TRUE;
+				POINT offset = { 0, 0 };
+				for (DWORD y = top; y < bottom; y += BLOCK_SIZE)
+				{
+					DWORD bt = y + BLOCK_SIZE;
+					if (bt > bottom)
+						bt = bottom;
+
+					for (DWORD x = 0; x < this->last.width; x += BLOCK_SIZE)
+					{
+						DWORD rt = x + BLOCK_SIZE;
+						if (rt > this->last.width)
+							rt = this->last.width;
+
+						RECT rc = { *(LONG*)&x, *(LONG*)&y, *(LONG*)&rt, *(LONG*)&bt };
+						this->UpdateBlock(&rc, &offset);
+					}
+				}
+
+				res = TRUE;
 			}
 		}
+		else
+		{
+			RECT offset;
+			offset.left = (config.mode->width - this->last.width) >> 1;
+			offset.top = (config.mode->height - this->last.height) >> 1;
+			offset.right = offset.left + this->last.width;
+			offset.bottom = offset.top + this->last.height;
+
+			for (LONG y = offset.top; y < offset.bottom; y += BLOCK_SIZE)
+			{
+				LONG bottom = y + BLOCK_SIZE;
+				if (bottom > offset.bottom)
+					bottom = offset.bottom;
+
+				for (LONG x = offset.left; x < offset.right; x += BLOCK_SIZE)
+				{
+					LONG right = x + BLOCK_SIZE;
+					if (right > offset.right)
+						right = offset.right;
+
+					RECT rc = { x, y, right, bottom };
+					if (this->UpdateBlock(&rc, (POINT*)&offset))
+						res = TRUE;
+				}
+			}
+		}
+
+		GLPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	}
 
 	if (res)
 	{
-		*lpStateBuffer = this->secondaryBuffer;
-		this->secondaryBuffer = this->primaryBuffer;
-
-		if (fpsState)
-			fpsCounter->Calculate();
-		return TRUE;
+		if (swap)
+		{
+			*lpStateBuffer = this->secondaryBuffer;
+			this->secondaryBuffer = this->primaryBuffer;
+		}
+		else
+		{
+			this->secondaryBuffer->size = this->primaryBuffer->size;
+			MemoryCopy(this->secondaryBuffer->data, this->primaryBuffer->data, config.mode->width * config.mode->height * (this->isTrue ? sizeof(DWORD) : sizeof(WORD)));
+		}
 	}
-	else if (fpsState == FpsBenchmark)
-	{
-		fpsCounter->Calculate();
-		return TRUE;
-	}
 
-	return FALSE;
+	return res;
 }
 
 BOOL PixelBuffer::UpdateBlock(RECT* rect, POINT* offset)

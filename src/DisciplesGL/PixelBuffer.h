@@ -27,7 +27,6 @@
 #include "Allocation.h"
 #include "ExtraTypes.h"
 #include "StateBuffer.h"
-#include "FpsCounter.h"
 
 #define BLOCK_SIZE 256
 
@@ -43,7 +42,6 @@ private:
 	DWORD pitch;
 	StateBufferAligned* primaryBuffer;
 	StateBufferAligned* secondaryBuffer;
-	FpsCounter* fpsCounter;
 
 	COMPARE ForwardCompare;
 	COMPARE BackwardCompare;
@@ -59,5 +57,5 @@ public:
 	~PixelBuffer();
 
 	VOID Reset();
-	BOOL Update(StateBufferAligned**, BOOL = FALSE);
+	BOOL Update(StateBufferAligned**, BOOL, BOOL = FALSE);
 };
