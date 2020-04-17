@@ -48,12 +48,9 @@ VOID MidRenderer::Begin()
 	this->texSize = (this->maxTexSize & 0xFFFF) | (this->maxTexSize << 16);
 
 	this->shaders = {
-		new ShaderProgram(GLSL_VER_1_10, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT),
-		new ShaderProgram(GLSL_VER_1_10, IDR_LINEAR_VERTEX_DOUBLE, IDR_LINEAR_FRAGMENT_DOUBLE),
-		new ShaderProgram(GLSL_VER_1_10, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT),
-		new ShaderProgram(GLSL_VER_1_10, IDR_HERMITE_VERTEX_DOUBLE, IDR_HERMITE_FRAGMENT_DOUBLE),
-		new ShaderProgram(GLSL_VER_1_10, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT),
-		new ShaderProgram(GLSL_VER_1_10, IDR_CUBIC_VERTEX_DOUBLE, IDR_CUBIC_FRAGMENT_DOUBLE)
+		new ShaderGroup(GLSL_VER_1_10, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
+		new ShaderGroup(GLSL_VER_1_10, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
+		new ShaderGroup(GLSL_VER_1_10, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS)
 	};
 
 	{
@@ -173,10 +170,10 @@ VOID MidRenderer::End()
 	}
 	GLUseProgram(NULL);
 
-	ShaderProgram** shader = (ShaderProgram**)&this->shaders;
-	DWORD count = sizeof(this->shaders) / sizeof(ShaderProgram*);
+	ShaderGroup** shader = (ShaderGroup**)&this->shaders;
+	DWORD count = sizeof(this->shaders) / sizeof(ShaderGroup*);
 	do
-		(*(shader++))->Release();
+		delete *shader;
 	while (--count);
 }
 
@@ -202,16 +199,16 @@ BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 			switch (state.interpolation)
 			{
 			case InterpolateHermite:
-				this->program = stateBuffer->isBack ? this->shaders.hermite_double : this->shaders.hermite;
+				this->program = this->shaders.hermite;
 				break;
 			case InterpolateCubic:
-				this->program = stateBuffer->isBack ? this->shaders.cubic_double : this->shaders.cubic;
+				this->program = this->shaders.cubic;
 				break;
 			default:
-				this->program = stateBuffer->isBack ? this->shaders.linear_double : this->shaders.linear;
+				this->program = this->shaders.linear;
 				break;
 			}
-			this->program->Use(this->texSize);
+			this->program->Use(this->texSize, stateBuffer->isBack);
 
 			if (state.flags || this->backStatus != stateBuffer->isBack)
 			{

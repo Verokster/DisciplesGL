@@ -35,7 +35,7 @@
 #define BORDERLESS_OFFSET 1
 
 #define WIDE_WIDTH 990
-#define WIDE_HEIGHT 800
+#define WIDE_HEIGHT 600
 
 #define MSG_TIMEOUT 10
 
@@ -53,6 +53,7 @@ extern const Resolution resolutionsList[28];
 
 extern Adjustment activeColors;
 extern const Adjustment inactiveColors;
+extern const Adjustment defaultColors;
 
 namespace Config
 {

@@ -46,7 +46,6 @@ typedef char GLchar;
 
 #define GLSL_VER_1_10 "#version 110\n"
 #define GLSL_VER_1_30 "#version 130\n"
-#define GLSL_VER_1_30_ALPHA "#version 130\n#define ALPHA_CHECK\n"
 
 #define WGL_DRAW_TO_WINDOW_ARB 0x2001
 #define WGL_SUPPORT_OPENGL_ARB 0x2010
@@ -280,7 +279,7 @@ namespace GL
 	VOID __fastcall PreparePixelFormatDescription(PIXELFORMATDESCRIPTOR*);
 	INT __fastcall PreparePixelFormat(PIXELFORMATDESCRIPTOR*);
 	VOID __fastcall ResetPixelFormat();
-	GLuint __fastcall CompileShaderSource(DWORD, const CHAR*, GLenum);
+	GLuint __fastcall CompileShaderSource(DWORD, CHAR*, GLenum);
 	HGLRC __fastcall Init(HWND, HDC*);
 	VOID __fastcall Release(HWND, HDC*, HGLRC*);
 }

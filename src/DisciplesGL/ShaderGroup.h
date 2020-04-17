@@ -24,30 +24,24 @@
 
 #pragma once
 
-#include "OGLRenderer.h"
+#include "Allocation.h"
+#include "ShaderProgram.h"
 
-class MidRenderer : public OGLRenderer {
+class ShaderGroup : public Allocation {
 private:
-	DWORD texSize;
-	Size zoomSize;
-	FLOAT buffer[4][8];
-	GLuint bufferName;
-
-	struct {
-		ShaderGroup* linear;
-		ShaderGroup* hermite;
-		ShaderGroup* cubic;
-	} shaders;
-
-	struct {
-		GLuint back;
-		GLuint primary;
-	} textureId;
-
-	VOID Begin();
-	VOID End();
-	BOOL RenderInner(BOOL, BOOL, StateBufferAligned**);
+	const CHAR* version;
+	DWORD vertexName;
+	DWORD fragmentName;
+	DWORD flags;
+	Adjustment* colors;
+	BOOL update;
+	ShaderProgram* current;
+	ShaderProgram* list;
 
 public:
-	MidRenderer(OpenDraw*);
+	ShaderGroup(const CHAR*, DWORD, DWORD, DWORD);
+	~ShaderGroup();
+
+	BOOL Check();
+	VOID Use(DWORD, BOOL);
 };

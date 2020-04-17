@@ -463,7 +463,7 @@ namespace GL
 		}
 	}
 
-	GLuint __fastcall CompileShaderSource(DWORD name, const CHAR* version, GLenum type)
+	GLuint __fastcall CompileShaderSource(DWORD name, CHAR* prefix, GLenum type)
 	{
 		HGLOBAL hResourceData;
 		LPVOID pData = NULL;
@@ -480,13 +480,13 @@ namespace GL
 
 		GLuint shader = GLCreateShader(type);
 
-		DWORD pre = StrLength(version);
+		DWORD pre = StrLength(prefix);
 		DWORD length = SizeofResource(hDllModule, hResource);
 		DWORD size = length + pre;
 		CHAR* source = (CHAR*)MemoryAlloc(size + 1);
 		const GLchar* srcData[] = { source };
 		{
-			MemoryCopy(source, version, pre);
+			MemoryCopy(source, prefix, pre);
 			MemoryCopy(source + pre, pData, length);
 			*(source + size) = NULL;
 

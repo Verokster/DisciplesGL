@@ -67,9 +67,6 @@
     <ClCompile Include="MappedFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderProgram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
@@ -87,6 +84,12 @@
     </ClCompile>
     <ClCompile Include="OldRenderer.cpp">
       <Filter>Source Files\Render\OGL</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderGroup.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderProgram.cpp">
+      <Filter>Source Files\Shaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -159,9 +162,6 @@
     <ClInclude Include="MappedFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderProgram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
@@ -179,6 +179,12 @@
     </ClInclude>
     <ClInclude Include="OldRenderer.h">
       <Filter>Header Files\Render\OGL</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderGroup.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderProgram.h">
+      <Filter>Header Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -226,6 +232,12 @@
     </Filter>
     <Filter Include="Header Files\Render\OGL">
       <UniqueIdentifier>{bfa9acb6-d47e-4f4b-b139-0478fc0e6b88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders">
+      <UniqueIdentifier>{533bf25d-13a4-4dd7-9146-a7050c0b041a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{e4660601-4d7c-4fd1-8108-1b4b78989a40}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

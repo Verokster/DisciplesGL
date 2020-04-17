@@ -27,15 +27,14 @@
 #include "Allocation.h"
 #include "ExtraTypes.h"
 
+#define SHADER_DOUBLE 0x1
+#define SHADER_LEVELS 0x2
+#define SHADER_ALPHA 0x4
+
 class ShaderProgram : public Allocation {
 private:
 	GLuint id;
-	const CHAR* version;
-	DWORD vertexName;
-	DWORD fragmentName;
 	DWORD texSize;
-	BOOL update;
-	Adjustment colors;
 	struct {
 		GLint texSize;
 		GLint hue;
@@ -51,12 +50,14 @@ private:
 		} output;
 	} loc;
 
-	VOID UpdateLevels();
+	Adjustment* colors;
 
 public:
-	ShaderProgram(const CHAR*, DWORD, DWORD);
+	ShaderProgram* last;
+	DWORD flags;
+	ShaderProgram(const CHAR*, DWORD, DWORD, DWORD, ShaderProgram*);
+	~ShaderProgram();
 
-	BOOL Check();
-	VOID Use(DWORD);
-	VOID Release();
+	VOID Use();
+	VOID Update(DWORD, Adjustment*);
 };

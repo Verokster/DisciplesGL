@@ -30,7 +30,7 @@
 class NewRenderer : public OGLRenderer {
 private:
 	DWORD texSize;
-	ShaderProgram* upscaleProgram;
+	ShaderGroup* upscaleProgram;
 	Size zoomSize;
 	Size zoomFbSize;
 	GLuint fboId;
@@ -44,23 +44,20 @@ private:
 	GLuint arrayName;
 	
 	struct {
-		ShaderProgram* linear;
-		ShaderProgram* linear_double;
-		ShaderProgram* hermite;
-		ShaderProgram* hermite_double;
-		ShaderProgram* cubic;
-		ShaderProgram* cubic_double;
-		ShaderProgram* xBRz_2x;
-		ShaderProgram* xBRz_3x;
-		ShaderProgram* xBRz_4x;
-		ShaderProgram* xBRz_5x;
-		ShaderProgram* xBRz_6x;
-		ShaderProgram* scaleHQ_2x;
-		ShaderProgram* scaleHQ_4x;
-		ShaderProgram* xSal_2x;
-		ShaderProgram* eagle_2x;
-		ShaderProgram* scaleNx_2x;
-		ShaderProgram* scaleNx_3x;
+		ShaderGroup* linear;
+		ShaderGroup* hermite;
+		ShaderGroup* cubic;
+		ShaderGroup* xBRz_2x;
+		ShaderGroup* xBRz_3x;
+		ShaderGroup* xBRz_4x;
+		ShaderGroup* xBRz_5x;
+		ShaderGroup* xBRz_6x;
+		ShaderGroup* scaleHQ_2x;
+		ShaderGroup* scaleHQ_4x;
+		ShaderGroup* xSal_2x;
+		ShaderGroup* eagle_2x;
+		ShaderGroup* scaleNx_2x;
+		ShaderGroup* scaleNx_3x;
 	} shaders;
 
 	struct {

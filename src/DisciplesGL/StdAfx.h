@@ -80,6 +80,8 @@ extern "C"
 #define MathCeil(x) ceil(x)
 #define MathFloor(x) floor(x)
 #define MathPower(a, b) pow(a, b)
+#define MathSinus(x) sin(x)
+#define MathCosinus(x) cos(x)
 #define StrPrint(buf, fmt, ...) sprintf(buf, fmt, __VA_ARGS__)
 #define StrPrintVar(buf, fmt, va) vsprintf(buf, fmt, va)
 #define StrLength(str) strlen(str)

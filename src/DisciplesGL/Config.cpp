@@ -104,6 +104,36 @@ const Adjustment inactiveColors = {
 	1.0f
 };
 
+const Adjustment defaultColors = {
+	0.5f,
+	0.5f,
+
+	0.0f,
+	0.0f,
+	0.0f,
+	0.0f,
+
+	1.0f,
+	1.0f,
+	1.0f,
+	1.0f,
+
+	0.5f,
+	0.5f,
+	0.5f,
+	0.5f,
+
+	0.0f,
+	0.0f,
+	0.0f,
+	0.0f,
+
+	1.0f,
+	1.0f,
+	1.0f,
+	1.0f
+};
+
 namespace Config
 {
 	BOOL __stdcall EnumLocalesCount(LPTSTR lpLocaleString)

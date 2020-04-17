@@ -492,23 +492,32 @@ PixelBuffer::PixelBuffer(BOOL isTrue)
 
 	this->secondaryBuffer = new StateBufferAligned();
 
-	if (config.updateMode == UpdateCPP)
+	switch (config.updateMode)
 	{
+	case UpdateCPP:
 		this->ForwardCompare = CPP::ForwardCompare;
 		this->BackwardCompare = CPP::BackwardCompare;
 		this->BlockForwardCompare = CPP::BlockForwardCompare;
 		this->BlockBackwardCompare = CPP::BlockBackwardCompare;
 		this->SideForwardCompare = CPP::SideForwardCompare;
 		this->SideBackwardCompare = CPP::SideBackwardCompare;
-	}
-	else if (config.updateMode == UpdateASM)
-	{
+		break;
+	case UpdateASM:
 		this->ForwardCompare = ASM::ForwardCompare;
 		this->BackwardCompare = ASM::BackwardCompare;
 		this->BlockForwardCompare = ASM::BlockForwardCompare;
 		this->BlockBackwardCompare = ASM::BlockBackwardCompare;
 		this->SideForwardCompare = ASM::SideForwardCompare;
 		this->SideBackwardCompare = ASM::SideBackwardCompare;
+		break;
+	default:
+		this->ForwardCompare = NULL;
+		this->BackwardCompare = NULL;
+		this->BlockForwardCompare = NULL;
+		this->BlockBackwardCompare = NULL;
+		this->SideForwardCompare = NULL;
+		this->SideBackwardCompare = NULL;
+		break;
 	}
 }
 
@@ -529,7 +538,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 	BOOL res = FALSE;
 	if (checkOnly)
 	{
-		if (config.updateMode == UpdateNone || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
+		if (!this->ForwardCompare || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
 		{
 			this->last = this->primaryBuffer->size;
 			res = TRUE;
@@ -560,7 +569,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 	{
 		GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 
-		if (config.updateMode == UpdateNone || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
+		if (!this->ForwardCompare || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
 		{
 			this->last = this->primaryBuffer->size;
 

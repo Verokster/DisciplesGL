@@ -109,6 +109,8 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x005094B1, 0x00509575,
 		0x00552D19, 0x0042924B, 0x004292D3,
 		0x00510361, 0x00510419,
+
+		0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .41
@@ -143,6 +145,8 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x0050E461, 0x0050E525,
 		0x00558E25, 0x0042A9E1, 0x0042AA69,
 		0x00515681, 0x00515739,
+
+		0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .01
@@ -177,6 +181,8 @@ namespace Hooks
 		0x00450226, 0x004502B3, 0x0040A789, 0x00513981, 0x00513A45,
 		0x0055EA01, 0x0042AE78, 0x0042AF00,
 		0x0051ABC1, 0x0051AC79,
+
+		0x00651AE8, 0x00651B34,
 #pragma endregion
 
 #pragma region v2 .01 - Steam
@@ -211,6 +217,8 @@ namespace Hooks
 		0x0045010A, 0x00450197, 0x0040A4AE, 0x005141A1, 0x00514265,
 		0x0055F0EF, 0x0042AC9E, 0x0042AD26,
 		0x0051B331, 0x0051B3E9,
+
+		0x00651AA8, 0x00651AF4,
 #pragma endregion
 
 #pragma region v2 .02
@@ -245,6 +253,8 @@ namespace Hooks
 		0x00450417, 0x004504A4, 0x0040A438, 0x00512D71, 0x00512E35,
 		0x0055D726, 0x0042AC64, 0x0042ACEC,
 		0x00519FF1, 0x0051A0A9,
+
+		0x00650628, 0x00650674,
 #pragma endregion
 
 #pragma region v2 .02 - Crack
@@ -279,6 +289,8 @@ namespace Hooks
 		0x004506BD, 0x0045074A, 0x0040A79F, 0x00513EB1, 0x00513F75,
 		0x0055F051, 0x0042AE8E, 0x0042AF16,
 		0x0051B0F1, 0x0051B1A9,
+
+		0x00651BF8, 0x00651C44,
 #pragma endregion
 
 #pragma region v3 .00 - Steam
@@ -313,6 +325,8 @@ namespace Hooks
 		0x0045257F, 0x0045260C, 0x0040A3D9, 0x00517311, 0x005173D5,
 		0x00561961, 0x0042BF1B, 0x0042BFA3,
 		0x0051E501, 0x0051E5B9,
+
+		0x00659398, 0x006593E4,
 #pragma endregion
 
 #pragma region v3 .01a
@@ -347,6 +361,8 @@ namespace Hooks
 		0x004526E8, 0x00452775, 0x0040A79D, 0x00517111, 0x005171D5,
 		0x00561B61, 0x0042C330, 0x0042C3B8,
 		0x0051E2B1, 0x0051E369,
+
+		0x0065A018, 0x0065A064,
 #pragma endregion
 
 #pragma region v3 .01b
@@ -381,6 +397,8 @@ namespace Hooks
 		0x004520B4, 0x00452141, 0x0040A3F9, 0x00516621, 0x005166E5,
 		0x005612FE, 0x0042BD4D, 0x0042BDD5,
 		0x0051D871, 0x0051D929,
+
+		0x00658A98, 0x00658AE4,
 #pragma endregion
 
 #pragma region v1 .10 Editor
@@ -415,6 +433,8 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x004947C1, 0x00494885,
 		0x0046DAB2, 0x00000000, 0x00000000,
 		0x0049B711, 0x0049B7C9,
+
+		0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .41 Editor
@@ -449,6 +469,8 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00495941, 0x00495A05,
 		0x0046DCE2, 0x00000000, 0x00000000,
 		0x0049CC41, 0x0049CCF9,
+
+		0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .00 Editor - Steam
@@ -483,6 +505,8 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x004AD0E1, 0x004AD1A5,
 		0x00485073, 0x00000000, 0x00000000,
 		0x004B43C1, 0x004B4479,
+
+		0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .01 Editor
@@ -517,6 +541,8 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
 		0x00484719, 0x00000000, 0x00000000,
 		0x004B3AE1, 0x004B3B99,
+
+		0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .02 Editor
@@ -551,6 +577,8 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
 		0x00484719, 0x00000000, 0x00000000,
 		0x004B3AE1, 0x004B3B99,
+
+		0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .00 Editor - Steam
@@ -585,6 +613,8 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x004AFD41, 0x004AFE05,
 		0x00487C40, 0x00000000, 0x00000000,
 		0x004B7001, 0x004B70B9,
+
+		0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .01 Editor
@@ -618,7 +648,9 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AED61, 0x004AEE25,
 		0x00486E3C, 0x00000000, 0x00000000,
-		0x004B6051, 0x004B6109
+		0x004B6051, 0x004B6109,
+
+		0x00000000, 0x00000000
 #pragma endregion
 	};
 
@@ -3937,6 +3969,7 @@ namespace Hooks
 	DWORD sub_LoadImgPackage;
 	DWORD __stdcall LoadImgPackage(DWORD** store, CHAR* dir, CHAR* filename, DWORD unknown)
 	{
+		*(store + 24) = 0;
 		if (((DWORD(__stdcall*)(DWORD**, CHAR*, CHAR*, DWORD))sub_LoadImgPackage)(store + 24, dir, "Wrapper.ff", unknown))
 			config.package = (DWORD*)store[24][0];
 
@@ -5314,6 +5347,58 @@ namespace Hooks
 	}
 #pragma endregion
 
+#pragma region Sphere fix
+	VOID __declspec(naked) hook_00650628()
+	{
+		__asm {
+			MOV EAX, config.mode
+			MOV EAX, [EAX]
+			SAR EAX, 1
+			ADD EDX, EAX
+
+			MOV EAX, config.battle.wide
+			TEST EAX, EAX
+			JNZ lbl_wide
+			MOV EAX, GAME_WIDTH
+			JMP lbl_cont
+			lbl_wide:
+			MOV EAX, WIDE_WIDTH
+			lbl_cont:
+			SAR EAX, 1
+			SUB EDX, EAX
+
+			MOV EAX, [EBP-0x38]
+			MOV [EAX], EDX
+			RETN
+		}
+	}
+
+	VOID __declspec(naked) hook_00650674()
+	{
+		__asm {
+			MOV EAX, config.mode
+			MOV EAX, [EAX+0x4]
+			SAR EAX, 1
+			ADD EDX, EAX
+
+			MOV EAX, config.battle.wide
+			TEST EAX, EAX
+			JNZ lbl_wide
+			MOV EAX, GAME_HEIGHT
+			JMP lbl_cont
+			lbl_wide:
+			MOV EAX, WIDE_HEIGHT
+			lbl_cont:
+			SAR EAX, 1
+			SUB EDX, EAX
+
+			MOV EAX, [EBP-0x40]
+			MOV [EAX], EDX
+			RETN
+		}
+	}
+#pragma endregion
+
 	BOOL __stdcall FakeEntryPoint(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	{
 		return TRUE;
@@ -5588,6 +5673,13 @@ namespace Hooks
 			PatchCall(hookSpace->btlLoadBack_3, hook_005AEF44);
 
 			PatchHook(hookSpace->btlBackHeight, hook_00529AEB);
+		}
+
+		// Sphere fix
+		if (hookSpace->sphere_x && hookSpace->sphere_y)
+		{
+			PatchCall(hookSpace->sphere_x, hook_00650628);
+			PatchCall(hookSpace->sphere_y, hook_00650674);
 		}
 
 		if (config.hd)

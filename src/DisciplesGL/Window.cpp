@@ -1279,8 +1279,8 @@ namespace Window
 						FLOAT h = 2.0f * config.colors.active.hueShift - 1.0f;
 						FLOAT s = (FLOAT)MathPower(2.0f * config.colors.active.saturation, 1.5849625007211561f);
 
-						FLOAT vsu = s * (FLOAT)cos(h * M_PI);
-						FLOAT vsw = s * (FLOAT)sin(h * M_PI);
+						FLOAT vsu = s * (FLOAT)MathCosinus(h * M_PI);
+						FLOAT vsw = s * (FLOAT)MathSinus(h * M_PI);
 
 						LevelColorsFloat mat[3] = {
 							{ 0.299f + 0.701f * vsu + 0.168f * vsw,

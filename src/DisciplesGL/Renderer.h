@@ -26,7 +26,7 @@
 
 #include "Allocation.h"
 #include "ExtraTypes.h"
-#include "ShaderProgram.h"
+#include "ShaderGroup.h"
 #include "StateBuffer.h"
 
 class OpenDraw;
@@ -40,7 +40,7 @@ protected:
 	OpenDraw* ddraw;
 	HDC hDc;
 	BOOL isFinish;
-	ShaderProgram* program;
+	ShaderGroup* program;
 
 	BOOL Stop();
 	VOID Render();

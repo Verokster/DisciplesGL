@@ -47,25 +47,22 @@ VOID NewRenderer::Begin()
 
 	this->texSize = (this->maxTexSize & 0xFFFF) | (this->maxTexSize << 16);
 
-	const CHAR* xbrzVersion = config.bpp32Hooked ? GLSL_VER_1_30_ALPHA : GLSL_VER_1_30;
+	DWORD flags = config.bpp32Hooked ? SHADER_ALPHA : NULL;
 	this->shaders = {
-		new ShaderProgram(GLSL_VER_1_30, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT),
-		new ShaderProgram(GLSL_VER_1_30, IDR_LINEAR_VERTEX_DOUBLE, IDR_LINEAR_FRAGMENT_DOUBLE),
-		new ShaderProgram(GLSL_VER_1_30, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT),
-		new ShaderProgram(GLSL_VER_1_30, IDR_HERMITE_VERTEX_DOUBLE, IDR_HERMITE_FRAGMENT_DOUBLE),
-		new ShaderProgram(GLSL_VER_1_30, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT),
-		new ShaderProgram(GLSL_VER_1_30, IDR_CUBIC_VERTEX_DOUBLE, IDR_CUBIC_FRAGMENT_DOUBLE),
-		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_2X),
-		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_3X),
-		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_4X),
-		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_5X),
-		new ShaderProgram(xbrzVersion, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_6X),
-		new ShaderProgram(GLSL_VER_1_30, IDR_SCALEHQ_VERTEX_2X, IDR_SCALEHQ_FRAGMENT_2X),
-		new ShaderProgram(GLSL_VER_1_30, IDR_SCALEHQ_VERTEX_4X, IDR_SCALEHQ_FRAGMENT_4X),
-		new ShaderProgram(GLSL_VER_1_30, IDR_XSAL_VERTEX, IDR_XSAL_FRAGMENT),
-		new ShaderProgram(GLSL_VER_1_30, IDR_EAGLE_VERTEX, IDR_EAGLE_FRAGMENT),
-		new ShaderProgram(GLSL_VER_1_30, IDR_SCALENX_VERTEX_2X, IDR_SCALENX_FRAGMENT_2X),
-		new ShaderProgram(GLSL_VER_1_30, IDR_SCALENX_VERTEX_3X, IDR_SCALENX_FRAGMENT_3X)
+		new ShaderGroup(GLSL_VER_1_30, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
+		new ShaderGroup(GLSL_VER_1_30, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
+		new ShaderGroup(GLSL_VER_1_30, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
+		new ShaderGroup(GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_2X, flags),
+		new ShaderGroup(GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_3X, flags),
+		new ShaderGroup(GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_4X, flags),
+		new ShaderGroup(GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_5X, flags),
+		new ShaderGroup(GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_6X, flags),
+		new ShaderGroup(GLSL_VER_1_30, IDR_SCALEHQ_VERTEX_2X, IDR_SCALEHQ_FRAGMENT_2X, NULL),
+		new ShaderGroup(GLSL_VER_1_30, IDR_SCALEHQ_VERTEX_4X, IDR_SCALEHQ_FRAGMENT_4X, NULL),
+		new ShaderGroup(GLSL_VER_1_30, IDR_XSAL_VERTEX, IDR_XSAL_FRAGMENT, NULL),
+		new ShaderGroup(GLSL_VER_1_30, IDR_EAGLE_VERTEX, IDR_EAGLE_FRAGMENT, NULL),
+		new ShaderGroup(GLSL_VER_1_30, IDR_SCALENX_VERTEX_2X, IDR_SCALENX_FRAGMENT_2X, NULL),
+		new ShaderGroup(GLSL_VER_1_30, IDR_SCALENX_VERTEX_3X, IDR_SCALENX_FRAGMENT_3X, NULL)
 	};
 
 	{
@@ -219,10 +216,10 @@ VOID NewRenderer::End()
 	}
 	GLUseProgram(NULL);
 
-	ShaderProgram** shader = (ShaderProgram**)&shaders;
-	DWORD count = sizeof(shaders) / sizeof(ShaderProgram*);
+	ShaderGroup** shader = (ShaderGroup**)&this->shaders;
+	DWORD count = sizeof(this->shaders) / sizeof(ShaderGroup*);
 	do
-		(*(shader++))->Release();
+		delete *shader;
 	while (--count);
 }
 
@@ -365,7 +362,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 						}
 					}
 
-					this->upscaleProgram->Use(this->texSize);
+					this->upscaleProgram->Use(this->texSize, FALSE);
 
 					if (!config.version && config.resHooked)
 					{
@@ -388,6 +385,8 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 					GLFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId.primaryBO, 0);
 				}
+				else
+					this->upscaleProgram->Use(this->texSize, FALSE);
 
 				if (stateBuffer->isZoomed)
 					GLViewport(0, 0, DWORD(kw * LOWORD(this->viewSize)), DWORD(kh * HIWORD(this->viewSize)));
@@ -422,10 +421,12 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 				GLBindTexFilter(((GLuint*)&textureId.primary)[this->activeIndex], GL_LINEAR);
 
 				{
+					GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 					if (!this->isTrueColor)
 						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize->width, frameSize->height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)stateBuffer->data + ((config.mode->height - frameSize->height) >> 1) * config.mode->width + ((config.mode->width - frameSize->width) >> 1));
 					else
 						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize->width, frameSize->height, GL_RGBA, GL_UNSIGNED_BYTE, (DWORD*)stateBuffer->data + ((config.mode->height - frameSize->height) >> 1) * config.mode->width + ((config.mode->width - frameSize->width) >> 1));
+					GLPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
 					// Draw into FBO texture
 					if (stateBuffer->isZoomed)
@@ -458,19 +459,18 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 			switch (state.interpolation)
 			{
 			case InterpolateHermite:
-				this->program = stateBuffer->isBack ? shaders.hermite_double : shaders.hermite;
+				this->program = shaders.hermite;
 				break;
 			case InterpolateCubic:
-				this->program = stateBuffer->isBack ? shaders.cubic_double : shaders.cubic;
+				this->program = shaders.cubic;
 				break;
 			default:
-				this->program = stateBuffer->isBack ? shaders.linear_double : shaders.linear;
+				this->program = shaders.linear;
 				break;
 			}
 
-			this->program->Use(this->texSize);
+			this->program->Use(this->texSize, stateBuffer->isBack);
 			{
-				GLClear(GL_COLOR_BUFFER_BIT);
 				GLViewport(this->ddraw->viewport.rectangle.x, this->ddraw->viewport.rectangle.y + this->ddraw->viewport.offset, this->ddraw->viewport.rectangle.width, this->ddraw->viewport.rectangle.height);
 
 				if (stateBuffer->isBack)
@@ -501,7 +501,6 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 				else
 					GLDrawArrays(GL_TRIANGLE_FAN, 8, 4);
 			}
-			this->upscaleProgram->Use(this->texSize);
 			isSwap = TRUE;
 		}
 	}
@@ -551,17 +550,17 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 				switch (state.interpolation)
 				{
 				case InterpolateHermite:
-					this->program = stateBuffer->isBack ? shaders.hermite_double : shaders.hermite;
+					this->program = shaders.hermite;
 					break;
 				case InterpolateCubic:
-					this->program = stateBuffer->isBack ? shaders.cubic_double : shaders.cubic;
+					this->program = shaders.cubic;
 					break;
 				default:
-					this->program = stateBuffer->isBack ? shaders.linear_double : shaders.linear;
+					this->program = shaders.linear;
 					break;
 				}
 
-				this->program->Use(this->texSize);
+				this->program->Use(this->texSize, stateBuffer->isBack);
 
 				if (state.flags || this->backStatus != stateBuffer->isBack)
 				{

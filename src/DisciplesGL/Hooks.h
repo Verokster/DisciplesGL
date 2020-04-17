@@ -247,6 +247,9 @@ namespace Hooks
 
 		DWORD speed_anim;
 		DWORD speed_map;
+
+		DWORD sphere_x;
+		DWORD sphere_y;
 	};
 
 	struct BlendData {
