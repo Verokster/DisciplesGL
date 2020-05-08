@@ -69,18 +69,21 @@
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 1|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <GenerateManifest>false</GenerateManifest>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2|Win32'">
     <Midl>
@@ -235,13 +238,13 @@
     <ClCompile Include="Allocation.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="GDIRenderer.cpp" />
+    <ClCompile Include="Hooker.cpp" />
     <ClCompile Include="IDraw7.cpp" />
     <ClCompile Include="IDrawClipper.cpp" />
     <ClCompile Include="IDrawPalette.cpp" />
     <ClCompile Include="IDrawSurface7.cpp" />
     <ClCompile Include="IDrawUnknown.cpp" />
     <ClCompile Include="IPlay4.cpp" />
-    <ClCompile Include="MappedFile.cpp" />
     <ClCompile Include="MidRenderer.cpp" />
     <ClCompile Include="NewRenderer.cpp" />
     <ClCompile Include="OGLRenderer.cpp" />
@@ -270,13 +273,13 @@
     <ClInclude Include="Allocation.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="GDIRenderer.h" />
+    <ClInclude Include="Hooker.h" />
     <ClInclude Include="IDraw7.h" />
     <ClInclude Include="IDrawClipper.h" />
     <ClInclude Include="IDrawPalette.h" />
     <ClInclude Include="IDrawSurface7.h" />
     <ClInclude Include="IDrawUnknown.h" />
     <ClInclude Include="IPlay4.h" />
-    <ClInclude Include="MappedFile.h" />
     <ClInclude Include="MidRenderer.h" />
     <ClInclude Include="NewRenderer.h" />
     <ClInclude Include="OGLRenderer.h" />

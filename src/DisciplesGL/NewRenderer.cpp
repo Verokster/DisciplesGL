@@ -97,7 +97,7 @@ VOID NewRenderer::Begin()
 
 							for (DWORD i = 0; i < 8; ++i)
 							{
-								FLOAT* vector = &buffer[i][0];
+								FLOAT* vector = &this->buffer[i][0];
 								for (DWORD j = 0; j < 4; ++j)
 								{
 									FLOAT sum = 0.0f;
@@ -108,11 +108,11 @@ VOID NewRenderer::Begin()
 								}
 							}
 
-							GLBufferData(GL_ARRAY_BUFFER, sizeof(buffer) << 1, NULL, GL_STATIC_DRAW);
-							GLBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(buffer) >> 1, buffer);
-							GLBufferSubData(GL_ARRAY_BUFFER, sizeof(buffer) >> 1, sizeof(buffer) >> 1, buffer);
-							GLBufferSubData(GL_ARRAY_BUFFER, sizeof(buffer), sizeof(buffer) >> 1, &buffer[4]);
-							GLBufferSubData(GL_ARRAY_BUFFER, (sizeof(buffer) >> 1) * 3, sizeof(buffer) >> 1, &buffer[4]);
+							GLBufferData(GL_ARRAY_BUFFER, sizeof(this->buffer) << 1, NULL, GL_STATIC_DRAW);
+							GLBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(this->buffer) >> 1, this->buffer);
+							GLBufferSubData(GL_ARRAY_BUFFER, sizeof(this->buffer) >> 1, sizeof(this->buffer) >> 1, this->buffer);
+							GLBufferSubData(GL_ARRAY_BUFFER, sizeof(this->buffer), sizeof(this->buffer) >> 1, &this->buffer[4]);
+							GLBufferSubData(GL_ARRAY_BUFFER, (sizeof(this->buffer) >> 1) * 3, sizeof(this->buffer) >> 1, &this->buffer[4]);
 						}
 
 						{
@@ -438,12 +438,12 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 							FLOAT tw = (FLOAT)frameSize->width / this->maxTexSize;
 							FLOAT th = (FLOAT)frameSize->height / this->maxTexSize;
 
-							buffer[1][4] = tw;
-							buffer[2][4] = tw;
-							buffer[2][5] = th;
-							buffer[3][5] = th;
+							this->buffer[1][4] = tw;
+							this->buffer[2][4] = tw;
+							this->buffer[2][5] = th;
+							this->buffer[3][5] = th;
 
-							GLBufferSubData(GL_ARRAY_BUFFER, 5 * 8 * sizeof(FLOAT), 3 * 8 * sizeof(FLOAT), &buffer[1]);
+							GLBufferSubData(GL_ARRAY_BUFFER, 5 * 8 * sizeof(FLOAT), 3 * 8 * sizeof(FLOAT), &this->buffer[1]);
 						}
 
 						GLDrawArrays(GL_TRIANGLE_FAN, 4, 4);
@@ -488,12 +488,12 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 					{
 						this->zoomFbSize = *frameSize;
 
-						buffer[4][5] = kh;
-						buffer[5][4] = kw;
-						buffer[5][5] = kh;
-						buffer[6][4] = kw;
+						this->buffer[4][5] = kh;
+						this->buffer[5][4] = kw;
+						this->buffer[5][5] = kh;
+						this->buffer[6][4] = kw;
 
-						GLBufferSubData(GL_ARRAY_BUFFER, 12 * 8 * sizeof(FLOAT), 3 * 8 * sizeof(FLOAT), &buffer[4]);
+						GLBufferSubData(GL_ARRAY_BUFFER, 12 * 8 * sizeof(FLOAT), 3 * 8 * sizeof(FLOAT), &this->buffer[4]);
 					}
 
 					GLDrawArrays(GL_TRIANGLE_FAN, 12, 4);
@@ -587,12 +587,12 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 					FLOAT tw = (FLOAT)frameSize->width / this->maxTexSize;
 					FLOAT th = (FLOAT)frameSize->height / this->maxTexSize;
 
-					buffer[1][4] = tw;
-					buffer[2][4] = tw;
-					buffer[2][5] = th;
-					buffer[3][5] = th;
+					this->buffer[1][4] = tw;
+					this->buffer[2][4] = tw;
+					this->buffer[2][5] = th;
+					this->buffer[3][5] = th;
 
-					GLBufferSubData(GL_ARRAY_BUFFER, 5 * 8 * sizeof(FLOAT), 3 * 8 * sizeof(FLOAT), &buffer[1]);
+					GLBufferSubData(GL_ARRAY_BUFFER, 5 * 8 * sizeof(FLOAT), 3 * 8 * sizeof(FLOAT), &this->buffer[1]);
 				}
 
 				GLDrawArrays(GL_TRIANGLE_FAN, 4, 4);

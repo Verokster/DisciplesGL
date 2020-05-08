@@ -22,43 +22,44 @@
 	SOFTWARE.
 */
 
-#include "stdafx.h"
-#include "MappedFile.h"
+#pragma once
 
-MappedFile::MappedFile(HMODULE hModule)
-{
-	this->hModule = hModule;
-	this->hFile = INVALID_HANDLE_VALUE;
-	this->hMap = NULL;
-	this->address = NULL;
-}
+#include "Allocation.h"
 
-MappedFile::~MappedFile()
-{
-	if (this->address)
-		UnmapViewOfFile(this->address);
+#pragma once
+class Hooker : public Allocation {
+private:
+	HANDLE hFile;
+	HANDLE hMap;
 
-	if (this->hMap)
-		CloseHandle(this->hMap);
+public:
+	HMODULE hModule;
+	PIMAGE_NT_HEADERS headNT;
+	DWORD baseOffset;
+	VOID* mapAddress;
 
-	if (this->hFile != INVALID_HANDLE_VALUE)
-		CloseHandle(this->hFile);
-}
+	Hooker(HMODULE);
+	~Hooker();
 
-VOID MappedFile::Load()
-{
-	CHAR filePath[MAX_PATH];
-	GetModuleFileName(hModule, filePath, MAX_PATH);
-	this->hFile = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	BOOL MapFile();
+	VOID UnmapFile();
 
-	if (this->hFile == INVALID_HANDLE_VALUE)
-		return;
-
-	this->hMap = CreateFileMapping(this->hFile, NULL, PAGE_READONLY, 0, 0, NULL);
-	if (!this->hMap)
-		return;
-
-	this->address = MapViewOfFile(this->hMap, FILE_MAP_READ, 0, 0, 0);
-}
-
-
+	BOOL PatchSet(DWORD, BYTE, DWORD);
+	BOOL PatchNop(DWORD, DWORD);
+	BOOL PatchRedirect(DWORD, DWORD, BYTE, DWORD);
+	BOOL PatchJump(DWORD, DWORD);
+	BOOL PatchHook(DWORD, VOID*, DWORD = 0);
+	BOOL PatchCall(DWORD, VOID*, DWORD = 0);
+	BOOL PatchBlock(DWORD, VOID* block, DWORD);
+	BOOL ReadBlock(DWORD, VOID* block, DWORD);
+	BOOL PatchWord(DWORD, WORD);
+	BOOL PatchDWord(DWORD, DWORD);
+	BOOL PatchByte(DWORD, BYTE);
+	BOOL ReadWord(DWORD, WORD*);
+	BOOL ReadDWord(DWORD, DWORD*);
+	BOOL ReadByte(DWORD, BYTE*);
+	BOOL ReadRedirect(DWORD, DWORD*);
+	BOOL RedirectCall(DWORD, VOID*, DWORD* old);
+	DWORD PatchImport(const CHAR*, VOID*, BOOL = FALSE);
+	DWORD PatchEntryPoint(VOID*);
+};

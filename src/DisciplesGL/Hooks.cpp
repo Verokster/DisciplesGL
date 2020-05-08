@@ -35,15 +35,12 @@
 #include "Window.h"
 #include "PngLib.h"
 #include "IPlay4.h"
-#include "MappedFile.h"
+#include "Hooker.h"
 
 #define CHECKVALUE (WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX)
 
 namespace Hooks
 {
-	HMODULE hModule;
-	INT baseOffset;
-
 	const BYTE nop4[] = { 0x83, 0xC4, 0x04, 0x90, 0x90 };
 
 	const AddressSpaceV1 addressArrayV1[] = {
@@ -653,304 +650,6 @@ namespace Hooks
 		0x00000000, 0x00000000
 #pragma endregion
 	};
-
-#pragma region Hook helpers
-#pragma optimize("s", on)
-	BOOL __fastcall PatchSet(DWORD addr, BYTE byte, DWORD size)
-	{
-		DWORD address = addr + baseOffset;
-
-		DWORD old_prot;
-		if (VirtualProtect((VOID*)address, size, PAGE_EXECUTE_READWRITE, &old_prot))
-		{
-			MemorySet((VOID*)address, byte, size);
-			VirtualProtect((VOID*)address, size, old_prot, &old_prot);
-
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	BOOL __fastcall PatchNop(DWORD addr, DWORD size)
-	{
-		return PatchSet(addr, 0x90, size);
-	}
-
-	BOOL __fastcall PatchRedirect(DWORD addr, DWORD dest, BYTE instruction, DWORD nop)
-	{
-		DWORD address = addr + baseOffset;
-
-		DWORD size = instruction == 0xEB ? 2 : 5;
-
-		DWORD old_prot;
-		if (VirtualProtect((VOID*)address, size + nop, PAGE_EXECUTE_READWRITE, &old_prot))
-		{
-			BYTE* jump = (BYTE*)address;
-			*jump = instruction;
-			++jump;
-			*(DWORD*)jump = dest - address - size;
-
-			if (nop)
-				MemorySet((VOID*)(address + size), 0x90, nop);
-
-			VirtualProtect((VOID*)address, size + nop, old_prot, &old_prot);
-
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	BOOL __fastcall PatchJump(DWORD addr, DWORD dest)
-	{
-		INT relative = dest - addr - baseOffset - 2;
-		return PatchRedirect(addr, dest, relative >= -128 && relative <= 127 ? 0xEB : 0xE9, 0);
-	}
-
-	BOOL __fastcall PatchHook(DWORD addr, VOID* hook, DWORD nop = 0)
-	{
-		return PatchRedirect(addr, (DWORD)hook, 0xE9, nop);
-	}
-
-	BOOL __fastcall PatchCall(DWORD addr, VOID* hook, DWORD nop = 0)
-	{
-		return PatchRedirect(addr, (DWORD)hook, 0xE8, nop);
-	}
-
-	BOOL __fastcall PatchBlock(DWORD addr, VOID* block, DWORD size)
-	{
-		DWORD address = addr + baseOffset;
-
-		DWORD old_prot;
-		if (VirtualProtect((VOID*)address, size, PAGE_EXECUTE_READWRITE, &old_prot))
-		{
-			switch (size)
-			{
-			case 4:
-				*(DWORD*)address = *(DWORD*)block;
-				break;
-			case 2:
-				*(WORD*)address = *(WORD*)block;
-				break;
-			case 1:
-				*(BYTE*)address = *(BYTE*)block;
-				break;
-			default:
-				MemoryCopy((VOID*)address, block, size);
-				break;
-			}
-
-			VirtualProtect((VOID*)address, size, old_prot, &old_prot);
-
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	BOOL __fastcall ReadBlock(DWORD addr, VOID* block, DWORD size)
-	{
-		DWORD address = addr + baseOffset;
-
-		DWORD old_prot;
-		if (VirtualProtect((VOID*)address, size, PAGE_READONLY, &old_prot))
-		{
-			switch (size)
-			{
-			case 4:
-				*(DWORD*)block = *(DWORD*)address;
-				break;
-			case 2:
-				*(WORD*)block = *(WORD*)address;
-				break;
-			case 1:
-				*(BYTE*)block = *(BYTE*)address;
-				break;
-			default:
-				MemoryCopy(block, (VOID*)address, size);
-				break;
-			}
-
-			VirtualProtect((VOID*)address, size, old_prot, &old_prot);
-
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	BOOL __fastcall PatchWord(DWORD addr, WORD value)
-	{
-		return PatchBlock(addr, &value, sizeof(value));
-	}
-
-	BOOL __fastcall PatchDWord(DWORD addr, DWORD value)
-	{
-		return PatchBlock(addr, &value, sizeof(value));
-	}
-
-	BOOL __fastcall PatchByte(DWORD addr, BYTE value)
-	{
-		return PatchBlock(addr, &value, sizeof(value));
-	}
-
-	BOOL __fastcall ReadWord(DWORD addr, WORD* value)
-	{
-		return ReadBlock(addr, value, sizeof(*value));
-	}
-
-	BOOL __fastcall ReadDWord(DWORD addr, DWORD* value)
-	{
-		return ReadBlock(addr, value, sizeof(*value));
-	}
-
-	BOOL __fastcall ReadByte(DWORD addr, BYTE* value)
-	{
-		return ReadBlock(addr, value, sizeof(*value));
-	}
-
-	BOOL __fastcall ReadRedirect(DWORD addr, DWORD* value)
-	{
-		if (ReadDWord(addr + 1, value))
-		{
-			*value += addr + baseOffset + 5;
-			return TRUE;
-		}
-		else
-			return FALSE;
-	}
-
-	BOOL __fastcall RedirectCall(DWORD addr, VOID* hook, DWORD* old)
-	{
-		if (ReadDWord(addr + 1, old))
-		{
-			*old += addr + 5 + baseOffset;
-			return PatchCall(addr, hook);
-		}
-
-		return FALSE;
-	}
-
-	DWORD __fastcall PatchFunction(MappedFile* file, const CHAR* function, VOID* addr, BOOL deep = FALSE)
-	{
-		DWORD res = NULL;
-
-		DWORD base = (DWORD)file->hModule;
-		PIMAGE_NT_HEADERS headNT = (PIMAGE_NT_HEADERS)((BYTE*)base + ((PIMAGE_DOS_HEADER)file->hModule)->e_lfanew);
-
-		PIMAGE_DATA_DIRECTORY dataDir = &headNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
-		if (dataDir->Size)
-		{
-			PIMAGE_IMPORT_DESCRIPTOR imports = (PIMAGE_IMPORT_DESCRIPTOR)(base + dataDir->VirtualAddress);
-			for (DWORD idx = 0; imports->Name; ++idx, ++imports)
-			{
-				CHAR* libraryName = (CHAR*)(base + imports->Name);
-
-				PIMAGE_THUNK_DATA addressThunk = (PIMAGE_THUNK_DATA)(base + imports->FirstThunk);
-				PIMAGE_THUNK_DATA nameThunk;
-				BOOL nameInternal = imports->OriginalFirstThunk;
-				if (imports->OriginalFirstThunk)
-					nameThunk = (PIMAGE_THUNK_DATA)(base + imports->OriginalFirstThunk);
-				else
-				{
-					if (!file->address)
-					{
-						file->Load();
-						if (!file->address)
-							return res;
-					}
-
-					PIMAGE_NT_HEADERS headNT = (PIMAGE_NT_HEADERS)((BYTE*)file->address + ((PIMAGE_DOS_HEADER)file->address)->e_lfanew);
-					PIMAGE_SECTION_HEADER sh = (PIMAGE_SECTION_HEADER)((DWORD)&headNT->OptionalHeader + headNT->FileHeader.SizeOfOptionalHeader);
-
-					nameThunk = NULL;
-					DWORD sCount = headNT->FileHeader.NumberOfSections;
-					while (sCount)
-					{
-						--sCount;
-
-						if (imports->FirstThunk >= sh->VirtualAddress && imports->FirstThunk < sh->VirtualAddress + sh->Misc.VirtualSize)
-						{
-							nameThunk = PIMAGE_THUNK_DATA((DWORD)file->address + sh->PointerToRawData + imports->FirstThunk - sh->VirtualAddress);
-							break;
-						}
-
-						++sh;
-					}
-
-					if (!nameThunk)
-						return res;
-				}
-
-				for (; nameThunk->u1.AddressOfData; ++nameThunk, ++addressThunk)
-				{
-					PIMAGE_IMPORT_BY_NAME name = PIMAGE_IMPORT_BY_NAME(base + nameThunk->u1.AddressOfData);
-
-					WORD hint;
-					if (ReadWord((INT)name - baseOffset, &hint) && !StrCompare((CHAR*)name->Name, function))
-					{
-						INT address = (INT)&addressThunk->u1.AddressOfData;
-						if (ReadDWord(address - baseOffset, &res) && PatchDWord(address - baseOffset, (DWORD)addr))
-						{
-							if (nameInternal)
-								PatchSet((DWORD)name->Name - baseOffset, NULL, StrLength(function));
-
-							if (deep)
-							{
-								IMAGE_SECTION_HEADER* section = IMAGE_FIRST_SECTION(headNT);
-								for (DWORD idx = 0; idx < headNT->FileHeader.NumberOfSections; ++idx, ++section)
-								{
-									if (section->VirtualAddress == headNT->OptionalHeader.BaseOfCode && section->Misc.VirtualSize)
-									{
-										BYTE block[6];
-										block[0] = 0xFF;
-										block[1] = 0x25;
-										*(DWORD*)&block[2] = address;
-
-										BYTE* entry = (BYTE*)(headNT->OptionalHeader.ImageBase + section->VirtualAddress + baseOffset);
-										DWORD total = section->Misc.VirtualSize;
-										do
-										{
-											BYTE* ptr1 = entry;
-											BYTE* ptr2 = block;
-
-											DWORD count = sizeof(block);
-											do
-											{
-												if (*ptr1++ != *ptr2++)
-													goto lbl_cont;
-											} while (--count);
-
-											PatchJump((DWORD)entry - baseOffset, (DWORD)addr);
-											goto lbl_exit;
-
-										lbl_cont:
-											++entry;
-										} while (--total);
-									}
-								}
-
-							lbl_exit:;
-							}
-						}
-
-						return res;
-					}
-				}
-			}
-		}
-
-		return res;
-	}
-
-	DWORD __fastcall PatchEntryPoint(const CHAR* library, VOID* entryPoint)
-	{
-		DWORD base = (DWORD)GetModuleHandle(library);
-		if (!base)
-			return FALSE;
-
-		PIMAGE_NT_HEADERS headNT = (PIMAGE_NT_HEADERS)((BYTE*)base + ((PIMAGE_DOS_HEADER)base)->e_lfanew);
-		return PatchHook(base + headNT->OptionalHeader.AddressOfEntryPoint, entryPoint);
-	}
-#pragma optimize("", on)
-#pragma endregion
 
 	// ===============================================================
 	HWND hWndMain;
@@ -3883,7 +3582,7 @@ namespace Hooks
 			StrCat(name, "_SHADOW");
 		}*/
 
-		DWORD** object = ((DWORD**(__stdcall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_005A9A1E)(thisObj[10], name, 0, 0, *thisObj);
+		DWORD** object = ((DWORD**(__stdcall*)(DWORD, CHAR*, DWORD, DWORD, DWORD)) sub_005A9A1E)(thisObj[10], name, 0, 0, *thisObj);
 		if (object)
 		{
 			SIZE* size = (SIZE*)object[1][5];
@@ -5405,37 +5104,37 @@ namespace Hooks
 	}
 
 #pragma optimize("s", on)
-	VOID __fastcall LoadV1(const AddressSpaceV1* hookSpace, MappedFile* file)
+	VOID __fastcall LoadV1(Hooker* hooker, const AddressSpaceV1* hookSpace)
 	{
 		// Game Speed
 		if (hookSpace->speed_anim)
 		{
-			PatchCall(hookSpace->speed_anim, hook_004E1FA7, 5);
+			hooker->PatchCall(hookSpace->speed_anim, hook_004E1FA7, 5);
 			config.speed.hooked = TRUE;
 		}
 
 		// Scroll
 		{
-			PatchCall(hookSpace->scroll_speed, hook_004E0323);
+			hooker->PatchCall(hookSpace->scroll_speed, hook_004E0323);
 			scrollSpeed.multi = 14.0;
 			scrollSpeed.offset.y = 14;
 			scrollSpeed.offset.x = scrollSpeed.offset.y << 1;
 
 			if (hookSpace->scroll_nop)
 			{
-				PatchBlock(hookSpace->scroll_nop, (VOID*)nop4, sizeof(nop4));
-				PatchBlock(hookSpace->scroll_nop + 33, (VOID*)nop4, sizeof(nop4));
+				hooker->PatchBlock(hookSpace->scroll_nop, (VOID*)nop4, sizeof(nop4));
+				hooker->PatchBlock(hookSpace->scroll_nop + 33, (VOID*)nop4, sizeof(nop4));
 			}
 
-			PatchCall(hookSpace->scroll_hook, hook_004DFC7A);
+			hooker->PatchCall(hookSpace->scroll_hook, hook_004DFC7A);
 		}
 
 		// Random
 		if (hookSpace->random_nop)
-			PatchNop(hookSpace->random_nop, 5);
+			hooker->PatchNop(hookSpace->random_nop, 5);
 
 		// Interlock Fix
-		RedirectCall(hookSpace->interlockFix, InterlockHook, &sub_EndLock);
+		hooker->RedirectCall(hookSpace->interlockFix, InterlockHook, &sub_EndLock);
 
 		// HD
 		if (config.hd)
@@ -5479,8 +5178,8 @@ namespace Hooks
 				{
 					if (hookSpace->dlg_Create && hookSpace->dlg_Delete)
 					{
-						PatchCall(hookSpace->dlg_Create, hook_004E746D);
-						RedirectCall(hookSpace->dlg_Delete, hook_004E74D8, &sub_004E74F1);
+						hooker->PatchCall(hookSpace->dlg_Create, hook_004E746D);
+						hooker->RedirectCall(hookSpace->dlg_Delete, hook_004E74D8, &sub_004E74F1);
 
 						config.zoom.allowed = TRUE;
 					}
@@ -5492,10 +5191,10 @@ namespace Hooks
 				}
 
 				{
-					PatchFunction(file, "CreateFileA", CreateFileHook);
-					PatchFunction(file, "GetFileSize", GetFileSizeHook);
-					PatchFunction(file, "ReadFile", ReadFileHook);
-					PatchFunction(file, "CloseHandle", CloseHandleHook);
+					hooker->PatchImport("CreateFileA", CreateFileHook);
+					hooker->PatchImport("GetFileSize", GetFileSizeHook);
+					hooker->PatchImport("ReadFile", ReadFileHook);
+					hooker->PatchImport("CloseHandle", CloseHandleHook);
 				}
 
 				hud.pitch = config.mode->width + 179;
@@ -5503,129 +5202,129 @@ namespace Hooks
 					hud.pitch = (hud.pitch & 0xFFFFFFFC) + 4;
 				hud.buffer = (BYTE*)MemoryAlloc(hud.pitch * config.mode->height);
 
-				PatchBlock(hookSpace->res_mode_1, config.mode, sizeof(DWORD) * 2);
+				hooker->PatchBlock(hookSpace->res_mode_1, config.mode, sizeof(DWORD) * 2);
 				if (hookSpace->res_mode_2)
-					PatchBlock(hookSpace->res_mode_2, config.mode, sizeof(DWORD) * 2);
+					hooker->PatchBlock(hookSpace->res_mode_2, config.mode, sizeof(DWORD) * 2);
 
 				lineList = (DWORD*)MemoryAlloc(config.mode->height * sizeof(DWORD));
-				PatchCall(hookSpace->res_linelist_hook, PopolateList);
+				hooker->PatchCall(hookSpace->res_linelist_hook, PopolateList);
 
 				// CreateDialog hook
-				RedirectCall(hookSpace->res_CreateDialog, hook_0055106A, &off_0055106A);
+				hooker->RedirectCall(hookSpace->res_CreateDialog, hook_0055106A, &off_0055106A);
 
 				// CreateDialog ISO hook
 				if (hookSpace->res_CreateIsoDialog)
-					RedirectCall(hookSpace->res_CreateIsoDialog, hook_0046541D, &off_0046541D);
+					hooker->RedirectCall(hookSpace->res_CreateIsoDialog, hook_0046541D, &off_0046541D);
 
 				// Load Image V1
-				PatchHook(hookSpace->res_LoadImage, hook_004F0B39);
+				hooker->PatchHook(hookSpace->res_LoadImage, hook_004F0B39);
 
 				// StartDecodeImage
-				PatchCall(hookSpace->res_StartDecodeImage, hook_004F12D6);
+				hooker->PatchCall(hookSpace->res_StartDecodeImage, hook_004F12D6);
 
 				// EndDecodeImage
-				PatchHook(hookSpace->res_EndDecodeImage, hook_004F157A);
+				hooker->PatchHook(hookSpace->res_EndDecodeImage, hook_004F157A);
 			}
 		}
 	}
 
-	VOID __fastcall LoadV2(const AddressSpaceV2* hookSpace, MappedFile* file)
+	VOID __fastcall LoadV2(Hooker* hooker, const AddressSpaceV2* hookSpace)
 	{
 		config.background.allowed = TRUE;
 
 		// Game Speed
 		if (hookSpace->speed_anim && hookSpace->speed_map)
 		{
-			PatchCall(hookSpace->speed_anim, hook_00519FF1, 2);
-			PatchCall(hookSpace->speed_map, hook_0051A0A9, 2);
+			hooker->PatchCall(hookSpace->speed_anim, hook_00519FF1, 2);
+			hooker->PatchCall(hookSpace->speed_map, hook_0051A0A9, 2);
 			config.speed.hooked = TRUE;
 		}
 
 		// Scroll
 		{
-			if (ReadRedirect(hookSpace->scroll_check, &cursorPos))
-				PatchCall(hookSpace->scroll_check, hook_cursorPos);
+			if (hooker->ReadRedirect(hookSpace->scroll_check, &cursorPos))
+				hooker->PatchCall(hookSpace->scroll_check, hook_cursorPos);
 
 			if (hookSpace->scroll_nop_1)
 			{
-				PatchBlock(hookSpace->scroll_nop_1, (VOID*)nop4, sizeof(nop4));
-				PatchBlock(hookSpace->scroll_nop_1 + 33, (VOID*)nop4, sizeof(nop4));
+				hooker->PatchBlock(hookSpace->scroll_nop_1, (VOID*)nop4, sizeof(nop4));
+				hooker->PatchBlock(hookSpace->scroll_nop_1 + 33, (VOID*)nop4, sizeof(nop4));
 			}
 
 			if (hookSpace->scroll_nop_2)
 			{
-				PatchBlock(hookSpace->scroll_nop_2, (VOID*)nop4, sizeof(nop4));
-				PatchBlock(hookSpace->scroll_nop_2 + 33, (VOID*)nop4, sizeof(nop4));
+				hooker->PatchBlock(hookSpace->scroll_nop_2, (VOID*)nop4, sizeof(nop4));
+				hooker->PatchBlock(hookSpace->scroll_nop_2 + 33, (VOID*)nop4, sizeof(nop4));
 			}
 
-			PatchCall(hookSpace->scroll_speed, hook_0053D185, 1);
+			hooker->PatchCall(hookSpace->scroll_speed, hook_0053D185, 1);
 
 			scrollSpeed.multi = 16.0;
 			scrollSpeed.offset.y = 16;
 			scrollSpeed.offset.x = scrollSpeed.offset.y << 1;
 
-			PatchCall(hookSpace->scroll_hook, hook_0053CA08);
+			hooker->PatchCall(hookSpace->scroll_hook, hook_0053CA08);
 
-			PatchCall(hookSpace->dblclick_hook, hook_0053A73D);
+			hooker->PatchCall(hookSpace->dblclick_hook, hook_0053A73D);
 		}
 
 		// Cold CPU
 		{
 			// wait dialog
-			if (ReadDWord(hookSpace->waitClass + 2, &waitAddress))
-				PatchHook(hookSpace->waitHook, hook_004F1464);
+			if (hooker->ReadDWord(hookSpace->waitClass + 2, &waitAddress))
+				hooker->PatchHook(hookSpace->waitHook, hook_004F1464);
 
 			// wait cursor
-			RedirectCall(hookSpace->waitShowCursor, hook_0053C095, &sub_0052EE9E);
+			hooker->RedirectCall(hookSpace->waitShowCursor, hook_0053C095, &sub_0052EE9E);
 
-			if (ReadDWord(hookSpace->waitLoadCursor + 1, &sub_006ACED2))
+			if (hooker->ReadDWord(hookSpace->waitLoadCursor + 1, &sub_006ACED2))
 			{
-				PatchHook(hookSpace->waitLoadCursor, hook_005AE161);
-				sub_005AE161 = hookSpace->waitLoadCursor + 5 + baseOffset;
+				hooker->PatchHook(hookSpace->waitLoadCursor, hook_005AE161);
+				sub_005AE161 = hookSpace->waitLoadCursor + 5 + hooker->baseOffset;
 				sub_006ACED2 += sub_005AE161;
 			}
 		}
 
 		// Messages real time
-		PatchCall(hookSpace->msgTimeHook, hook_00484CD0);
+		hooker->PatchCall(hookSpace->msgTimeHook, hook_00484CD0);
 		config.msgTimeScale.hooked = TRUE;
 
 		// Print text
 		if (hookSpace->print_text)
 		{
-			sub_PrintText = hookSpace->print_text + baseOffset;
-			RedirectCall(hookSpace->print_init, hook_00405A1A, &sub_GameObjectInit);
-			RedirectCall(hookSpace->print_deinit, hook_0048A93C, &sub_GameObjectDeInit);
+			sub_PrintText = hookSpace->print_text + hooker->baseOffset;
+			hooker->RedirectCall(hookSpace->print_init, hook_00405A1A, &sub_GameObjectInit);
+			hooker->RedirectCall(hookSpace->print_deinit, hook_0048A93C, &sub_GameObjectDeInit);
 		}
 
 		// Png
 		{
-			pnglib_create_read_struct = (PNG_CREATE_READ_STRUCT)(hookSpace->png_create_read_struct + baseOffset);
-			pnglib_create_info_struct = (PNG_CREATE_INFO_STRUCT)(hookSpace->png_create_info_struct + baseOffset);
-			pnglib_set_read_fn = (PNG_SET_READ_FN)(hookSpace->png_set_read_fn + baseOffset);
-			pnglib_destroy_read_struct = (PNG_DESTROY_READ_STRUCT)(hookSpace->png_destroy_read_struct + baseOffset);
-			pnglib_read_info = (PNG_READ_INFO)(hookSpace->png_read_info + baseOffset);
-			pnglib_read_image = (PNG_READ_IMAGE)(hookSpace->png_read_image + baseOffset);
+			pnglib_create_read_struct = (PNG_CREATE_READ_STRUCT)(hookSpace->png_create_read_struct + hooker->baseOffset);
+			pnglib_create_info_struct = (PNG_CREATE_INFO_STRUCT)(hookSpace->png_create_info_struct + hooker->baseOffset);
+			pnglib_set_read_fn = (PNG_SET_READ_FN)(hookSpace->png_set_read_fn + hooker->baseOffset);
+			pnglib_destroy_read_struct = (PNG_DESTROY_READ_STRUCT)(hookSpace->png_destroy_read_struct + hooker->baseOffset);
+			pnglib_read_info = (PNG_READ_INFO)(hookSpace->png_read_info + hooker->baseOffset);
+			pnglib_read_image = (PNG_READ_IMAGE)(hookSpace->png_read_image + hooker->baseOffset);
 
-			pnglib_create_write_struct = (PNG_CREATE_WRITE_STRUCT)(hookSpace->png_create_write_struct + baseOffset);
-			pnglib_set_write_fn = (PNG_SET_WRITE_FN)(hookSpace->png_set_write_fn + baseOffset);
-			pnglib_destroy_write_struct = (PNG_DESTROY_WRITE_STRUCT)(hookSpace->png_destroy_write_struct + baseOffset);
-			pnglib_write_info = (PNG_WRITE_INFO)(hookSpace->png_write_info + baseOffset);
-			pnglib_write_image = (PNG_WRITE_IMAGE)(hookSpace->png_write_image + baseOffset);
-			pnglib_write_end = (PNG_WRITE_END)(hookSpace->png_write_end + baseOffset);
-			pnglib_set_filter = (PNG_SET_FILTER)(hookSpace->png_set_filter + baseOffset);
-			pnglib_set_IHDR = (PNG_SET_IHDR)(hookSpace->png_set_IHDR + baseOffset);
+			pnglib_create_write_struct = (PNG_CREATE_WRITE_STRUCT)(hookSpace->png_create_write_struct + hooker->baseOffset);
+			pnglib_set_write_fn = (PNG_SET_WRITE_FN)(hookSpace->png_set_write_fn + hooker->baseOffset);
+			pnglib_destroy_write_struct = (PNG_DESTROY_WRITE_STRUCT)(hookSpace->png_destroy_write_struct + hooker->baseOffset);
+			pnglib_write_info = (PNG_WRITE_INFO)(hookSpace->png_write_info + hooker->baseOffset);
+			pnglib_write_image = (PNG_WRITE_IMAGE)(hookSpace->png_write_image + hooker->baseOffset);
+			pnglib_write_end = (PNG_WRITE_END)(hookSpace->png_write_end + hooker->baseOffset);
+			pnglib_set_filter = (PNG_SET_FILTER)(hookSpace->png_set_filter + hooker->baseOffset);
+			pnglib_set_IHDR = (PNG_SET_IHDR)(hookSpace->png_set_IHDR + hooker->baseOffset);
 		}
 
 		// Map bit-mask fix
 		switch (hookSpace->mapSize)
 		{
 		case 96:
-			PatchHook(hookSpace->bitmaskFix, hook_005BBF85);
+			hooker->PatchHook(hookSpace->bitmaskFix, hook_005BBF85);
 			break;
 
 		case 144:
-			PatchHook(hookSpace->bitmaskFix, hook_005C848D);
+			hooker->PatchHook(hookSpace->bitmaskFix, hook_005C848D);
 			break;
 
 		default:
@@ -5633,53 +5332,53 @@ namespace Hooks
 		}
 
 		// Random
-		PatchNop(hookSpace->random_nop, 5);
+		hooker->PatchNop(hookSpace->random_nop, 5);
 
 		// AI list fix
 		if (hookSpace->ai_list_hook_1)
 		{
-			RedirectCall(hookSpace->ai_list_hook_1, sub_45287F_Hook, &sub_45287F);
-			PatchCall(hookSpace->ai_list_hook_2, sub_45287F_Hook);
-			sub_GetType = hookSpace->ai_list_get_type + baseOffset;
+			hooker->RedirectCall(hookSpace->ai_list_hook_1, sub_45287F_Hook, &sub_45287F);
+			hooker->PatchCall(hookSpace->ai_list_hook_2, sub_45287F_Hook);
+			sub_GetType = hookSpace->ai_list_get_type + hooker->baseOffset;
 		}
 
 		// Interlock Fix
-		RedirectCall(hookSpace->interlockFix, InterlockHook, &sub_EndLock);
+		hooker->RedirectCall(hookSpace->interlockFix, InterlockHook, &sub_EndLock);
 
 		// AI turn
 		if (hookSpace->startAiTurn && hookSpace->endAiTurn)
 		{
-			RedirectCall(hookSpace->startAiTurn, StartAiTurnHook, &sub_GetQueueCommands);
-			PatchCall(hookSpace->endAiTurn, EndAiTurnHook);
+			hooker->RedirectCall(hookSpace->startAiTurn, StartAiTurnHook, &sub_GetQueueCommands);
+			hooker->PatchCall(hookSpace->endAiTurn, EndAiTurnHook);
 		}
 
 		// Skip draw
-		RedirectCall(hookSpace->draw_hook_1, hook_00512BF0, &sub_00512BF0);
-		PatchCall(hookSpace->draw_hook_2, hook_00512BF0);
+		hooker->RedirectCall(hookSpace->draw_hook_1, hook_00512BF0, &sub_00512BF0);
+		hooker->PatchCall(hookSpace->draw_hook_2, hook_00512BF0);
 
 		// Custom Package
 		if (hookSpace->pkg_size)
 		{
-			PatchByte(hookSpace->pkg_size + 1, 104);
-			RedirectCall(hookSpace->pkg_load, LoadImgPackage, &sub_LoadImgPackage);
-			sub_005A9A1E = hookSpace->pkg_sub + baseOffset;
+			hooker->PatchByte(hookSpace->pkg_size + 1, 104);
+			hooker->RedirectCall(hookSpace->pkg_load, LoadImgPackage, &sub_LoadImgPackage);
+			sub_005A9A1E = hookSpace->pkg_sub + hooker->baseOffset;
 
-			PatchHook(hookSpace->pkg_entry_load, hook_0051F886);
-			sub_0052A14E = hookSpace->pkg_entry_sub + baseOffset;
+			hooker->PatchHook(hookSpace->pkg_entry_load, hook_0051F886);
+			sub_0052A14E = hookSpace->pkg_entry_sub + hooker->baseOffset;
 
 			// Mirror battle bg
-			RedirectCall(hookSpace->btlLoadBack_1, hook_005AEF44, &sub_005A9AE9);
-			PatchCall(hookSpace->btlLoadBack_2, hook_005AEF44);
-			PatchCall(hookSpace->btlLoadBack_3, hook_005AEF44);
+			hooker->RedirectCall(hookSpace->btlLoadBack_1, hook_005AEF44, &sub_005A9AE9);
+			hooker->PatchCall(hookSpace->btlLoadBack_2, hook_005AEF44);
+			hooker->PatchCall(hookSpace->btlLoadBack_3, hook_005AEF44);
 
-			PatchHook(hookSpace->btlBackHeight, hook_00529AEB);
+			hooker->PatchHook(hookSpace->btlBackHeight, hook_00529AEB);
 		}
 
 		// Sphere fix
 		if (hookSpace->sphere_x && hookSpace->sphere_y)
 		{
-			PatchCall(hookSpace->sphere_x, hook_00650628);
-			PatchCall(hookSpace->sphere_y, hook_00650674);
+			hooker->PatchCall(hookSpace->sphere_x, hook_00650628);
+			hooker->PatchCall(hookSpace->sphere_y, hook_00650674);
 		}
 
 		if (config.hd)
@@ -5689,50 +5388,50 @@ namespace Hooks
 			config.randPos.x = Random();
 			config.randPos.y = Random();
 
-			pBinkCopyToBuffer = PatchFunction(file, "_BinkCopyToBuffer@28", BinkCopyToBufferHook);
+			pBinkCopyToBuffer = hooker->PatchImport("_BinkCopyToBuffer@28", BinkCopyToBufferHook);
 			Convert565toRGB = config.renderer == RendererGDI ? ConvertToBGR : ConvertToRGB;
 
-			PatchBlock(hookSpace->pixel, (VOID*)pixelFunctions, sizeof(pixelFunctions));
+			hooker->PatchBlock(hookSpace->pixel, (VOID*)pixelFunctions, sizeof(pixelFunctions));
 
 			// =================================================================
 
-			PatchHook(hookSpace->fillColor, hook_0055D283); // Fill color
-			PatchCall(hookSpace->minimapGround, DrawMinimapGround); // Minimap ground
-			PatchHook(hookSpace->minimapObjects, hook_0055D419); // Draw minimap object
-			PatchDWord(hookSpace->clearGround, (DWORD)ClearGround); // Clear ground
-			PatchHook(hookSpace->mapGround, hook_005B5660); // Draw map ground
-			PatchHook(hookSpace->waterBorders, hook_005B5560); // Draw water borders
+			hooker->PatchHook(hookSpace->fillColor, hook_0055D283); // Fill color
+			hooker->PatchCall(hookSpace->minimapGround, DrawMinimapGround); // Minimap ground
+			hooker->PatchHook(hookSpace->minimapObjects, hook_0055D419); // Draw minimap object
+			hooker->PatchDWord(hookSpace->clearGround, (DWORD)ClearGround); // Clear ground
+			hooker->PatchHook(hookSpace->mapGround, hook_005B5660); // Draw map ground
+			hooker->PatchHook(hookSpace->waterBorders, hook_005B5560); // Draw water borders
 
-			PatchHook(hookSpace->symbol, hook_005280D9); // Draw Symbol
-			PatchCall(hookSpace->faces, DrawFaces);
-			PatchDWord(hookSpace->buildings, (DWORD)DrawCastleBuildings);
+			hooker->PatchHook(hookSpace->symbol, hook_005280D9); // Draw Symbol
+			hooker->PatchCall(hookSpace->faces, DrawFaces);
+			hooker->PatchDWord(hookSpace->buildings, (DWORD)DrawCastleBuildings);
 
-			PatchHook(hookSpace->horLine, hook_0053056A); // Draw Horizontal Line
-			PatchHook(hookSpace->verLine, hook_00530603); // Draw Vertical Line
+			hooker->PatchHook(hookSpace->horLine, hook_0053056A); // Draw Horizontal Line
+			hooker->PatchHook(hookSpace->verLine, hook_00530603); // Draw Vertical Line
 
 			// =================================================================
 
-			PatchCall(hookSpace->line_1, DrawLine);
-			PatchCall(hookSpace->line_2, DrawLine);
+			hooker->PatchCall(hookSpace->line_1, DrawLine);
+			hooker->PatchCall(hookSpace->line_2, DrawLine);
 
-			PatchHook(hookSpace->unknown_1, hook_005383A5);
-			back_005383AA = hookSpace->unknown_1 + 5 + baseOffset;
+			hooker->PatchHook(hookSpace->unknown_1, hook_005383A5);
+			back_005383AA = hookSpace->unknown_1 + 5 + hooker->baseOffset;
 
-			PatchHook(hookSpace->unknown_2, hook_005383F7);
-			back_00538413 = hookSpace->unknown_2 + 28 + baseOffset;
+			hooker->PatchHook(hookSpace->unknown_2, hook_005383F7);
+			back_00538413 = hookSpace->unknown_2 + 28 + hooker->baseOffset;
 
 			// Increase memory
 			{
-				PatchByte(hookSpace->memory_1 + 2, 0xC);
+				hooker->PatchByte(hookSpace->memory_1 + 2, 0xC);
 
-				PatchCall(hookSpace->memory_2, hook_005A6311);
+				hooker->PatchCall(hookSpace->memory_2, hook_005A6311);
 
-				PatchHook(hookSpace->memory_3, hook_005BACE1);
-				back_005BACE7 = hookSpace->memory_3 + 6 + baseOffset;
+				hooker->PatchHook(hookSpace->memory_3, hook_005BACE1);
+				back_005BACE7 = hookSpace->memory_3 + 6 + hooker->baseOffset;
 
-				PatchCall(hookSpace->memory_4, hook_00674400);
-				PatchCall(hookSpace->memory_5, hook_00674400);
-				PatchCall(hookSpace->memory_6, hook_005A6209);
+				hooker->PatchCall(hookSpace->memory_4, hook_00674400);
+				hooker->PatchCall(hookSpace->memory_5, hook_00674400);
+				hooker->PatchCall(hookSpace->memory_6, hook_005A6209);
 			}
 
 			if (hookSpace->res_hook)
@@ -5772,23 +5471,23 @@ namespace Hooks
 
 				// Resolution
 				{
-					PatchHook(hookSpace->res_hook, hook_00611C8B);
-					back_00611CEF = hookSpace->res_back + baseOffset;
+					hooker->PatchHook(hookSpace->res_hook, hook_00611C8B);
+					back_00611CEF = hookSpace->res_back + hooker->baseOffset;
 				}
 
 				// Remove window size restriction
 				{
-					PatchByte(hookSpace->res_restriction_jmp, 0xEB);
-					PatchNop(hookSpace->res_restriction_nop, 2);
-					PatchNop(hookSpace->res_restriction_nop + 8, 2);
+					hooker->PatchByte(hookSpace->res_restriction_jmp, 0xEB);
+					hooker->PatchNop(hookSpace->res_restriction_nop, 2);
+					hooker->PatchNop(hookSpace->res_restriction_nop + 8, 2);
 				}
 
 				// Borders
 				{
 					if (hookSpace->border_nop)
 					{
-						PatchNop(hookSpace->border_nop, 2);
-						PatchByte(hookSpace->border_nop + 0x16, 0xEB); // remove internal borders
+						hooker->PatchNop(hookSpace->border_nop, 2);
+						hooker->PatchByte(hookSpace->border_nop + 0x16, 0xEB); // remove internal borders
 
 						if (config.mode->width > *(DWORD*)&GAME_WIDTH || config.mode->height > *(DWORD*)&GAME_HEIGHT)
 						{
@@ -5810,26 +5509,26 @@ namespace Hooks
 						config.zoom.enabled = FALSE;
 
 					if (!hookSpace->border_nop || config.mode->width > *(DWORD*)&GAME_WIDTH || config.mode->height > *(DWORD*)&GAME_HEIGHT)
-						PatchCall(hookSpace->border_hook - 3, hook_00538FEB); // detect border
+						hooker->PatchCall(hookSpace->border_hook - 3, hook_00538FEB); // detect border
 				}
 
 				// Blit count
 				{
 					BYTE value;
-					ReadByte(hookSpace->blit_size + 2, &value);
+					hooker->ReadByte(hookSpace->blit_size + 2, &value);
 
 					DWORD count = DWORD((2048.0f * config.mode->width * config.mode->height) / (GAME_WIDTH_FLOAT * GAME_HEIGHT_FLOAT));
-					PatchDWord(hookSpace->blit_patch_1 + 1, count * value);
-					PatchDWord(hookSpace->blit_patch_1 + 0xC + 3, count);
+					hooker->PatchDWord(hookSpace->blit_patch_1 + 1, count * value);
+					hooker->PatchDWord(hookSpace->blit_patch_1 + 0xC + 3, count);
 
-					PatchDWord(hookSpace->blit_patch_2 + 1, count * 20);
-					PatchDWord(hookSpace->blit_patch_2 + 0x17 + 6, count);
+					hooker->PatchDWord(hookSpace->blit_patch_2 + 1, count * 20);
+					hooker->PatchDWord(hookSpace->blit_patch_2 + 0x17 + 6, count);
 				}
 
 				// Minimap rectangle
 				{
-					PatchByte(hookSpace->mini_rect_jmp, 0xEB);
-					PatchByte(hookSpace->mini_rect_jmp + 23, 0xEB);
+					hooker->PatchByte(hookSpace->mini_rect_jmp, 0xEB);
+					hooker->PatchByte(hookSpace->mini_rect_jmp + 23, 0xEB);
 
 					FLOAT w = FLOAT(27 - 7) / (GAME_WIDTH - 160) * (config.mode->width - 160);
 					FLOAT h = FLOAT(27 + 7) / GAME_HEIGHT * config.mode->height;
@@ -5839,41 +5538,41 @@ namespace Hooks
 					INT x = (INT)MathRound(w + ky);
 					INT y = (INT)MathRound(ky);
 
-					PatchDWord(hookSpace->mini_rect_patch + 3, *(DWORD*)&x);
-					PatchDWord(hookSpace->mini_rect_patch + 8 + 3, *(DWORD*)&y);
+					hooker->PatchDWord(hookSpace->mini_rect_patch + 3, *(DWORD*)&x);
+					hooker->PatchDWord(hookSpace->mini_rect_patch + 8 + 3, *(DWORD*)&y);
 				}
 
 				// Fix right side curve
 				if (hookSpace->right_curve)
 				{
-					PatchHook(hookSpace->right_curve, hook_00489124);
-					back_00489136 = hookSpace->right_curve + 18 + baseOffset;
+					hooker->PatchHook(hookSpace->right_curve, hook_00489124);
+					back_00489136 = hookSpace->right_curve + 18 + hooker->baseOffset;
 				}
 
 				// Fix minimap fill color alpha
 				if (hookSpace->minimap_fill)
-					PatchNop(hookSpace->minimap_fill, 6);
+					hooker->PatchNop(hookSpace->minimap_fill, 6);
 
 				if (config.mode->width > 1152)
 				{
-					PatchDWord(hookSpace->maxSize_1 + 2, (DWORD)&config.mode->width);
-					PatchDWord(hookSpace->maxSize_2 + 2, (DWORD)&config.mode->width);
-					PatchDWord(hookSpace->maxSize_3 + 6 + 2, (DWORD)&config.mode->width);
+					hooker->PatchDWord(hookSpace->maxSize_1 + 2, (DWORD)&config.mode->width);
+					hooker->PatchDWord(hookSpace->maxSize_2 + 2, (DWORD)&config.mode->width);
+					hooker->PatchDWord(hookSpace->maxSize_3 + 6 + 2, (DWORD)&config.mode->width);
 				}
 
 				if (config.mode->height > 1152)
 				{
-					PatchDWord(hookSpace->maxSize_1 + 29 + 2, (DWORD)&config.mode->height);
-					PatchDWord(hookSpace->maxSize_2 + 28 + 2, (DWORD)&config.mode->height);
-					PatchDWord(hookSpace->maxSize_3 + 2, (DWORD)&config.mode->height);
+					hooker->PatchDWord(hookSpace->maxSize_1 + 29 + 2, (DWORD)&config.mode->height);
+					hooker->PatchDWord(hookSpace->maxSize_2 + 28 + 2, (DWORD)&config.mode->height);
+					hooker->PatchDWord(hookSpace->maxSize_3 + 2, (DWORD)&config.mode->height);
 				}
 
 				// Centre battle background
-				PatchNop(hookSpace->btlCentrBack, 2);
-				PatchCall(hookSpace->btlCentrBack + 27, hook_0063E6B8);
+				hooker->PatchNop(hookSpace->btlCentrBack, 2);
+				hooker->PatchCall(hookSpace->btlCentrBack + 27, hook_0063E6B8);
 
 				// Widescreen Battle
-				if (hookSpace->btlClass && config.mode->width >= WIDE_WIDTH && ReadDWord(hookSpace->btlClass + 2, &battleAddress))
+				if (hookSpace->btlClass && config.mode->width >= WIDE_WIDTH && hooker->ReadDWord(hookSpace->btlClass + 2, &battleAddress))
 				{
 					config.wide.hooked = TRUE;
 
@@ -5883,68 +5582,68 @@ namespace Hooks
 						Config::Set(CONFIG_WRAPPER, "WideBattle", config.wide.allowed);
 					}
 
-					PatchHook(hookSpace->btlCentrUnits, hook_00625683); // centre battle units
-					back_00625688 = hookSpace->btlCentrUnits + 5 + baseOffset;
+					hooker->PatchHook(hookSpace->btlCentrUnits, hook_00625683); // centre battle units
+					back_00625688 = hookSpace->btlCentrUnits + 5 + hooker->baseOffset;
 
 					// remove mouse check left group
-					RedirectCall(hookSpace->btlMouseCheck, hook_0062891A, &sub_00629FAA);
+					hooker->RedirectCall(hookSpace->btlMouseCheck, hook_0062891A, &sub_00629FAA);
 
 					// swap groups
-					PatchHook(hookSpace->btlSwapGroup, hook_0062F524);
-					back_0062F52A = hookSpace->btlSwapGroup + 6 + baseOffset;
+					hooker->PatchHook(hookSpace->btlSwapGroup, hook_0062F524);
+					back_0062F52A = hookSpace->btlSwapGroup + 6 + hooker->baseOffset;
 
 					// remove set inactive group
-					RedirectCall(hookSpace->btlGroupsInactive, hook_0062F5B8, &sub_00643E80);
+					hooker->RedirectCall(hookSpace->btlGroupsInactive, hook_0062F5B8, &sub_00643E80);
 
 					// groups init parameters
 					if (hookSpace->version == 2)
 					{
-						PatchCall(hookSpace->btlGroupsActive, hook_0062521D); // set groups active
+						hooker->PatchCall(hookSpace->btlGroupsActive, hook_0062521D); // set groups active
 
 						// Reverse groups back
-						PatchCall(hookSpace->btlReverseGroup, hook_00624F2F, 1);
-						PatchCall(hookSpace->btlInitGroups1_1, hook_00625EAE, 3);
-						PatchCall(hookSpace->btlInitGroups1_2, hook_00625EFD, 1);
-						PatchCall(hookSpace->btlInitGroups1_3, hook_00625EFD, 1);
-						PatchCall(hookSpace->btlInitGroups2_1, hook_0062635D, 3);
-						PatchCall(hookSpace->btlInitGroups2_2, hook_006263AC, 1);
-						PatchCall(hookSpace->btlInitGroups2_3, hook_006263AC, 1);
+						hooker->PatchCall(hookSpace->btlReverseGroup, hook_00624F2F, 1);
+						hooker->PatchCall(hookSpace->btlInitGroups1_1, hook_00625EAE, 3);
+						hooker->PatchCall(hookSpace->btlInitGroups1_2, hook_00625EFD, 1);
+						hooker->PatchCall(hookSpace->btlInitGroups1_3, hook_00625EFD, 1);
+						hooker->PatchCall(hookSpace->btlInitGroups2_1, hook_0062635D, 3);
+						hooker->PatchCall(hookSpace->btlInitGroups2_2, hook_006263AC, 1);
+						hooker->PatchCall(hookSpace->btlInitGroups2_3, hook_006263AC, 1);
 					}
 					else if (hookSpace->version == 3)
 					{
-						PatchCall(hookSpace->btlGroupsActive, hook_0062DAA8); // set groups active
+						hooker->PatchCall(hookSpace->btlGroupsActive, hook_0062DAA8); // set groups active
 
 						// Reverse groups back
-						PatchCall(hookSpace->btlReverseGroup, hook_0062ED48, 1);
-						//PatchCall(hookSpace->btlInitGroups1_1, hook_0062E7FB, 1);
-						PatchCall(hookSpace->btlInitGroups1_2, hook_0062E848, 1);
-						PatchCall(hookSpace->btlInitGroups1_3, hook_0062E848, 1);
-						//PatchCall(hookSpace->btlInitGroups2_1, hook_0062ECA9, 1);
-						PatchCall(hookSpace->btlInitGroups2_2, hook_0062ECFC, 1);
-						PatchCall(hookSpace->btlInitGroups2_3, hook_0062ECFC, 1);
+						hooker->PatchCall(hookSpace->btlReverseGroup, hook_0062ED48, 1);
+						//hooker->PatchCall(hookSpace->btlInitGroups1_1, hook_0062E7FB, 1);
+						hooker->PatchCall(hookSpace->btlInitGroups1_2, hook_0062E848, 1);
+						hooker->PatchCall(hookSpace->btlInitGroups1_3, hook_0062E848, 1);
+						//hooker->PatchCall(hookSpace->btlInitGroups2_1, hook_0062ECA9, 1);
+						hooker->PatchCall(hookSpace->btlInitGroups2_2, hook_0062ECFC, 1);
+						hooker->PatchCall(hookSpace->btlInitGroups2_3, hook_0062ECFC, 1);
 					}
 
 					// change image indices
-					RedirectCall(hookSpace->btlImgIndices, hook_00625387, &sub_00625387);
+					hooker->RedirectCall(hookSpace->btlImgIndices, hook_00625387, &sub_00625387);
 
 					// set dialog
-					PatchCall(hookSpace->btlDialog_1, hook_006244CA, 1);
-					PatchCall(hookSpace->btlDialog_2, hook_0062476C, 1);
+					hooker->PatchCall(hookSpace->btlDialog_1, hook_006244CA, 1);
+					hooker->PatchCall(hookSpace->btlDialog_2, hook_0062476C, 1);
 
 					if (hookSpace->btlFileGetStr)
-						RedirectCall(hookSpace->btlFileGetStr, SteamFileGetStrHook, &sub_fgets);
+						hooker->RedirectCall(hookSpace->btlFileGetStr, SteamFileGetStrHook, &sub_fgets);
 					else
-						PatchFunction(file, "fgets", FileGetStrHook);
+						hooker->PatchImport("fgets", FileGetStrHook);
 				}
 
 				// Debug & message position
 				{
 					// Calc debug window
-					PatchCall(hookSpace->debugPosition, hook_0052EAAE, 1);
+					hooker->PatchCall(hookSpace->debugPosition, hook_0052EAAE, 1);
 
 					// Calc messages
-					PatchCall(hookSpace->msgIconPosition, hook_00484DD1);
-					PatchCall(hookSpace->msgTextPosition, hook_00484DD1);
+					hooker->PatchCall(hookSpace->msgIconPosition, hook_00484DD1);
+					hooker->PatchCall(hookSpace->msgTextPosition, hook_00484DD1);
 				}
 			}
 		}
@@ -5952,81 +5651,85 @@ namespace Hooks
 
 	VOID Load()
 	{
-		hModule = GetModuleHandle(NULL);
-		PIMAGE_NT_HEADERS headNT = (PIMAGE_NT_HEADERS)((BYTE*)hModule + ((PIMAGE_DOS_HEADER)hModule)->e_lfanew);
-		baseOffset = (INT)hModule - (INT)headNT->OptionalHeader.ImageBase;
-
 		{
 			CHAR path[MAX_PATH];
-			GetModuleFileName(hModule, path, MAX_PATH - 1);
+			GetModuleFileName(NULL, path, MAX_PATH - 1);
 			CHAR* p = StrLastChar(path, '\\');
 			StrCopy(p, "\\DDRAW.dll");
-			PatchEntryPoint(path, FakeEntryPoint);
+			HMODULE hLib = GetModuleHandle(path);
+			if (hLib)
+			{
+				Hooker* hooker = new Hooker(hLib);
+				{
+					hooker->PatchEntryPoint(FakeEntryPoint);
+				}
+				delete hooker;
+			}
 		}
 
-		MappedFile* file = new MappedFile(hModule);
+		Hooker* hooker = new Hooker(GetModuleHandle(NULL));
 		{
 			{
-				PatchFunction(file, "GetDeviceCaps", GetDeviceCapsHook);
-				PatchFunction(file, "GetForegroundWindow", GetForegroundWindowHook);
+				hooker->PatchImport("GetDeviceCaps", GetDeviceCapsHook);
+				hooker->PatchImport("GetForegroundWindow", GetForegroundWindowHook);
 
-				PatchFunction(file, "CreateWindowExA", CreateWindowExHook);
-				PatchFunction(file, "RegisterClassA", RegisterClassHook);
+				hooker->PatchImport("CreateWindowExA", CreateWindowExHook);
+				hooker->PatchImport("RegisterClassA", RegisterClassHook);
 
-				PatchFunction(file, "SetWindowLongA", SetWindowLongHook);
+				hooker->PatchImport("SetWindowLongA", SetWindowLongHook);
 
-				PatchFunction(file, "MessageBoxA", MessageBoxHook);
+				hooker->PatchImport("MessageBoxA", MessageBoxHook);
 
-				if (!PatchFunction(file, "RegisterWindowMessageA", RegisterWindowMessageHook))
-					PatchFunction(file, "RegisterClipboardFormatA", RegisterWindowMessageHook); // for cracks
+				if (!hooker->PatchImport("RegisterWindowMessageA", RegisterWindowMessageHook))
+					hooker->PatchImport("RegisterClipboardFormatA", RegisterWindowMessageHook); // for cracks
 
-				PatchFunction(file, "SetThreadPriority", SetThreadPriorityHook);
+				hooker->PatchImport("SetThreadPriority", SetThreadPriorityHook);
 
-				PatchFunction(file, "ShowCursor", ShowCursorHook);
-				PatchFunction(file, "ClipCursor", ClipCursorHook);
+				hooker->PatchImport("ShowCursor", ShowCursorHook);
+				hooker->PatchImport("ClipCursor", ClipCursorHook);
 
-				PatchFunction(file, "GetClientRect", GetClientRectHook);
-				PatchFunction(file, "GetWindowRect", GetWindowRectHook);
+				hooker->PatchImport("GetClientRect", GetClientRectHook);
+				hooker->PatchImport("GetWindowRect", GetWindowRectHook);
 
-				PatchFunction(file, "timeGetTime", timeGetTimeHook);
+				hooker->PatchImport("timeGetTime", timeGetTimeHook);
 
-				PatchFunction(file, "GetOpenFileNameA", GetOpenFileNameHook);
-				PatchFunction(file, "GetSaveFileNameA", GetSaveFileNameHook);
+				hooker->PatchImport("GetOpenFileNameA", GetOpenFileNameHook);
+				hooker->PatchImport("GetSaveFileNameA", GetSaveFileNameHook);
 
-				PatchFunction(file, "isalpha", IsAlphaHook);
-				PatchFunction(file, "isalnum", IsAlNumHook);
-				PatchFunction(file, "isdigit", IsDigitHook);
-				PatchFunction(file, "isspace", IsSpaceHook);
-				PatchFunction(file, "ispunct", IsPunctHook);
-				PatchFunction(file, "iscntrl", IsCntrlHook);
-				PatchFunction(file, "isupper", IsUpperHook);
-				PatchFunction(file, "toupper", ToUpperHook);
-				PatchFunction(file, "tolower", ToLowerHook);
-				PatchFunction(file, "strchr", StrCharHook);
-				PatchFunction(file, "memchr", MemoryCharHook);
+				hooker->PatchImport("isalpha", IsAlphaHook);
+				hooker->PatchImport("isalnum", IsAlNumHook);
+				hooker->PatchImport("isdigit", IsDigitHook);
+				hooker->PatchImport("isspace", IsSpaceHook);
+				hooker->PatchImport("ispunct", IsPunctHook);
+				hooker->PatchImport("iscntrl", IsCntrlHook);
+				hooker->PatchImport("isupper", IsUpperHook);
+				hooker->PatchImport("toupper", ToUpperHook);
+				hooker->PatchImport("tolower", ToLowerHook);
+				hooker->PatchImport("strchr", StrCharHook);
+				hooker->PatchImport("memchr", MemoryCharHook);
 
 				if (config.locales.current.oem && config.locales.current.ansi)
 				{
-					PatchFunction(file, "OemToCharA", OemToCharHook);
-					PatchFunction(file, "CharToOemA", CharToOemHook);
+					hooker->PatchImport("OemToCharA", OemToCharHook);
+					hooker->PatchImport("CharToOemA", CharToOemHook);
 				}
 
-				PatchFunction(file, "CoCreateInstance", CoCreateInstanceHook);
+				hooker->PatchImport("CoCreateInstance", CoCreateInstanceHook);
 
 				if (config.version)
 				{
-					PatchFunction(file, "PeekMessageA", PeekMessageHook);
-					PatchFunction(file, "GetCursorPos", GetCursorPosHookV1);
-					PatchFunction(file, "ClientToScreen", ClientToScreenHook);
-					PatchFunction(file, "GetDoubleClickTime", GetDoubleClickTimeHook);
+					hooker->PatchImport("PeekMessageA", PeekMessageHook);
+					hooker->PatchImport("GetCursorPos", GetCursorPosHookV1);
+					hooker->PatchImport("ClientToScreen", ClientToScreenHook);
+					hooker->PatchImport("GetDoubleClickTime", GetDoubleClickTimeHook);
 				}
 				else
 				{
-					PatchFunction(file, "DirectDrawEnumerateExA", Main::DrawEnumerateEx, TRUE);
-					PatchFunction(file, "DirectDrawCreate", Main::DrawCreate, TRUE);
-					PatchFunction(file, "DirectDrawCreateEx", Main::DrawCreateEx, TRUE);
-					PatchFunction(file, "GetCursorPos", GetCursorPosHookV2);
-					PatchFunction(file, "SetCursorPos", SetCursorPosHook);
+					hooker->PatchImport("DirectDrawEnumerateExA", Main::DrawEnumerateEx, TRUE);
+					hooker->PatchImport("DirectDrawCreate", Main::DrawCreate, TRUE);
+					hooker->PatchImport("DirectDrawCreateEx", Main::DrawCreateEx, TRUE);
+					hooker->PatchImport("GetCursorPos", GetCursorPosHookV2);
+					hooker->PatchImport("SetCursorPos", SetCursorPosHook);
 				}
 			}
 
@@ -6037,9 +5740,9 @@ namespace Hooks
 				do
 				{
 					DWORD check;
-					if (ReadDWord(hookSpace->check + 1, &check) && check == hookSpace->value)
+					if (hooker->ReadDWord(hookSpace->check + 1, &check) && check == hookSpace->value)
 					{
-						LoadV1(hookSpace, file);
+						LoadV1(hooker, hookSpace);
 						break;
 					}
 
@@ -6056,13 +5759,13 @@ namespace Hooks
 				do
 				{
 					DWORD check;
-					if (ReadDWord(hookSpace->check_1, &check) && check == hookSpace->value_1)
+					if (hooker->ReadDWord(hookSpace->check_1, &check) && check == hookSpace->value_1)
 					{
 						if (!hookSpace->check_2)
 							defaultSpace = hookSpace;
-						else if (ReadDWord(hookSpace->check_2, &check) && check == hookSpace->value_2)
+						else if (hooker->ReadDWord(hookSpace->check_2, &check) && check == hookSpace->value_2)
 						{
-							LoadV2(hookSpace, file);
+							LoadV2(hooker, hookSpace);
 							defaultSpace = NULL;
 							break;
 						}
@@ -6072,10 +5775,10 @@ namespace Hooks
 				} while (--hookCount);
 
 				if (defaultSpace)
-					LoadV2(defaultSpace, file);
+					LoadV2(hooker, defaultSpace);
 			}
 		}
-		delete file;
+		delete hooker;
 	}
 #pragma optimize("", on)
 }
