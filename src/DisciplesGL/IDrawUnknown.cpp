@@ -38,7 +38,7 @@ VOID IDrawUnknown::operator delete(VOID* p)
 			if (entry == item)
 			{
 				*item->list = entry->last;
-				MemoryFree(p);
+				MemoryDelete(p);
 				return;
 			}
 			else
@@ -47,7 +47,7 @@ VOID IDrawUnknown::operator delete(VOID* p)
 					if (entry->last == item)
 					{
 						entry->last = item->last;
-						MemoryFree(p);
+						MemoryDelete(p);
 						return;
 					}
 
