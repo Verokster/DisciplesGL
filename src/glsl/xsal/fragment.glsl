@@ -33,18 +33,21 @@ uniform vec2 texSize;
 in vec2 fTex;
 out vec4 fragColor;
 
+const vec4 dt = vec4(1.0, 1.0, 1.0, 1.0);
+
 void main() {
 	if (texture(tex01, fTex) == texture(tex02, fTex))
 		discard;
 
-	#define TEX(x, y) texture(tex01, (floor(fTex * texSize + vec2(x, y)) + 0.5) / texSize)
+	vec2 cTex = fTex * texSize * 1.00001;
 
+	#define TEX(x, y) texture(tex01, (floor(cTex + vec2(x, y)) + 0.5) / texSize)
+	
 	vec4 c00 = TEX(-0.25, -0.25);
 	vec4 c20 = TEX( 0.25, -0.25);
 	vec4 c02 = TEX(-0.25,  0.25);
 	vec4 c22 = TEX( 0.25,  0.25);
 
-	vec4 dt = vec4(1.0, 1.0, 1.0, 1.0);
 	float m1 = dot(abs(c00 - c22), dt) + 0.001;
 	float m2 = dot(abs(c02 - c20), dt) + 0.001;
 
