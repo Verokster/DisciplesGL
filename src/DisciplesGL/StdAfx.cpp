@@ -40,7 +40,7 @@ SETPROCESSDPIAWARENESS SetProcessDpiAwarenessC;
 DOUBLE __fastcall MathRound(DOUBLE number)
 {
 	DOUBLE floorVal = MathFloor(number);
-	return floorVal + 0.5f > number ? floorVal : MathCeil(number);
+	return floorVal + 0.5 > number ? floorVal : MathCeil(number);
 }
 
 struct Aligned {

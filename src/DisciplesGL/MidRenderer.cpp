@@ -173,7 +173,7 @@ VOID MidRenderer::End()
 	ShaderGroup** shader = (ShaderGroup**)&this->shaders;
 	DWORD count = sizeof(this->shaders) / sizeof(ShaderGroup*);
 	do
-		delete *shader;
+		delete *shader++;
 	while (--count);
 }
 

@@ -205,6 +205,7 @@ namespace Hooks
 		DWORD btlInitGroups2_2;
 		DWORD btlInitGroups2_3;
 		DWORD btlImgIndices;
+		DWORD btnItemsUseFix;
 		DWORD btlDialog_1;
 		DWORD btlDialog_2;
 		DWORD btlFileGetStr;
@@ -247,6 +248,9 @@ namespace Hooks
 
 		DWORD speed_anim;
 		DWORD speed_map;
+
+		DWORD async_spell;
+		DWORD async_death;
 
 		DWORD sphere_x;
 		DWORD sphere_y;

@@ -219,7 +219,7 @@ VOID NewRenderer::End()
 	ShaderGroup** shader = (ShaderGroup**)&this->shaders;
 	DWORD count = sizeof(this->shaders) / sizeof(ShaderGroup*);
 	do
-		delete *shader;
+		delete *shader++;
 	while (--count);
 }
 
@@ -317,12 +317,12 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 						break;
 
 					case UpscaleXSal:
-						upscaleProgram = shaders.xSal_2x;
+						this->upscaleProgram = shaders.xSal_2x;
 
 						break;
 
 					default:
-						upscaleProgram = shaders.eagle_2x;
+						this->upscaleProgram = shaders.eagle_2x;
 
 						break;
 					}

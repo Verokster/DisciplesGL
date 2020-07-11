@@ -97,7 +97,7 @@ BOOL Hooker::PatchSet(DWORD addr, BYTE byte, DWORD size)
 
 BOOL Hooker::PatchNop(DWORD addr, DWORD size)
 {
-	return PatchSet(addr, 0x90, size);
+	return this->PatchSet(addr, 0x90, size);
 }
 
 BOOL Hooker::PatchRedirect(DWORD addr, DWORD dest, BYTE instruction, DWORD nop)
@@ -127,17 +127,17 @@ BOOL Hooker::PatchRedirect(DWORD addr, DWORD dest, BYTE instruction, DWORD nop)
 BOOL Hooker::PatchJump(DWORD addr, DWORD dest)
 {
 	INT relative = dest - addr - this->baseOffset - 2;
-	return PatchRedirect(addr, dest, relative >= -128 && relative <= 127 ? 0xEB : 0xE9, 0);
+	return this->PatchRedirect(addr, dest, relative >= -128 && relative <= 127 ? 0xEB : 0xE9, 0);
 }
 
 BOOL Hooker::PatchHook(DWORD addr, VOID* hook, DWORD nop)
 {
-	return PatchRedirect(addr, (DWORD)hook, 0xE9, nop);
+	return this->PatchRedirect(addr, (DWORD)hook, 0xE9, nop);
 }
 
 BOOL Hooker::PatchCall(DWORD addr, VOID* hook, DWORD nop)
 {
-	return PatchRedirect(addr, (DWORD)hook, 0xE8, nop);
+	return this->PatchRedirect(addr, (DWORD)hook, 0xE8, nop);
 }
 
 BOOL Hooker::PatchBlock(DWORD addr, VOID* block, DWORD size)
@@ -202,37 +202,37 @@ BOOL Hooker::ReadBlock(DWORD addr, VOID* block, DWORD size)
 
 BOOL Hooker::PatchWord(DWORD addr, WORD value)
 {
-	return PatchBlock(addr, &value, sizeof(value));
+	return this->PatchBlock(addr, &value, sizeof(value));
 }
 
 BOOL Hooker::PatchDWord(DWORD addr, DWORD value)
 {
-	return PatchBlock(addr, &value, sizeof(value));
+	return this->PatchBlock(addr, &value, sizeof(value));
 }
 
 BOOL Hooker::PatchByte(DWORD addr, BYTE value)
 {
-	return PatchBlock(addr, &value, sizeof(value));
+	return this->PatchBlock(addr, &value, sizeof(value));
 }
 
 BOOL Hooker::ReadWord(DWORD addr, WORD* value)
 {
-	return ReadBlock(addr, value, sizeof(*value));
+	return this->ReadBlock(addr, value, sizeof(*value));
 }
 
 BOOL Hooker::ReadDWord(DWORD addr, DWORD* value)
 {
-	return ReadBlock(addr, value, sizeof(*value));
+	return this->ReadBlock(addr, value, sizeof(*value));
 }
 
 BOOL Hooker::ReadByte(DWORD addr, BYTE* value)
 {
-	return ReadBlock(addr, value, sizeof(*value));
+	return this->ReadBlock(addr, value, sizeof(*value));
 }
 
 BOOL Hooker::ReadRedirect(DWORD addr, DWORD* value)
 {
-	if (ReadDWord(addr + 1, value))
+	if (this->ReadDWord(addr + 1, value))
 	{
 		*value += addr + this->baseOffset + 5;
 		return TRUE;
@@ -243,10 +243,10 @@ BOOL Hooker::ReadRedirect(DWORD addr, DWORD* value)
 
 BOOL Hooker::RedirectCall(DWORD addr, VOID* hook, DWORD* old)
 {
-	if (ReadDWord(addr + 1, old))
+	if (this->ReadDWord(addr + 1, old))
 	{
 		*old += addr + 5 + this->baseOffset;
-		return PatchCall(addr, hook);
+		return this->PatchCall(addr, hook);
 	}
 
 	return FALSE;
@@ -316,8 +316,7 @@ DWORD Hooker::PatchImport(const CHAR* function, VOID* addr, BOOL deep)
 								if (section->VirtualAddress == this->headNT->OptionalHeader.BaseOfCode && section->Misc.VirtualSize)
 								{
 									BYTE block[6];
-									block[0] = 0xFF;
-									block[1] = 0x25;
+									*(WORD*)&block[0] = 0x25FF;
 									*(DWORD*)&block[2] = address;
 
 									BYTE* entry = (BYTE*)(this->headNT->OptionalHeader.ImageBase + section->VirtualAddress + this->baseOffset);
@@ -358,6 +357,10 @@ DWORD Hooker::PatchImport(const CHAR* function, VOID* addr, BOOL deep)
 
 DWORD Hooker::PatchEntryPoint(VOID* entryPoint)
 {
-	return PatchHook((DWORD)this->hModule + this->headNT->OptionalHeader.AddressOfEntryPoint, entryPoint);
+	DWORD res = (DWORD)this->hModule + this->headNT->OptionalHeader.AddressOfEntryPoint;
+	if (this->PatchHook(res, entryPoint))
+		return res + this->baseOffset;
+
+	return NULL;
 }
 #pragma optimize("", on)

@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "atomic"
 #include "Allocation.h"
 #include "ExtraTypes.h"
 #include "ShaderGroup.h"
@@ -39,7 +40,7 @@ private:
 protected:
 	OpenDraw* ddraw;
 	HDC hDc;
-	BOOL isFinish;
+	std::atomic<BOOL> isFinish;
 	ShaderGroup* program;
 
 	BOOL Stop();

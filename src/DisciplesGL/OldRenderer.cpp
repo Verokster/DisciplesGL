@@ -49,8 +49,8 @@ VOID OldRenderer::Begin()
 	DWORD maxAllow = GetPow2(config.mode->width > config.mode->height ? config.mode->width : config.mode->height);
 	this->maxTexSize = maxAllow < glMaxTexSize ? maxAllow : glMaxTexSize;
 
-	DWORD framePerWidth = config.mode->width / maxTexSize + (config.mode->width % maxTexSize ? 1 : 0);
-	DWORD framePerHeight = config.mode->height / maxTexSize + (config.mode->height % maxTexSize ? 1 : 0);
+	DWORD framePerWidth = config.mode->width / this->maxTexSize + (config.mode->width % this->maxTexSize ? 1 : 0);
+	DWORD framePerHeight = config.mode->height / this->maxTexSize + (config.mode->height % this->maxTexSize ? 1 : 0);
 	this->frameCount = framePerWidth * framePerHeight;
 
 	config.zoom.glallow = this->frameCount == 1;
@@ -190,7 +190,7 @@ BOOL OldRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
 	Size* frameSize = &stateBuffer->size;
 	FilterState state = this->ddraw->filterState;
-	if (this->pixelBuffer->Update(lpStateBuffer, ready, frameCount != 1 || this->convert) || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
+	if (this->pixelBuffer->Update(lpStateBuffer, ready, this->frameCount != 1 || this->convert) || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
 	{
 		if (this->isVSync != config.image.vSync)
 		{

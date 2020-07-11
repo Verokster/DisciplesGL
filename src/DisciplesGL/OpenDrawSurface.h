@@ -49,7 +49,7 @@ public:
 
 	StateBuffer* indexBuffer;
 	StateBuffer* secondaryBuffer;
-	
+
 	BOOL redraw;
 	BOOL drawEnabled;
 
@@ -61,7 +61,7 @@ public:
 	VOID CreateBuffer(DWORD, DWORD, DWORD, VOID*);
 	VOID ReleaseBuffer();
 	VOID DrawBorders(VOID*, DWORD, DWORD);
-	
+
 	// Inherited via IDrawSurface
 	ULONG __stdcall Release() override;
 	HRESULT __stdcall Blt(LPRECT, IDrawSurface7*, LPRECT, DWORD, LPDDBLTFX) override;
