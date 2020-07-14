@@ -251,6 +251,7 @@ namespace Hooks
 
 		DWORD async_spell;
 		DWORD async_death;
+		DWORD async_ruin;
 
 		DWORD sphere_x;
 		DWORD sphere_y;

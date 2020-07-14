@@ -67,7 +67,7 @@ BOOL Renderer::Start()
 			this->ddraw->hDraw = CreateWindowEx(
 				WS_EX_CONTROLPARENT | WS_EX_TOPMOST,
 				WC_DRAW,
-				NULL,
+				"Disciples - GL Wrapper",
 				WS_VISIBLE | WS_POPUP | WS_MAXIMIZE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 				0, 0,
 				rect.right, rect.bottom,
@@ -80,7 +80,7 @@ BOOL Renderer::Start()
 			this->ddraw->hDraw = CreateWindowEx(
 				WS_EX_CONTROLPARENT,
 				WC_DRAW,
-				NULL,
+				"Disciples - GL Wrapper",
 				WS_VISIBLE | WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 				0, 0,
 				rect.right, rect.bottom,

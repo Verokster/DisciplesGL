@@ -116,7 +116,7 @@
       <SectionAlignment>
       </SectionAlignment>
       <AssemblyDebug>true</AssemblyDebug>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;msimg32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;shw32.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;msimg32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;shw32.lib;hooker.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
@@ -209,7 +209,7 @@
     </ClCompile>
     <ResourceCompile />
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;msimg32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;msvcrt.lib;shw32.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;msimg32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;msvcrt.lib;shw32.lib;hooker.lib</AdditionalDependencies>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AssemblyDebug>false</AssemblyDebug>
       <BaseAddress>0x60000000</BaseAddress>
@@ -238,7 +238,6 @@
     <ClCompile Include="Allocation.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="GDIRenderer.cpp" />
-    <ClCompile Include="Hooker.cpp" />
     <ClCompile Include="IDraw7.cpp" />
     <ClCompile Include="IDrawClipper.cpp" />
     <ClCompile Include="IDrawPalette.cpp" />
@@ -273,7 +272,6 @@
     <ClInclude Include="Allocation.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="GDIRenderer.h" />
-    <ClInclude Include="Hooker.h" />
     <ClInclude Include="IDraw7.h" />
     <ClInclude Include="IDrawClipper.h" />
     <ClInclude Include="IDrawPalette.h" />

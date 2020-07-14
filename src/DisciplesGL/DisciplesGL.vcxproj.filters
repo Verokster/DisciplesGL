@@ -88,9 +88,6 @@
     <ClCompile Include="ShaderProgram.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="Hooker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -182,9 +179,6 @@
     </ClInclude>
     <ClInclude Include="ShaderProgram.h">
       <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Hooker.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
