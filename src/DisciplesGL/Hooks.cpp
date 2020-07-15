@@ -1123,7 +1123,7 @@ namespace Hooks
 			return Main::DrawCreateEx(NULL, ppv, riid, NULL);
 
 		HRESULT res = CoCreateInstance(rclsid, pUnkOuter, dwClsContext, riid, ppv);
-		if (!MemoryCompare(&rclsid, &CLSID_DirectPlay, sizeof(CLSID)) && !MemoryCompare(&riid, &IID_IDirectPlay4A, sizeof(IID)))
+		if (!res && !MemoryCompare(&rclsid, &CLSID_DirectPlay, sizeof(CLSID)) && !MemoryCompare(&riid, &IID_IDirectPlay4A, sizeof(IID)))
 			*ppv = new IPlay4((LPDIRECTPLAY4)*ppv, hWndMain);
 
 		return res;

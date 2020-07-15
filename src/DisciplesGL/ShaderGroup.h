@@ -34,7 +34,6 @@ private:
 	DWORD fragmentName;
 	DWORD flags;
 	Adjustment* colors;
-	BOOL update;
 	ShaderProgram* current;
 	ShaderProgram* list;
 

@@ -36,7 +36,7 @@ ShaderGroup::ShaderGroup(const CHAR* version, DWORD vertexName, DWORD fragmentNa
 	if (this->flags & SHADER_LEVELS)
 	{
 		this->colors = (Adjustment*)MemoryAlloc(sizeof(Adjustment));
-		*this->colors = defaultColors;
+		*this->colors = *config.colors.current;
 	}
 	else
 		this->colors = NULL;
