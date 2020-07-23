@@ -5733,11 +5733,12 @@ namespace Hooks
 				PatchCall(hooker, hookSpace->res_linelist_hook, PopolateList);
 
 				// CreateDialog hook
-				off_0055106A = RedirectCall(hooker, hookSpace->res_CreateDialog, hook_0055106A);
+				if (ReadDWord(hooker, hookSpace->res_CreateDialog + 1, &off_0055106A))
+					PatchCall(hooker, hookSpace->res_CreateDialog, hook_0055106A);
 
 				// CreateDialog ISO hook
-				if (hookSpace->res_CreateIsoDialog)
-					off_0046541D = RedirectCall(hooker, hookSpace->res_CreateIsoDialog, hook_0046541D);
+				if (hookSpace->res_CreateIsoDialog && ReadDWord(hooker, hookSpace->res_CreateIsoDialog + 1, &off_0046541D))
+					 PatchCall(hooker, hookSpace->res_CreateIsoDialog, hook_0046541D);
 
 				// Load Image V1
 				PatchHook(hooker, hookSpace->res_LoadImage, hook_004F0B39);
