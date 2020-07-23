@@ -100,12 +100,12 @@ VOID MidRenderer::Begin()
 					GLVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 32, (GLvoid*)16);
 				}
 
-				if (!config.version && config.resHooked)
+				if (this->allowBack)
 					GLGenTextures(2, &this->textureId.back);
 				else
 					GLGenTextures(1, &this->textureId.primary);
 				{
-					if (!config.version && config.resHooked)
+					if (this->allowBack)
 					{
 						GLActiveTexture(GL_TEXTURE1);
 						GLBindTexParameter(this->textureId.back, GL_LINEAR);
@@ -115,6 +115,7 @@ VOID MidRenderer::Begin()
 						{
 							MemoryZero(tempBuffer, length);
 							Main::LoadBack(tempBuffer, config.mode->width, config.mode->height);
+							DWORD dds = *(DWORD*)tempBuffer;
 							GLTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->maxTexSize, this->maxTexSize, GL_NONE, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 							GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, config.mode->width, config.mode->height, GL_RGBA, GL_UNSIGNED_BYTE, tempBuffer);
 						}
@@ -159,7 +160,7 @@ VOID MidRenderer::End()
 					delete this->pixelBuffer;
 				}
 
-				if (!config.version && config.resHooked)
+				if (this->allowBack)
 					GLDeleteTextures(2, &this->textureId.back);
 				else
 					GLDeleteTextures(1, &this->textureId.primary);

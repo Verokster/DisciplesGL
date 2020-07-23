@@ -189,6 +189,7 @@
 #define IDM_BORDERS_ALTERNATIVE 253
 
 #define IDM_BACKGROUND 254
+#define IDM_COLOR_ADJUST 255
 
 #define IDM_STRETCH_OFF 700
 #define IDM_STRETCH_10 710
@@ -201,6 +202,59 @@
 #define IDM_STRETCH_80 780
 #define IDM_STRETCH_90 790
 #define IDM_STRETCH_100 800
+
+#define IDM_SPEED_1_0 170
+#define IDM_SPEED_1_1 (IDM_SPEED_1_0 + 1)
+#define IDM_SPEED_1_2 (IDM_SPEED_1_0 + 2)
+#define IDM_SPEED_1_3 (IDM_SPEED_1_0 + 3)
+#define IDM_SPEED_1_4 (IDM_SPEED_1_0 + 4)
+#define IDM_SPEED_1_5 (IDM_SPEED_1_0 + 5)
+#define IDM_SPEED_1_6 (IDM_SPEED_1_0 + 6)
+#define IDM_SPEED_1_7 (IDM_SPEED_1_0 + 7)
+#define IDM_SPEED_1_8 (IDM_SPEED_1_0 + 8)
+#define IDM_SPEED_1_9 (IDM_SPEED_1_0 + 9)
+#define IDM_SPEED_2_0 (IDM_SPEED_1_0 + 10)
+#define IDM_SPEED_2_1 (IDM_SPEED_2_0 + 1)
+#define IDM_SPEED_2_2 (IDM_SPEED_2_0 + 2)
+#define IDM_SPEED_2_3 (IDM_SPEED_2_0 + 3)
+#define IDM_SPEED_2_4 (IDM_SPEED_2_0 + 4)
+#define IDM_SPEED_2_5 (IDM_SPEED_2_0 + 5)
+#define IDM_SPEED_2_6 (IDM_SPEED_2_0 + 6)
+#define IDM_SPEED_2_7 (IDM_SPEED_2_0 + 7)
+#define IDM_SPEED_2_8 (IDM_SPEED_2_0 + 8)
+#define IDM_SPEED_2_9 (IDM_SPEED_2_0 + 9)
+#define IDM_SPEED_3_0 (IDM_SPEED_2_0 + 10)
+
+#define IDM_ALWAYS_ACTIVE 191
+#define IDM_PATCH_CPU 192
+
+#define IDM_MODE_BORDERLESS 193
+#define IDM_MODE_EXCLUSIVE 194
+
+#define IDM_MODE_WIDEBATTLE 195
+#define IDM_FAST_AI 196
+
+#define IDM_SCR_BMP 549
+#define IDM_SCR_PNG 550
+#define IDM_SCR_1 (IDM_SCR_PNG + 1)
+#define IDM_SCR_2 (IDM_SCR_PNG + 2)
+#define IDM_SCR_3 (IDM_SCR_PNG + 3)
+#define IDM_SCR_4 (IDM_SCR_PNG + 4)
+#define IDM_SCR_5 (IDM_SCR_PNG + 5)
+#define IDM_SCR_6 (IDM_SCR_PNG + 6)
+#define IDM_SCR_7 (IDM_SCR_PNG + 7)
+#define IDM_SCR_8 (IDM_SCR_PNG + 8)
+#define IDM_SCR_9 (IDM_SCR_PNG + 9)
+
+#define IDM_LOCALE_DEFAULT 5000
+
+#define IDM_MSG_0 400
+#define IDM_MSG_5 405
+#define IDM_MSG_10 410
+#define IDM_MSG_15 415
+#define IDM_MSG_20 420
+#define IDM_MSG_25 425
+#define IDM_MSG_30 430
 
 #define IDS_ERROR_CHOOSE_PF 300
 #define IDS_ERROR_SET_PF 301
@@ -265,61 +319,6 @@
 #define IDS_REND_GL2 379
 #define IDS_REND_GL3 380
 #define IDS_REND_GDI 381
-
-#define IDM_COLOR_ADJUST 382
-
-#define IDM_SPEED_1_0 170
-#define IDM_SPEED_1_1 (IDM_SPEED_1_0 + 1)
-#define IDM_SPEED_1_2 (IDM_SPEED_1_0 + 2)
-#define IDM_SPEED_1_3 (IDM_SPEED_1_0 + 3)
-#define IDM_SPEED_1_4 (IDM_SPEED_1_0 + 4)
-#define IDM_SPEED_1_5 (IDM_SPEED_1_0 + 5)
-#define IDM_SPEED_1_6 (IDM_SPEED_1_0 + 6)
-#define IDM_SPEED_1_7 (IDM_SPEED_1_0 + 7)
-#define IDM_SPEED_1_8 (IDM_SPEED_1_0 + 8)
-#define IDM_SPEED_1_9 (IDM_SPEED_1_0 + 9)
-#define IDM_SPEED_2_0 (IDM_SPEED_1_0 + 10)
-#define IDM_SPEED_2_1 (IDM_SPEED_2_0 + 1)
-#define IDM_SPEED_2_2 (IDM_SPEED_2_0 + 2)
-#define IDM_SPEED_2_3 (IDM_SPEED_2_0 + 3)
-#define IDM_SPEED_2_4 (IDM_SPEED_2_0 + 4)
-#define IDM_SPEED_2_5 (IDM_SPEED_2_0 + 5)
-#define IDM_SPEED_2_6 (IDM_SPEED_2_0 + 6)
-#define IDM_SPEED_2_7 (IDM_SPEED_2_0 + 7)
-#define IDM_SPEED_2_8 (IDM_SPEED_2_0 + 8)
-#define IDM_SPEED_2_9 (IDM_SPEED_2_0 + 9)
-#define IDM_SPEED_3_0 (IDM_SPEED_2_0 + 10)
-
-#define IDM_ALWAYS_ACTIVE 191
-#define IDM_PATCH_CPU 192
-
-#define IDM_MODE_BORDERLESS 193
-#define IDM_MODE_EXCLUSIVE 194
-
-#define IDM_MODE_WIDEBATTLE 195
-#define IDM_FAST_AI 196
-
-#define IDM_SCR_BMP 549
-#define IDM_SCR_PNG 550
-#define IDM_SCR_1 (IDM_SCR_PNG + 1)
-#define IDM_SCR_2 (IDM_SCR_PNG + 2)
-#define IDM_SCR_3 (IDM_SCR_PNG + 3)
-#define IDM_SCR_4 (IDM_SCR_PNG + 4)
-#define IDM_SCR_5 (IDM_SCR_PNG + 5)
-#define IDM_SCR_6 (IDM_SCR_PNG + 6)
-#define IDM_SCR_7 (IDM_SCR_PNG + 7)
-#define IDM_SCR_8 (IDM_SCR_PNG + 8)
-#define IDM_SCR_9 (IDM_SCR_PNG + 9)
-
-#define IDM_LOCALE_DEFAULT 5000
-
-#define IDM_MSG_0 400
-#define IDM_MSG_5 405
-#define IDM_MSG_10 410
-#define IDM_MSG_15 415
-#define IDM_MSG_20 420
-#define IDM_MSG_25 425
-#define IDM_MSG_30 430
 
 // Next default values for new objects
 //

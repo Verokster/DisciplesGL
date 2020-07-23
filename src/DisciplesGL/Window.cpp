@@ -2002,7 +2002,7 @@ namespace Window
 		case WM_GETMINMAXINFO: {
 			DWORD style = GetWindowLong(hWnd, GWL_STYLE);
 
-			RECT min = { 0, 0, MIN_WIDTH, MIN_HEIGHT };
+			RECT min = { 0, 0, 240, 240 * LONG(config.mode->height / config.mode->width) };
 			AdjustWindowRect(&min, style, config.windowedMode);
 
 			RECT max = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
@@ -2467,26 +2467,21 @@ namespace Window
 					Config::Set(CONFIG_WRAPPER, "Background", config.background.enabled);
 					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", config.background.enabled);
 
-					if (config.resHooked)
 					{
-						{
-							CHAR str1[32];
-							LoadString(hDllModule, IDS_BACKGROUND, str1, sizeof(str1));
+						CHAR str1[32];
+						LoadString(hDllModule, IDS_BACKGROUND, str1, sizeof(str1));
 
-							CHAR str2[32];
-							LoadString(hDllModule, config.background.enabled ? IDS_ON : IDS_OFF, str2, sizeof(str2));
+						CHAR str2[32];
+						LoadString(hDllModule, config.background.enabled ? IDS_ON : IDS_OFF, str2, sizeof(str2));
 
-							CHAR text[64];
-							StrPrint(text, "%s: %s", str1, str2);
-							Hooks::PrintText(text);
-						}
-
-						OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-						if (ddraw)
-							ddraw->Redraw();
+						CHAR text[64];
+						StrPrint(text, "%s: %s", str1, str2);
+						Hooks::PrintText(text);
 					}
-					else
-						Main::ShowInfo(IDS_INFO_RESTART);
+
+					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+					if (ddraw)
+						ddraw->Redraw();
 
 					CheckMenu(MenuBackground);
 				}

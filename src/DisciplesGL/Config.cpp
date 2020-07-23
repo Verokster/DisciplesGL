@@ -256,6 +256,12 @@ namespace Config
 				Config::Set(CONFIG_DISCIPLE, "DisplayMode", config.windowedMode);
 			}
 
+			config.toogle.banners = FALSE;
+			Config::Set(CONFIG_SETTINGS, "ShowBanners", config.toogle.banners);
+
+			config.toogle.resources = FALSE;
+			Config::Set(CONFIG_SETTINGS, "ShowResources", config.toogle.resources);
+
 			config.renderer = RendererAuto;
 			Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&config.renderer);
 
@@ -425,6 +431,9 @@ namespace Config
 				return FALSE;
 
 			config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", TRUE);
+
+			config.toogle.banners = (BOOL)Config::Get(CONFIG_SETTINGS, "ShowBanners", FALSE);
+			config.toogle.resources = (BOOL)Config::Get(CONFIG_SETTINGS, "ShowResources", FALSE);
 
 			INT value = Config::Get(CONFIG_WRAPPER, "Renderer", RendererAuto);
 			config.renderer = *(RendererType*)&value;

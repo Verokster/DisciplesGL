@@ -26,6 +26,16 @@
 
 namespace Hooks
 {
+	struct LOCK {
+		DWORD unk_0;
+		DWORD unk_1;
+		LONG flags;
+		DWORD unk_3;
+	};
+
+	typedef DWORD**(__stdcall* BEGINLOCK)(LOCK*);
+	typedef VOID(__thiscall* ENDLOCK)(LOCK*, DWORD);
+
 	//======================================================================= 
 	#define BINKYAINVERT          0x00000800L // Reverse Y and A planes when blitting (for debugging) 
 	#define BINKFRAMERATE         0x00001000L // Override fr (call BinkFrameRate first) 
@@ -242,7 +252,27 @@ namespace Hooks
 		DWORD draw_hook_1;
 		DWORD draw_hook_2;
 
+		DWORD lock_begin;
+		DWORD lock_end;
+		DWORD lock_begin_2;
+		DWORD lock_end_2;
 		DWORD interlockFix;
+
+		DWORD iso_view_interface;
+		DWORD iso_view_info_interface;
+		DWORD iso_view_events_interface;
+		DWORD radio_objects_interface;
+		DWORD radio_objects_create;
+
+		DWORD mouse_allow_flag;
+		DWORD map_center_get;
+		DWORD map_center_set;
+		DWORD offset_area;
+		DWORD offset_keystate;
+		DWORD offset_dialog_set;
+		DWORD offset_dialog_clear;
+		DWORD offset_dialog_get;
+
 		DWORD startAiTurn;
 		DWORD endAiTurn;
 
@@ -255,6 +285,14 @@ namespace Hooks
 
 		DWORD sphere_x;
 		DWORD sphere_y;
+
+		DWORD resources_set;
+		DWORD resources_nop;
+		DWORD resources_hook;
+
+		DWORD banners_set;
+		DWORD banners_nop;
+		DWORD banners_hook;
 	};
 
 	struct BlendData {
@@ -282,10 +320,8 @@ namespace Hooks
 		DWORD color;
 	};
 
-	INT __stdcall MessageBoxHook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType);
-
+	INT __stdcall MessageBoxHook(HWND, LPCSTR, LPCSTR, UINT);
 	VOID __fastcall PrintText(CHAR* str);
-
 	VOID __fastcall SetGameSpeed();
 
 	VOID Load();

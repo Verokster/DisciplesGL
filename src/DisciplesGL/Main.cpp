@@ -179,9 +179,6 @@ namespace Main
 
 	VOID __fastcall LoadBack(VOID* buffer, DWORD width, DWORD height)
 	{
-		if (config.version || !config.resHooked)
-			return;
-
 		Stream stream;
 		MemoryZero(&stream, sizeof(Stream));
 		if (Main::LoadResource(MAKEINTRESOURCE(IDR_BACK), &stream))

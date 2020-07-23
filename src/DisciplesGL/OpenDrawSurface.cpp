@@ -194,6 +194,19 @@ StateBufferBorder* __fastcall LoadBufferImage(LPSTR resourceId)
 	return buffer;
 }
 
+StateBufferBorder* __fastcall CreateBufferImage(DWORD width, DWORD height)
+{
+	StateBufferBorder* buffer = new StateBufferBorder(width, height, width * height * sizeof(DWORD));
+
+	DWORD* data = (DWORD*)buffer->data;
+	DWORD count = width * height;
+	do
+		*data++ = ALPHA_COMPONENT;
+	while (--count);
+
+	return buffer;
+}
+
 VOID OpenDrawSurface::DrawBorders(VOID* data, DWORD width, DWORD height)
 {
 	if (!config.borders.allowed)
@@ -223,10 +236,10 @@ VOID OpenDrawSurface::DrawBorders(VOID* data, DWORD width, DWORD height)
 
 		if (!*lpBuffer)
 		{
-			if (wide)
-				*lpBuffer = new StateBufferBorder(GAME_WIDTH, GAME_HEIGHT, (VOID*)NULL);
+			if (!wide)
+				*lpBuffer = CreateBufferImage(GAME_WIDTH, GAME_HEIGHT);
 			else
-				*lpBuffer = new StateBufferBorder(WIDE_WIDTH, WIDE_HEIGHT, (VOID*)NULL);
+				*lpBuffer = CreateBufferImage(WIDE_WIDTH, WIDE_HEIGHT);
 		}
 	}
 
@@ -313,7 +326,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 
 			buffer->isZoomed = Config::IsZoomed();
 			buffer->borders = config.borders.active ? config.borders.type : BordersNone;
-			buffer->isBack = config.background.enabled && config.borders.active;
+			buffer->isBack = config.background.enabled;
 		}
 		else
 		{
@@ -354,10 +367,10 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 			}
 
 			if (!this->secondaryBuffer)
-				this->secondaryBuffer = new StateBufferBorder(GAME_WIDTH, GAME_HEIGHT, (VOID*)NULL);
+				this->secondaryBuffer = CreateBufferImage(GAME_WIDTH, GAME_HEIGHT);
 
 			if (!this->backBuffer)
-				this->backBuffer = new StateBufferBorder(WIDE_WIDTH, WIDE_HEIGHT, (VOID*)NULL);
+				this->backBuffer = CreateBufferImage(WIDE_WIDTH, WIDE_HEIGHT);
 		}
 	}
 }
@@ -424,7 +437,7 @@ VOID OpenDrawSurface::Flush()
 		{
 			surfaceBuffer->isZoomed = Config::IsZoomed();
 
-			if (config.borders.type != BordersNone && config.borders.active)
+			if (config.borders.active)
 			{
 				surface->redraw = surfaceBuffer->borders != config.borders.type;
 				surfaceBuffer->borders = config.borders.type;
@@ -432,7 +445,7 @@ VOID OpenDrawSurface::Flush()
 			else
 				surfaceBuffer->borders = BordersNone;
 
-			surfaceBuffer->isBack = config.background.enabled && config.borders.active;
+			surfaceBuffer->isBack = config.background.enabled;
 		}
 
 		BOOL isSync = !config.ai.thinking && !config.ai.waiting && config.coldCPU;
@@ -715,8 +728,7 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 			if (this->type == SurfaceSecondary)
 			{
 				((StateBufferAligned*)this->indexBuffer)->borders = config.borders.active ? config.borders.type : BordersNone;
-				if (((StateBufferAligned*)this->indexBuffer)->borders != BordersNone)
-					this->DrawBorders(this->indexBuffer->data, this->mode.width, this->mode.height);
+				this->DrawBorders(this->indexBuffer->data, this->mode.width, this->mode.height);
 			}
 		}
 	}

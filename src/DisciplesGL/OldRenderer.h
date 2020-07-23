@@ -28,7 +28,6 @@
 
 class OldRenderer : public OGLRenderer {
 private:
-	BOOL loadBack;
 	BOOL convert;
 	DWORD frameCount;
 	Frame* frames;

@@ -311,6 +311,11 @@ struct ConfigItems {
 		Adjustment active;
 	} colors;
 
+	struct {
+		BOOL banners;
+		BOOL resources;
+	} toogle;
+
 	BOOL isExist;
 	CHAR file[MAX_PATH];
 };

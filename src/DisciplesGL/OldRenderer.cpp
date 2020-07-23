@@ -59,8 +59,7 @@ VOID OldRenderer::Begin()
 	this->frames = (Frame*)MemoryAlloc(this->frameCount * sizeof(Frame));
 	{
 		VOID* tempBuffer = NULL;
-		this->loadBack = !config.version && config.resHooked;
-		if (this->loadBack)
+		if (this->allowBack)
 		{
 			DWORD length = config.mode->width * config.mode->height * sizeof(DWORD);
 			tempBuffer = MemoryAlloc(length);
@@ -98,7 +97,7 @@ VOID OldRenderer::Begin()
 
 					GLGenTextures(2, frame->id);
 
-					if (this->loadBack)
+					if (this->allowBack)
 					{
 						GLBindTexture(GL_TEXTURE_2D, frame->id[1]);
 
@@ -213,7 +212,7 @@ BOOL OldRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 		this->borderStatus = stateBuffer->borders;
 		this->backStatus = stateBuffer->isBack;
-		if (stateBuffer->isBack && this->loadBack)
+		if (stateBuffer->isBack && this->allowBack)
 		{
 			DWORD count = this->frameCount;
 			Frame* frame = this->frames;

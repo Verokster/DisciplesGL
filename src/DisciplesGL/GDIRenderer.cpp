@@ -59,7 +59,7 @@ BOOL GDIRenderer::Start()
 	if (!Renderer::Start())
 		return FALSE;
 
-	if (!config.version && config.resHooked)
+	if (this->allowBack)
 	{
 		this->hDc = GetDC(this->ddraw->hDraw);
 		SetStretchBltMode(this->hDc, COLORONCOLOR);

@@ -24,9 +24,6 @@
 
 #pragma once
 
-#define MIN_WIDTH 240
-#define MIN_HEIGHT 180
-
 namespace Window
 {
 	BOOL __fastcall GetMenuByChildID(MenuItemData* mData);

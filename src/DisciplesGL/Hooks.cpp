@@ -38,6 +38,7 @@
 #include "Hooker.h"
 
 #define CHECKVALUE (WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX)
+#define PANEL_WIDTH 160
 
 namespace Hooks
 {
@@ -104,10 +105,16 @@ namespace Hooks
 		0x00487F80, 0x004059C7, 0x004857C7,
 
 		0x00000000, 0x00000000, 0x00000000, 0x005094B1, 0x00509575,
-		0x00552D19, 0x0042924B, 0x004292D3,
+		0x00552CB4, 0x004BE5D1, 0x00522641, 0x004BE5D1, 0x00552D19,
+		0x006B612C, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x0078A270, 0x00531EE0, 0x00531FAC, 31, 72, 32, 36, 40,
+
+		0x0042924B, 0x004292D3,
 		0x00510361, 0x00510419,
 		0x004E8EA2, 0x004E64FC, 0x004E8A62,
 		0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000, 0x007C5E30, 0x005A2DB5, 0x005A2E7A,
 #pragma endregion
 
 #pragma region v1 .41
@@ -140,10 +147,16 @@ namespace Hooks
 		0x0048A53D, 0x004059F2, 0x00487CEB,
 
 		0x00000000, 0x00000000, 0x00000000, 0x0050E461, 0x0050E525,
-		0x00558E25, 0x0042A9E1, 0x0042AA69,
+		0x00558DC0, 0x0053C846, 0x005279A1, 0x0053C846, 0x00558E25,
+		0x006C152C, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00798BB0, 0x00537FCB, 0x00538095, 52, 84, 36, 40, 44,
+
+		0x0042A9E1, 0x0042AA69,
 		0x00515681, 0x00515739,
 		0x004ED61D, 0x004EAC44, 0x004ED1DD,
 		0x00000000, 0x00000000,
+
+		0x0081DDDC, 0x00483DFB, 0x00483F14, 0x00824930, 0x005A9143, 0x005A9203,
 #pragma endregion
 
 #pragma region v2 .01
@@ -176,10 +189,16 @@ namespace Hooks
 		0x0048CD6F, 0x00405F03, 0x0048A44F,
 
 		0x00450226, 0x004502B3, 0x0040A789, 0x00513981, 0x00513A45,
-		0x0055EA01, 0x0042AE78, 0x0042AF00,
+		0x0055E99C, 0x00507F20, 0x0052D0FA, 0x00507F20, 0x0055EA01,
+		0x006CB6C4, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x007A61E4, 0x0053DBD9, 0x0053DCA5, 50, 88, 36, 40, 44,
+
+		0x0042AE78, 0x0042AF00,
 		0x0051ABC1, 0x0051AC79,
 		0x004F2BD1, 0x004F014B, 0x004F2791,
 		0x00651AE8, 0x00651B34,
+
+		0x0082B42C, 0x004863BA, 0x004864D7, 0x00831FB0, 0x005AFDA8, 0x005AFE6D,
 #pragma endregion
 
 #pragma region v2 .01 - Steam
@@ -212,10 +231,16 @@ namespace Hooks
 		0x0048CE0E, 0x00405B80, 0x0048A4EE,
 
 		0x0045010A, 0x00450197, 0x0040A4AE, 0x005141A1, 0x00514265,
-		0x0055F0EF, 0x0042AC9E, 0x0042AD26,
+		0x0055F08A, 0x00401A11, 0x0052D8BB, 0x0047E73B, 0x0055F0EF,
+		0x006CB6F4, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x007A7078, 0x0053E2A4, 0x0053E370, 50, 88, 36, 40, 44,
+
+		0x0042AC9E, 0x0042AD26,
 		0x0051B331, 0x0051B3E9,
 		0x004F2BDD, 0x004F0194, 0x004F279D,
 		0x00651AA8, 0x00651AF4,
+
+		0x0082C40C, 0x00486441, 0x0048656A, 0x00832F98, 0x005B0398, 0x005B043C,
 #pragma endregion
 
 #pragma region v2 .02
@@ -248,10 +273,16 @@ namespace Hooks
 		0x0048D25C, 0x00405A1A, 0x0048A93C,
 
 		0x00450417, 0x004504A4, 0x0040A438, 0x00512D71, 0x00512E35,
-		0x0055D726, 0x0042AC64, 0x0042ACEC,
+		0x0055D6C1, 0x004018E2, 0x0052C062, 0x0046F4D9, 0x0055D726,
+		0x006CA61C, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x005C7089, 0x0053CA0E, 0x0053CADA, 50, 88, 36, 40, 44,
+
+		0x0042AC64, 0x0042ACEC,
 		0x00519FF1, 0x0051A0A9,
 		0x004F21C0, 0x004EF722, 0x004F1D80,
 		0x00650628, 0x00650674,
+
+		0x008293AC, 0x004868AE, 0x004869CB, 0x0082FF38, 0x005AEC65, 0x005AED25,
 #pragma endregion
 
 #pragma region v2 .02 - Crack
@@ -284,10 +315,16 @@ namespace Hooks
 		0x0048D424, 0x00405F19, 0x0048AB04,
 
 		0x004506BD, 0x0045074A, 0x0040A79F, 0x00513EB1, 0x00513F75,
-		0x0055F051, 0x0042AE8E, 0x0042AF16,
+		0x0055EFEC, 0x0050844A, 0x0052D6B4, 0x0050844A, 0x0055F051,
+		0x006CB6C4, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x007A6248, 0x0053E0A9, 0x0053E175, 50, 88, 36, 40, 44,
+
+		0x0042AE8E, 0x0042AF16,
 		0x0051B0F1, 0x0051B1A9,
 		0x004F3268, 0x004F07E2, 0x004F2E28,
 		0x00651BF8, 0x00651C44,
+
+		0x0082B49C, 0x00486A6F, 0x00486B8C, 0x00832028, 0x005B056E, 0x005B0633,
 #pragma endregion
 
 #pragma region v3 .00 - Steam
@@ -320,10 +357,16 @@ namespace Hooks
 		0x00490052, 0x00405929, 0x0048D732,
 
 		0x0045257F, 0x0045260C, 0x0040A3D9, 0x00517311, 0x005173D5,
-		0x00561961, 0x0042BF1B, 0x0042BFA3,
+		0x005618FC, 0x00401989, 0x00530AA9, 0x004722EF, 0x00561961,
+		0x006D5934, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x007B296C, 0x00541434, 0x00541500, 50, 88, 36, 40, 44,
+
+		0x0042BF1B, 0x0042BFA3,
 		0x0051E501, 0x0051E5B9,
 		0x004F57C4, 0x004F2D6D, 0x004F5384,
 		0x00659398, 0x006593E4,
+
+		0x00837E7C, 0x004893E9, 0x004894F5,  0x0083AA58, 0x005B3A1E, 0x005B3ADE,
 #pragma endregion
 
 #pragma region v3 .01a
@@ -356,10 +399,16 @@ namespace Hooks
 		0x004900C8, 0x00405C95, 0x0048D7A8,
 
 		0x004526E8, 0x00452775, 0x0040A79D, 0x00517111, 0x005171D5,
-		0x00561B61, 0x0042C330, 0x0042C3B8,
+		0x00561AFC, 0x005E4830, 0x00530AE7, 0x005E4830, 0x00561B61,
+		0x006D6984, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x007B2740, 0x005414BC, 0x00541588, 50, 88, 36, 40, 44,
+
+		0x0042C330, 0x0042C3B8,
 		0x0051E2B1, 0x0051E369,
 		0x004F5FD7, 0x004F355B, 0x004F5B97,
 		0x0065A018, 0x0065A064,
+
+		0x00837ACC, 0x004893B4, 0x004894BC, 0x0083A6A8, 0x005B402C, 0x005B40D5,
 #pragma endregion
 
 #pragma region v3 .01b
@@ -392,10 +441,16 @@ namespace Hooks
 		0x0048FBCC, 0x00405921, 0x0048D2E2,
 
 		0x004520B4, 0x00452141, 0x0040A3F9, 0x00516621, 0x005166E5,
-		0x005612FE, 0x0042BD4D, 0x0042BDD5,
+		0x00561299, 0x00401943, 0x00530014, 0x0055B7BC, 0x005612FE,
+		0x006D4924, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x007B06F0, 0x00540B6C, 0x00540C38, 50, 88, 36, 40, 44,
+
+		0x0042BD4D, 0x0042BDD5,
 		0x0051D871, 0x0051D929,
 		0x004F53DF, 0x004F2990, 0x004F4F9F,
 		0x00658A98, 0x00658AE4,
+
+		0x00835A7C, 0x00488F9D, 0x004890A5, 0x00838650, 0x005B32F2, 0x005B33B7,
 #pragma endregion
 
 #pragma region v1 .10 Editor
@@ -412,7 +467,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x0054D87E, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x0054C850, 0x0054D87E, 0x0054D6D9, 0x0054D324, 0x0054CA3B, 0x0054D2D7,
 		0x0054E299, 0x0054F9FC, 0x0054E701, 0x0054DED5, 0x0054E423, 0x0054E161, 0x0054E8D2, 0x0054EFDC,
 
 		0x004813D2, 0x00481AE4, 0x00446339, 0x0045FBD4, 0x00481B86, 0x0047E658,
@@ -428,10 +483,16 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004947C1, 0x00494885,
-		0x0046DAB2, 0x00000000, 0x00000000,
+		0x0046DA4D, 0x0053A204, 0x004728FC, 0x0053A204, 0x0046DAB2,
+		0x005A4AB4, 0x005A637C, 0x005A5ED4, 0x005A814C, 0x00489285,
+		0x00621444, 0x00480C94, 0x00480D60, 6, 72, 32, 36, 40,
+
+		0x00000000, 0x00000000,
 		0x0049B711, 0x0049B7C9,
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .41 Editor
@@ -448,7 +509,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00550A9E, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x0054FA70, 0x00550A9E, 0x005508F9, 0x00550544, 0x0054FC5B, 0x005504F7,
 		0x005514B9, 0x00552C1C, 0x00551921, 0x005510F5, 0x00551643, 0x00551381, 0x00551AF2, 0x005521FC,
 
 		0x004823D1, 0x00482AC0, 0x00446667, 0x004601FA, 0x00482B62, 0x0047F6A4,
@@ -464,10 +525,16 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00495941, 0x00495A05,
-		0x0046DCE2, 0x00000000, 0x00000000,
+		0x0046DC7D, 0x0053D5B9, 0x00472BB6, 0x0053D5B9, 0x0046DCE2,
+		0x005A8F94, 0x005AA9FC, 0x005AA534, 0x005AC934, 0x0048A35B,
+		0x00626570, 0x00481C95, 0x00481D5F, 6, 84, 36, 40, 44,
+
+		0x00000000, 0x00000000,
 		0x0049CC41, 0x0049CCF9,
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .00 Editor - Steam
@@ -500,10 +567,16 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AD0E1, 0x004AD1A5,
-		0x00485073, 0x00000000, 0x00000000,
+		0x0048500E, 0x005225DB, 0x00489FEC, 0x005225DB, 0x00485073,
+		0x005CA40C, 0x005CBF34, 0x005CBA6C, 0x005CE40C, 0x004A1872,
+		0x0064DEC8, 0x00499417, 0x004994E3, 6, 88, 36, 40, 44,
+
+		0x00000000, 0x00000000,
 		0x004B43C1, 0x004B4479,
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .01 Editor
@@ -536,10 +609,16 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
-		0x00484719, 0x00000000, 0x00000000,
+		0x004846B4, 0x00547DC7, 0x00489684, 0x00547DC7, 0x00484719,
+		0x005C93BC, 0x005CAEE4, 0x005CAA1C, 0x005CD394, 0x004A0F63,
+		0x0064CC34, 0x00498AE8, 0x00498BB4, 6, 88, 36, 40, 44,
+
+		0x00000000, 0x00000000,
 		0x004B3AE1, 0x004B3B99,
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .02 Editor
@@ -572,10 +651,16 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
-		0x00484719, 0x00000000, 0x00000000,
+		0x004846B4, 0x00547EE7, 0x00489684, 0x00547EE7, 0x00484719,
+		0x005C93BC, 0x005CAEE4, 0x005CAA1C, 0x005CD394, 0x004A0F63,
+		0x0064CC38, 0x00498AE8, 0x00498BB4, 6, 88, 36, 40, 44,
+
+		0x00000000, 0x00000000,
 		0x004B3AE1, 0x004B3B99,
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .00 Editor - Steam
@@ -608,10 +693,16 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AFD41, 0x004AFE05,
-		0x00487C40, 0x00000000, 0x00000000,
+		0x00487BDB, 0x0055FF24, 0x0048CB09, 0x0055FF24, 0x00487C40,
+		0x005D1774, 0x005D32FC, 0x005D2DFC, 0x005D58D4, 0x004A44F5,
+		0x006574A4, 0x0049C0C3, 0x0049C18F, 6, 88, 36, 40, 44,
+
+		0x00000000, 0x00000000,
 		0x004B7001, 0x004B70B9,
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .01 Editor
@@ -644,14 +735,26 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x004AED61, 0x004AEE25,
-		0x00486E3C, 0x00000000, 0x00000000,
+		0x00486DD7, 0x00534AA4, 0x0048BCE2, 0x00534AA4, 0x00486E3C,
+		0x005D0714, 0x005D229C, 0x005D1D9C, 0x005D484C, 0x004A3549,
+		0x00656180, 0x0049B0E0, 0x0049B1AC, 6, 88, 36, 40, 44,
+
+		0x00000000, 0x00000000,
 		0x004B6051, 0x004B6109,
 		0x00000000, 0x00000000, 0x00000000,
-		0x00000000, 0x00000000
+		0x00000000, 0x00000000,
+
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
 #pragma endregion
 	};
 
 	// ===============================================================
+	BEGINLOCK sub_BeginLock;
+	ENDLOCK sub_EndLock;
+
+	BEGINLOCK sub_BeginLock_2;
+	ENDLOCK sub_EndLock_2;
+
 	HWND hWndMain;
 	UINT uAiMsg;
 
@@ -1992,7 +2095,7 @@ namespace Hooks
 	{
 		DWORD pitch = obj->pitch >> 1;
 
-		DWORD* srcData = (*(DWORD*(__thiscall**)(DWORD*))((*thisObj) + 12))(thisObj);
+		DWORD* srcData = (*(DWORD * (__thiscall**)(DWORD*))((*thisObj) + 12))(thisObj);
 		DWORD* dstData = (DWORD*)obj->data + loc->y * pitch;
 
 		LONG offset = 30;
@@ -3582,7 +3685,7 @@ namespace Hooks
 			StrCat(name, "_SHADOW");
 		}*/
 
-		DWORD** object = ((DWORD**(__stdcall*)(DWORD, CHAR*, DWORD, DWORD, DWORD)) sub_005A9A1E)(thisObj[10], name, 0, 0, *thisObj);
+		DWORD** object = ((DWORD * *(__stdcall*)(DWORD, CHAR*, DWORD, DWORD, DWORD)) sub_005A9A1E)(thisObj[10], name, 0, 0, *thisObj);
 		if (object)
 		{
 			SIZE* size = (SIZE*)object[1][5];
@@ -3982,7 +4085,6 @@ namespace Hooks
 #pragma endregion
 
 #pragma region Main interlock fix
-	DWORD sub_EndLock;
 	VOID __declspec(naked) InterlockHook()
 	{
 		__asm {
@@ -5170,6 +5272,325 @@ namespace Hooks
 	}
 #pragma endregion
 
+#pragma region Map move by mouse
+	struct {
+		POINT mapPos;
+		POINT dlgPos;
+		POINT checkPos;
+		DWORD* dialog;
+		BOOL moved;
+		BYTE* allow;
+		BOOL deleted;
+		struct {
+			DWORD area;
+			DWORD keystate;
+			struct {
+				DWORD set;
+				DWORD clear;
+				DWORD get;
+			} dialog;
+		} offset;
+		DWORD* radioObjects;
+	} mouseAction;
+
+	DWORD sub_CreateRadio;
+	DWORD* __stdcall CreateRadioObjects(DWORD* obj, CHAR* name)
+	{
+		DWORD* res = ((DWORD * (__stdcall*)(DWORD*, CHAR*)) sub_CreateRadio)(obj, name);
+		if (!StrCompare(name, "RAD_OBJECTS"))
+			mouseAction.radioObjects = res;
+		return res;
+	}
+
+	SHORT GetDialogKeyState(DWORD* dialog, INT iKey)
+	{
+		LOCK lock;
+		DWORD* lockMethod = sub_BeginLock(&lock)[1];
+		lock.flags = 0;
+		SHORT res = (*(SHORT(__stdcall**)(INT))(**(DWORD**)(lockMethod[1] + 4) + mouseAction.offset.keystate))(iKey);
+		lock.flags = -1;
+		sub_EndLock(&lock, NULL);
+
+		return res;
+	}
+
+	VOID SetCurrentDialog(DWORD* dialog)
+	{
+		LOCK lock;
+		DWORD* lockMethod = sub_BeginLock_2(&lock)[1];
+		lock.flags = 0;
+		((VOID(__thiscall*)(DWORD*, DWORD*)) * (DWORD*)(lockMethod[0] + mouseAction.offset.dialog.set))(lockMethod, dialog);
+		lock.flags = -1;
+		sub_EndLock_2(&lock, NULL);
+	}
+
+	VOID ClearCurrentDialog()
+	{
+		LOCK lock;
+		DWORD* lockMethod = sub_BeginLock_2(&lock)[1];
+		lock.flags = 1;
+		((VOID(__thiscall*)(DWORD*)) * (DWORD*)(lockMethod[0] + mouseAction.offset.dialog.clear))(lockMethod);
+		lock.flags = -1;
+		sub_EndLock_2(&lock, NULL);
+	}
+
+	DWORD* GetCurrentDialog()
+	{
+		LOCK lock;
+		DWORD* lockMethod = sub_BeginLock_2(&lock)[1];
+		lock.flags = 1;
+		DWORD* dialog = ((DWORD * (__thiscall*)(DWORD*)) * (DWORD*)(lockMethod[0] + mouseAction.offset.dialog.get))(lockMethod);
+		lock.flags = -1;
+		sub_EndLock_2(&lock, NULL);
+
+		return dialog;
+	}
+
+	DWORD sub_GetMapCenter, sub_SetMapCenter;
+
+	DWORD sub_DeleteIsoView;
+	VOID __declspec(naked) DeleteIsoView(DWORD obj)
+	{
+		__asm {
+			mov mouseAction.deleted, 1
+			jmp sub_DeleteIsoView
+		}
+	}
+
+	DWORD sub_DeleteIsoInfoView;
+	VOID __declspec(naked) DeleteIsoInfoView(DWORD obj)
+	{
+		__asm {
+			mov mouseAction.deleted, 1
+			jmp sub_DeleteIsoInfoView
+		}
+	}
+
+	DWORD sub_DeleteIsoEventsView;
+	VOID __declspec(naked) DeleteIsoEventsView(DWORD obj)
+	{
+		__asm {
+			mov mouseAction.deleted, 1
+			jmp sub_DeleteIsoEventsView
+		}
+	}
+
+	DWORD sub_DeleteRadioObjects;
+	VOID __declspec(naked) DeleteRadioObjects(DWORD obj)
+	{
+		__asm {
+			cmp ecx, mouseAction.radioObjects
+			jne lbl_cont
+			mov mouseAction.radioObjects, 0
+
+			lbl_cont:
+			jmp sub_DeleteRadioObjects
+		}
+	}
+
+	DWORD* __fastcall GetAreaObject(DWORD* global)
+	{
+		if (config.isEditor)
+			return (DWORD*)((DWORD*)global[4])[mouseAction.offset.area];
+		else
+			return (DWORD*)global[mouseAction.offset.area];
+	}
+
+	DWORD sub_MouseAction;
+	BOOL __stdcall MouseAction(DWORD* global, UINT uMsg, POINT* pt)
+	{
+		if (*mouseAction.allow)
+		{
+			DWORD* obj = GetAreaObject(global);
+			if (uMsg == WM_LBUTTONDOWN)
+			{
+				if (!mouseAction.radioObjects || ((DWORD*)mouseAction.radioObjects[2])[5] != 7)
+				{
+					DWORD* methods = (DWORD*)obj[0];
+					RECT* rc = ((RECT * (__thiscall*)(DWORD*)) methods[12])(obj);
+					if (pt->x >= rc->left && pt->x < rc->right && pt->y >= rc->top && pt->y < rc->bottom && (rc->right - rc->left != config.mode->width || pt->x < rc->right - PANEL_WIDTH || pt->y >= rc->top + GAME_HEIGHT) && !GetCurrentDialog())
+					{
+						DWORD* mapObject = (DWORD*)((DWORD*)obj[2])[1];
+
+						POINT offset;
+						((BOOL(__thiscall*)(DWORD*, POINT*, LONG*, LONG*))sub_GetMapCenter)(mapObject, &mouseAction.mapPos, &offset.x, &offset.y); // Get Map Center
+						mouseAction.dlgPos = { pt->x + offset.x, pt->y + offset.y };
+						mouseAction.checkPos = *pt;
+						mouseAction.dialog = global;
+						mouseAction.moved = FALSE;
+
+						SetCurrentDialog(global);
+						return TRUE;
+					}
+				}
+			}
+			else if (uMsg == WM_LBUTTONUP && mouseAction.dialog == global)
+			{
+				mouseAction.dialog = NULL;
+
+				ClearCurrentDialog();
+
+				if (mouseAction.moved)
+				{
+					DWORD* mapObject = (DWORD*)((DWORD*)obj[2])[1];
+					((VOID(__thiscall*)(DWORD*, POINT*, LONG, LONG))sub_SetMapCenter)(mapObject, &mouseAction.mapPos, mouseAction.dlgPos.x - pt->x, mouseAction.dlgPos.y - pt->y);
+				}
+				else
+				{
+					mouseAction.deleted = FALSE;
+					BOOL res = ((BOOL(__thiscall*)(DWORD*, UINT, POINT*))sub_MouseAction)(global, WM_LBUTTONDOWN, pt);
+					if (mouseAction.deleted)
+						return res;
+				}
+			}
+		}
+
+		return ((BOOL(__thiscall*)(DWORD*, UINT, POINT*))sub_MouseAction)(global, uMsg, pt);
+	}
+
+	VOID __declspec(naked) hook_006D79B8()
+	{
+		__asm {
+			pop eax
+			push ecx
+			push eax
+			jmp MouseAction
+		}
+	}
+
+	DWORD sub_MouseMove;
+	BOOL __stdcall MouseMove(DWORD* global, POINT* pt)
+	{
+		if (*mouseAction.allow)
+		{
+			if (GetDialogKeyState(global, VK_LBUTTON))
+			{
+				if (mouseAction.dialog == global)
+				{
+					if (!mouseAction.moved)
+					{
+						LONG x = mouseAction.checkPos.x - pt->x;
+						LONG y = mouseAction.checkPos.y - pt->y;
+						mouseAction.moved = (LONG)sqrtf(FLOAT(x * x + y * y)) >= 32;
+					}
+
+					if (mouseAction.moved)
+					{
+						DWORD* obj = GetAreaObject(global);
+
+						DWORD* mapObject = (DWORD*)((DWORD*)obj[2])[1];
+						((VOID(__thiscall*)(DWORD*, POINT*, LONG, LONG))sub_SetMapCenter)(mapObject, &mouseAction.mapPos, mouseAction.dlgPos.x - pt->x, mouseAction.dlgPos.y - pt->y);
+
+						POINT offset, mapPos;
+						((VOID(__thiscall*)(DWORD*, POINT*, LONG*, LONG*))sub_GetMapCenter)(mapObject, &mapPos, &offset.x, &offset.y); // Get Map Center
+
+						// To map offset
+						offset = { offset.y * 2 + offset.x, offset.y * 2 - offset.x };
+
+						LONG size = ((LONG*)mapObject[0])[5];
+
+						BOOL reset = FALSE;
+						if (mapPos.x < 0 || !mapPos.x && offset.x < 0)
+						{
+							mapPos.x = 0;
+							offset.x = 0;
+							reset = TRUE;
+						}
+						else if (mapPos.x >= size || mapPos.x == size - 1 && offset.x > 0)
+						{
+							mapPos.x = size - 1;
+							offset.x = 0;
+							reset = TRUE;
+						}
+
+						if (mapPos.y < 0 || !mapPos.y && offset.y < 0)
+						{
+							mapPos.y = 0;
+							offset.y = 0;
+							reset = TRUE;
+						}
+						else if (mapPos.y >= size || mapPos.y == size - 1 && offset.y > 0)
+						{
+							mapPos.y = size - 1;
+							offset.y = 0;
+							reset = TRUE;
+						}
+
+						if (reset)
+						{
+							offset = { (offset.x - offset.y) / 2, (offset.x + offset.y) / 4 };
+
+							mouseAction.mapPos = mapPos;
+							mouseAction.dlgPos = { pt->x + offset.x, pt->y + offset.y };
+
+							((VOID(__thiscall*)(DWORD*, POINT*, LONG, LONG))sub_SetMapCenter)(mapObject, &mouseAction.mapPos, offset.x, offset.y);
+						}
+
+						return TRUE;
+					}
+				}
+			}
+			else
+			{
+				mouseAction.dialog = NULL;
+
+				if (GetCurrentDialog() == global)
+					ClearCurrentDialog();
+			}
+		}
+
+		return ((BOOL(__thiscall*)(DWORD*, POINT*))sub_MouseMove)(global, pt);
+	}
+
+	VOID __declspec(naked) hook_006D79B4()
+	{
+		__asm {
+			pop eax
+			push ecx
+			push eax
+			jmp MouseMove
+		}
+	}
+#pragma endregion
+
+#pragma region Banners and resources popup
+	BYTE* flagResPopup;
+	VOID __cdecl SetResources(DWORD value)
+	{
+		*flagResPopup = value & 1;
+		config.toogle.resources = *flagResPopup;
+		Config::Set(CONFIG_SETTINGS, "ShowResources", config.toogle.resources);
+	}
+
+	VOID __declspec(naked) hook_004869CB()
+	{
+		__asm {
+			push eax
+			call SetResources
+			pop eax
+			cmp al, bl
+			retn
+		}
+	}
+
+	VOID __stdcall SetBanners(DWORD value)
+	{
+		config.toogle.banners = value & 1;
+		Config::Set(CONFIG_SETTINGS, "ShowBanners", config.toogle.banners);
+	}
+
+	VOID __declspec(naked) hook_005AED25()
+	{
+		__asm {
+			mov [ecx], al
+			push eax
+			call SetBanners
+			retn 4
+		}
+	}
+
+#pragma endregion
+
 	BOOL __stdcall FakeEntryPoint(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	{
 		return TRUE;
@@ -5184,7 +5605,7 @@ namespace Hooks
 			*(WORD*)&block[0] = 0x25FF;
 			*(DWORD*)&block[2] = address;
 
-			address = FindBlock(hooker, & block, sizeof(block));
+			address = FindBlock(hooker, &block, sizeof(block));
 			if (address)
 			{
 				PatchJump(hooker, address, (DWORD)addr);
@@ -5226,7 +5647,7 @@ namespace Hooks
 			PatchNop(hooker, hookSpace->random_nop, 5);
 
 		// Interlock Fix
-		sub_EndLock = RedirectCall(hooker, hookSpace->interlockFix, InterlockHook);
+		sub_EndLock = (ENDLOCK)RedirectCall(hooker, hookSpace->interlockFix, InterlockHook);
 
 		// HD
 		if (config.hd)
@@ -5322,8 +5743,6 @@ namespace Hooks
 
 	VOID __fastcall LoadV2(HOOKER hooker, const AddressSpaceV2* hookSpace)
 	{
-		config.background.allowed = TRUE;
-
 		DWORD baseOffset = GetBaseOffset(hooker);
 
 		// Async spell & death sounds
@@ -5444,7 +5863,51 @@ namespace Hooks
 		}
 
 		// Interlock Fix
-		sub_EndLock = RedirectCall(hooker, hookSpace->interlockFix, InterlockHook);
+		{
+			sub_BeginLock = BEGINLOCK(hookSpace->lock_begin + baseOffset);
+			sub_EndLock = ENDLOCK(hookSpace->lock_end + baseOffset);
+			sub_BeginLock_2 = BEGINLOCK(hookSpace->lock_begin_2 + baseOffset);
+			sub_EndLock_2 = ENDLOCK(hookSpace->lock_end_2 + baseOffset);
+
+			PatchCall(hooker, hookSpace->interlockFix, InterlockHook);
+		}
+
+		// Map move by mouse press
+		if (ReadDWord(hooker, hookSpace->iso_view_interface, &sub_DeleteIsoView) && ReadDWord(hooker, hookSpace->iso_view_interface + 8, &sub_MouseMove) && ReadDWord(hooker, hookSpace->iso_view_interface + 12, &sub_MouseAction))
+		{
+			PatchDWord(hooker, hookSpace->iso_view_interface, (DWORD)DeleteIsoView);
+			PatchDWord(hooker, hookSpace->iso_view_interface + 8, (DWORD)hook_006D79B4);
+			PatchDWord(hooker, hookSpace->iso_view_interface + 12, (DWORD)hook_006D79B8);
+
+			if (hookSpace->iso_view_info_interface && ReadDWord(hooker, hookSpace->iso_view_info_interface, &sub_DeleteIsoInfoView))
+			{
+				PatchDWord(hooker, hookSpace->iso_view_info_interface, (DWORD)DeleteIsoInfoView);
+				PatchDWord(hooker, hookSpace->iso_view_info_interface + 8, (DWORD)hook_006D79B4);
+				PatchDWord(hooker, hookSpace->iso_view_info_interface + 12, (DWORD)hook_006D79B8);
+			}
+
+			if (hookSpace->iso_view_events_interface && ReadDWord(hooker, hookSpace->iso_view_events_interface, &sub_DeleteIsoEventsView))
+			{
+				PatchDWord(hooker, hookSpace->iso_view_events_interface, (DWORD)DeleteIsoEventsView);
+				PatchDWord(hooker, hookSpace->iso_view_events_interface + 8, (DWORD)hook_006D79B4);
+				PatchDWord(hooker, hookSpace->iso_view_events_interface + 12, (DWORD)hook_006D79B8);
+			}
+
+			if (hookSpace->radio_objects_interface && ReadDWord(hooker, hookSpace->radio_objects_interface, &sub_DeleteRadioObjects))
+			{
+				PatchDWord(hooker, hookSpace->radio_objects_interface, (DWORD)DeleteRadioObjects);
+				sub_CreateRadio = RedirectCall(hooker, hookSpace->radio_objects_create, CreateRadioObjects);
+			}
+
+			mouseAction.allow = (BYTE*)(hookSpace->mouse_allow_flag + baseOffset);
+			mouseAction.offset.area = hookSpace->offset_area;
+			mouseAction.offset.keystate = hookSpace->offset_keystate;
+			mouseAction.offset.dialog.set = hookSpace->offset_dialog_set;
+			mouseAction.offset.dialog.clear = hookSpace->offset_dialog_clear;
+			mouseAction.offset.dialog.get = hookSpace->offset_dialog_get;
+			sub_GetMapCenter = hookSpace->map_center_get + baseOffset;
+			sub_SetMapCenter = hookSpace->map_center_set + baseOffset;
+		}
 
 		// AI turn
 		if (hookSpace->startAiTurn && hookSpace->endAiTurn)
@@ -5482,9 +5945,28 @@ namespace Hooks
 			PatchCall(hooker, hookSpace->sphere_y, hook_00650674);
 		}
 
+		// Resources toogle
+		if (hookSpace->resources_set)
+		{
+			PatchByte(hooker, hookSpace->resources_set, config.toogle.resources);
+			flagResPopup = (BYTE*)(hookSpace->resources_set + baseOffset);
+
+			PatchByte(hooker, hookSpace->resources_nop, 0xC3);
+			PatchCall(hooker, hookSpace->resources_hook, hook_004869CB);
+		}
+
+		// Banners toogle
+		if (hookSpace->banners_set)
+		{
+			PatchByte(hooker, hookSpace->banners_set, config.toogle.banners);
+			PatchByte(hooker, hookSpace->banners_nop, 0xEB);
+			PatchHook(hooker, hookSpace->banners_hook, hook_005AED25);
+		}
+
 		if (config.hd)
 		{
 			config.bpp32Hooked = TRUE;
+			config.background.allowed = config.isEditor;
 			SeedRandom(timeGetTime());
 			config.randPos.x = Random();
 			config.randPos.y = Random();
@@ -5631,7 +6113,7 @@ namespace Hooks
 					PatchByte(hooker, hookSpace->mini_rect_jmp, 0xEB);
 					PatchByte(hooker, hookSpace->mini_rect_jmp + 23, 0xEB);
 
-					FLOAT w = FLOAT(27 - 7) / (GAME_WIDTH - 160) * (config.mode->width - 160);
+					FLOAT w = FLOAT(27 - 7) / (GAME_WIDTH - PANEL_WIDTH) * (config.mode->width - PANEL_WIDTH);
 					FLOAT h = FLOAT(27 + 7) / GAME_HEIGHT * config.mode->height;
 
 					FLOAT ky = (h - w) * 0.5f;
@@ -5836,6 +6318,7 @@ namespace Hooks
 
 					PatchImport(hooker, "GetCursorPos", GetCursorPosHookV2);
 					PatchImport(hooker, "SetCursorPos", SetCursorPosHook);
+					PatchImport(hooker, "GetAsyncKeyState", GetKeyState);
 				}
 			}
 

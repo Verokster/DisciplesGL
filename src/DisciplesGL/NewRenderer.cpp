@@ -123,12 +123,12 @@ VOID NewRenderer::Begin()
 							GLVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 32, (GLvoid*)16);
 						}
 
-						if (!config.version && config.resHooked)
+						if (this->allowBack)
 							GLGenTextures(2, &textureId.back);
 						else
 							GLGenTextures(1, &textureId.primary);
 						{
-							if (!config.version && config.resHooked)
+							if (this->allowBack)
 							{
 								GLActiveTexture(GL_TEXTURE1);
 								GLBindTexParameter(textureId.back, GL_LINEAR);
@@ -193,7 +193,7 @@ VOID NewRenderer::End()
 							{
 								if (this->fboId)
 								{
-									GLDeleteTextures(!config.version && config.resHooked ? 3 : 2, (GLuint*)&textureId.secondary);
+									GLDeleteTextures(this->allowBack ? 3 : 2, (GLuint*)&textureId.secondary);
 									GLDeleteRenderbuffers(1, &this->rboId);
 									GLDeleteFramebuffers(1, &this->fboId);
 									AlignedFree(this->frameBuffer);
@@ -201,7 +201,7 @@ VOID NewRenderer::End()
 							}
 							delete this->pixelBuffer;
 						}
-						if (!config.version && config.resHooked)
+						if (this->allowBack)
 							GLDeleteTextures(2, &textureId.back);
 						else
 							GLDeleteTextures(1, &textureId.primary);
@@ -364,7 +364,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 					this->upscaleProgram->Use(this->texSize, FALSE);
 
-					if (!config.version && config.resHooked)
+					if (this->allowBack)
 					{
 						GLViewport(0, 0, LOWORD(this->viewSize), HIWORD(this->viewSize));
 
@@ -508,7 +508,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 	{
 		if (this->fboId)
 		{
-			GLDeleteTextures(!config.version && config.resHooked ? 3 : 2, (GLuint*)&textureId.secondary);
+			GLDeleteTextures(this->allowBack ? 3 : 2, (GLuint*)&textureId.secondary);
 			GLDeleteRenderbuffers(1, &this->rboId);
 			GLDeleteFramebuffers(1, &this->fboId);
 			AlignedFree(this->frameBuffer);
@@ -520,7 +520,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 			this->pixelBuffer->Reset();
 
-			if (!config.version && config.resHooked)
+			if (this->allowBack)
 			{
 				GLActiveTexture(GL_TEXTURE1);
 				GLBindTexFilter(textureId.back, state.interpolation != InterpolateNearest ? GL_LINEAR : GL_NEAREST);
