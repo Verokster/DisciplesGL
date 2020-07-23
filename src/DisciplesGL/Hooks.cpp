@@ -114,7 +114,7 @@ namespace Hooks
 		0x004E8EA2, 0x004E64FC, 0x004E8A62,
 		0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x007C5E30, 0x005A2DB5, 0x005A2E7A,
+		0x00000000, 0x00000000, 0x00000000, 0x007C5E30, 0x005A2DB5, 0x005A2E7A, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .41
@@ -156,7 +156,7 @@ namespace Hooks
 		0x004ED61D, 0x004EAC44, 0x004ED1DD,
 		0x00000000, 0x00000000,
 
-		0x0081DDDC, 0x00483DFB, 0x00483F14, 0x00824930, 0x005A9143, 0x005A9203,
+		0x0081DDDC, 0x00483DFB, 0x00483F14, 0x00824930, 0x005A9143, 0x005A9203, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .01
@@ -198,7 +198,7 @@ namespace Hooks
 		0x004F2BD1, 0x004F014B, 0x004F2791,
 		0x00651AE8, 0x00651B34,
 
-		0x0082B42C, 0x004863BA, 0x004864D7, 0x00831FB0, 0x005AFDA8, 0x005AFE6D,
+		0x0082B42C, 0x004863BA, 0x004864D7, 0x00831FB0, 0x005AFDA8, 0x005AFE6D, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .01 - Steam
@@ -240,7 +240,7 @@ namespace Hooks
 		0x004F2BDD, 0x004F0194, 0x004F279D,
 		0x00651AA8, 0x00651AF4,
 
-		0x0082C40C, 0x00486441, 0x0048656A, 0x00832F98, 0x005B0398, 0x005B043C,
+		0x0082C40C, 0x00486441, 0x0048656A, 0x00832F98, 0x005B0398, 0x005B043C, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .02
@@ -282,7 +282,7 @@ namespace Hooks
 		0x004F21C0, 0x004EF722, 0x004F1D80,
 		0x00650628, 0x00650674,
 
-		0x008293AC, 0x004868AE, 0x004869CB, 0x0082FF38, 0x005AEC65, 0x005AED25,
+		0x008293AC, 0x004868AE, 0x004869CB, 0x0082FF38, 0x005AEC65, 0x005AED25, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .02 - Crack
@@ -324,7 +324,7 @@ namespace Hooks
 		0x004F3268, 0x004F07E2, 0x004F2E28,
 		0x00651BF8, 0x00651C44,
 
-		0x0082B49C, 0x00486A6F, 0x00486B8C, 0x00832028, 0x005B056E, 0x005B0633,
+		0x0082B49C, 0x00486A6F, 0x00486B8C, 0x00832028, 0x005B056E, 0x005B0633, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .00 - Steam
@@ -366,7 +366,7 @@ namespace Hooks
 		0x004F57C4, 0x004F2D6D, 0x004F5384,
 		0x00659398, 0x006593E4,
 
-		0x00837E7C, 0x004893E9, 0x004894F5,  0x0083AA58, 0x005B3A1E, 0x005B3ADE,
+		0x00837E7C, 0x004893E9, 0x004894F5, 0x0083AA58, 0x005B3A1E, 0x005B3ADE, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .01a
@@ -408,7 +408,7 @@ namespace Hooks
 		0x004F5FD7, 0x004F355B, 0x004F5B97,
 		0x0065A018, 0x0065A064,
 
-		0x00837ACC, 0x004893B4, 0x004894BC, 0x0083A6A8, 0x005B402C, 0x005B40D5,
+		0x00837ACC, 0x004893B4, 0x004894BC, 0x0083A6A8, 0x005B402C, 0x005B40D5, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .01b
@@ -450,7 +450,7 @@ namespace Hooks
 		0x004F53DF, 0x004F2990, 0x004F4F9F,
 		0x00658A98, 0x00658AE4,
 
-		0x00835A7C, 0x00488F9D, 0x004890A5, 0x00838650, 0x005B32F2, 0x005B33B7,
+		0x00835A7C, 0x00488F9D, 0x004890A5, 0x00838650, 0x005B32F2, 0x005B33B7, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .10 Editor
@@ -492,7 +492,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00631120, 0x0053EF10, 0x00000000, 0x0044A591,
 #pragma endregion
 
 #pragma region v1 .41 Editor
@@ -534,7 +534,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00636338, 0x00541F1F, 0x00000000, 0x0044A9C1,
 #pragma endregion
 
 #pragma region v2 .00 Editor - Steam
@@ -576,7 +576,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x0065E520, 0x0055E93A, 0x00000000, 0x0044D014,
 #pragma endregion
 
 #pragma region v2 .01 Editor
@@ -618,7 +618,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x0065CD48, 0x0055DD64, 0x00000000, 0x0044D09A,
 #pragma endregion
 
 #pragma region v2 .02 Editor
@@ -660,7 +660,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x0065CD70, 0x0055DE84, 0x00000000, 0x0044D09A,
 #pragma endregion
 
 #pragma region v3 .00 Editor - Steam
@@ -702,7 +702,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00667E44, 0x0056480E, 0x00000000, 0x0044EE74,
 #pragma endregion
 
 #pragma region v3 .01 Editor
@@ -744,7 +744,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
+		0x00000000, 0x00000000, 0x00000000, 0x00666484, 0x00563C2D, 0x00000000, 0x0044EBD5
 #pragma endregion
 	};
 
@@ -5589,6 +5589,16 @@ namespace Hooks
 		}
 	}
 
+	DWORD sub_SpinOwnerCallback;
+	VOID __declspec(naked) hook_SpinOwnerCallback()
+	{
+		__asm {
+			mov eax, [ecx+0x20]
+			mov byte ptr [eax+0x3C], 0x1
+			jmp sub_SpinOwnerCallback
+		}
+	}
+
 #pragma endregion
 
 	BOOL __stdcall FakeEntryPoint(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
@@ -5960,8 +5970,13 @@ namespace Hooks
 		{
 			PatchByte(hooker, hookSpace->banners_set, config.toogle.banners);
 			PatchByte(hooker, hookSpace->banners_nop, 0xEB);
-			PatchHook(hooker, hookSpace->banners_hook, hook_005AED25);
+			if (hookSpace->banners_hook)
+				PatchHook(hooker, hookSpace->banners_hook, hook_005AED25);	
 		}
+
+		// Editor owner trigger
+		if (hookSpace->banners_owner_trigger && ReadDWord(hooker, hookSpace->banners_owner_trigger + 3, &sub_SpinOwnerCallback))
+			PatchDWord(hooker, hookSpace->banners_owner_trigger + 3, (DWORD)hook_SpinOwnerCallback);
 
 		if (config.hd)
 		{
