@@ -53,6 +53,7 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, SurfaceTyp
 	this->mode.height = 0;
 	this->mode.bpp = 0;
 
+	this->redraw = FALSE;
 	this->drawEnabled = TRUE;
 	if (type == SurfaceSecondary)
 		config.drawEnabled = TRUE;
@@ -326,7 +327,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 
 			buffer->isZoomed = Config::IsZoomed();
 			buffer->borders = config.borders.active ? config.borders.type : BordersNone;
-			buffer->isBack = config.background.enabled;
+			buffer->isBack = config.background.allowed && config.background.enabled;
 		}
 		else
 		{
@@ -445,7 +446,7 @@ VOID OpenDrawSurface::Flush()
 			else
 				surfaceBuffer->borders = BordersNone;
 
-			surfaceBuffer->isBack = config.background.enabled;
+			surfaceBuffer->isBack = config.background.allowed && config.background.enabled;
 		}
 
 		BOOL isSync = !config.ai.thinking && !config.ai.waiting && config.coldCPU;

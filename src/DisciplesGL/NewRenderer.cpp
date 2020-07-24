@@ -123,12 +123,12 @@ VOID NewRenderer::Begin()
 							GLVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 32, (GLvoid*)16);
 						}
 
-						if (this->allowBack)
+						if (config.background.allowed)
 							GLGenTextures(2, &textureId.back);
 						else
 							GLGenTextures(1, &textureId.primary);
 						{
-							if (this->allowBack)
+							if (config.background.allowed)
 							{
 								GLActiveTexture(GL_TEXTURE1);
 								GLBindTexParameter(textureId.back, GL_LINEAR);
@@ -193,7 +193,7 @@ VOID NewRenderer::End()
 							{
 								if (this->fboId)
 								{
-									GLDeleteTextures(this->allowBack ? 3 : 2, (GLuint*)&textureId.secondary);
+									GLDeleteTextures(config.background.allowed ? 3 : 2, (GLuint*)&textureId.secondary);
 									GLDeleteRenderbuffers(1, &this->rboId);
 									GLDeleteFramebuffers(1, &this->fboId);
 									AlignedFree(this->frameBuffer);
@@ -201,7 +201,7 @@ VOID NewRenderer::End()
 							}
 							delete this->pixelBuffer;
 						}
-						if (this->allowBack)
+						if (config.background.allowed)
 							GLDeleteTextures(2, &textureId.back);
 						else
 							GLDeleteTextures(1, &textureId.primary);
@@ -341,7 +341,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 								GLFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
 							}
 
-							GLGenTextures(!config.version && config.resHooked ? 3 : 2, (GLuint*)&textureId.secondary);
+							GLGenTextures(config.background.allowed ? 3 : 2, (GLuint*)&textureId.secondary);
 							{
 								GLBindTexParameter(textureId.secondary, GL_LINEAR);
 
@@ -353,7 +353,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 						}
 
 						// Gen texture
-						DWORD idx = !config.version && config.resHooked ? 2 : 1;
+						DWORD idx = config.background.allowed ? 2 : 1;
 						while (idx)
 						{
 							--idx;
@@ -364,7 +364,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 					this->upscaleProgram->Use(this->texSize, FALSE);
 
-					if (this->allowBack)
+					if (config.background.allowed)
 					{
 						GLViewport(0, 0, LOWORD(this->viewSize), HIWORD(this->viewSize));
 
@@ -508,7 +508,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 	{
 		if (this->fboId)
 		{
-			GLDeleteTextures(this->allowBack ? 3 : 2, (GLuint*)&textureId.secondary);
+			GLDeleteTextures(config.background.allowed ? 3 : 2, (GLuint*)&textureId.secondary);
 			GLDeleteRenderbuffers(1, &this->rboId);
 			GLDeleteFramebuffers(1, &this->fboId);
 			AlignedFree(this->frameBuffer);
@@ -520,7 +520,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 			this->pixelBuffer->Reset();
 
-			if (this->allowBack)
+			if (config.background.allowed)
 			{
 				GLActiveTexture(GL_TEXTURE1);
 				GLBindTexFilter(textureId.back, state.interpolation != InterpolateNearest ? GL_LINEAR : GL_NEAREST);

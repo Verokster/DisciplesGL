@@ -100,12 +100,12 @@ VOID MidRenderer::Begin()
 					GLVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 32, (GLvoid*)16);
 				}
 
-				if (this->allowBack)
+				if (config.background.allowed)
 					GLGenTextures(2, &this->textureId.back);
 				else
 					GLGenTextures(1, &this->textureId.primary);
 				{
-					if (this->allowBack)
+					if (config.background.allowed)
 					{
 						GLActiveTexture(GL_TEXTURE1);
 						GLBindTexParameter(this->textureId.back, GL_LINEAR);
@@ -160,7 +160,7 @@ VOID MidRenderer::End()
 					delete this->pixelBuffer;
 				}
 
-				if (this->allowBack)
+				if (config.background.allowed)
 					GLDeleteTextures(2, &this->textureId.back);
 				else
 					GLDeleteTextures(1, &this->textureId.primary);

@@ -41,7 +41,6 @@ protected:
 	OpenDraw* ddraw;
 	HDC hDc;
 	std::atomic<BOOL> isFinish;
-	BOOL allowBack;
 	ShaderGroup* program;
 
 	BOOL Stop();

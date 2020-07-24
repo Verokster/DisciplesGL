@@ -34,7 +34,6 @@ Renderer::Renderer(OpenDraw* ddraw)
 	ddraw->renderer = this;
 
 	this->isFinish = TRUE;
-	this->allowBack = !config.version && (config.resHooked || config.isEditor);
 	this->program = NULL;
 }
 

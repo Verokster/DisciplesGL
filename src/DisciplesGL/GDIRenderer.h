@@ -30,8 +30,13 @@ class GDIRenderer : public Renderer {
 private:
 	HDC hDcFront;
 	HDC hDcBack;
+	HDC hDcTemp;
 	HBITMAP hBmpFront;
 	HBITMAP hBmpBack;
+	HBITMAP hBmpTemp;
+
+	DWORD* tempData;
+	BOOL isTrue;
 
 	VOID Clear();
 	VOID RenderFrame(BOOL, BOOL, StateBufferAligned**);
