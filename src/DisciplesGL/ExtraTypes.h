@@ -316,6 +316,11 @@ struct ConfigItems {
 		BOOL resources;
 	} toogle;
 
+	struct {
+		BOOL lButton;
+		BOOL mButton;
+	} mouseScroll;
+
 	BOOL isExist;
 	CHAR file[MAX_PATH];
 };

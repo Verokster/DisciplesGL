@@ -33,9 +33,17 @@
 COMPAT_IN vec4 vCoord;
 COMPAT_IN vec4 vTex;
 
+#ifdef DOUBLE
+COMPAT_OUT vec4 fTex;
+#else
 COMPAT_OUT vec2 fTex;
+#endif
 
 void main() {
 	gl_Position = vCoord;
+#ifdef DOUBLE
+	fTex = vTex;
+#else
 	fTex = vTex.rg;
+#endif
 }

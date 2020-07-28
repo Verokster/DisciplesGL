@@ -98,7 +98,8 @@ StateBufferAligned::~StateBufferAligned()
 	{
 		this->isAllocated = FALSE;
 
-		if (config.renderer != RendererGDI)
+		BOOL isTrue = config.mode->bpp != 16 || config.bpp32Hooked;
+		if (config.renderer != RendererGDI || !isTrue)
 			AlignedFree(this->data);
 		else
 		{

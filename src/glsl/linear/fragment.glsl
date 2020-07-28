@@ -23,6 +23,10 @@
 */
 
 uniform sampler2D tex01;
+#ifdef DOUBLE
+uniform sampler2D tex02;
+#endif
+#ifdef LEVELS
 uniform float hue;
 uniform float sat;
 uniform vec4 in_left;
@@ -30,6 +34,7 @@ uniform vec4 in_right;
 uniform vec4 gamma;
 uniform vec4 out_left;
 uniform vec4 out_right;
+#endif
 
 #if __VERSION__ >= 130
 	#define COMPAT_IN in
@@ -41,10 +46,14 @@ uniform vec4 out_right;
 	#define FRAG_COLOR gl_FragColor
 #endif
 
+#ifdef DOUBLE
+COMPAT_IN vec4 fTex;
+#else
 COMPAT_IN vec2 fTex;
+#endif
 
-vec3 satHue(vec3 color)
-{
+#ifdef LEVELS
+vec3 satHue(vec3 color) {
 	const mat3 mrgb = mat3(	  1.0,    1.0,    1.0,
 							0.956, -0.272, -1.107,
 							0.621, -0.647,  1.705 );
@@ -63,8 +72,7 @@ vec3 satHue(vec3 color)
 	return mrgb * mhsv * myiq * color;
 }
 
-vec3 levels(vec3 color)
-{
+vec3 levels(vec3 color) {
 	color = clamp((color - in_left.rgb) / (in_right.rgb - in_left.rgb), 0.0, 1.0);
 	color = pow(color, gamma.rgb);
 	color = clamp(color * (out_right.rgb - out_left.rgb) + out_left.rgb, 0.0, 1.0);
@@ -73,10 +81,21 @@ vec3 levels(vec3 color)
 	color = pow(color, gamma.aaa);
 	return clamp(color * (out_right.aaa - out_left.aaa) + out_left.aaa, 0.0, 1.0);
 }
+#endif
 
 void main() {
+#ifdef DOUBLE
+	vec4 front = COMPAT_TEXTURE(tex01, fTex.rg);
+	vec4 back = COMPAT_TEXTURE(tex02, fTex.ba);
+	vec3 color = mix(back.rgb, front.rgb, front.a);
+#else
 	vec3 color = COMPAT_TEXTURE(tex01, fTex).rgb;
+#endif
 
+#ifdef LEVELS
 	color = satHue(color);
-	FRAG_COLOR = vec4(levels(color), 1.0);
+	color = levels(color);
+#endif
+	
+	FRAG_COLOR = vec4(color, 1.0);
 }

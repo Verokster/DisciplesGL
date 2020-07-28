@@ -39,7 +39,7 @@ out vec4 fragColor;
 #define MIN_W -0.05
 #define LUM_ADD 0.25
 
-vec4 dt = vec4(1.0);
+const vec4 dt = vec4(1.0);
 
 void main() {
 	if (texture(tex01, fTex) == texture(tex02, fTex))

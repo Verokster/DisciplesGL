@@ -210,7 +210,7 @@ StateBufferBorder* __fastcall CreateBufferImage(DWORD width, DWORD height)
 
 VOID OpenDrawSurface::DrawBorders(VOID* data, DWORD width, DWORD height)
 {
-	if (!config.borders.allowed)
+	if (!config.borders.allowed || !config.borders.active)
 		return;
 
 	BOOL wide = config.battle.active && config.battle.wide;
@@ -327,7 +327,7 @@ VOID OpenDrawSurface::CreateBuffer(DWORD width, DWORD height, DWORD bpp, VOID* b
 
 			buffer->isZoomed = Config::IsZoomed();
 			buffer->borders = config.borders.active ? config.borders.type : BordersNone;
-			buffer->isBack = config.background.allowed && config.background.enabled;
+			buffer->isBack = config.borders.active && config.background.allowed && config.background.enabled;
 		}
 		else
 		{
@@ -446,7 +446,7 @@ VOID OpenDrawSurface::Flush()
 			else
 				surfaceBuffer->borders = BordersNone;
 
-			surfaceBuffer->isBack = config.background.allowed && config.background.enabled;
+			surfaceBuffer->isBack = (config.borders.active || !config.resHooked && !config.version && config.isEditor) && config.background.allowed && config.background.enabled;
 		}
 
 		BOOL isSync = !config.ai.thinking && !config.ai.waiting && config.coldCPU;
@@ -885,7 +885,7 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 					DWORD count = width;
 					do
 					{
-						if ((*src & COLORKEY_AND) != colorKey)
+						if ((*src & COLORKEY_AND) != COLORKEY_CHECK)
 							*dst = *src;
 
 						++src;

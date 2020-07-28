@@ -104,10 +104,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00480A18,
 		0x00487F80, 0x004059C7, 0x004857C7,
 
-		0x00000000, 0x00000000, 0x00000000, 0x005094B1, 0x00509575,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x005094B1, 0x00509575,
 		0x00552CB4, 0x004BE5D1, 0x00522641, 0x004BE5D1, 0x00552D19,
-		0x006B612C, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x0078A270, 0x00531EE0, 0x00531FAC, 31, 72, 32, 36, 40,
+		0x006B612C, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x005540C2, 0x0078A270, 0x00531EE0, 0x00531FAC, 31, 72, 32, 36, 40,
 
 		0x0042924B, 0x004292D3,
 		0x00510361, 0x00510419,
@@ -146,10 +146,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00482654,
 		0x0048A53D, 0x004059F2, 0x00487CEB,
 
-		0x00000000, 0x00000000, 0x00000000, 0x0050E461, 0x0050E525,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x0050E461, 0x0050E525,
 		0x00558DC0, 0x0053C846, 0x005279A1, 0x0053C846, 0x00558E25,
-		0x006C152C, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x00798BB0, 0x00537FCB, 0x00538095, 52, 84, 36, 40, 44,
+		0x006C152C, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x0055A32F, 0x00798BB0, 0x00537FCB, 0x00538095, 52, 84, 36, 40, 44,
 
 		0x0042A9E1, 0x0042AA69,
 		0x00515681, 0x00515739,
@@ -188,10 +188,10 @@ namespace Hooks
 		0x0052FD28, 0x00484900, 0x00484922, 0x004847FF,
 		0x0048CD6F, 0x00405F03, 0x0048A44F,
 
-		0x00450226, 0x004502B3, 0x0040A789, 0x00513981, 0x00513A45,
+		0x00450226, 0x004502B3, 0x0040A789, 0x00000000, 0x00513981, 0x00513A45,
 		0x0055E99C, 0x00507F20, 0x0052D0FA, 0x00507F20, 0x0055EA01,
-		0x006CB6C4, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x007A61E4, 0x0053DBD9, 0x0053DCA5, 50, 88, 36, 40, 44,
+		0x006CB6C4, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x0055FF8B, 0x007A61E4, 0x0053DBD9, 0x0053DCA5, 50, 88, 36, 40, 44,
 
 		0x0042AE78, 0x0042AF00,
 		0x0051ABC1, 0x0051AC79,
@@ -230,10 +230,10 @@ namespace Hooks
 		0x00530462, 0x00484960, 0x00484982, 0x0048485F,
 		0x0048CE0E, 0x00405B80, 0x0048A4EE,
 
-		0x0045010A, 0x00450197, 0x0040A4AE, 0x005141A1, 0x00514265,
+		0x0045010A, 0x00450197, 0x0040A4AE, 0x00000000, 0x005141A1, 0x00514265,
 		0x0055F08A, 0x00401A11, 0x0052D8BB, 0x0047E73B, 0x0055F0EF,
-		0x006CB6F4, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x007A7078, 0x0053E2A4, 0x0053E370, 50, 88, 36, 40, 44,
+		0x006CB6F4, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00560680, 0x007A7078, 0x0053E2A4, 0x0053E370, 50, 88, 36, 40, 44,
 
 		0x0042AC9E, 0x0042AD26,
 		0x0051B331, 0x0051B3E9,
@@ -272,10 +272,10 @@ namespace Hooks
 		0x0052EAAE, 0x00484DD1, 0x00484DF3, 0x00484CD0,
 		0x0048D25C, 0x00405A1A, 0x0048A93C,
 
-		0x00450417, 0x004504A4, 0x0040A438, 0x00512D71, 0x00512E35,
+		0x00450417, 0x004504A4, 0x0040A438, 0x00000000, 0x00512D71, 0x00512E35,
 		0x0055D6C1, 0x004018E2, 0x0052C062, 0x0046F4D9, 0x0055D726,
-		0x006CA61C, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x005C7089, 0x0053CA0E, 0x0053CADA, 50, 88, 36, 40, 44,
+		0x006CA61C, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x0055ECCC, 0x005C7089, 0x0053CA0E, 0x0053CADA, 50, 88, 36, 40, 44,
 
 		0x0042AC64, 0x0042ACEC,
 		0x00519FF1, 0x0051A0A9,
@@ -314,10 +314,10 @@ namespace Hooks
 		0x005301F8, 0x00484FB5, 0x00484FD7, 0x00484EB4,
 		0x0048D424, 0x00405F19, 0x0048AB04,
 
-		0x004506BD, 0x0045074A, 0x0040A79F, 0x00513EB1, 0x00513F75,
+		0x004506BD, 0x0045074A, 0x0040A79F, 0x00000000, 0x00513EB1, 0x00513F75,
 		0x0055EFEC, 0x0050844A, 0x0052D6B4, 0x0050844A, 0x0055F051,
-		0x006CB6C4, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x007A6248, 0x0053E0A9, 0x0053E175, 50, 88, 36, 40, 44,
+		0x006CB6C4, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x005605DB, 0x007A6248, 0x0053E0A9, 0x0053E175, 50, 88, 36, 40, 44,
 
 		0x0042AE8E, 0x0042AF16,
 		0x0051B0F1, 0x0051B1A9,
@@ -356,10 +356,10 @@ namespace Hooks
 		0x00533515, 0x00487AAD, 0x00487ACF, 0x004879AC,
 		0x00490052, 0x00405929, 0x0048D732,
 
-		0x0045257F, 0x0045260C, 0x0040A3D9, 0x00517311, 0x005173D5,
+		0x0045257F, 0x0045260C, 0x0040A3D9, 0x006270CE, 0x00517311, 0x005173D5,
 		0x005618FC, 0x00401989, 0x00530AA9, 0x004722EF, 0x00561961,
-		0x006D5934, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x007B296C, 0x00541434, 0x00541500, 50, 88, 36, 40, 44,
+		0x006D5934, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00562EF2, 0x007B296C, 0x00541434, 0x00541500, 50, 88, 36, 40, 44,
 
 		0x0042BF1B, 0x0042BFA3,
 		0x0051E501, 0x0051E5B9,
@@ -398,10 +398,10 @@ namespace Hooks
 		0x005335EC, 0x00487AB9, 0x00487ADB, 0x004879B8,
 		0x004900C8, 0x00405C95, 0x0048D7A8,
 
-		0x004526E8, 0x00452775, 0x0040A79D, 0x00517111, 0x005171D5,
+		0x004526E8, 0x00452775, 0x0040A79D, 0x00627CEE, 0x00517111, 0x005171D5,
 		0x00561AFC, 0x005E4830, 0x00530AE7, 0x005E4830, 0x00561B61,
-		0x006D6984, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x007B2740, 0x005414BC, 0x00541588, 50, 88, 36, 40, 44,
+		0x006D6984, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x0056310E, 0x007B2740, 0x005414BC, 0x00541588, 50, 88, 36, 40, 44,
 
 		0x0042C330, 0x0042C3B8,
 		0x0051E2B1, 0x0051E369,
@@ -440,10 +440,10 @@ namespace Hooks
 		0x00532B79, 0x0048768A, 0x004876AC, 0x00487589,
 		0x0048FBCC, 0x00405921, 0x0048D2E2,
 
-		0x004520B4, 0x00452141, 0x0040A3F9, 0x00516621, 0x005166E5,
+		0x004520B4, 0x00452141, 0x0040A3F9, 0x0062682E, 0x00516621, 0x005166E5,
 		0x00561299, 0x00401943, 0x00530014, 0x0055B7BC, 0x005612FE,
-		0x006D4924, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x007B06F0, 0x00540B6C, 0x00540C38, 50, 88, 36, 40, 44,
+		0x006D4924, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x005628A4, 0x007B06F0, 0x00540B6C, 0x00540C38, 50, 88, 36, 40, 44,
 
 		0x0042BD4D, 0x0042BDD5,
 		0x0051D871, 0x0051D929,
@@ -482,10 +482,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x004947C1, 0x00494885,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x004947C1, 0x00494885,
 		0x0046DA4D, 0x0053A204, 0x004728FC, 0x0053A204, 0x0046DAB2,
-		0x005A4AB4, 0x005A637C, 0x005A5ED4, 0x005A814C, 0x00489285,
-		0x00621444, 0x00480C94, 0x00480D60, 6, 72, 32, 36, 40,
+		0x005A4AB4, 0x005A637C, 0x005A5ED4, 0x005A6894, 0x005A814C, 0x00489285,
+		0x004720CA, 0x00621444, 0x00480C94, 0x00480D60, 6, 72, 32, 36, 40,
 
 		0x00000000, 0x00000000,
 		0x0049B711, 0x0049B7C9,
@@ -524,10 +524,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x00495941, 0x00495A05,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00495941, 0x00495A05,
 		0x0046DC7D, 0x0053D5B9, 0x00472BB6, 0x0053D5B9, 0x0046DCE2,
-		0x005A8F94, 0x005AA9FC, 0x005AA534, 0x005AC934, 0x0048A35B,
-		0x00626570, 0x00481C95, 0x00481D5F, 6, 84, 36, 40, 44,
+		0x005A8F94, 0x005AA9FC, 0x005AA534, 0x005AAF6C, 0x005AC934, 0x0048A35B,
+		0x004723DC, 0x00626570, 0x00481C95, 0x00481D5F, 6, 84, 36, 40, 44,
 
 		0x00000000, 0x00000000,
 		0x0049CC41, 0x0049CCF9,
@@ -566,10 +566,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x004AD0E1, 0x004AD1A5,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x004AD0E1, 0x004AD1A5,
 		0x0048500E, 0x005225DB, 0x00489FEC, 0x005225DB, 0x00485073,
-		0x005CA40C, 0x005CBF34, 0x005CBA6C, 0x005CE40C, 0x004A1872,
-		0x0064DEC8, 0x00499417, 0x004994E3, 6, 88, 36, 40, 44,
+		0x005CA40C, 0x005CBF34, 0x005CBA6C, 0x005CC4A4, 0x005CE40C, 0x004A1872,
+		0x004897CA, 0x0064DEC8, 0x00499417, 0x004994E3, 6, 88, 36, 40, 44,
 
 		0x00000000, 0x00000000,
 		0x004B43C1, 0x004B4479,
@@ -608,10 +608,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
 		0x004846B4, 0x00547DC7, 0x00489684, 0x00547DC7, 0x00484719,
-		0x005C93BC, 0x005CAEE4, 0x005CAA1C, 0x005CD394, 0x004A0F63,
-		0x0064CC34, 0x00498AE8, 0x00498BB4, 6, 88, 36, 40, 44,
+		0x005C93BC, 0x005CAEE4, 0x005CAA1C, 0x005CB454, 0x005CD394, 0x004A0F63,
+		0x00488ECB, 0x0064CC34, 0x00498AE8, 0x00498BB4, 6, 88, 36, 40, 44,
 
 		0x00000000, 0x00000000,
 		0x004B3AE1, 0x004B3B99,
@@ -650,10 +650,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x004AC811, 0x004AC8D5,
 		0x004846B4, 0x00547EE7, 0x00489684, 0x00547EE7, 0x00484719,
-		0x005C93BC, 0x005CAEE4, 0x005CAA1C, 0x005CD394, 0x004A0F63,
-		0x0064CC38, 0x00498AE8, 0x00498BB4, 6, 88, 36, 40, 44,
+		0x005C93BC, 0x005CAEE4, 0x005CAA1C, 0x005CB454, 0x005CD394, 0x004A0F63,
+		0x00488ECB, 0x0064CC38, 0x00498AE8, 0x00498BB4, 6, 88, 36, 40, 44,
 
 		0x00000000, 0x00000000,
 		0x004B3AE1, 0x004B3B99,
@@ -692,10 +692,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x004AFD41, 0x004AFE05,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x004AFD41, 0x004AFE05,
 		0x00487BDB, 0x0055FF24, 0x0048CB09, 0x0055FF24, 0x00487C40,
-		0x005D1774, 0x005D32FC, 0x005D2DFC, 0x005D58D4, 0x004A44F5,
-		0x006574A4, 0x0049C0C3, 0x0049C18F, 6, 88, 36, 40, 44,
+		0x005D1774, 0x005D32FC, 0x005D2DFC, 0x005D386C, 0x005D58D4, 0x004A44F5,
+		0x0048C354, 0x006574A4, 0x0049C0C3, 0x0049C18F, 6, 88, 36, 40, 44,
 
 		0x00000000, 0x00000000,
 		0x004B7001, 0x004B70B9,
@@ -734,10 +734,10 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x004AED61, 0x004AEE25,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x004AED61, 0x004AEE25,
 		0x00486DD7, 0x00534AA4, 0x0048BCE2, 0x00534AA4, 0x00486E3C,
-		0x005D0714, 0x005D229C, 0x005D1D9C, 0x005D484C, 0x004A3549,
-		0x00656180, 0x0049B0E0, 0x0049B1AC, 6, 88, 36, 40, 44,
+		0x005D0714, 0x005D229C, 0x005D1D9C, 0x005D280C, 0x005D484C, 0x004A3549,
+		0x0048B529, 0x00656180, 0x0049B0E0, 0x0049B1AC, 6, 88, 36, 40, 44,
 
 		0x00000000, 0x00000000,
 		0x004B6051, 0x004B6109,
@@ -2882,7 +2882,7 @@ namespace Hooks
 	VOID __stdcall SetAnimSpeed()
 	{
 		if (animSpeed)
-			*animSpeed = DWORD(66.0 / (config.speed.enabled ? config.speed.value : 1.0));
+			*animSpeed = config.speed.enabled ? DWORD(66.0 / config.speed.value) : 66;
 	}
 
 	VOID __stdcall SetMapSpeed()
@@ -4102,6 +4102,22 @@ namespace Hooks
 	}
 #pragma endregion
 
+#pragma region Summoner fix
+	DWORD sub_005E9984;
+	VOID __declspec(naked) hook_0062682E()
+	{
+		__asm
+		{
+			test ecx, ecx
+			jz lbl_exit
+			jmp sub_005E9984
+
+			lbl_exit:
+			retn 0x4
+		}
+	}
+#pragma endregion
+
 #pragma region AI turn
 	DWORD sub_GetQueueCommands;
 
@@ -5273,11 +5289,15 @@ namespace Hooks
 #pragma endregion
 
 #pragma region Map move by mouse
+#define LBUTTON 1
+#define MBUTTON 2
+
 	struct {
 		POINT mapPos;
 		POINT dlgPos;
 		POINT checkPos;
 		DWORD* dialog;
+		DWORD button;
 		BOOL moved;
 		BYTE* allow;
 		BOOL deleted;
@@ -5375,6 +5395,15 @@ namespace Hooks
 		}
 	}
 
+	DWORD sub_DeleteIsoMapView;
+	VOID __declspec(naked) DeleteIsoMapView(DWORD obj)
+	{
+		__asm {
+			mov mouseAction.deleted, 1
+			jmp sub_DeleteIsoMapView
+		}
+	}
+
 	DWORD sub_DeleteRadioObjects;
 	VOID __declspec(naked) DeleteRadioObjects(DWORD obj)
 	{
@@ -5402,9 +5431,9 @@ namespace Hooks
 		if (*mouseAction.allow)
 		{
 			DWORD* obj = GetAreaObject(global);
-			if (uMsg == WM_LBUTTONDOWN)
+			if (config.mouseScroll.lButton && uMsg == WM_LBUTTONDOWN || config.mouseScroll.mButton && uMsg == WM_MBUTTONDOWN)
 			{
-				if (!mouseAction.radioObjects || ((DWORD*)mouseAction.radioObjects[2])[5] != 7)
+				if (uMsg != WM_LBUTTONDOWN || !mouseAction.radioObjects || ((DWORD*)mouseAction.radioObjects[2])[5] != 7)
 				{
 					DWORD* methods = (DWORD*)obj[0];
 					RECT* rc = ((RECT * (__thiscall*)(DWORD*)) methods[12])(obj);
@@ -5417,6 +5446,7 @@ namespace Hooks
 						mouseAction.dlgPos = { pt->x + offset.x, pt->y + offset.y };
 						mouseAction.checkPos = *pt;
 						mouseAction.dialog = global;
+						mouseAction.button = uMsg == WM_LBUTTONDOWN ? LBUTTON : MBUTTON;
 						mouseAction.moved = FALSE;
 
 						SetCurrentDialog(global);
@@ -5424,13 +5454,14 @@ namespace Hooks
 					}
 				}
 			}
-			else if (uMsg == WM_LBUTTONUP && mouseAction.dialog == global)
+			else if (mouseAction.dialog == global && (mouseAction.button == LBUTTON && uMsg == WM_LBUTTONUP || mouseAction.button == MBUTTON && uMsg == WM_MBUTTONUP))
 			{
 				mouseAction.dialog = NULL;
+				mouseAction.button = NULL;
 
 				ClearCurrentDialog();
 
-				if (mouseAction.moved)
+				if (uMsg != WM_LBUTTONUP || mouseAction.moved)
 				{
 					DWORD* mapObject = (DWORD*)((DWORD*)obj[2])[1];
 					((VOID(__thiscall*)(DWORD*, POINT*, LONG, LONG))sub_SetMapCenter)(mapObject, &mouseAction.mapPos, mouseAction.dlgPos.x - pt->x, mouseAction.dlgPos.y - pt->y);
@@ -5438,7 +5469,7 @@ namespace Hooks
 				else
 				{
 					mouseAction.deleted = FALSE;
-					BOOL res = ((BOOL(__thiscall*)(DWORD*, UINT, POINT*))sub_MouseAction)(global, WM_LBUTTONDOWN, pt);
+					BOOL res = ((BOOL(__thiscall*)(DWORD*, UINT, POINT*))sub_MouseAction)(global, uMsg == WM_LBUTTONUP ? WM_LBUTTONDOWN : WM_MBUTTONDOWN, pt);
 					if (mouseAction.deleted)
 						return res;
 				}
@@ -5458,81 +5489,130 @@ namespace Hooks
 		}
 	}
 
-	DWORD sub_MouseMove;
-	BOOL __stdcall MouseMove(DWORD* global, POINT* pt)
+	DWORD sub_MouseActionMap;
+	BOOL __stdcall MouseActionMap(DWORD* global, UINT uMsg, POINT* pt)
 	{
 		if (*mouseAction.allow)
 		{
-			if (GetDialogKeyState(global, VK_LBUTTON))
+			DWORD* obj = GetAreaObject(global);
+			if (config.mouseScroll.mButton && uMsg == WM_MBUTTONDOWN)
 			{
-				if (mouseAction.dialog == global)
+				DWORD* methods = (DWORD*)obj[0];
+				RECT* rc = ((RECT * (__thiscall*)(DWORD*)) methods[12])(obj);
+				if (pt->x >= rc->left && pt->x < rc->right && pt->y >= rc->top && pt->y < rc->bottom && (rc->right - rc->left != config.mode->width || pt->x < rc->right - PANEL_WIDTH || pt->y >= rc->top + GAME_HEIGHT) && !GetCurrentDialog())
 				{
-					if (!mouseAction.moved)
+					DWORD* mapObject = (DWORD*)((DWORD*)obj[2])[1];
+
+					POINT offset;
+					((BOOL(__thiscall*)(DWORD*, POINT*, LONG*, LONG*))sub_GetMapCenter)(mapObject, &mouseAction.mapPos, &offset.x, &offset.y); // Get Map Center
+					mouseAction.dlgPos = { pt->x + offset.x, pt->y + offset.y };
+					mouseAction.checkPos = *pt;
+					mouseAction.dialog = global;
+					mouseAction.button = uMsg == WM_LBUTTONDOWN ? LBUTTON : MBUTTON;
+					mouseAction.moved = FALSE;
+
+					SetCurrentDialog(global);
+					return TRUE;
+				}
+			}
+			else if (mouseAction.dialog == global && mouseAction.button == MBUTTON && uMsg == WM_MBUTTONUP)
+			{
+				mouseAction.dialog = NULL;
+				mouseAction.button = NULL;
+
+				ClearCurrentDialog();
+
+				DWORD* mapObject = (DWORD*)((DWORD*)obj[2])[1];
+				((VOID(__thiscall*)(DWORD*, POINT*, LONG, LONG))sub_SetMapCenter)(mapObject, &mouseAction.mapPos, mouseAction.dlgPos.x - pt->x, mouseAction.dlgPos.y - pt->y);
+			}
+		}
+
+		return ((BOOL(__thiscall*)(DWORD*, UINT, POINT*))sub_MouseActionMap)(global, uMsg, pt);
+	}
+
+	VOID __declspec(naked) hook_005CB460()
+	{
+		__asm {
+			pop eax
+			push ecx
+			push eax
+			jmp MouseActionMap
+		}
+	}
+
+	DWORD sub_MouseMove;
+	BOOL __stdcall MouseMove(DWORD* global, POINT* pt)
+	{
+		if (*mouseAction.allow && mouseAction.dialog == global)
+		{
+			if (mouseAction.button == LBUTTON && GetDialogKeyState(global, VK_LBUTTON) || mouseAction.button == MBUTTON && GetDialogKeyState(global, VK_MBUTTON))
+			{
+				if (mouseAction.button == LBUTTON && !mouseAction.moved)
+				{
+					LONG x = mouseAction.checkPos.x - pt->x;
+					LONG y = mouseAction.checkPos.y - pt->y;
+					mouseAction.moved = (LONG)sqrtf(FLOAT(x * x + y * y)) >= 32;
+				}
+
+				if (mouseAction.button != LBUTTON || mouseAction.moved)
+				{
+					DWORD* obj = GetAreaObject(global);
+
+					DWORD* mapObject = (DWORD*)((DWORD*)obj[2])[1];
+					((VOID(__thiscall*)(DWORD*, POINT*, LONG, LONG))sub_SetMapCenter)(mapObject, &mouseAction.mapPos, mouseAction.dlgPos.x - pt->x, mouseAction.dlgPos.y - pt->y);
+
+					POINT offset, mapPos;
+					((VOID(__thiscall*)(DWORD*, POINT*, LONG*, LONG*))sub_GetMapCenter)(mapObject, &mapPos, &offset.x, &offset.y); // Get Map Center
+
+					// To map offset
+					offset = { offset.y * 2 + offset.x, offset.y * 2 - offset.x };
+
+					LONG size = ((LONG*)mapObject[0])[5];
+
+					BOOL reset = FALSE;
+					if (mapPos.x < 0 || !mapPos.x && offset.x < 0)
 					{
-						LONG x = mouseAction.checkPos.x - pt->x;
-						LONG y = mouseAction.checkPos.y - pt->y;
-						mouseAction.moved = (LONG)sqrtf(FLOAT(x * x + y * y)) >= 32;
+						mapPos.x = 0;
+						offset.x = 0;
+						reset = TRUE;
+					}
+					else if (mapPos.x >= size || mapPos.x == size - 1 && offset.x > 0)
+					{
+						mapPos.x = size - 1;
+						offset.x = 0;
+						reset = TRUE;
 					}
 
-					if (mouseAction.moved)
+					if (mapPos.y < 0 || !mapPos.y && offset.y < 0)
 					{
-						DWORD* obj = GetAreaObject(global);
-
-						DWORD* mapObject = (DWORD*)((DWORD*)obj[2])[1];
-						((VOID(__thiscall*)(DWORD*, POINT*, LONG, LONG))sub_SetMapCenter)(mapObject, &mouseAction.mapPos, mouseAction.dlgPos.x - pt->x, mouseAction.dlgPos.y - pt->y);
-
-						POINT offset, mapPos;
-						((VOID(__thiscall*)(DWORD*, POINT*, LONG*, LONG*))sub_GetMapCenter)(mapObject, &mapPos, &offset.x, &offset.y); // Get Map Center
-
-						// To map offset
-						offset = { offset.y * 2 + offset.x, offset.y * 2 - offset.x };
-
-						LONG size = ((LONG*)mapObject[0])[5];
-
-						BOOL reset = FALSE;
-						if (mapPos.x < 0 || !mapPos.x && offset.x < 0)
-						{
-							mapPos.x = 0;
-							offset.x = 0;
-							reset = TRUE;
-						}
-						else if (mapPos.x >= size || mapPos.x == size - 1 && offset.x > 0)
-						{
-							mapPos.x = size - 1;
-							offset.x = 0;
-							reset = TRUE;
-						}
-
-						if (mapPos.y < 0 || !mapPos.y && offset.y < 0)
-						{
-							mapPos.y = 0;
-							offset.y = 0;
-							reset = TRUE;
-						}
-						else if (mapPos.y >= size || mapPos.y == size - 1 && offset.y > 0)
-						{
-							mapPos.y = size - 1;
-							offset.y = 0;
-							reset = TRUE;
-						}
-
-						if (reset)
-						{
-							offset = { (offset.x - offset.y) / 2, (offset.x + offset.y) / 4 };
-
-							mouseAction.mapPos = mapPos;
-							mouseAction.dlgPos = { pt->x + offset.x, pt->y + offset.y };
-
-							((VOID(__thiscall*)(DWORD*, POINT*, LONG, LONG))sub_SetMapCenter)(mapObject, &mouseAction.mapPos, offset.x, offset.y);
-						}
-
-						return TRUE;
+						mapPos.y = 0;
+						offset.y = 0;
+						reset = TRUE;
 					}
+					else if (mapPos.y >= size || mapPos.y == size - 1 && offset.y > 0)
+					{
+						mapPos.y = size - 1;
+						offset.y = 0;
+						reset = TRUE;
+					}
+
+					if (reset)
+					{
+						offset = { (offset.x - offset.y) / 2, (offset.x + offset.y) / 4 };
+
+						mouseAction.mapPos = mapPos;
+						mouseAction.dlgPos = { pt->x + offset.x, pt->y + offset.y };
+
+						((VOID(__thiscall*)(DWORD*, POINT*, LONG, LONG))sub_SetMapCenter)(mapObject, &mouseAction.mapPos, offset.x, offset.y);
+					}
+
+					return TRUE;
 				}
 			}
 			else
 			{
 				mouseAction.dialog = NULL;
+				mouseAction.button = NULL;
 
 				if (GetCurrentDialog() == global)
 					ClearCurrentDialog();
@@ -5738,7 +5818,7 @@ namespace Hooks
 
 				// CreateDialog ISO hook
 				if (hookSpace->res_CreateIsoDialog && ReadDWord(hooker, hookSpace->res_CreateIsoDialog + 1, &off_0046541D))
-					 PatchCall(hooker, hookSpace->res_CreateIsoDialog, hook_0046541D);
+					PatchCall(hooker, hookSpace->res_CreateIsoDialog, hook_0046541D);
 
 				// Load Image V1
 				PatchHook(hooker, hookSpace->res_LoadImage, hook_004F0B39);
@@ -5873,6 +5953,10 @@ namespace Hooks
 			sub_GetType = hookSpace->ai_list_get_type + baseOffset;
 		}
 
+		// Summoner Fix
+		if (hookSpace->summoner_fix)
+			sub_005E9984 = RedirectCall(hooker, hookSpace->summoner_fix, hook_0062682E);
+
 		// Interlock Fix
 		{
 			sub_BeginLock = BEGINLOCK(hookSpace->lock_begin + baseOffset);
@@ -5904,11 +5988,20 @@ namespace Hooks
 				PatchDWord(hooker, hookSpace->iso_view_events_interface + 12, (DWORD)hook_006D79B8);
 			}
 
+			if (hookSpace->iso_view_map_interface && ReadDWord(hooker, hookSpace->iso_view_map_interface, &sub_DeleteIsoMapView) && ReadDWord(hooker, hookSpace->iso_view_map_interface + 12, &sub_MouseActionMap))
+			{
+				PatchDWord(hooker, hookSpace->iso_view_map_interface, (DWORD)DeleteIsoMapView);
+				PatchDWord(hooker, hookSpace->iso_view_map_interface + 8, (DWORD)hook_006D79B4);
+				PatchDWord(hooker, hookSpace->iso_view_map_interface + 12, (DWORD)hook_005CB460);
+			}
+
 			if (hookSpace->radio_objects_interface && ReadDWord(hooker, hookSpace->radio_objects_interface, &sub_DeleteRadioObjects))
 			{
 				PatchDWord(hooker, hookSpace->radio_objects_interface, (DWORD)DeleteRadioObjects);
 				sub_CreateRadio = RedirectCall(hooker, hookSpace->radio_objects_create, CreateRadioObjects);
 			}
+
+			PatchDWord(hooker, hookSpace->mouse_mid_button + 1, WM_MBUTTONUP);
 
 			mouseAction.allow = (BYTE*)(hookSpace->mouse_allow_flag + baseOffset);
 			mouseAction.offset.area = hookSpace->offset_area;
@@ -5972,7 +6065,7 @@ namespace Hooks
 			PatchByte(hooker, hookSpace->banners_set, config.toogle.banners);
 			PatchByte(hooker, hookSpace->banners_nop, 0xEB);
 			if (hookSpace->banners_hook)
-				PatchHook(hooker, hookSpace->banners_hook, hook_005AED25);	
+				PatchHook(hooker, hookSpace->banners_hook, hook_005AED25);
 		}
 
 		// Editor owner trigger

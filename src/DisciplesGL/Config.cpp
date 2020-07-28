@@ -377,6 +377,9 @@ namespace Config
 			config.ai.fast = FALSE;
 			Config::Set(CONFIG_WRAPPER, "FastAI", config.ai.fast);
 
+			config.mouseScroll.lButton = config.mouseScroll.mButton = TRUE;
+			Config::Set(CONFIG_WRAPPER, "MouseScroll", 3);
+
 			config.colors.active.hueShift = 0.5f;
 			config.colors.active.saturation = 0.5f;
 			Config::Set(CONFIG_COLORS, "HueSat", 0x01F401F4);
@@ -597,6 +600,13 @@ namespace Config
 			if (!config.isEditor)
 				config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
 
+			value = Config::Get(CONFIG_WRAPPER, "MouseScroll", 3);
+			if (value < 0 || value > 3)
+				value = 3;
+
+			config.mouseScroll.lButton = value & 1;
+			config.mouseScroll.mButton = value & 2;
+			
 			value = Config::Get(CONFIG_COLORS, "HueSat", 0x01F401F4);
 			config.colors.active.hueShift = 0.001f * min(1000, max(0, LOWORD(value)));
 			config.colors.active.saturation = 0.001f * min(1000, max(0, HIWORD(value)));

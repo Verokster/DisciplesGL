@@ -249,6 +249,8 @@ namespace Hooks
 		DWORD ai_list_hook_2;
 		DWORD ai_list_get_type;
 
+		DWORD summoner_fix;
+
 		DWORD draw_hook_1;
 		DWORD draw_hook_2;
 
@@ -261,9 +263,11 @@ namespace Hooks
 		DWORD iso_view_interface;
 		DWORD iso_view_info_interface;
 		DWORD iso_view_events_interface;
+		DWORD iso_view_map_interface;
 		DWORD radio_objects_interface;
 		DWORD radio_objects_create;
 
+		DWORD mouse_mid_button;
 		DWORD mouse_allow_flag;
 		DWORD map_center_get;
 		DWORD map_center_set;
