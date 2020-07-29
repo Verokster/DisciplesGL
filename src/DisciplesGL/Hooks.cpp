@@ -3950,61 +3950,6 @@ namespace Hooks
 #pragma endregion
 
 #pragma region Locale
-	INT __cdecl IsAlphaHook(BYTE ch)
-	{
-		return IsAlpha(ch);
-	}
-
-	INT __cdecl IsAlNumHook(BYTE ch)
-	{
-		return IsAlNum(ch);
-	}
-
-	INT __cdecl IsDigitHook(BYTE ch)
-	{
-		return IsDigit(ch);
-	}
-
-	INT __cdecl IsSpaceHook(BYTE ch)
-	{
-		return IsSpace(ch);
-	}
-
-	INT __cdecl IsPunctHook(BYTE ch)
-	{
-		return IsPunct(ch);
-	}
-
-	INT __cdecl IsCntrlHook(BYTE ch)
-	{
-		return IsCntrl(ch);
-	}
-
-	INT __cdecl IsUpperHook(BYTE ch)
-	{
-		return IsUpper(ch);
-	}
-
-	INT __cdecl ToUpperHook(BYTE ch)
-	{
-		return ToUpper(ch);
-	}
-
-	INT __cdecl ToLowerHook(BYTE ch)
-	{
-		return ToLower(ch);
-	}
-
-	const CHAR* __cdecl StrCharHook(const CHAR* str, BYTE ch)
-	{
-		return StrChar(str, ch);
-	}
-
-	const VOID* __cdecl MemoryCharHook(const VOID* block, BYTE ch, size_t length)
-	{
-		return MemoryChar(block, ch, length);
-	}
-
 	BYTE wideCharBuffer[4096];
 
 	BOOL __fastcall ConvertChars(const CHAR* srcData, UINT srcCP, CHAR* dstData, UINT dstCP)
@@ -6391,18 +6336,6 @@ namespace Hooks
 
 				PatchImport(hooker, "GetOpenFileNameA", GetOpenFileNameHook);
 				PatchImport(hooker, "GetSaveFileNameA", GetSaveFileNameHook);
-
-				PatchImport(hooker, "isalpha", IsAlphaHook);
-				PatchImport(hooker, "isalnum", IsAlNumHook);
-				PatchImport(hooker, "isdigit", IsDigitHook);
-				PatchImport(hooker, "isspace", IsSpaceHook);
-				PatchImport(hooker, "ispunct", IsPunctHook);
-				PatchImport(hooker, "iscntrl", IsCntrlHook);
-				PatchImport(hooker, "isupper", IsUpperHook);
-				PatchImport(hooker, "toupper", ToUpperHook);
-				PatchImport(hooker, "tolower", ToLowerHook);
-				PatchImport(hooker, "strchr", StrCharHook);
-				PatchImport(hooker, "memchr", MemoryCharHook);
 
 				if (config.locales.current.oem && config.locales.current.ansi)
 				{
