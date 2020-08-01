@@ -47,6 +47,7 @@ private:
 		ShaderGroup* linear;
 		ShaderGroup* hermite;
 		ShaderGroup* cubic;
+		ShaderGroup* lanczos;
 		ShaderGroup* xBRz_2x;
 		ShaderGroup* xBRz_3x;
 		ShaderGroup* xBRz_4x;

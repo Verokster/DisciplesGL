@@ -450,7 +450,7 @@ namespace Config
 
 			value = Config::Get(CONFIG_WRAPPER, "Interpolation", InterpolateHermite);
 			config.image.interpolation = *(InterpolationFilter*)&value;
-			if (config.image.interpolation < InterpolateNearest || config.image.interpolation > InterpolateCubic)
+			if (config.image.interpolation < InterpolateNearest || config.image.interpolation > InterpolateLanczos)
 				config.image.interpolation = InterpolateHermite;
 
 			value = Config::Get(CONFIG_WRAPPER, "Upscaling", UpscaleNone);
@@ -553,9 +553,9 @@ namespace Config
 			config.borderless.real = config.borderless.mode = (BOOL)Config::Get(CONFIG_WRAPPER, "BorderlessMode", FALSE);
 
 			value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
+			if (value < 1)
+				value = 5;
 			config.speed.index = *(DWORD*)&value;
-			if (config.speed.index >= MAX_SPEED_INDEX)
-				config.speed.index = 5;
 			config.speed.value = 0.1f * (config.speed.index + 10);
 
 			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", TRUE);

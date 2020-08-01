@@ -37,6 +37,7 @@ private:
 		ShaderGroup* linear;
 		ShaderGroup* hermite;
 		ShaderGroup* cubic;
+		ShaderGroup* lanczos;
 	} shaders;
 
 	struct {

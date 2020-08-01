@@ -50,7 +50,8 @@ VOID MidRenderer::Begin()
 	this->shaders = {
 		new ShaderGroup(GLSL_VER_1_10, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
 		new ShaderGroup(GLSL_VER_1_10, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
-		new ShaderGroup(GLSL_VER_1_10, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS)
+		new ShaderGroup(GLSL_VER_1_10, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
+		new ShaderGroup(GLSL_VER_1_10, IDR_LANCZOS_VERTEX, IDR_LANCZOS_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS)
 	};
 
 	{
@@ -181,7 +182,7 @@ VOID MidRenderer::End()
 BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpStateBuffer)
 {
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
-	Size* frameSize = &stateBuffer->size;
+	Size frameSize = stateBuffer->size;
 	FilterState state = this->ddraw->filterState;
 	if (pixelBuffer->Update(lpStateBuffer, ready) || state.flags || this->borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
 	{
@@ -195,6 +196,13 @@ BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 		if (this->CheckView(TRUE))
 			GLViewport(this->ddraw->viewport.rectangle.x, this->ddraw->viewport.rectangle.y + this->ddraw->viewport.offset, this->ddraw->viewport.rectangle.width, this->ddraw->viewport.rectangle.height);
 
+		if (state.interpolation > InterpolateLinear && frameSize.width >= this->ddraw->viewport.rectangle.width && frameSize.height >= this->ddraw->viewport.rectangle.height)
+		{
+			state.interpolation = InterpolateLinear;
+			if (this->program != this->shaders.linear)
+				state.flags = TRUE;
+		}
+
 		if (force || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
 		{
 			switch (state.interpolation)
@@ -204,6 +212,9 @@ BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 				break;
 			case InterpolateCubic:
 				this->program = this->shaders.cubic;
+				break;
+			case InterpolateLanczos:
+				this->program = this->shaders.lanczos;
 				break;
 			default:
 				this->program = this->shaders.linear;
@@ -231,12 +242,12 @@ BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 		if (stateBuffer->isZoomed)
 		{
-			if (this->zoomSize.width != frameSize->width || this->zoomSize.height != frameSize->height)
+			if (this->zoomSize.width != frameSize.width || this->zoomSize.height != frameSize.height)
 			{
-				this->zoomSize = *frameSize;
+				this->zoomSize = frameSize;
 
-				FLOAT tw = (FLOAT)frameSize->width / this->maxTexSize;
-				FLOAT th = (FLOAT)frameSize->height / this->maxTexSize;
+				FLOAT tw = (FLOAT)frameSize.width / this->maxTexSize;
+				FLOAT th = (FLOAT)frameSize.height / this->maxTexSize;
 
 				this->buffer[1][4] = tw;
 				this->buffer[2][4] = tw;

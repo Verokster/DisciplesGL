@@ -45,6 +45,7 @@ BEGIN
 	IDS_TEXT_FILT_LINEAR			"Linear"
 	IDS_TEXT_FILT_HERMITE			"Hermite"
 	IDS_TEXT_FILT_CUBIC				"Cubic"
+	IDS_TEXT_FILT_LANCZOS			"Lanczos"
 	IDS_TEXT_FILT_NONE				"None"
 	IDS_TEXT_FILT_SCALENX			"ScaleNx"
 	IDS_TEXT_FILT_EAGLE				"Super Eagle"
@@ -167,6 +168,7 @@ BEGIN
 			MENUITEM "&Linear",						IDM_FILT_LINEAR
 			MENUITEM "&Hermite",					IDM_FILT_HERMITE
 			MENUITEM "&Cubic",						IDM_FILT_CUBIC
+			MENUITEM "&Lanczos",					IDM_FILT_LANCZOS
 		END
 		POPUP "&Upscaling"
 		BEGIN
@@ -413,6 +415,7 @@ IDR_LINEAR_VERTEX			RCDATA		DISCARDABLE			"..\\glsl\\linear\\vertex.glsl"
 IDR_LINEAR_FRAGMENT			RCDATA		DISCARDABLE			"..\\glsl\\linear\\fragment.glsl"
 IDR_HERMITE_FRAGMENT		RCDATA		DISCARDABLE			"..\\glsl\\hermite\\fragment.glsl"
 IDR_CUBIC_FRAGMENT			RCDATA		DISCARDABLE			"..\\glsl\\cubic\\fragment.glsl"
+IDR_LANCZOS_FRAGMENT		RCDATA		DISCARDABLE			"..\\glsl\\lanczos\\fragment.glsl"
 
 IDR_XBRZ_FRAGMENT_2X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_2x.glsl"
 IDR_XBRZ_FRAGMENT_3X		RCDATA		DISCARDABLE			"..\\glsl\\xbrz\\fragment_3x.glsl"
@@ -453,8 +456,8 @@ IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2020,7,29,1632
- PRODUCTVERSION 1,6,8,0
+ FILEVERSION 2020,7,31,1657
+ PRODUCTVERSION 1,6,9,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -470,10 +473,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2020.07.29.1632"
+			VALUE "FileVersion", "2020.07.31.1657"
 			VALUE "LegalCopyright", "© 2020 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4dll-R.dll"
-			VALUE "ProductVersion", "1.6.8"
+			VALUE "ProductVersion", "1.6.9"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

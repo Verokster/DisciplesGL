@@ -169,6 +169,9 @@ namespace Window
 			EnableMenuItem(config.menu, IDM_FILT_CUBIC, MF_BYCOMMAND | (config.gl.version.value >= GL_VER_2_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			CheckMenuItem(config.menu, IDM_FILT_CUBIC, MF_BYCOMMAND | MF_UNCHECKED);
 
+			EnableMenuItem(config.menu, IDM_FILT_LANCZOS, MF_BYCOMMAND | (config.gl.version.value >= GL_VER_2_0 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_FILT_LANCZOS, MF_BYCOMMAND | MF_UNCHECKED);
+
 			switch (config.image.interpolation)
 			{
 			case InterpolateLinear:
@@ -181,6 +184,10 @@ namespace Window
 
 			case InterpolateCubic:
 				CheckMenuItem(config.menu, config.gl.version.value >= GL_VER_2_0 ? IDM_FILT_CUBIC : (config.gl.version.value ? IDM_FILT_LINEAR : IDM_FILT_OFF), MF_BYCOMMAND | MF_CHECKED);
+				break;
+
+			case InterpolateLanczos:
+				CheckMenuItem(config.menu, config.gl.version.value >= GL_VER_2_0 ? IDM_FILT_LANCZOS : (config.gl.version.value ? IDM_FILT_LINEAR : IDM_FILT_OFF), MF_BYCOMMAND | MF_CHECKED);
 				break;
 
 			default:
@@ -609,6 +616,9 @@ namespace Window
 				break;
 			case InterpolateCubic:
 				id = IDS_TEXT_FILT_CUBIC;
+				break;
+			case InterpolateLanczos:
+				id = IDS_TEXT_FILT_LANCZOS;
 				break;
 			default:
 				id = IDS_TEXT_FILT_OFF;
@@ -2091,15 +2101,9 @@ namespace Window
 					DWORD index = config.speed.enabled ? config.speed.index : 0;
 					DWORD oldIndex = index;
 					if (wParam == VK_ADD || wParam == VK_OEM_PLUS)
-					{
-						if (index != MAX_SPEED_INDEX - 1)
-							++index;
-					}
-					else
-					{
-						if (index)
-							--index;
-					}
+						++index;
+					else if (index)
+						--index;
 
 					if (index != oldIndex)
 					{
@@ -2136,6 +2140,10 @@ namespace Window
 
 					case InterpolateHermite:
 						InterpolationChanged(hWnd, config.gl.version.value >= GL_VER_2_0 ? InterpolateCubic : InterpolateNearest);
+						break;
+
+					case InterpolateCubic:
+						InterpolationChanged(hWnd, config.gl.version.value >= GL_VER_2_0 ? InterpolateLanczos : InterpolateNearest);
 						break;
 
 					default:
@@ -2182,6 +2190,7 @@ namespace Window
 						Hooks::PrintText(text);
 					}
 
+					Hooks::SetGameSpeed();
 					CheckMenu(MenuSpeed);
 					return NULL;
 				}
@@ -2397,6 +2406,11 @@ namespace Window
 
 			case IDM_FILT_CUBIC: {
 				InterpolationChanged(hWnd, InterpolateCubic);
+				return NULL;
+			}
+
+			case IDM_FILT_LANCZOS: {
+				InterpolationChanged(hWnd, InterpolateLanczos);
 				return NULL;
 			}
 

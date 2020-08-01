@@ -44,7 +44,8 @@ out vec4 fragColor;
 const float one_third = 1.0 / 3.0;
 
 float reduce(const vec3 color) {
-	return dot(color, vec3(65536.0, 256.0, 1.0));
+	const vec3 w = vec3(65536.0, 256.0, 1.0);
+	return dot(color, w);
 }
 
 float DistYCbCr(const vec3 pixA, const vec3 pixB) {

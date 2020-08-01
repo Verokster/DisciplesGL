@@ -159,8 +159,6 @@ namespace Hooks
 
 		DWORD res_hook;
 		DWORD res_back;
-		DWORD res_restriction_jmp;
-		DWORD res_restriction_nop;
 		DWORD border_nop;
 		DWORD border_hook;
 
@@ -250,9 +248,6 @@ namespace Hooks
 		DWORD ai_list_get_type;
 
 		DWORD summoner_fix;
-
-		DWORD draw_hook_1;
-		DWORD draw_hook_2;
 
 		DWORD lock_begin;
 		DWORD lock_end;

@@ -75,7 +75,8 @@ enum InterpolationFilter : BYTE
 	InterpolateNearest = 0,
 	InterpolateLinear = 1,
 	InterpolateHermite = 2,
-	InterpolateCubic = 3
+	InterpolateCubic = 3,
+	InterpolateLanczos = 4
 };
 
 enum UpscalingFilter : BYTE

@@ -187,7 +187,7 @@ VOID OldRenderer::End()
 BOOL OldRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpStateBuffer)
 {
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
-	Size* frameSize = &stateBuffer->size;
+	Size frameSize = stateBuffer->size;
 	FilterState state = this->ddraw->filterState;
 	if (this->pixelBuffer->Update(lpStateBuffer, ready, this->frameCount != 1 || this->convert) || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
 	{
@@ -268,12 +268,12 @@ BOOL OldRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 						WORD* src = (WORD*)stateBuffer->data + ((config.mode->height - stateBuffer->size.height) >> 1) * config.mode->width + ((config.mode->width - stateBuffer->size.width) >> 1);
 						DWORD* dst = (DWORD*)this->frameBuffer;
 
-						DWORD slice = config.mode->width - frameSize->width;
+						DWORD slice = config.mode->width - frameSize.width;
 
-						DWORD copyHeight = frameSize->height;
+						DWORD copyHeight = frameSize.height;
 						do
 						{
-							DWORD copyWidth = frameSize->width;
+							DWORD copyWidth = frameSize.width;
 							do
 							{
 								WORD px = *src++;
@@ -284,18 +284,18 @@ BOOL OldRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 							dst += slice;
 						} while (--copyHeight);
 
-						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize->width, frameSize->height, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
+						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize.width, frameSize.height, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
 					}
 				}
 				else
 				{
 					if (this->isTrueColor)
-						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frame->rect.width, frame->rect.height, GL_RGBA, GL_UNSIGNED_BYTE, (DWORD*)stateBuffer->data + frame->rect.y * frameSize->width + frame->rect.x);
+						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frame->rect.width, frame->rect.height, GL_RGBA, GL_UNSIGNED_BYTE, (DWORD*)stateBuffer->data + frame->rect.y * frameSize.width + frame->rect.x);
 					else if (config.gl.version.value > GL_VER_1_1)
-						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frame->rect.width, frame->rect.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)stateBuffer->data + frame->rect.y * frameSize->width + frame->rect.x);
+						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frame->rect.width, frame->rect.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)stateBuffer->data + frame->rect.y * frameSize.width + frame->rect.x);
 					else
 					{
-						WORD* src = (WORD*)stateBuffer->data + frame->rect.y * frameSize->width + frame->rect.x;
+						WORD* src = (WORD*)stateBuffer->data + frame->rect.y * frameSize.width + frame->rect.x;
 						DWORD* dst = (DWORD*)this->frameBuffer;
 
 						DWORD slice = config.mode->width - frame->rect.width;

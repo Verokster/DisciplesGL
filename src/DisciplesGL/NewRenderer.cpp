@@ -52,6 +52,7 @@ VOID NewRenderer::Begin()
 		new ShaderGroup(GLSL_VER_1_30, IDR_LINEAR_VERTEX, IDR_LINEAR_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
 		new ShaderGroup(GLSL_VER_1_30, IDR_HERMITE_VERTEX, IDR_HERMITE_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
 		new ShaderGroup(GLSL_VER_1_30, IDR_CUBIC_VERTEX, IDR_CUBIC_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
+		new ShaderGroup(GLSL_VER_1_30, IDR_LANCZOS_VERTEX, IDR_LANCZOS_FRAGMENT, SHADER_DOUBLE | SHADER_LEVELS),
 		new ShaderGroup(GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_2X, flags),
 		new ShaderGroup(GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_3X, flags),
 		new ShaderGroup(GLSL_VER_1_30, IDR_XBRZ_VERTEX, IDR_XBRZ_FRAGMENT_4X, flags),
@@ -226,7 +227,7 @@ VOID NewRenderer::End()
 BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpStateBuffer)
 {
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
-	Size* frameSize = &stateBuffer->size;
+	Size frameSize = stateBuffer->size;
 	FilterState state = this->ddraw->filterState;
 	this->ddraw->filterState.flags = FALSE;
 
@@ -259,8 +260,8 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 				this->ddraw->viewport.refresh = TRUE;
 			}
 
-			FLOAT kw = (FLOAT)frameSize->width / config.mode->width;
-			FLOAT kh = (FLOAT)frameSize->height / config.mode->height;
+			FLOAT kw = (FLOAT)frameSize.width / config.mode->width;
+			FLOAT kh = (FLOAT)frameSize.height / config.mode->height;
 
 			GLBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->fboId);
 			{
@@ -272,10 +273,10 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 						switch (state.value)
 						{
 						case 3:
-							this->upscaleProgram = shaders.scaleNx_3x;
+							this->upscaleProgram = this->shaders.scaleNx_3x;
 							break;
 						default:
-							this->upscaleProgram = shaders.scaleNx_2x;
+							this->upscaleProgram = this->shaders.scaleNx_2x;
 							break;
 						}
 
@@ -285,10 +286,10 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 						switch (state.value)
 						{
 						case 4:
-							this->upscaleProgram = shaders.scaleHQ_4x;
+							this->upscaleProgram = this->shaders.scaleHQ_4x;
 							break;
 						default:
-							this->upscaleProgram = shaders.scaleHQ_2x;
+							this->upscaleProgram = this->shaders.scaleHQ_2x;
 							break;
 						}
 
@@ -298,32 +299,30 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 						switch (state.value)
 						{
 						case 6:
-							this->upscaleProgram = shaders.xBRz_6x;
+							this->upscaleProgram = this->shaders.xBRz_6x;
 							break;
 						case 5:
-							this->upscaleProgram = shaders.xBRz_5x;
+							this->upscaleProgram = this->shaders.xBRz_5x;
 							break;
 						case 4:
-							this->upscaleProgram = shaders.xBRz_4x;
+							this->upscaleProgram = this->shaders.xBRz_4x;
 							break;
 						case 3:
-							this->upscaleProgram = shaders.xBRz_3x;
+							this->upscaleProgram = this->shaders.xBRz_3x;
 							break;
 						default:
-							this->upscaleProgram = shaders.xBRz_2x;
+							this->upscaleProgram = this->shaders.xBRz_2x;
 							break;
 						}
 
 						break;
 
 					case UpscaleXSal:
-						this->upscaleProgram = shaders.xSal_2x;
-
+						this->upscaleProgram = this->shaders.xSal_2x;
 						break;
 
 					default:
-						this->upscaleProgram = shaders.eagle_2x;
-
+						this->upscaleProgram = this->shaders.eagle_2x;
 						break;
 					}
 
@@ -396,23 +395,23 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 				GLActiveTexture(GL_TEXTURE1);
 				GLBindTexFilter(((GLuint*)&textureId.primary)[this->activeIndex], GL_LINEAR);
 
-				if (this->CheckView(FALSE) || this->zoomStatus != stateBuffer->isZoomed || stateBuffer->isZoomed && (this->zoomSize.width != frameSize->width || this->zoomSize.height != frameSize->height))
+				if (this->CheckView(FALSE) || this->zoomStatus != stateBuffer->isZoomed || stateBuffer->isZoomed && (this->zoomSize.width != frameSize.width || this->zoomSize.height != frameSize.height))
 				{
 					this->zoomStatus = stateBuffer->isZoomed;
 
 					if (this->isTrueColor)
 					{
 						DWORD* ptr = (DWORD*)this->frameBuffer;
-						DWORD count = frameSize->height * config.mode->width;
+						DWORD count = frameSize.height * config.mode->width;
 						do
 							*ptr++ = 0x00FFFFFF;
 						while (--count);
-						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize->width, frameSize->height, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
+						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize.width, frameSize.height, GL_RGBA, GL_UNSIGNED_BYTE, frameBuffer);
 					}
 					else
 					{
-						MemoryZero(this->frameBuffer, frameSize->height * config.mode->width * (this->isTrueColor ? sizeof(DWORD) : sizeof(WORD)));
-						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize->width, frameSize->height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frameBuffer);
+						MemoryZero(this->frameBuffer, frameSize.height * config.mode->width * (this->isTrueColor ? sizeof(DWORD) : sizeof(WORD)));
+						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize.width, frameSize.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frameBuffer);
 					}
 				}
 
@@ -423,20 +422,20 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 				{
 					GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 					if (!this->isTrueColor)
-						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize->width, frameSize->height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)stateBuffer->data + ((config.mode->height - frameSize->height) >> 1) * config.mode->width + ((config.mode->width - frameSize->width) >> 1));
+						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize.width, frameSize.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (WORD*)stateBuffer->data + ((config.mode->height - frameSize.height) >> 1) * config.mode->width + ((config.mode->width - frameSize.width) >> 1));
 					else
-						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize->width, frameSize->height, GL_RGBA, GL_UNSIGNED_BYTE, (DWORD*)stateBuffer->data + ((config.mode->height - frameSize->height) >> 1) * config.mode->width + ((config.mode->width - frameSize->width) >> 1));
+						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize.width, frameSize.height, GL_RGBA, GL_UNSIGNED_BYTE, (DWORD*)stateBuffer->data + ((config.mode->height - frameSize.height) >> 1) * config.mode->width + ((config.mode->width - frameSize.width) >> 1));
 					GLPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
 					// Draw into FBO texture
 					if (stateBuffer->isZoomed)
 					{
-						if (this->zoomSize.width != frameSize->width || this->zoomSize.height != frameSize->height)
+						if (this->zoomSize.width != frameSize.width || this->zoomSize.height != frameSize.height)
 						{
-							this->zoomSize = *frameSize;
+							this->zoomSize = frameSize;
 
-							FLOAT tw = (FLOAT)frameSize->width / this->maxTexSize;
-							FLOAT th = (FLOAT)frameSize->height / this->maxTexSize;
+							FLOAT tw = (FLOAT)frameSize.width / this->maxTexSize;
+							FLOAT th = (FLOAT)frameSize.height / this->maxTexSize;
 
 							this->buffer[1][4] = tw;
 							this->buffer[2][4] = tw;
@@ -459,13 +458,16 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 			switch (state.interpolation)
 			{
 			case InterpolateHermite:
-				this->program = shaders.hermite;
+				this->program = this->shaders.hermite;
 				break;
 			case InterpolateCubic:
-				this->program = shaders.cubic;
+				this->program = this->shaders.cubic;
+				break;
+			case InterpolateLanczos:
+				this->program = this->shaders.lanczos;
 				break;
 			default:
-				this->program = shaders.linear;
+				this->program = this->shaders.linear;
 				break;
 			}
 
@@ -484,9 +486,9 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 				if (stateBuffer->isZoomed)
 				{
-					if (this->zoomFbSize.width != frameSize->width || this->zoomFbSize.height != frameSize->height)
+					if (this->zoomFbSize.width != frameSize.width || this->zoomFbSize.height != frameSize.height)
 					{
-						this->zoomFbSize = *frameSize;
+						this->zoomFbSize = frameSize;
 
 						this->buffer[4][5] = kh;
 						this->buffer[5][4] = kw;
@@ -545,18 +547,28 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 			if (this->CheckView(TRUE))
 				GLViewport(this->ddraw->viewport.rectangle.x, this->ddraw->viewport.rectangle.y + this->ddraw->viewport.offset, this->ddraw->viewport.rectangle.width, this->ddraw->viewport.rectangle.height);
 
+			if (state.interpolation > InterpolateLinear && frameSize.width >= this->ddraw->viewport.rectangle.width && frameSize.height >= this->ddraw->viewport.rectangle.height)
+			{
+				state.interpolation = InterpolateLinear;
+				if (this->program != this->shaders.linear)
+					state.flags = TRUE;
+			}
+
 			if (force || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
 			{
 				switch (state.interpolation)
 				{
 				case InterpolateHermite:
-					this->program = shaders.hermite;
+					this->program = this->shaders.hermite;
 					break;
 				case InterpolateCubic:
-					this->program = shaders.cubic;
+					this->program = this->shaders.cubic;
+					break;
+				case InterpolateLanczos:
+					this->program = this->shaders.lanczos;
 					break;
 				default:
-					this->program = shaders.linear;
+					this->program = this->shaders.linear;
 					break;
 				}
 
@@ -580,12 +592,12 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 			if (stateBuffer->isZoomed)
 			{
-				if (this->zoomSize.width != frameSize->width || this->zoomSize.height != frameSize->height)
+				if (this->zoomSize.width != frameSize.width || this->zoomSize.height != frameSize.height)
 				{
-					this->zoomSize = *frameSize;
+					this->zoomSize = frameSize;
 
-					FLOAT tw = (FLOAT)frameSize->width / this->maxTexSize;
-					FLOAT th = (FLOAT)frameSize->height / this->maxTexSize;
+					FLOAT tw = (FLOAT)frameSize.width / this->maxTexSize;
+					FLOAT th = (FLOAT)frameSize.height / this->maxTexSize;
 
 					this->buffer[1][4] = tw;
 					this->buffer[2][4] = tw;
