@@ -10,15 +10,17 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "linear", "linear", "{170CEC3B-59D7-4260-ADA6-14EA0F7ED042}"
 	ProjectSection(SolutionItems) = preProject
 		glsl\linear\fragment.glsl = glsl\linear\fragment.glsl
-		glsl\linear\fragment_double.glsl = glsl\linear\fragment_double.glsl
 		glsl\linear\vertex.glsl = glsl\linear\vertex.glsl
-		glsl\linear\vertex_double.glsl = glsl\linear\vertex_double.glsl
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cubic", "cubic", "{E4F599C2-AF64-4BAC-98C8-5B29F95F6B34}"
 	ProjectSection(SolutionItems) = preProject
 		glsl\cubic\fragment.glsl = glsl\cubic\fragment.glsl
-		glsl\cubic\fragment_double.glsl = glsl\cubic\fragment_double.glsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lanczos", "lanczos", "{A7DD06E7-5813-4F39-87B9-F3C2D7AD98BF}"
+	ProjectSection(SolutionItems) = preProject
+		glsl\lanczos\fragment.glsl = glsl\lanczos\fragment.glsl
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scalehq", "scalehq", "{82C8BA11-F68D-4990-B4BC-D066DBFB2047}"
@@ -64,7 +66,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hermite", "hermite", "{8C6324D3-BDF6-4CB4-AA40-0115DB11BEE5}"
 	ProjectSection(SolutionItems) = preProject
 		glsl\hermite\fragment.glsl = glsl\hermite\fragment.glsl
-		glsl\hermite\fragment_double.glsl = glsl\hermite\fragment_double.glsl
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{F116CB8C-2F5E-404D-A949-1FCBDD5639CF}"
@@ -113,6 +114,7 @@ Global
 		{AE45BC76-A7E0-49BF-B05B-F58D72A4E3C6} = {520D4B5D-885D-43CC-B75C-4F342C729245}
 		{C7909C56-36E5-4C1E-A7DA-E7F7EB05C41D} = {520D4B5D-885D-43CC-B75C-4F342C729245}
 		{8C6324D3-BDF6-4CB4-AA40-0115DB11BEE5} = {520D4B5D-885D-43CC-B75C-4F342C729245}
+		{A7DD06E7-5813-4F39-87B9-F3C2D7AD98BF} = {520D4B5D-885D-43CC-B75C-4F342C729245}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76298140-6EFF-4E41-BE27-FD61CE97B9DE}
