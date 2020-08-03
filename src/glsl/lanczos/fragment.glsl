@@ -95,8 +95,8 @@ vec4 lanczos(sampler2D tex, vec2 coord) {
 	y2 /= ysum;
 	
 	vec2 pos = (-0.5 - f) * stp + uv;
-	float x[6] = { pos.x - stp.x * 2.0, pos.x - stp.x, pos.x, pos.x + stp.x, pos.x + stp.x * 2.0, pos.x + stp.x * 3.0 };
-	float y[6] = { pos.y - stp.y * 2.0, pos.y - stp.y, pos.y, pos.y + stp.y, pos.y + stp.y * 2.0, pos.y + stp.y * 3.0 };
+	float x[6] = float[](pos.x - stp.x * 2.0, pos.x - stp.x, pos.x, pos.x + stp.x, pos.x + stp.x * 2.0, pos.x + stp.x * 3.0);
+	float y[6] = float[](pos.y - stp.y * 2.0, pos.y - stp.y, pos.y, pos.y + stp.y, pos.y + stp.y * 2.0, pos.y + stp.y * 3.0);
 
 	vec4 v1 = mat3x4(
 		lsum(tex, x, y[0], y1, y2),
@@ -106,7 +106,7 @@ vec4 lanczos(sampler2D tex, vec2 coord) {
 	vec4 v2 = mat3x4(
 		lsum(tex, x, y[1], y1, y2),
 		lsum(tex, x, y[3], y1, y2),
-		lsum(tex, x, y[4], y1, y2)) * x2;
+		lsum(tex, x, y[5], y1, y2)) * x2;
 
 	return v1 + v2;
 }

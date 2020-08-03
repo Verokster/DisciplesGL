@@ -89,22 +89,18 @@ void main() {
 			p01 = p10 = C7;
 			p00 = c6 == c7 || c5 == c2 ? 0.25*(3.0*C7+C4) : 0.5*(C4+C5);
 			p11 = c5 == d4 || c7 == d1 ? 0.25*(3.0*C7+C8) : 0.5*(C7+C8);
-		}
-		else {
+		} else {
 			p11 = 0.125*(6.0*C8+C7+C5);
 			p00 = 0.125*(6.0*C4+C7+C5);
 			p10 = 0.125*(6.0*C7+C4+C8);
 			p01 = 0.125*(6.0*C5+C4+C8);
 		}
-	}
-	else if (c7 != c5) {
+	} else if (c7 != c5) {
 		p11 = p00 = C4;
 		p01 = c1 == c4 || c8 == d5 ? 0.25*(3.0*C4+C5) : 0.5*(C4+C5);
-		p10 = c8 == d2 || c3 == c4 ? p10 = 0.25*(3.0*C4+C7) : p10 = 0.5*(C7+C8);
-	}
-	else {
-		int r = 0;
-		r += GET_RESULT(c5,c4,c6,d1);
+		p10 = c8 == d2 || c3 == c4 ? 0.25*(3.0*C4+C7) : 0.5*(C7+C8);
+	} else {
+		int r = GET_RESULT(c5,c4,c6,d1);
 		r += GET_RESULT(c5,c4,c3,c1);
 		r += GET_RESULT(c5,c4,d2,d5);
 		r += GET_RESULT(c5,c4,c2,d4);
@@ -112,12 +108,10 @@ void main() {
 		if (r > 0) {
 			p01 = p10 = C7;
 			p00 = p11 = 0.5*(C4+C5);
-		}
-		else if (r < 0) {
+		} else if (r < 0) {
 			p11 = p00 = C4;
 			p01 = p10 = 0.5*(C4+C5);
-		}
-		else {
+		} else {
 			p11 = p00 = C4;
 			p01 = p10 = C7;
 		}
