@@ -115,6 +115,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x007C5E30, 0x005A2DB5, 0x005A2E7A, 0x00000000,
+		0x005293DA, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .41
@@ -157,6 +158,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x0081DDDC, 0x00483DFB, 0x00483F14, 0x00824930, 0x005A9143, 0x005A9203, 0x00000000,
+		0x0052F05B, 0x0052AF13,
 #pragma endregion
 
 #pragma region v2 .01
@@ -199,6 +201,7 @@ namespace Hooks
 		0x00651AE8, 0x00651B34,
 
 		0x0082B42C, 0x004863BA, 0x004864D7, 0x00831FB0, 0x005AFDA8, 0x005AFE6D, 0x00000000,
+		0x00534C77, 0x0052EC27,
 #pragma endregion
 
 #pragma region v2 .01 - Steam
@@ -241,6 +244,7 @@ namespace Hooks
 		0x00651AA8, 0x00651AF4,
 
 		0x0082C40C, 0x00486441, 0x0048656A, 0x00832F98, 0x005B0398, 0x005B043C, 0x00000000,
+		0x0053533C, 0x0052F3E8,
 #pragma endregion
 
 #pragma region v2 .02
@@ -283,6 +287,7 @@ namespace Hooks
 		0x00650628, 0x00650674,
 
 		0x008293AC, 0x004868AE, 0x004869CB, 0x0082FF38, 0x005AEC65, 0x005AED25, 0x00000000,
+		0x00494AED, 0x0052DB6A,
 #pragma endregion
 
 #pragma region v2 .02 - Crack
@@ -325,6 +330,7 @@ namespace Hooks
 		0x00651BF8, 0x00651C44,
 
 		0x0082B49C, 0x00486A6F, 0x00486B8C, 0x00832028, 0x005B056E, 0x005B0633, 0x00000000,
+		0x00535147, 0x0052F1E1,
 #pragma endregion
 
 #pragma region v3 .00 - Steam
@@ -367,6 +373,7 @@ namespace Hooks
 		0x00659398, 0x006593E4,
 
 		0x00837E7C, 0x004893E9, 0x004894F5, 0x0083AA58, 0x005B3A1E, 0x005B3ADE, 0x00000000,
+		0x0053842D, 0x005325B2,
 #pragma endregion
 
 #pragma region v3 .01a
@@ -409,6 +416,7 @@ namespace Hooks
 		0x0065A018, 0x0065A064,
 
 		0x00837ACC, 0x004893B4, 0x004894BC, 0x0083A6A8, 0x005B402C, 0x005B40D5, 0x00000000,
+		0x005384C4, 0x0053260D,
 #pragma endregion
 
 #pragma region v3 .01b
@@ -451,6 +459,7 @@ namespace Hooks
 		0x00658A98, 0x00658AE4,
 
 		0x00835A7C, 0x00488F9D, 0x004890A5, 0x00838650, 0x005B32F2, 0x005B33B7, 0x00000000,
+		0x00537ACC, 0x00531B25,
 #pragma endregion
 
 #pragma region v1 .10 Editor
@@ -493,6 +502,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00631120, 0x0053EF10, 0x00000000, 0x0044A591,
+		0x00478A74, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .41 Editor
@@ -535,6 +545,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00636338, 0x00541F1F, 0x00000000, 0x0044A9C1,
+		0x00479013, 0x0047DD3B,
 #pragma endregion
 
 #pragma region v2 .00 Editor - Steam
@@ -577,6 +588,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x0065E520, 0x0055E93A, 0x00000000, 0x0044D014,
+		0x004903E5, 0x00495435,
 #pragma endregion
 
 #pragma region v2 .01 Editor
@@ -619,6 +631,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x0065CD48, 0x0055DD64, 0x00000000, 0x0044D09A,
+		0x0048FADD, 0x00494AED,
 #pragma endregion
 
 #pragma region v2 .02 Editor
@@ -661,6 +674,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x0065CD70, 0x0055DE84, 0x00000000, 0x0044D09A,
+		0x0048FADD, 0x00494AED,
 #pragma endregion
 
 #pragma region v3 .00 Editor - Steam
@@ -703,6 +717,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00667E44, 0x0056480E, 0x00000000, 0x0044EE74,
+		0x00493001, 0x004980CE,
 #pragma endregion
 
 #pragma region v3 .01 Editor
@@ -744,7 +759,8 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000,
 
-		0x00000000, 0x00000000, 0x00000000, 0x00666484, 0x00563C2D, 0x00000000, 0x0044EBD5
+		0x00000000, 0x00000000, 0x00000000, 0x00666484, 0x00563C2D, 0x00000000, 0x0044EBD5,
+		0x0049209B, 0x004970EC
 #pragma endregion
 	};
 
@@ -3963,6 +3979,62 @@ namespace Hooks
 #pragma endregion
 
 #pragma region Locale
+	// all these functions needed as msvcrt check int not byte
+	INT __cdecl IsAlphaHook(BYTE ch)
+	{
+		return IsAlpha(ch);
+	}
+
+	INT __cdecl IsAlNumHook(BYTE ch)
+	{
+		return IsAlNum(ch);
+	}
+
+	INT __cdecl IsDigitHook(BYTE ch)
+	{
+		return IsDigit(ch);
+	}
+
+	INT __cdecl IsSpaceHook(BYTE ch)
+	{
+		return IsSpace(ch);
+	}
+
+	INT __cdecl IsPunctHook(BYTE ch)
+	{
+		return IsPunct(ch);
+	}
+
+	INT __cdecl IsCntrlHook(BYTE ch)
+	{
+		return IsCntrl(ch);
+	}
+
+	INT __cdecl IsUpperHook(BYTE ch)
+	{
+		return IsUpper(ch);
+	}
+
+	INT __cdecl ToUpperHook(BYTE ch)
+	{
+		return ToUpper(ch);
+	}
+
+	INT __cdecl ToLowerHook(BYTE ch)
+	{
+		return ToLower(ch);
+	}
+
+	const CHAR* __cdecl StrCharHook(const CHAR* str, BYTE ch)
+	{
+		return StrChar(str, ch);
+	}
+
+	const VOID* __cdecl MemoryCharHook(const VOID* block, BYTE ch, size_t length)
+	{
+		return MemoryChar(block, ch, length);
+	}
+
 	BYTE wideCharBuffer[4096];
 
 	BOOL __fastcall ConvertChars(const CHAR* srcData, UINT srcCP, CHAR* dstData, UINT dstCP)
@@ -3994,6 +4066,45 @@ namespace Hooks
 			return TRUE;
 
 		return CharToOem(pSrc, pDst);
+	}
+
+	DWORD back_0048FAFB;
+	VOID __declspec(naked) hook_0048FADD()
+	{
+		__asm
+		{
+			push eax
+			call IsAlNumHook
+			xor ecx, ecx 
+			test eax, eax
+			pop eax
+			
+			jnz lbl_ret
+			inc ecx
+
+			lbl_ret:
+			cmp ecx, 0x0
+			jmp back_0048FAFB
+		}
+	}
+
+	DWORD back_00494B09;
+	VOID __declspec(naked) hook_00494AED()
+	{
+		__asm {
+			push eax
+			call IsAlNumHook
+			xor ecx, ecx 
+			test eax, eax
+			pop eax
+			
+			jnz lbl_ret
+			inc ecx
+
+			lbl_ret:
+			cmp ecx, 0x0
+			jmp back_00494B09
+		}
 	}
 #pragma endregion
 
@@ -6024,6 +6135,21 @@ namespace Hooks
 		if (hookSpace->banners_owner_trigger && ReadDWord(hooker, hookSpace->banners_owner_trigger + 3, &sub_SpinOwnerCallback))
 			PatchDWord(hooker, hookSpace->banners_owner_trigger + 3, (DWORD)hook_SpinOwnerCallback);
 
+		// Editor check alpanum for map name
+		{
+			if (hookSpace->locale_fix_1)
+			{
+				PatchHook(hooker, hookSpace->locale_fix_1, hook_0048FADD);
+				back_0048FAFB = hookSpace->locale_fix_1 + 30 + baseOffset;
+			}
+
+			if (hookSpace->locale_fix_2)
+			{
+				PatchHook(hooker, hookSpace->locale_fix_2, hook_00494AED);
+				back_00494B09 = hookSpace->locale_fix_2 + 28 + baseOffset;
+			}
+		}
+
 		if (config.hd)
 		{
 			config.bpp32Hooked = TRUE;
@@ -6334,6 +6460,18 @@ namespace Hooks
 
 				PatchImport(hooker, "GetOpenFileNameA", GetOpenFileNameHook);
 				PatchImport(hooker, "GetSaveFileNameA", GetSaveFileNameHook);
+
+				PatchImport(hooker, "isalpha", IsAlphaHook);
+				PatchImport(hooker, "isalnum", IsAlNumHook);
+				PatchImport(hooker, "isdigit", IsDigitHook);
+				PatchImport(hooker, "isspace", IsSpaceHook);
+				PatchImport(hooker, "ispunct", IsPunctHook);
+				PatchImport(hooker, "iscntrl", IsCntrlHook);
+				PatchImport(hooker, "isupper", IsUpperHook);
+				PatchImport(hooker, "toupper", ToUpperHook);
+				PatchImport(hooker, "tolower", ToLowerHook);
+				PatchImport(hooker, "strchr", StrCharHook);
+				PatchImport(hooker, "memchr", MemoryCharHook);
 
 				if (config.locales.current.oem && config.locales.current.ansi)
 				{

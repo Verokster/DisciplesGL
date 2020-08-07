@@ -1282,7 +1282,7 @@ namespace Window
 				DRAWITEMSTRUCT* paint = (DRAWITEMSTRUCT*)lParam;
 
 				LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
-				if (levelsData->colors)
+				if (levelsData && levelsData->colors)
 				{
 					LevelColorsFloat prep[260];
 					{
@@ -1558,21 +1558,24 @@ namespace Window
 			{
 			case IDC_BTN_OK: {
 				LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
-				levelsData->values = config.colors.active;
+				if (levelsData)
+				{
+					levelsData->values = config.colors.active;
 
-				Config::Set(CONFIG_COLORS, "HueSat", MAKELONG(DWORD(config.colors.active.hueShift * 1000.0f), DWORD(config.colors.active.saturation * 1000.0f)));
-				Config::Set(CONFIG_COLORS, "RgbInput", MAKELONG(DWORD(config.colors.active.input.left.rgb * 1000.0f), DWORD(config.colors.active.input.right.rgb * 1000.0f)));
-				Config::Set(CONFIG_COLORS, "RedInput", MAKELONG(DWORD(config.colors.active.input.left.red * 1000.0f), DWORD(config.colors.active.input.right.red * 1000.0f)));
-				Config::Set(CONFIG_COLORS, "GreenInput", MAKELONG(DWORD(config.colors.active.input.left.green * 1000.0f), DWORD(config.colors.active.input.right.green * 1000.0f)));
-				Config::Set(CONFIG_COLORS, "BlueInput", MAKELONG(DWORD(config.colors.active.input.left.blue * 1000.0f), DWORD(config.colors.active.input.right.blue * 1000.0f)));
-				Config::Set(CONFIG_COLORS, "RgbGamma", DWORD(config.colors.active.gamma.rgb * 1000.0f));
-				Config::Set(CONFIG_COLORS, "RedGamma", DWORD(config.colors.active.gamma.red * 1000.0f));
-				Config::Set(CONFIG_COLORS, "GreenGamma", DWORD(config.colors.active.gamma.green * 1000.0f));
-				Config::Set(CONFIG_COLORS, "BlueGamma", DWORD(config.colors.active.gamma.blue * 1000.0f));
-				Config::Set(CONFIG_COLORS, "RgbOutput", MAKELONG(DWORD(config.colors.active.output.left.rgb * 1000.0f), DWORD(config.colors.active.output.right.rgb * 1000.0f)));
-				Config::Set(CONFIG_COLORS, "RedOutput", MAKELONG(DWORD(config.colors.active.output.left.red * 1000.0f), DWORD(config.colors.active.output.right.red * 1000.0f)));
-				Config::Set(CONFIG_COLORS, "GreenOutput", MAKELONG(DWORD(config.colors.active.output.left.green * 1000.0f), DWORD(config.colors.active.output.right.green * 1000.0f)));
-				Config::Set(CONFIG_COLORS, "BlueOutput", MAKELONG(DWORD(config.colors.active.output.left.blue * 1000.0f), DWORD(config.colors.active.output.right.blue * 1000.0f)));
+					Config::Set(CONFIG_COLORS, "HueSat", MAKELONG(DWORD(config.colors.active.hueShift * 1000.0f), DWORD(config.colors.active.saturation * 1000.0f)));
+					Config::Set(CONFIG_COLORS, "RgbInput", MAKELONG(DWORD(config.colors.active.input.left.rgb * 1000.0f), DWORD(config.colors.active.input.right.rgb * 1000.0f)));
+					Config::Set(CONFIG_COLORS, "RedInput", MAKELONG(DWORD(config.colors.active.input.left.red * 1000.0f), DWORD(config.colors.active.input.right.red * 1000.0f)));
+					Config::Set(CONFIG_COLORS, "GreenInput", MAKELONG(DWORD(config.colors.active.input.left.green * 1000.0f), DWORD(config.colors.active.input.right.green * 1000.0f)));
+					Config::Set(CONFIG_COLORS, "BlueInput", MAKELONG(DWORD(config.colors.active.input.left.blue * 1000.0f), DWORD(config.colors.active.input.right.blue * 1000.0f)));
+					Config::Set(CONFIG_COLORS, "RgbGamma", DWORD(config.colors.active.gamma.rgb * 1000.0f));
+					Config::Set(CONFIG_COLORS, "RedGamma", DWORD(config.colors.active.gamma.red * 1000.0f));
+					Config::Set(CONFIG_COLORS, "GreenGamma", DWORD(config.colors.active.gamma.green * 1000.0f));
+					Config::Set(CONFIG_COLORS, "BlueGamma", DWORD(config.colors.active.gamma.blue * 1000.0f));
+					Config::Set(CONFIG_COLORS, "RgbOutput", MAKELONG(DWORD(config.colors.active.output.left.rgb * 1000.0f), DWORD(config.colors.active.output.right.rgb * 1000.0f)));
+					Config::Set(CONFIG_COLORS, "RedOutput", MAKELONG(DWORD(config.colors.active.output.left.red * 1000.0f), DWORD(config.colors.active.output.right.red * 1000.0f)));
+					Config::Set(CONFIG_COLORS, "GreenOutput", MAKELONG(DWORD(config.colors.active.output.left.green * 1000.0f), DWORD(config.colors.active.output.right.green * 1000.0f)));
+					Config::Set(CONFIG_COLORS, "BlueOutput", MAKELONG(DWORD(config.colors.active.output.left.blue * 1000.0f), DWORD(config.colors.active.output.right.blue * 1000.0f)));
+				}
 
 				SendMessage(hDlg, WM_CLOSE, NULL, NULL);
 				return NULL;
@@ -1660,7 +1663,7 @@ namespace Window
 				SendDlgItemMessage(hDlg, IDC_LBL_OUT_RIGHT, WM_SETTEXT, NULL, (WPARAM) "255");
 
 				LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
-				if (levelsData->colors)
+				if (levelsData && levelsData->colors)
 				{
 					{
 						LevelColorsFloat found = { 0.0, 0.0, 0.0 };
@@ -1776,11 +1779,14 @@ namespace Window
 			if (PtInRect(&rc, pt))
 			{
 				LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
-				FLOAT dlt = levelsData->delta + 0.025f * GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
-				if (dlt > 0.0f && dlt < 1.0f)
+				if (levelsData)
 				{
-					levelsData->delta = dlt;
-					SendMessage(hDlg, WM_REDRAW_CANVAS, NULL, NULL);
+					FLOAT dlt = levelsData->delta + 0.025f * GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
+					if (dlt > 0.0f && dlt < 1.0f)
+					{
+						levelsData->delta = dlt;
+						SendMessage(hDlg, WM_REDRAW_CANVAS, NULL, NULL);
+					}
 				}
 			}
 
@@ -1921,15 +1927,19 @@ namespace Window
 
 		case WM_CLOSE: {
 			LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
-			config.colors.active = levelsData->values;
-			if (levelsData->colors)
+			if (levelsData)
 			{
-				MemoryFree(levelsData->colors);
-				DeleteObject(levelsData->hBmp);
-				DeleteDC(levelsData->hDc);
-			}
+				SetWindowLong(hDlg, GWLP_USERDATA, NULL);
+				config.colors.active = levelsData->values;
+				if (levelsData->colors)
+				{
+					MemoryFree(levelsData->colors);
+					DeleteObject(levelsData->hBmp);
+					DeleteDC(levelsData->hDc);
+				}
 
-			MemoryFree(levelsData);
+				MemoryFree(levelsData);
+			}
 
 			EndDialog(hDlg, TRUE);
 		}

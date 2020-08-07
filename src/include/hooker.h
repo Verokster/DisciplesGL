@@ -251,4 +251,27 @@ extern "C"
 	/// <param name="funcAddress"></param>
 	/// <returns></returns>
 	DWORD __stdcall PatchEntry(HOOKER hooker, VOID* funcAddress);
+	
+	/// <summary>
+	/// Redirect all imports to other module
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="libName"></param>
+	/// <param name="hLib"></param>
+	/// <returns></returns>
+	VOID __stdcall RedirectImports(HOOKER hooker, const CHAR* libName, HMODULE hLib);
+	
+	/// <summary>
+	/// Map module file into memory
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <returns></returns>
+	BOOL __stdcall MapFile(HOOKER hooker);
+	
+	/// <summary>
+	/// Unmap module file from memory
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <returns></returns>
+	VOID __stdcall UnmapFile(HOOKER hooker);
 }

@@ -293,6 +293,9 @@ namespace Hooks
 		DWORD banners_nop;
 		DWORD banners_hook;
 		DWORD banners_owner_trigger;
+
+		DWORD locale_fix_1;
+		DWORD locale_fix_2;
 	};
 
 	struct BlendData {

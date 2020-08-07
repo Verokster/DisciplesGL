@@ -196,7 +196,7 @@ BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 		if (this->CheckView(TRUE))
 			GLViewport(this->ddraw->viewport.rectangle.x, this->ddraw->viewport.rectangle.y + this->ddraw->viewport.offset, this->ddraw->viewport.rectangle.width, this->ddraw->viewport.rectangle.height);
 
-		if (state.interpolation > InterpolateLinear && frameSize.width >= this->ddraw->viewport.rectangle.width && frameSize.height >= this->ddraw->viewport.rectangle.height)
+		if (state.interpolation > InterpolateLinear && frameSize.width == this->ddraw->viewport.rectangle.width && frameSize.height == this->ddraw->viewport.rectangle.height)
 		{
 			state.interpolation = InterpolateLinear;
 			if (this->program != this->shaders.linear)
