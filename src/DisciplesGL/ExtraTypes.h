@@ -168,6 +168,13 @@ enum UpdateMode
 	UpdateASM = 2
 };
 
+enum SceneSort
+{
+	SceneByTitle = 0,
+	SceneByFile = 1,
+	SceneBySize = 2
+};
+
 struct ConfigItems {
 	BOOL version;
 	BOOL isEditor;
@@ -195,6 +202,8 @@ struct ConfigItems {
 
 	BOOL drawEnabled;
 	UpdateMode updateMode;
+
+	SceneSort sceneSort;
 
 	struct {
 		BOOL fast;
@@ -437,4 +446,27 @@ struct LevelsData {
 	LevelColorsFloat* colors;
 	FLOAT delta;
 	Adjustment values;
+};
+
+struct StringObject {
+	DWORD length;
+	DWORD size;
+	CHAR* text;
+	DWORD unknown;
+};
+
+struct SceneObject {
+	StringObject fileName; // +0
+	StringObject author; // +16
+	BYTE isNotCuston; // +32
+	BYTE unknown_0[3]; // +33
+	DWORD unknown_1; // +36
+	StringObject descriptio; // +40
+	StringObject title; // +45
+	DWORD size; // +72
+	DWORD unknown_2[3]; // +76
+	DWORD isSaveGame; // +88
+	DWORD unknown_3[2]; // +92
+	DWORD races; // +100
+	DWORD unknown_4[6]; // +104
 };

@@ -35,6 +35,8 @@ namespace Hooks
 
 	typedef DWORD**(__stdcall* BEGINLOCK)(LOCK*);
 	typedef VOID(__thiscall* ENDLOCK)(LOCK*, DWORD);
+	typedef BOOL(__stdcall* PRINTSTRING)(StringObject*, const CHAR*, CHAR*);
+	typedef CHAR*(__thiscall* COPYSTRING)(StringObject*, CHAR*, DWORD);
 
 	//======================================================================= 
 	#define BINKYAINVERT          0x00000800L // Reverse Y and A planes when blitting (for debugging) 
@@ -296,6 +298,11 @@ namespace Hooks
 
 		DWORD locale_fix_1;
 		DWORD locale_fix_2;
+
+		DWORD scene_sort_hook;
+		DWORD scene_print_hook;
+		DWORD str_copy;
+		DWORD str_print;
 	};
 
 	struct BlendData {

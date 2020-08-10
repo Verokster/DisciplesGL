@@ -115,7 +115,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x007C5E30, 0x005A2DB5, 0x005A2E7A, 0x00000000,
-		0x005293DA, 0x00000000,
+		0x005293DA, 0x00000000, 0x005EEA92, 0x004DD0CB, 0x00403C95, 0x005117EC,
 #pragma endregion
 
 #pragma region v1 .41
@@ -158,7 +158,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x0081DDDC, 0x00483DFB, 0x00483F14, 0x00824930, 0x005A9143, 0x005A9203, 0x00000000,
-		0x0052F05B, 0x0052AF13,
+		0x0052F05B, 0x0052AF13, 0x005F6A94, 0x004E17F1, 0x00403D22, 0x00516AEC,
 #pragma endregion
 
 #pragma region v2 .01
@@ -201,7 +201,7 @@ namespace Hooks
 		0x00651AE8, 0x00651B34,
 
 		0x0082B42C, 0x004863BA, 0x004864D7, 0x00831FB0, 0x005AFDA8, 0x005AFE6D, 0x00000000,
-		0x00534C77, 0x0052EC27,
+		0x00534C77, 0x0052EC27, 0x005FE61C, 0x004E5B9A, 0x004041B0, 0x0051C0A8,
 #pragma endregion
 
 #pragma region v2 .01 - Steam
@@ -244,7 +244,7 @@ namespace Hooks
 		0x00651AA8, 0x00651AF4,
 
 		0x0082C40C, 0x00486441, 0x0048656A, 0x00832F98, 0x005B0398, 0x005B043C, 0x00000000,
-		0x0053533C, 0x0052F3E8,
+		0x0053533C, 0x0052F3E8, 0x005FEB31, 0x004E5BA0, 0x00403DFF, 0x0051C6FA,
 #pragma endregion
 
 #pragma region v2 .02
@@ -287,7 +287,7 @@ namespace Hooks
 		0x00650628, 0x00650674,
 
 		0x008293AC, 0x004868AE, 0x004869CB, 0x0082FF38, 0x005AEC65, 0x005AED25, 0x00000000,
-		0x00494AED, 0x0052DB6A,
+		0x005339EE, 0x0052DB6A, 0x005FD0AC, 0x004E584B, 0x00403C7D, 0x0051B292,
 #pragma endregion
 
 #pragma region v2 .02 - Crack
@@ -330,7 +330,7 @@ namespace Hooks
 		0x00651BF8, 0x00651C44,
 
 		0x0082B49C, 0x00486A6F, 0x00486B8C, 0x00832028, 0x005B056E, 0x005B0633, 0x00000000,
-		0x00535147, 0x0052F1E1,
+		0x00535147, 0x0052F1E1, 0x005FE818, 0x004E612B, 0x004041C6, 0x0051C5C1,
 #pragma endregion
 
 #pragma region v3 .00 - Steam
@@ -373,7 +373,7 @@ namespace Hooks
 		0x00659398, 0x006593E4,
 
 		0x00837E7C, 0x004893E9, 0x004894F5, 0x0083AA58, 0x005B3A1E, 0x005B3ADE, 0x00000000,
-		0x0053842D, 0x005325B2,
+		0x0053842D, 0x005325B2, 0x00604AD3, 0x004E9495, 0x00403CB9, 0x0051F84D,
 #pragma endregion
 
 #pragma region v3 .01a
@@ -416,7 +416,7 @@ namespace Hooks
 		0x0065A018, 0x0065A064,
 
 		0x00837ACC, 0x004893B4, 0x004894BC, 0x0083A6A8, 0x005B402C, 0x005B40D5, 0x00000000,
-		0x005384C4, 0x0053260D,
+		0x005384C4, 0x0053260D, 0x00605628, 0x004E9C47, 0x00403F62, 0x0051F785,
 #pragma endregion
 
 #pragma region v3 .01b
@@ -459,7 +459,7 @@ namespace Hooks
 		0x00658A98, 0x00658AE4,
 
 		0x00835A7C, 0x00488F9D, 0x004890A5, 0x00838650, 0x005B32F2, 0x005B33B7, 0x00000000,
-		0x00537ACC, 0x00531B25,
+		0x00537ACC, 0x00531B25, 0x00604135, 0x004E90E2, 0x00403C8B, 0x0051EB96,
 #pragma endregion
 
 #pragma region v1 .10 Editor
@@ -502,7 +502,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00631120, 0x0053EF10, 0x00000000, 0x0044A591,
-		0x00478A74, 0x00000000,
+		0x00478A74, 0x00000000, 0x004D26F7, 0x00415F96, 0x00402FB2, 0x0049D9D4,
 #pragma endregion
 
 #pragma region v1 .41 Editor
@@ -545,7 +545,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00636338, 0x00541F1F, 0x00000000, 0x0044A9C1,
-		0x00479013, 0x0047DD3B,
+		0x00479013, 0x0047DD3B, 0x004D4DAA, 0x004162C4, 0x00402FC8, 0x0049EEE4,
 #pragma endregion
 
 #pragma region v2 .00 Editor - Steam
@@ -588,7 +588,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x0065E520, 0x0055E93A, 0x00000000, 0x0044D014,
-		0x004903E5, 0x00495435,
+		0x004903E5, 0x00495435, 0x004F066C, 0x004166BC, 0x00403156, 0x004B65A9,
 #pragma endregion
 
 #pragma region v2 .01 Editor
@@ -631,7 +631,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x0065CD48, 0x0055DD64, 0x00000000, 0x0044D09A,
-		0x0048FADD, 0x00494AED,
+		0x0048FADD, 0x00494AED, 0x004EFD1B, 0x0041683E, 0x004030B3, 0x004B5C57,
 #pragma endregion
 
 #pragma region v2 .02 Editor
@@ -674,7 +674,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x0065CD70, 0x0055DE84, 0x00000000, 0x0044D09A,
-		0x0048FADD, 0x00494AED,
+		0x0048FADD, 0x00494AED, 0x004EFD1B, 0x0041683E, 0x004030B3, 0x004B5C57,
 #pragma endregion
 
 #pragma region v3 .00 Editor - Steam
@@ -717,7 +717,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00667E44, 0x0056480E, 0x00000000, 0x0044EE74,
-		0x00493001, 0x004980CE,
+		0x00493001, 0x004980CE, 0x004F48C9, 0x004169C0, 0x00403195, 0x004B91B6,
 #pragma endregion
 
 #pragma region v3 .01 Editor
@@ -760,7 +760,7 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00666484, 0x00563C2D, 0x00000000, 0x0044EBD5,
-		0x0049209B, 0x004970EC
+		0x0049209B, 0x004970EC, 0x004F3C0C, 0x0041670E, 0x00403079, 0x004B816B
 #pragma endregion
 	};
 
@@ -4071,8 +4071,7 @@ namespace Hooks
 	DWORD back_0048FAFB;
 	VOID __declspec(naked) hook_0048FADD()
 	{
-		__asm
-		{
+		__asm {
 			push eax
 			call IsAlNumHook
 			xor ecx, ecx 
@@ -4175,8 +4174,7 @@ namespace Hooks
 	DWORD sub_005E9984;
 	VOID __declspec(naked) hook_0062682E()
 	{
-		__asm
-		{
+		__asm {
 			test ecx, ecx
 			jz lbl_exit
 			jmp sub_005E9984
@@ -5750,6 +5748,84 @@ namespace Hooks
 
 #pragma endregion
 
+#pragma region Sort scenarios by title
+	COPYSTRING CopyString;
+	PRINTSTRING PrintString;
+
+	BOOL __stdcall CompareScenes(SceneObject* scene1, SceneObject* scene2)
+	{
+		if (!scene1->isSaveGame && !scene2->isSaveGame)
+		{
+			switch (config.sceneSort)
+			{
+			case SceneBySize: {
+				if (scene1->size != scene2->size)
+					return scene1->size < scene2->size;
+				else
+				{
+					INT res = StrCompareInsensitive(scene1->title.text, scene2->title.text);
+					if (res)
+						return res < 0;
+					else
+						goto lbl_default;
+				}
+			}
+			case SceneByFile:
+				return StrCompareInsensitive(scene1->fileName.text, scene2->fileName.text) < 0;
+
+			default: {
+				INT res = StrCompareInsensitive(scene1->title.text, scene2->title.text);
+				if (res)
+					return res < 0;
+				else
+					goto lbl_default;
+			}
+			}
+		}
+
+	lbl_default:
+		CHAR* ptr1 = StrLastChar(scene1->fileName.text, '\\');
+		CHAR* ptr2 = StrLastChar(scene2->fileName.text, '\\');
+
+		if (!ptr1 || !*(++ptr1))
+			ptr1 = scene1->fileName.text;
+
+		if (!ptr2 || !*(++ptr2))
+			ptr1 = scene1->fileName.text;
+
+		return StrCompareInsensitive(ptr1, ptr2) < 0;
+	}
+
+	DWORD sub_CopyStrObject;
+	StringObject* __stdcall AddScenarioSize(StringObject* dst, StringObject* src)
+	{
+		DWORD* scene = (DWORD*)src - 14;
+
+		const CHAR* pattern = "%SCEN%\\hR;%SIZE%";
+
+		MemoryZero(dst, sizeof(StringObject));
+		CopyString(dst, (CHAR*)pattern, StrLength(pattern));
+
+		PrintString(dst, "%SCEN%", (CHAR*)scene[16]);
+
+		CHAR size[16];
+		StrPrint(size, "%d x %d", scene[18], scene[18]);
+		PrintString(dst, "%SIZE%", (CHAR*)size);
+
+		return dst;
+	}
+
+	VOID __declspec(naked) hook_004E584B()
+	{
+		__asm {
+			pop eax
+			push ecx
+			push eax
+			jmp AddScenarioSize
+		}
+	}
+#pragma endregion
+
 	BOOL __stdcall FakeEntryPoint(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	{
 		return TRUE;
@@ -6148,6 +6224,19 @@ namespace Hooks
 				PatchHook(hooker, hookSpace->locale_fix_2, hook_00494AED);
 				back_00494B09 = hookSpace->locale_fix_2 + 28 + baseOffset;
 			}
+		}
+
+		// Scenarous list
+		{
+			PatchDWord(hooker, hookSpace->scene_sort_hook + 3, (DWORD)CompareScenes); // Sort by title
+
+			sub_CopyStrObject = RedirectCall(hooker, hookSpace->scene_print_hook, hook_004E584B);
+
+			if (!config.isEditor)
+				PatchByte(hooker, hookSpace->scene_print_hook + 13, 0xEB); // remove (Custom) check
+
+			CopyString = (COPYSTRING)(hookSpace->str_copy + baseOffset);
+			PrintString = (PRINTSTRING)(hookSpace->str_print + baseOffset);
 		}
 
 		if (config.hd)

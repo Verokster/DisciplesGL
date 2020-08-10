@@ -262,7 +262,8 @@ namespace Config
 			config.toogle.resources = FALSE;
 			Config::Set(CONFIG_SETTINGS, "ShowResources", config.toogle.resources);
 
-			config.renderer = RendererAuto;
+			Config::Set(CONFIG_SETTINGS, "SceneSort", *(INT*)&config.sceneSort);
+
 			Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&config.renderer);
 
 			config.hd = 1;
@@ -438,7 +439,12 @@ namespace Config
 			config.toogle.banners = (BOOL)Config::Get(CONFIG_SETTINGS, "ShowBanners", FALSE);
 			config.toogle.resources = (BOOL)Config::Get(CONFIG_SETTINGS, "ShowResources", FALSE);
 
-			INT value = Config::Get(CONFIG_WRAPPER, "Renderer", RendererAuto);
+			INT value = Config::Get(CONFIG_SETTINGS, "SceneSort", SceneByTitle);
+			config.sceneSort = *(SceneSort*)&value;
+			if (config.sceneSort < SceneByTitle || config.sceneSort > SceneBySize)
+				config.sceneSort = SceneByTitle;
+
+			value = Config::Get(CONFIG_WRAPPER, "Renderer", RendererAuto);
 			config.renderer = *(RendererType*)&value;
 			if (config.renderer < RendererAuto || config.renderer > RendererGDI)
 				config.renderer = RendererAuto;
