@@ -140,6 +140,7 @@ VOID MidRenderer::Begin()
 						this->program = NULL;
 						this->borderStatus = FALSE;
 						this->backStatus = FALSE;
+						this->zoomStatus = FALSE;
 						this->zoomSize = { 0, 0 };
 						this->isVSync = config.image.vSync;
 
@@ -183,8 +184,9 @@ BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 {
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
 	Size frameSize = stateBuffer->size;
+	BOOL stateChanged = this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack || this->zoomStatus != stateBuffer->isZoomed;
 	FilterState state = this->ddraw->filterState;
-	if (pixelBuffer->Update(lpStateBuffer, ready) || state.flags || this->borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+	if (pixelBuffer->Update(lpStateBuffer, ready) || state.flags || stateChanged)
 	{
 		if (this->isVSync != config.image.vSync)
 		{
@@ -203,7 +205,7 @@ BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 				state.flags = TRUE;
 		}
 
-		if (force || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
+		if (force || state.flags || stateChanged)
 		{
 			switch (state.interpolation)
 			{
@@ -238,6 +240,7 @@ BOOL MidRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 			this->borderStatus = stateBuffer->borders;
 			this->backStatus = stateBuffer->isBack;
+			this->zoomStatus = stateBuffer->isZoomed;
 		}
 
 		if (stateBuffer->isZoomed)

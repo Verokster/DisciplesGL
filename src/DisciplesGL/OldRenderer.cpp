@@ -155,6 +155,7 @@ VOID OldRenderer::Begin()
 
 				this->borderStatus = FALSE;
 				this->backStatus = FALSE;
+				this->zoomStatus = FALSE;
 				this->isVSync = config.image.vSync;
 				if (WGLSwapInterval)
 					WGLSwapInterval(isVSync);
@@ -188,8 +189,9 @@ BOOL OldRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 {
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
 	Size frameSize = stateBuffer->size;
+	BOOL stateChanged = this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack || this->zoomStatus != stateBuffer->isZoomed;
 	FilterState state = this->ddraw->filterState;
-	if (this->pixelBuffer->Update(lpStateBuffer, ready, this->frameCount != 1 || this->convert) || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
+	if (this->pixelBuffer->Update(lpStateBuffer, ready, this->frameCount != 1 || this->convert) || state.flags || stateChanged)
 	{
 		if (this->isVSync != config.image.vSync)
 		{
@@ -212,6 +214,7 @@ BOOL OldRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 		this->borderStatus = stateBuffer->borders;
 		this->backStatus = stateBuffer->isBack;
+		this->zoomStatus = stateBuffer->isZoomed;
 		if (stateBuffer->isBack && config.background.allowed)
 		{
 			DWORD count = this->frameCount;

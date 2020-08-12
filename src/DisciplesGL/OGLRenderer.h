@@ -47,6 +47,7 @@ protected:
 	BOOL isTrueColor;
 	BOOL borderStatus;
 	BOOL backStatus;
+	BOOL zoomStatus;
 	BOOL isVSync;
 	DWORD maxTexSize;
 

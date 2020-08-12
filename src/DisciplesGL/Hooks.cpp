@@ -5758,32 +5758,23 @@ namespace Hooks
 		{
 			switch (config.sceneSort)
 			{
-			case SceneBySize: {
+			case SceneBySizeAsc:
+			case SceneBySizeDesc: {
 				if (scene1->size != scene2->size)
-					return scene1->size < scene2->size;
-				else
-				{
-					INT res = StrCompareInsensitive(scene1->title.text, scene2->title.text);
-					if (res)
-						return res < 0;
-					else
-						goto lbl_default;
-				}
+					return config.sceneSort == SceneBySizeAsc ? scene1->size < scene2->size : scene1->size > scene2->size;
 			}
-			case SceneByFile:
-				return StrCompareInsensitive(scene1->fileName.text, scene2->fileName.text) < 0;
 
-			default: {
+			case SceneByTitle: {
 				INT res = StrCompareInsensitive(scene1->title.text, scene2->title.text);
 				if (res)
 					return res < 0;
-				else
-					goto lbl_default;
 			}
+
+			default:
+				break;
 			}
 		}
 
-	lbl_default:
 		CHAR* ptr1 = StrLastChar(scene1->fileName.text, '\\');
 		CHAR* ptr2 = StrLastChar(scene2->fileName.text, '\\');
 

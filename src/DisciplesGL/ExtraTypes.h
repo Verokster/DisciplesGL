@@ -82,7 +82,7 @@ enum InterpolationFilter : BYTE
 enum UpscalingFilter : BYTE
 {
 	UpscaleNone = 0,
-	UpscaleXRBZ = 1,
+	UpscaleXBRZ = 1,
 	UpscaleScaleHQ = 2,
 	UpscaleXSal = 3,
 	UpscaleEagle = 4,
@@ -172,7 +172,8 @@ enum SceneSort
 {
 	SceneByTitle = 0,
 	SceneByFile = 1,
-	SceneBySize = 2
+	SceneBySizeAsc = 2,
+	SceneBySizeDesc = 3
 };
 
 struct ConfigItems {
@@ -204,7 +205,7 @@ struct ConfigItems {
 	UpdateMode updateMode;
 
 	SceneSort sceneSort;
-
+	
 	struct {
 		BOOL fast;
 		union

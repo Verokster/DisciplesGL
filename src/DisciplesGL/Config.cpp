@@ -239,7 +239,6 @@ namespace Config
 		GAME_HEIGHT_FLOAT = (FLOAT)GAME_HEIGHT;
 
 		config.isExist = !(BOOL)Config::Get(CONFIG_WRAPPER, "ReInit", TRUE);
-		Config::Set(CONFIG_WRAPPER, "ReInit", FALSE);
 
 		if (!config.isExist)
 		{
@@ -256,178 +255,180 @@ namespace Config
 				Config::Set(CONFIG_DISCIPLE, "DisplayMode", config.windowedMode);
 			}
 
-			config.toogle.banners = FALSE;
-			Config::Set(CONFIG_SETTINGS, "ShowBanners", config.toogle.banners);
-
-			config.toogle.resources = FALSE;
-			Config::Set(CONFIG_SETTINGS, "ShowResources", config.toogle.resources);
-
-			Config::Set(CONFIG_SETTINGS, "SceneSort", *(INT*)&config.sceneSort);
-
-			Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&config.renderer);
-
-			config.hd = 1;
-			Config::Set(CONFIG_WRAPPER, "HD", config.hd);
-
-			config.image.aspect = TRUE;
-			Config::Set(CONFIG_WRAPPER, "ImageAspect", config.image.aspect);
-
-			config.image.vSync = TRUE;
-			Config::Set(CONFIG_WRAPPER, "ImageVSync", config.image.vSync);
-
-			config.image.interpolation = InterpolateHermite;
-			Config::Set(CONFIG_WRAPPER, "Interpolation", (INT)config.image.interpolation);
-
-			config.image.upscaling = UpscaleNone;
-			Config::Set(CONFIG_WRAPPER, "Upscaling", (INT)config.image.upscaling);
-
-			config.image.scaleNx = 2;
-			Config::Set(CONFIG_WRAPPER, "ScaleNx", config.image.scaleNx);
-
-			config.image.xSal = 2;
-			Config::Set(CONFIG_WRAPPER, "XSal", config.image.xSal);
-
-			config.image.eagle = 2;
-			Config::Set(CONFIG_WRAPPER, "Eagle", config.image.eagle);
-
-			config.image.scaleHQ = 2;
-			Config::Set(CONFIG_WRAPPER, "ScaleHQ", config.image.scaleHQ);
-
-			config.image.xBRz = 2;
-			Config::Set(CONFIG_WRAPPER, "XBRZ", config.image.xBRz);
-
-			if (!config.version)
 			{
-				BOOL value = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+				config.hd = TRUE;
+				config.image.aspect = TRUE;
+				config.image.vSync = TRUE;
+				config.image.interpolation = InterpolateHermite;
+				config.image.upscaling = UpscaleNone;
+				config.image.scaleNx = 2;
+				config.image.xSal = 2;
+				config.image.eagle = 2;
+				config.image.scaleHQ = 2;
+				config.image.xBRz = 2;
 
-				config.borders.type = value ? BordersClassic : BordersNone;
-				Config::Set(CONFIG_WRAPPER, "Borders", *(INT*)&config.borders.type);
+				if (!config.version)
+				{
+					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+					Config::Set(CONFIG_DISCIPLE, "EnableZoom", TRUE);
 
-				config.background.enabled = value;
-				Config::Set(CONFIG_WRAPPER, "Background", config.background.enabled);
+					config.borders.type = BordersClassic;
+					config.background.enabled = TRUE;
+					config.battle.mirror = TRUE;
+				}
 
 				config.zoom.enabled = TRUE;
-				Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.zoom.enabled);
+				config.zoom.value = 100;
+
+				config.speed.index = 5;
+				config.speed.value = 0.1f * (config.speed.index + 10);
+				config.speed.enabled = TRUE;
+
+				config.snapshot.type = ImagePNG;
+				config.snapshot.level = 9;
+				config.locales.current.id = GetUserDefaultLCID();
+				config.msgTimeScale.time = 15;
+				config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
+				config.updateMode = UpdateCPP;
+				config.mouseScroll.lButton = config.mouseScroll.mButton = TRUE;
+
+				CHAR* buffer = (CHAR*)MemoryAlloc(8192);
+				if (buffer)
+				{
+					CHAR* ptr = buffer;
+					ptr = Add(ptr, "ReInit", FALSE, "Reset all wrapper configurations (0 - no; 1 - yes)");
+
+					ptr = Add(ptr, "ShowBanners", config.toogle.banners, "Show in-game banners for troops (0 - no 'default'; 1 - yes)");
+					ptr = Add(ptr, "ShowResources", config.toogle.resources, "Show resources panel (0 - no 'default'; 1 - yes)");
+					ptr = Add(ptr, "SceneSort", *(INT*)&config.sceneSort, "Sort scenarios (0 - by title 'default'; 1 - by file name; 2 - by map size 'ascending'; 3 - by map size 'descending')");
+					ptr = Add(ptr, "Renderer", *(INT*)&config.renderer, "Image renderer (0 - auto 'default'; 1 - opengl 1.1; 2 - opengl 2.0; 3 - opengl 3.0; 4 - windows gdi)");
+					ptr = Add(ptr, "HD", config.hd, "Enables HD options, like 32 bpp rendering and different resolutions support (0 - no; 1 - yes 'default')");
+					
+					if (config.version)
+					{
+						ptr = Add(ptr, "DisplayWidth", GAME_WIDTH, "Image resolution width (640 - min; 2048 - max)");
+						ptr = Add(ptr, "DisplayHeight", GAME_HEIGHT, "Image resolution height (480 - min; 1024 - max)");
+					}
+					else
+					{
+						ptr = Add(ptr, "DisplayWidth", GAME_WIDTH, "Image resolution width (800 - min)");
+						ptr = Add(ptr, "DisplayHeight", GAME_HEIGHT, "Image resolution height (600 - min)");
+					}
+					
+					ptr = Add(ptr, "ImageAspect", config.image.aspect, "Keep image aspect ratio (0 - no; 1 - yes 'default')");
+					ptr = Add(ptr, "ImageVSync", config.image.vSync, "Enables vertical synchronization (0 - no; 1 - yes 'default')");
+					ptr = Add(ptr, "Interpolation", (INT)config.image.interpolation, "Image interpolation filter (0 - none; 1 - linear; 2 - hermite 'default'; 3 - cubic; 4 - lanczos)");
+					ptr = Add(ptr, "Upscaling", (INT)config.image.upscaling, "Image upscaling filter (0 - none 'default'; 1 - xbrz; 2 - scalehq; 3 - xsal; 4 - eagle; 5 - scalenx)");
+					ptr = Add(ptr, "ScaleNx", config.image.scaleNx, "ScaleNx scale factor (2 'default'; 3)");
+					ptr = Add(ptr, "XSal", config.image.xSal, "XSal scale factor (2 'default')");
+					ptr = Add(ptr, "Eagle", config.image.eagle, "Eagle scale factor (2 'default')");
+					ptr = Add(ptr, "ScaleHQ", config.image.scaleHQ, "ScaleHQ scale factor (2 'default')");
+					ptr = Add(ptr, "XBRZ", config.image.xBRz, "xBRZ scale factor (2 'default'; 3; 4; 5; 6)");
+
+					if (!config.version)
+					{
+						ptr = Add(ptr, "Borders", *(INT*)&config.borders.type, "Enables borders for in-game windows (0 - no; 1 - classic style 'default', 2 - alternative style)");
+						ptr = Add(ptr, "Background", config.background.enabled, "Enables background for in-game windows (0 - no; 1 - yes 'default')");
+					}
+
+					ptr = Add(ptr, "EnableZoom", config.zoom.enabled, "Enables in-game windows zoom (0 - no; 1 - yes 'default')");
+					ptr = Add(ptr, "ZoomFactor", *(INT*)&config.zoom.value, "Zoom factor for in-game windows (0 - 100 'default')");
+					ptr = Add(ptr, "FullScreenMode", config.borderless.mode, "Full screen window mode (0 - exclusive 'default'; 1 - borderless)");
+					ptr = Add(ptr, "GameSpeed", config.speed.index, "Animation speed (1 - ..., 5 - 1.5x 'deafult'");
+					ptr = Add(ptr, "SpeedEnabled", config.speed.enabled, "Enables animation speed (0 - no; 1 - yes 'default')");
+					ptr = Add(ptr, "AlwaysActive", config.alwaysActive, "Game window is always active (0 - no 'default'; 1 - yes)");
+					ptr = Add(ptr, "ColdCPU", config.coldCPU, "Decrease CPU usage for OpenGL renderer (0 - no 'default'; 1 - yes)");
+
+					if (!config.version)
+					{
+						ptr = Add(ptr, "WideBattle", config.wide.allowed, "Makes window battle wider. Depends on image aspect ratio (0 - no; 1 - yes)");
+						ptr = Add(ptr, "MirrorBattle", config.battle.mirror, "Allows mirrored bacgrounds for battles (0 - no; 1 - yes 'default')");
+					}
+
+					ptr = Add(ptr, "ScreenshotType", *(INT*)&config.snapshot.type, "Screenshots type (0 - bmp; 1 - png 'default')");
+					ptr = Add(ptr, "ScreenshotLevel", *(INT*)&config.snapshot.level, "Compression level for PNG screenshots (0 - 9, 5 - 'default')");
+					ptr = Add(ptr, "Locale", *(INT*)&config.locales.current.id, "Locale id (by default is determined by system locale)");
+					ptr = Add(ptr, "MessageTimeout", config.msgTimeScale.time, "In-game messages timeout in seconds (15 'default')");
+					ptr = Add(ptr, "UpdateMode", (INT)config.updateMode, "Image comparison. Affects on rendering performance (0 - none; 1 - classic 'default'; 2 - alternative)");
+					ptr = Add(ptr, "FastAI", config.ai.fast, "Increases AI performance, but may cause an unexpected game crash (0 - no 'default'; 1 - yes)");
+					ptr = Add(ptr, "MouseScroll", 3, "Allows map scrolling by pressing mouse button (0 - no; 1 - left button; 2 - middle button; 3 - both buttons 'default')");
+
+					*ptr = NULL;
+
+					WritePrivateProfileSection(CONFIG_WRAPPER, buffer + (*(WORD*)buffer == '\r\n' ? 2 : 0), config.file);
+					MemoryFree(buffer);
+				}
 			}
-			else
+
 			{
-				config.zoom.enabled = TRUE;
-				Config::Set(CONFIG_WRAPPER, "EnableZoom", config.zoom.enabled);
+				config.keys.imageFilter = 3;
+				Config::Set(CONFIG_KEYS, "ImageFilter", config.keys.imageFilter);
+
+				config.keys.windowedMode = 4;
+				Config::Set(CONFIG_KEYS, "WindowedMode", config.keys.windowedMode);
+
+				Config::Set(CONFIG_KEYS, "AspectRatio", "");
+				Config::Set(CONFIG_KEYS, "VSync", "");
+
+				if (!config.version)
+					Config::Set(CONFIG_KEYS, "ZoomImage", "");
+
+				config.keys.speedToggle = 5;
+				Config::Set(CONFIG_KEYS, "SpeedToggle", config.keys.speedToggle);
+
+				config.keys.snapshot = 12;
+				Config::Set(CONFIG_KEYS, "Screenshot", config.keys.snapshot);
 			}
 
-			config.keys.imageFilter = 3;
-			Config::Set(CONFIG_KEYS, "ImageFilter", config.keys.imageFilter);
-
-			config.keys.windowedMode = 4;
-			Config::Set(CONFIG_KEYS, "WindowedMode", config.keys.windowedMode);
-
-			Config::Set(CONFIG_KEYS, "AspectRatio", "");
-			Config::Set(CONFIG_KEYS, "VSync", "");
-
-			if (!config.version)
-				Config::Set(CONFIG_KEYS, "ZoomImage", "");
-
-			config.keys.speedToggle = 5;
-			Config::Set(CONFIG_KEYS, "SpeedToggle", config.keys.speedToggle);
-
-			config.keys.snapshot = 12;
-			Config::Set(CONFIG_KEYS, "Screenshot", config.keys.snapshot);
-
-			Config::Set(CONFIG_WRAPPER, "BorderlessMode", config.borderless.mode);
-
-			config.speed.index = 5;
-			config.speed.value = 0.1f * (config.speed.index + 10);
-			Config::Set(CONFIG_WRAPPER, "GameSpeed", config.speed.index);
-
-			config.speed.enabled = TRUE;
-			Config::Set(CONFIG_WRAPPER, "SpeedEnabled", config.speed.enabled);
-
-			config.alwaysActive = FALSE;
-			Config::Set(CONFIG_WRAPPER, "AlwaysActive", config.alwaysActive);
-
-			Config::Set(CONFIG_WRAPPER, "ColdCPU", config.coldCPU);
-
-			if (!config.version)
 			{
-				config.wide.allowed = FALSE;
-				Config::Set(CONFIG_WRAPPER, "WideBattle", config.wide.allowed);
+				config.colors.active.hueShift = 0.5f;
+				config.colors.active.saturation = 0.5f;
+				Config::Set(CONFIG_COLORS, "HueSat", 0x01F401F4);
 
-				config.battle.mirror = TRUE;
-				Config::Set(CONFIG_WRAPPER, "MirrorBattle", config.battle.mirror);
+				config.colors.active.input.left.rgb = 0.0f;
+				config.colors.active.input.right.rgb = 1.0f;
+				Config::Set(CONFIG_COLORS, "RgbInput", 0x03E80000);
+
+				config.colors.active.input.left.red = 0.0f;
+				config.colors.active.input.right.red = 1.0f;
+				Config::Set(CONFIG_COLORS, "RedInput", 0x03E80000);
+
+				config.colors.active.input.left.green = 0.0f;
+				config.colors.active.input.right.green = 1.0f;
+				Config::Set(CONFIG_COLORS, "GreenInput", 0x03E80000);
+
+				config.colors.active.input.left.blue = 0.0f;
+				config.colors.active.input.right.blue = 1.0f;
+				Config::Set(CONFIG_COLORS, "BlueInput", 0x03E80000);
+
+				config.colors.active.gamma.rgb = 0.5f;
+				Config::Set(CONFIG_COLORS, "RgbGamma", 500);
+
+				config.colors.active.gamma.red = 0.5f;
+				Config::Set(CONFIG_COLORS, "RedGamma", 500);
+
+				config.colors.active.gamma.green = 0.5f;
+				Config::Set(CONFIG_COLORS, "GreenGamma", 500);
+
+				config.colors.active.gamma.blue = 0.5f;
+				Config::Set(CONFIG_COLORS, "BlueGamma", 500);
+
+				config.colors.active.output.left.rgb = 0.0f;
+				config.colors.active.output.right.rgb = 1.0f;
+				Config::Set(CONFIG_COLORS, "RgbOutput", 0x03E80000);
+
+				config.colors.active.output.left.red = 0.0f;
+				config.colors.active.output.right.red = 1.0f;
+				Config::Set(CONFIG_COLORS, "RedOutput", 0x03E80000);
+
+				config.colors.active.output.left.green = 0.0f;
+				config.colors.active.output.right.green = 1.0f;
+				Config::Set(CONFIG_COLORS, "GreenOutput", 0x03E80000);
+
+				config.colors.active.output.left.blue = 0.0f;
+				config.colors.active.output.right.blue = 1.0f;
+				Config::Set(CONFIG_COLORS, "BlueOutput", 0x03E80000);
 			}
-
-			config.snapshot.type = ImagePNG;
-			Config::Set(CONFIG_WRAPPER, "ScreenshotType", *(INT*)&config.snapshot.type);
-
-			config.snapshot.level = 9;
-			Config::Set(CONFIG_WRAPPER, "ScreenshotLevel", *(INT*)&config.snapshot.level);
-
-			config.zoom.value = 100;
-			Config::Set(CONFIG_WRAPPER, "ZoomFactor", *(INT*)&config.zoom.value);
-
-			config.locales.current.id = GetUserDefaultLCID();
-			Config::Set(CONFIG_WRAPPER, "Locale", *(INT*)&config.locales.current.id);
-
-			config.msgTimeScale.time = 15;
-			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
-			Config::Set(CONFIG_WRAPPER, "MessageTimeout", config.msgTimeScale.time);
-
-			config.updateMode = UpdateCPP;
-			Config::Set(CONFIG_WRAPPER, "UpdateMode", (INT)config.updateMode);
-
-			config.ai.fast = FALSE;
-			Config::Set(CONFIG_WRAPPER, "FastAI", config.ai.fast);
-
-			config.mouseScroll.lButton = config.mouseScroll.mButton = TRUE;
-			Config::Set(CONFIG_WRAPPER, "MouseScroll", 3);
-
-			config.colors.active.hueShift = 0.5f;
-			config.colors.active.saturation = 0.5f;
-			Config::Set(CONFIG_COLORS, "HueSat", 0x01F401F4);
-
-			config.colors.active.input.left.rgb = 0.0f;
-			config.colors.active.input.right.rgb = 1.0f;
-			Config::Set(CONFIG_COLORS, "RgbInput", 0x03E80000);
-
-			config.colors.active.input.left.red = 0.0f;
-			config.colors.active.input.right.red = 1.0f;
-			Config::Set(CONFIG_COLORS, "RedInput", 0x03E80000);
-
-			config.colors.active.input.left.green = 0.0f;
-			config.colors.active.input.right.green = 1.0f;
-			Config::Set(CONFIG_COLORS, "GreenInput", 0x03E80000);
-
-			config.colors.active.input.left.blue = 0.0f;
-			config.colors.active.input.right.blue = 1.0f;
-			Config::Set(CONFIG_COLORS, "BlueInput", 0x03E80000);
-
-			config.colors.active.gamma.rgb = 0.5f;
-			Config::Set(CONFIG_COLORS, "RgbGamma", 500);
-
-			config.colors.active.gamma.red = 0.5f;
-			Config::Set(CONFIG_COLORS, "RedGamma", 500);
-
-			config.colors.active.gamma.green = 0.5f;
-			Config::Set(CONFIG_COLORS, "GreenGamma", 500);
-
-			config.colors.active.gamma.blue = 0.5f;
-			Config::Set(CONFIG_COLORS, "BlueGamma", 500);
-
-			config.colors.active.output.left.rgb = 0.0f;
-			config.colors.active.output.right.rgb = 1.0f;
-			Config::Set(CONFIG_COLORS, "RgbOutput", 0x03E80000);
-
-			config.colors.active.output.left.red = 0.0f;
-			config.colors.active.output.right.red = 1.0f;
-			Config::Set(CONFIG_COLORS, "RedOutput", 0x03E80000);
-
-			config.colors.active.output.left.green = 0.0f;
-			config.colors.active.output.right.green = 1.0f;
-			Config::Set(CONFIG_COLORS, "GreenOutput", 0x03E80000);
-
-			config.colors.active.output.left.blue = 0.0f;
-			config.colors.active.output.right.blue = 1.0f;
-			Config::Set(CONFIG_COLORS, "BlueOutput", 0x03E80000);
 		}
 		else
 		{
@@ -436,286 +437,292 @@ namespace Config
 
 			config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", TRUE);
 
-			config.toogle.banners = (BOOL)Config::Get(CONFIG_SETTINGS, "ShowBanners", FALSE);
-			config.toogle.resources = (BOOL)Config::Get(CONFIG_SETTINGS, "ShowResources", FALSE);
-
-			INT value = Config::Get(CONFIG_SETTINGS, "SceneSort", SceneByTitle);
-			config.sceneSort = *(SceneSort*)&value;
-			if (config.sceneSort < SceneByTitle || config.sceneSort > SceneBySize)
-				config.sceneSort = SceneByTitle;
-
-			value = Config::Get(CONFIG_WRAPPER, "Renderer", RendererAuto);
-			config.renderer = *(RendererType*)&value;
-			if (config.renderer < RendererAuto || config.renderer > RendererGDI)
-				config.renderer = RendererAuto;
-
-			config.hd = (BOOL)Config::Get(CONFIG_WRAPPER, "HD", TRUE);
-
-			config.image.aspect = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageAspect", TRUE);
-			config.image.vSync = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageVSync", TRUE);
-
-			value = Config::Get(CONFIG_WRAPPER, "Interpolation", InterpolateHermite);
-			config.image.interpolation = *(InterpolationFilter*)&value;
-			if (config.image.interpolation < InterpolateNearest || config.image.interpolation > InterpolateLanczos)
-				config.image.interpolation = InterpolateHermite;
-
-			value = Config::Get(CONFIG_WRAPPER, "Upscaling", UpscaleNone);
-			config.image.upscaling = *(UpscalingFilter*)&value;
-			if (config.image.upscaling < UpscaleNone || config.image.upscaling > UpscaleScaleNx)
-				config.image.upscaling = UpscaleNone;
-
-			config.image.scaleNx = Config::Get(CONFIG_WRAPPER, "ScaleNx", 2);
-			if (config.image.scaleNx != 2 && config.image.scaleNx != 3)
-				config.image.scaleNx = 2;
-
-			config.image.xSal = Config::Get(CONFIG_WRAPPER, "XSal", 2);
-			if (config.image.xSal != 2)
-				config.image.xSal = 2;
-
-			config.image.eagle = Config::Get(CONFIG_WRAPPER, "Eagle", 2);
-			if (config.image.eagle != 2)
-				config.image.eagle = 2;
-
-			config.image.scaleHQ = Config::Get(CONFIG_WRAPPER, "ScaleHQ", 2);
-			if (config.image.scaleHQ != 2 && config.image.scaleHQ != 4)
-				config.image.scaleHQ = 2;
-
-			config.image.xBRz = Config::Get(CONFIG_WRAPPER, "XBRZ", 2);
-			if (config.image.xBRz < 2 || config.image.xBRz > 6)
-				config.image.xBRz = 6;
-
-			if (!config.version)
 			{
-				BOOL value = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
-				config.borders.type = (BordersType)Config::Get(CONFIG_WRAPPER, "Borders", value ? BordersClassic : BordersNone);
-				config.background.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "Background", value);
+				config.toogle.banners = (BOOL)Config::Get(CONFIG_WRAPPER, "ShowBanners", FALSE);
+				config.toogle.resources = (BOOL)Config::Get(CONFIG_WRAPPER, "ShowResources", FALSE);
 
-				config.zoom.enabled = (BOOL)Config::Get(CONFIG_DISCIPLE, "EnableZoom", TRUE);
-			}
-			else
-				config.zoom.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "EnableZoom", TRUE);
+				INT value = Config::Get(CONFIG_WRAPPER, "SceneSort", SceneByTitle);
+				config.sceneSort = *(SceneSort*)&value;
+				if (config.sceneSort < SceneByTitle || config.sceneSort > SceneBySizeDesc)
+					config.sceneSort = SceneByTitle;
 
-			// F1 - reserved for "About"
-			CHAR buffer[20];
-			if (Config::Get(CONFIG_KEYS, "ImageFilter", "", buffer, sizeof(buffer)))
-			{
-				value = Config::Get(CONFIG_KEYS, "ImageFilter", 0);
-				config.keys.imageFilter = LOBYTE(value);
-				if (config.keys.imageFilter > 1 && config.keys.imageFilter > 24)
-					config.keys.imageFilter = 0;
-			}
+				value = Config::Get(CONFIG_WRAPPER, "Renderer", RendererAuto);
+				config.renderer = *(RendererType*)&value;
+				if (config.renderer < RendererAuto || config.renderer > RendererGDI)
+					config.renderer = RendererAuto;
 
-			if (Config::Get(CONFIG_KEYS, "WindowedMode", "", buffer, sizeof(buffer)))
-			{
-				value = Config::Get(CONFIG_KEYS, "WindowedMode", 0);
-				config.keys.windowedMode = LOBYTE(value);
-				if (config.keys.windowedMode > 1 && config.keys.windowedMode > 24)
-					config.keys.windowedMode = 0;
-			}
+				config.hd = (BOOL)Config::Get(CONFIG_WRAPPER, "HD", TRUE);
 
-			if (Config::Get(CONFIG_KEYS, "AspectRatio", "", buffer, sizeof(buffer)))
-			{
-				value = Config::Get(CONFIG_KEYS, "AspectRatio", 0);
-				config.keys.aspectRatio = LOBYTE(value);
-				if (config.keys.aspectRatio > 1 && config.keys.aspectRatio > 24)
-					config.keys.aspectRatio = 0;
-			}
+				config.image.aspect = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageAspect", TRUE);
+				config.image.vSync = (BOOL)Config::Get(CONFIG_WRAPPER, "ImageVSync", TRUE);
 
-			if (Config::Get(CONFIG_KEYS, "VSync", "", buffer, sizeof(buffer)))
-			{
-				value = Config::Get(CONFIG_KEYS, "VSync", 0);
-				config.keys.vSync = LOBYTE(value);
-				if (config.keys.vSync > 1 && config.keys.vSync > 24)
-					config.keys.vSync = 0;
-			}
+				value = Config::Get(CONFIG_WRAPPER, "Interpolation", InterpolateHermite);
+				config.image.interpolation = *(InterpolationFilter*)&value;
+				if (config.image.interpolation < InterpolateNearest || config.image.interpolation > InterpolateLanczos)
+					config.image.interpolation = InterpolateHermite;
 
-			if (!config.version)
-			{
-				if (Config::Get(CONFIG_KEYS, "ZoomImage", "", buffer, sizeof(buffer)))
+				value = Config::Get(CONFIG_WRAPPER, "Upscaling", UpscaleNone);
+				config.image.upscaling = *(UpscalingFilter*)&value;
+				if (config.image.upscaling < UpscaleNone || config.image.upscaling > UpscaleScaleNx)
+					config.image.upscaling = UpscaleNone;
+
+				config.image.scaleNx = Config::Get(CONFIG_WRAPPER, "ScaleNx", 2);
+				if (config.image.scaleNx != 2 && config.image.scaleNx != 3)
+					config.image.scaleNx = 2;
+
+				config.image.xSal = Config::Get(CONFIG_WRAPPER, "XSal", 2);
+				if (config.image.xSal != 2)
+					config.image.xSal = 2;
+
+				config.image.eagle = Config::Get(CONFIG_WRAPPER, "Eagle", 2);
+				if (config.image.eagle != 2)
+					config.image.eagle = 2;
+
+				config.image.scaleHQ = Config::Get(CONFIG_WRAPPER, "ScaleHQ", 2);
+				if (config.image.scaleHQ != 2 && config.image.scaleHQ != 4)
+					config.image.scaleHQ = 2;
+
+				config.image.xBRz = Config::Get(CONFIG_WRAPPER, "XBRZ", 2);
+				if (config.image.xBRz < 2 || config.image.xBRz > 6)
+					config.image.xBRz = 6;
+
+				if (!config.version)
 				{
-					value = Config::Get(CONFIG_KEYS, "ZoomImage", 0);
-					config.keys.zoomImage = LOBYTE(value);
-					if (config.keys.zoomImage > 1 && config.keys.zoomImage > 24)
-						config.keys.zoomImage = 0;
+					BOOL value = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
+					config.borders.type = (BordersType)Config::Get(CONFIG_WRAPPER, "Borders", value ? BordersClassic : BordersNone);
+					config.background.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "Background", value);
+
+					config.zoom.enabled = (BOOL)Config::Get(CONFIG_DISCIPLE, "EnableZoom", TRUE);
+				}
+				else
+					config.zoom.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "EnableZoom", TRUE);
+
+				config.borderless.real = config.borderless.mode = (BOOL)Config::Get(CONFIG_WRAPPER, "FullScreenMode", FALSE);
+
+				value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
+				if (value < 1)
+					value = 5;
+				config.speed.index = *(DWORD*)&value;
+				config.speed.value = 0.1f * (config.speed.index + 10);
+
+				config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", TRUE);
+
+				config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
+				config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
+
+				if (!config.version)
+				{
+					config.wide.allowed = (BOOL)Config::Get(CONFIG_WRAPPER, "WideBattle", FALSE);
+					config.battle.mirror = (BOOL)Config::Get(CONFIG_WRAPPER, "MirrorBattle", TRUE);
+				}
+
+				value = Config::Get(CONFIG_WRAPPER, "ScreenshotType", ImagePNG);
+				config.snapshot.type = *(ImageType*)&value;
+				if (config.snapshot.type < ImageBMP || config.snapshot.type > ImagePNG)
+					config.snapshot.type = ImagePNG;
+
+				value = Config::Get(CONFIG_WRAPPER, "ScreenshotLevel", 9);
+				config.snapshot.level = *(DWORD*)&value;
+				if (config.snapshot.level < 1 || config.snapshot.level > 9)
+					config.snapshot.level = 9;
+
+				value = Config::Get(CONFIG_WRAPPER, "ZoomFactor", 100);
+				config.zoom.value = *(DWORD*)&value;
+				if (!config.zoom.value || config.zoom.value > 100)
+					config.zoom.value = 100;
+
+				config.locales.current.id = (LCID)Config::Get(CONFIG_WRAPPER, "Locale", (INT)GetUserDefaultLCID());
+
+				value = Config::Get(CONFIG_WRAPPER, "MessageTimeout", 15);
+				if (value < 1)
+					value = 1;
+
+				config.msgTimeScale.time = *(DWORD*)&value;
+				config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
+
+				config.updateMode = (UpdateMode)Config::Get(CONFIG_WRAPPER, "UpdateMode", (INT)UpdateCPP);
+				if (config.updateMode < UpdateNone || config.updateMode > UpdateASM)
+					config.updateMode = UpdateCPP;
+
+				if (!config.isEditor)
+					config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
+
+				value = Config::Get(CONFIG_WRAPPER, "MouseScroll", 3);
+				if (value < 0 || value > 3)
+					value = 3;
+
+				config.mouseScroll.lButton = value & 1;
+				config.mouseScroll.mButton = value & 2;
+			}
+
+			{
+				// F1 - reserved for "About"
+				CHAR buffer[20];
+				if (Config::Get(CONFIG_KEYS, "ImageFilter", "", buffer, sizeof(buffer)))
+				{
+					INT value = Config::Get(CONFIG_KEYS, "ImageFilter", 0);
+					config.keys.imageFilter = LOBYTE(value);
+					if (config.keys.imageFilter > 1 && config.keys.imageFilter > 24)
+						config.keys.imageFilter = 0;
+				}
+
+				if (Config::Get(CONFIG_KEYS, "WindowedMode", "", buffer, sizeof(buffer)))
+				{
+					INT value = Config::Get(CONFIG_KEYS, "WindowedMode", 0);
+					config.keys.windowedMode = LOBYTE(value);
+					if (config.keys.windowedMode > 1 && config.keys.windowedMode > 24)
+						config.keys.windowedMode = 0;
+				}
+
+				if (Config::Get(CONFIG_KEYS, "AspectRatio", "", buffer, sizeof(buffer)))
+				{
+					INT value = Config::Get(CONFIG_KEYS, "AspectRatio", 0);
+					config.keys.aspectRatio = LOBYTE(value);
+					if (config.keys.aspectRatio > 1 && config.keys.aspectRatio > 24)
+						config.keys.aspectRatio = 0;
+				}
+
+				if (Config::Get(CONFIG_KEYS, "VSync", "", buffer, sizeof(buffer)))
+				{
+					INT value = Config::Get(CONFIG_KEYS, "VSync", 0);
+					config.keys.vSync = LOBYTE(value);
+					if (config.keys.vSync > 1 && config.keys.vSync > 24)
+						config.keys.vSync = 0;
+				}
+
+				if (!config.version)
+				{
+					if (Config::Get(CONFIG_KEYS, "ZoomImage", "", buffer, sizeof(buffer)))
+					{
+						INT value = Config::Get(CONFIG_KEYS, "ZoomImage", 0);
+						config.keys.zoomImage = LOBYTE(value);
+						if (config.keys.zoomImage > 1 && config.keys.zoomImage > 24)
+							config.keys.zoomImage = 0;
+					}
+				}
+
+				if (Config::Get(CONFIG_KEYS, "SpeedToggle", "", buffer, sizeof(buffer)))
+				{
+					INT value = Config::Get(CONFIG_KEYS, "SpeedToggle", 0);
+					config.keys.speedToggle = LOBYTE(value);
+					if (config.keys.speedToggle > 1 && config.keys.speedToggle > 24)
+						config.keys.speedToggle = 0;
+				}
+
+				if (Config::Get(CONFIG_KEYS, "Screenshot", "", buffer, sizeof(buffer)))
+				{
+					INT value = Config::Get(CONFIG_KEYS, "Screenshot", 0);
+					config.keys.snapshot = LOBYTE(value);
+					if (config.keys.snapshot > 1 && config.keys.snapshot > 24)
+						config.keys.snapshot = 0;
 				}
 			}
 
-			if (Config::Get(CONFIG_KEYS, "SpeedToggle", "", buffer, sizeof(buffer)))
 			{
-				value = Config::Get(CONFIG_KEYS, "SpeedToggle", 0);
-				config.keys.speedToggle = LOBYTE(value);
-				if (config.keys.speedToggle > 1 && config.keys.speedToggle > 24)
-					config.keys.speedToggle = 0;
-			}
+				INT value = Config::Get(CONFIG_COLORS, "HueSat", 0x01F401F4);
+				config.colors.active.hueShift = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.active.saturation = 0.001f * min(1000, max(0, HIWORD(value)));
 
-			if (Config::Get(CONFIG_KEYS, "Screenshot", "", buffer, sizeof(buffer)))
-			{
-				value = Config::Get(CONFIG_KEYS, "Screenshot", 0);
-				config.keys.snapshot = LOBYTE(value);
-				if (config.keys.snapshot > 1 && config.keys.snapshot > 24)
-					config.keys.snapshot = 0;
-			}
+				value = Config::Get(CONFIG_COLORS, "RgbInput", 0x03E80000);
+				if (LOWORD(value) < HIWORD(value))
+				{
+					config.colors.active.input.left.rgb = 0.001f * min(1000, max(0, LOWORD(value)));
+					config.colors.active.input.right.rgb = 0.001f * min(1000, max(0, HIWORD(value)));
+				}
+				else
+				{
+					config.colors.active.input.left.rgb = 0.0f;
+					config.colors.active.input.right.rgb = 1.0f;
+				}
 
-			config.borderless.real = config.borderless.mode = (BOOL)Config::Get(CONFIG_WRAPPER, "BorderlessMode", FALSE);
+				value = Config::Get(CONFIG_COLORS, "RedInput", 0x03E80000);
+				if (LOWORD(value) < HIWORD(value))
+				{
+					config.colors.active.input.left.red = 0.001f * min(1000, max(0, LOWORD(value)));
+					config.colors.active.input.right.red = 0.001f * min(1000, max(0, HIWORD(value)));
+				}
+				else
+				{
+					config.colors.active.input.left.red = 0.0f;
+					config.colors.active.input.right.red = 1.0f;
+				}
 
-			value = Config::Get(CONFIG_WRAPPER, "GameSpeed", 5);
-			if (value < 1)
-				value = 5;
-			config.speed.index = *(DWORD*)&value;
-			config.speed.value = 0.1f * (config.speed.index + 10);
+				value = Config::Get(CONFIG_COLORS, "GreenInput", 0x03E80000);
+				if (LOWORD(value) < HIWORD(value))
+				{
+					config.colors.active.input.left.green = 0.001f * min(1000, max(0, LOWORD(value)));
+					config.colors.active.input.right.green = 0.001f * min(1000, max(0, HIWORD(value)));
+				}
+				else
+				{
+					config.colors.active.input.left.green = 0.0f;
+					config.colors.active.input.right.green = 1.0f;
+				}
 
-			config.speed.enabled = (BOOL)Config::Get(CONFIG_WRAPPER, "SpeedEnabled", TRUE);
+				value = Config::Get(CONFIG_COLORS, "BlueInput", 0x03E80000);
+				if (LOWORD(value) < HIWORD(value))
+				{
+					config.colors.active.input.left.blue = 0.001f * min(1000, max(0, LOWORD(value)));
+					config.colors.active.input.right.blue = 0.001f * min(1000, max(0, HIWORD(value)));
+				}
+				else
+				{
+					config.colors.active.input.left.blue = 0.0f;
+					config.colors.active.input.right.blue = 1.0f;
+				}
 
-			config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
-			config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
+				config.colors.active.gamma.rgb = 0.001f * min(1000, max(0, Config::Get(CONFIG_COLORS, "RgbGamma", 500)));
+				config.colors.active.gamma.red = 0.001f * min(1000, max(0, Config::Get(CONFIG_COLORS, "RedGamma", 500)));
+				config.colors.active.gamma.green = 0.001f * min(1000, max(0, Config::Get(CONFIG_COLORS, "GreenGamma", 500)));
+				config.colors.active.gamma.blue = 0.001f * min(1000, max(0, Config::Get(CONFIG_COLORS, "BlueGamma", 500)));
 
-			if (!config.version)
-			{
-				config.wide.allowed = (BOOL)Config::Get(CONFIG_WRAPPER, "WideBattle", FALSE);
-				config.battle.mirror = (BOOL)Config::Get(CONFIG_WRAPPER, "MirrorBattle", TRUE);
-			}
+				value = Config::Get(CONFIG_COLORS, "RgbOutput", 0x03E80000);
+				if (LOWORD(value) < HIWORD(value))
+				{
+					config.colors.active.output.left.rgb = 0.001f * min(1000, max(0, LOWORD(value)));
+					config.colors.active.output.right.rgb = 0.001f * min(1000, max(0, HIWORD(value)));
+				}
+				else
+				{
+					config.colors.active.output.left.rgb = 0.0f;
+					config.colors.active.output.right.rgb = 1.0f;
+				}
 
-			value = Config::Get(CONFIG_WRAPPER, "ScreenshotType", ImagePNG);
-			config.snapshot.type = *(ImageType*)&value;
-			if (config.snapshot.type < ImageBMP || config.snapshot.type > ImagePNG)
-				config.snapshot.type = ImagePNG;
+				value = Config::Get(CONFIG_COLORS, "RedOutput", 0x03E80000);
+				if (LOWORD(value) < HIWORD(value))
+				{
+					config.colors.active.output.left.red = 0.001f * min(1000, max(0, LOWORD(value)));
+					config.colors.active.output.right.red = 0.001f * min(1000, max(0, HIWORD(value)));
+				}
+				else
+				{
+					config.colors.active.output.left.red = 0.0f;
+					config.colors.active.output.right.red = 1.0f;
+				}
 
-			value = Config::Get(CONFIG_WRAPPER, "ScreenshotLevel", 9);
-			config.snapshot.level = *(DWORD*)&value;
-			if (config.snapshot.level < 1 || config.snapshot.level > 9)
-				config.snapshot.level = 9;
+				value = Config::Get(CONFIG_COLORS, "GreenOutput", 0x03E80000);
+				if (LOWORD(value) < HIWORD(value))
+				{
+					config.colors.active.output.left.green = 0.001f * min(1000, max(0, LOWORD(value)));
+					config.colors.active.output.right.green = 0.001f * min(1000, max(0, HIWORD(value)));
+				}
+				else
+				{
+					config.colors.active.output.left.green = 0.0f;
+					config.colors.active.output.right.green = 1.0f;
+				}
 
-			value = Config::Get(CONFIG_WRAPPER, "ZoomFactor", 100);
-			config.zoom.value = *(DWORD*)&value;
-			if (!config.zoom.value || config.zoom.value > 100)
-				config.zoom.value = 100;
-
-			config.locales.current.id = (LCID)Config::Get(CONFIG_WRAPPER, "Locale", (INT)GetUserDefaultLCID());
-
-			value = Config::Get(CONFIG_WRAPPER, "MessageTimeout", 15);
-			if (value < 1)
-				value = 1;
-
-			config.msgTimeScale.time = *(DWORD*)&value;
-			config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
-
-			config.updateMode = (UpdateMode)Config::Get(CONFIG_WRAPPER, "UpdateMode", (INT)UpdateCPP);
-			if (config.updateMode < UpdateNone || config.updateMode > UpdateASM)
-				config.updateMode = UpdateCPP;
-
-			if (!config.isEditor)
-				config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
-
-			value = Config::Get(CONFIG_WRAPPER, "MouseScroll", 3);
-			if (value < 0 || value > 3)
-				value = 3;
-
-			config.mouseScroll.lButton = value & 1;
-			config.mouseScroll.mButton = value & 2;
-			
-			value = Config::Get(CONFIG_COLORS, "HueSat", 0x01F401F4);
-			config.colors.active.hueShift = 0.001f * min(1000, max(0, LOWORD(value)));
-			config.colors.active.saturation = 0.001f * min(1000, max(0, HIWORD(value)));
-
-			value = Config::Get(CONFIG_COLORS, "RgbInput", 0x03E80000);
-			if (LOWORD(value) < HIWORD(value))
-			{
-				config.colors.active.input.left.rgb = 0.001f * min(1000, max(0, LOWORD(value)));
-				config.colors.active.input.right.rgb = 0.001f * min(1000, max(0, HIWORD(value)));
-			}
-			else
-			{
-				config.colors.active.input.left.rgb = 0.0f;
-				config.colors.active.input.right.rgb = 1.0f;
-			}
-
-			value = Config::Get(CONFIG_COLORS, "RedInput", 0x03E80000);
-			if (LOWORD(value) < HIWORD(value))
-			{
-				config.colors.active.input.left.red = 0.001f * min(1000, max(0, LOWORD(value)));
-				config.colors.active.input.right.red = 0.001f * min(1000, max(0, HIWORD(value)));
-			}
-			else
-			{
-				config.colors.active.input.left.red = 0.0f;
-				config.colors.active.input.right.red = 1.0f;
-			}
-
-			value = Config::Get(CONFIG_COLORS, "GreenInput", 0x03E80000);
-			if (LOWORD(value) < HIWORD(value))
-			{
-				config.colors.active.input.left.green = 0.001f * min(1000, max(0, LOWORD(value)));
-				config.colors.active.input.right.green = 0.001f * min(1000, max(0, HIWORD(value)));
-			}
-			else
-			{
-				config.colors.active.input.left.green = 0.0f;
-				config.colors.active.input.right.green = 1.0f;
-			}
-
-			value = Config::Get(CONFIG_COLORS, "BlueInput", 0x03E80000);
-			if (LOWORD(value) < HIWORD(value))
-			{
-				config.colors.active.input.left.blue = 0.001f * min(1000, max(0, LOWORD(value)));
-				config.colors.active.input.right.blue = 0.001f * min(1000, max(0, HIWORD(value)));
-			}
-			else
-			{
-				config.colors.active.input.left.blue = 0.0f;
-				config.colors.active.input.right.blue = 1.0f;
-			}
-
-			config.colors.active.gamma.rgb = 0.001f * min(1000, max(0, Config::Get(CONFIG_COLORS, "RgbGamma", 500)));
-			config.colors.active.gamma.red = 0.001f * min(1000, max(0, Config::Get(CONFIG_COLORS, "RedGamma", 500)));
-			config.colors.active.gamma.green = 0.001f * min(1000, max(0, Config::Get(CONFIG_COLORS, "GreenGamma", 500)));
-			config.colors.active.gamma.blue = 0.001f * min(1000, max(0, Config::Get(CONFIG_COLORS, "BlueGamma", 500)));
-
-			value = Config::Get(CONFIG_COLORS, "RgbOutput", 0x03E80000);
-			if (LOWORD(value) < HIWORD(value))
-			{
-				config.colors.active.output.left.rgb = 0.001f * min(1000, max(0, LOWORD(value)));
-				config.colors.active.output.right.rgb = 0.001f * min(1000, max(0, HIWORD(value)));
-			}
-			else
-			{
-				config.colors.active.output.left.rgb = 0.0f;
-				config.colors.active.output.right.rgb = 1.0f;
-			}
-
-			value = Config::Get(CONFIG_COLORS, "RedOutput", 0x03E80000);
-			if (LOWORD(value) < HIWORD(value))
-			{
-				config.colors.active.output.left.red = 0.001f * min(1000, max(0, LOWORD(value)));
-				config.colors.active.output.right.red = 0.001f * min(1000, max(0, HIWORD(value)));
-			}
-			else
-			{
-				config.colors.active.output.left.red = 0.0f;
-				config.colors.active.output.right.red = 1.0f;
-			}
-
-			value = Config::Get(CONFIG_COLORS, "GreenOutput", 0x03E80000);
-			if (LOWORD(value) < HIWORD(value))
-			{
-				config.colors.active.output.left.green = 0.001f * min(1000, max(0, LOWORD(value)));
-				config.colors.active.output.right.green = 0.001f * min(1000, max(0, HIWORD(value)));
-			}
-			else
-			{
-				config.colors.active.output.left.green = 0.0f;
-				config.colors.active.output.right.green = 1.0f;
-			}
-
-			value = Config::Get(CONFIG_COLORS, "BlueOutput", 0x03E80000);
-			if (LOWORD(value) < HIWORD(value))
-			{
-				config.colors.active.output.left.blue = 0.001f * min(1000, max(0, LOWORD(value)));
-				config.colors.active.output.right.blue = 0.001f * min(1000, max(0, HIWORD(value)));
-			}
-			else
-			{
-				config.colors.active.output.left.blue = 0.0f;
-				config.colors.active.output.right.blue = 1.0f;
+				value = Config::Get(CONFIG_COLORS, "BlueOutput", 0x03E80000);
+				if (LOWORD(value) < HIWORD(value))
+				{
+					config.colors.active.output.left.blue = 0.001f * min(1000, max(0, LOWORD(value)));
+					config.colors.active.output.right.blue = 0.001f * min(1000, max(0, HIWORD(value)));
+				}
+				else
+				{
+					config.colors.active.output.left.blue = 0.0f;
+					config.colors.active.output.right.blue = 1.0f;
+				}
 			}
 		}
 
@@ -909,6 +916,26 @@ namespace Config
 	BOOL __fastcall Set(const CHAR* app, const CHAR* key, CHAR* value)
 	{
 		return WritePrivateProfileString(app, key, value, config.file);
+	}
+
+	CHAR* __fastcall Add(CHAR* ptr, const CHAR* key, INT value, const CHAR* comments)
+	{
+		if (comments)
+		{
+			*(DWORD*)ptr = '\r\n; ';
+			ptr += 4;
+			StrCopy(ptr, comments);
+			ptr += StrLength(comments) + 1;
+		}
+
+		{
+			CHAR dst[64];
+			StrPrint(dst, "%s=%d", key, value);
+			StrCopy(ptr, dst);
+			ptr += StrLength(dst) + 1;
+		}
+
+		return ptr;
 	}
 
 	BOOL __fastcall IsZoomed()

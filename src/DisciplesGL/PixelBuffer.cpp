@@ -371,7 +371,7 @@ namespace CPP
 
 		DWORD i = count;
 		for (DWORD i = 0; i < count; ++i)
-			if (ptr1[-i] != ptr2[-i])
+			if (*(ptr1 - i) != *(ptr2 - i))
 				return count - i;
 
 		return i;

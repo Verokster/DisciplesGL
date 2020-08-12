@@ -165,6 +165,7 @@ VOID NewRenderer::Begin()
 								this->zoomStatus = FALSE;
 								this->borderStatus = FALSE;
 								this->backStatus = FALSE;
+								this->zoomStatus = FALSE;
 								this->program = NULL;
 								this->zoomSize = { 0, 0 };
 								this->zoomFbSize = { 0, 0 };
@@ -228,6 +229,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 {
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
 	Size frameSize = stateBuffer->size;
+	BOOL stateChanged = this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack || this->zoomStatus != stateBuffer->isZoomed;
 	FilterState state = this->ddraw->filterState;
 	this->ddraw->filterState.flags = FALSE;
 
@@ -244,7 +246,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 		if (state.flags && newSize != this->viewSize)
 			this->pixelBuffer->Reset();
 
-		if (this->pixelBuffer->Update(lpStateBuffer, ready, TRUE) || state.flags || this->borderStatus != stateBuffer->borders || backStatus != stateBuffer->isBack)
+		if (this->pixelBuffer->Update(lpStateBuffer, ready, TRUE) || state.flags || stateChanged)
 		{
 			if (this->isVSync != config.image.vSync)
 			{
@@ -253,10 +255,11 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 					WGLSwapInterval(this->isVSync);
 			}
 
-			if (state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
+			if (state.flags || stateChanged)
 			{
 				this->borderStatus = stateBuffer->borders;
 				this->backStatus = stateBuffer->isBack;
+				this->zoomStatus = stateBuffer->isZoomed;
 				this->ddraw->viewport.refresh = TRUE;
 			}
 
@@ -295,7 +298,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 						break;
 
-					case UpscaleXRBZ:
+					case UpscaleXBRZ:
 						switch (state.value)
 						{
 						case 6:
@@ -532,7 +535,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 			GLBindTexFilter(textureId.primary, state.interpolation == InterpolateLinear || state.interpolation == InterpolateHermite ? GL_LINEAR : GL_NEAREST);
 		}
 
-		if (this->pixelBuffer->Update(lpStateBuffer, ready) || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
+		if (this->pixelBuffer->Update(lpStateBuffer, ready) || state.flags || stateChanged)
 		{
 			if (this->isVSync != config.image.vSync)
 			{
@@ -554,7 +557,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 					state.flags = TRUE;
 			}
 
-			if (force || state.flags || this->borderStatus != stateBuffer->borders || this->backStatus != stateBuffer->isBack)
+			if (force || state.flags || stateChanged)
 			{
 				switch (state.interpolation)
 				{
@@ -588,6 +591,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 
 				this->borderStatus = stateBuffer->borders;
 				this->backStatus = stateBuffer->isBack;
+				this->zoomStatus = stateBuffer->isZoomed;
 			}
 
 			if (stateBuffer->isZoomed)

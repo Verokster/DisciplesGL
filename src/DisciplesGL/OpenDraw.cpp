@@ -426,7 +426,7 @@ VOID OpenDraw::LoadFilterState()
 		state.value = config.image.scaleHQ;
 		break;
 
-	case UpscaleXRBZ:
+	case UpscaleXBRZ:
 		state.value = config.image.xBRz;
 		break;
 

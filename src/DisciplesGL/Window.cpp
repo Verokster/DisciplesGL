@@ -278,7 +278,7 @@ namespace Window
 
 					break;
 
-				case UpscaleXRBZ:
+				case UpscaleXBRZ:
 					if (mXBRZ.hParent)
 						CheckMenuItem(mXBRZ.hParent, mXBRZ.index, MF_BYPOSITION | MF_CHECKED);
 
@@ -664,7 +664,7 @@ namespace Window
 				id = IDS_TEXT_FILT_SCALEHQ;
 				value = config.image.scaleHQ;
 				break;
-			case UpscaleXRBZ:
+			case UpscaleXBRZ:
 				id = IDS_TEXT_FILT_XBRZ;
 				value = config.image.xBRz;
 				break;
@@ -722,7 +722,7 @@ namespace Window
 	{
 		config.image.xBRz = value;
 		Config::Set(CONFIG_WRAPPER, "XBRZ", *(INT*)&config.image.xBRz);
-		UpscalingChanged(hWnd, UpscaleXRBZ);
+		UpscalingChanged(hWnd, UpscaleXBRZ);
 	}
 
 	VOID __fastcall SelectRenderer(HWND hWnd, RendererType renderer)
@@ -2720,7 +2720,9 @@ namespace Window
 						else
 							config.zoom.enabled = FALSE;
 
-						Config::Set(!config.version ? CONFIG_DISCIPLE : CONFIG_WRAPPER, "EnableZoom", config.zoom.enabled);
+						if (!config.version)
+							Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.zoom.enabled);
+						Config::Set(CONFIG_WRAPPER, "EnableZoom", config.zoom.enabled);
 
 						{
 							CHAR str1[32];
