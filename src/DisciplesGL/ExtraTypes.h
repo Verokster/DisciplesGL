@@ -197,7 +197,6 @@ struct ConfigItems {
 	BOOL coldCPU;
 	BOOL singleWindow;
 	BOOL singleThread;
-	DWORD* package;
 	DOUBLE syncStep;
 	POINT randPos;
 
@@ -206,6 +205,13 @@ struct ConfigItems {
 
 	SceneSort sceneSort;
 	
+	FLOAT cloudsFactor;
+
+	struct {
+		DWORD* wrapper;
+		DWORD* clouds;
+	} packages;
+
 	struct {
 		BOOL fast;
 		union
@@ -470,4 +476,32 @@ struct SceneObject {
 	DWORD unknown_3[2]; // +92
 	DWORD races; // +100
 	DWORD unknown_4[6]; // +104
+};
+
+struct CloudItem {
+	POINT center;
+	POINT offset;
+	DWORD speed;
+	union
+	{
+		struct {
+			BYTE isValid;
+			BYTE hasShadow;
+			WORD reserved;
+		};
+		DWORD flags;
+	};
+};
+
+struct CloudObject {
+	CloudItem* list;
+	INT count;
+	union
+	{
+		struct {
+			SIZE mapSize;
+			SIZE boundsSize;
+		};
+		RECT boundsRect;
+	};
 };

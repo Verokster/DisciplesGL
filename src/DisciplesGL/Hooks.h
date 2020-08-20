@@ -303,6 +303,10 @@ namespace Hooks
 		DWORD scene_print_hook;
 		DWORD str_copy;
 		DWORD str_print;
+
+		DWORD clouds_hook;
+		DWORD clouds_init;
+		DWORD clouds_check;
 	};
 
 	struct BlendData {

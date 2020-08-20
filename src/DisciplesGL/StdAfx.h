@@ -87,6 +87,7 @@ extern "C"
 #define StrLength(str) strlen(str)
 #define StrCompare(str1, str2) strcmp(str1, str2)
 #define StrCompareInsensitive(str1, str2) _stricmp(str1, str2)
+#define StrCompareNum(str1, str2, count) strncmp(str1, str2, count)
 #define StrCopy(dst, src) strcpy(dst, src)
 #define StrCat(dst, src) strcat(dst, src)
 #define StrDuplicate(str) _strdup(str)

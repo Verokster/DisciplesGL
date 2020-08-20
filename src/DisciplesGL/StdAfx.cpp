@@ -37,6 +37,85 @@ DEACTIVATEACTCTX DeactivateActCtxC;
 
 SETPROCESSDPIAWARENESS SetProcessDpiAwarenessC;
 
+extern "C"
+{
+	VOID __stdcall _c4ltoa45(DWORD, DWORD, DWORD);
+	VOID __stdcall _c4dtoa45(DWORD, DWORD, DWORD, DWORD, DWORD);
+	VOID __stdcall _c4atod(DWORD, DWORD);
+	VOID __stdcall _c4atol(DWORD, DWORD);
+	VOID __stdcall _f4ptr(DWORD);
+	VOID __stdcall _f4name(DWORD);
+	VOID __stdcall _f4type(DWORD);
+	VOID __stdcall _f4len(DWORD);
+	VOID __stdcall _f4decimals(DWORD);
+	VOID __stdcall _d4delete(DWORD);
+	VOID __stdcall _d4close(DWORD);
+	VOID __stdcall _d4pack(DWORD);
+	VOID __stdcall _d4fieldJ(DWORD, DWORD);
+	VOID __stdcall _d4numFields(DWORD);
+	VOID __stdcall _d4open(DWORD, DWORD);
+	VOID __stdcall _d4openClone(DWORD);
+	VOID __stdcall _d4appendBlank(DWORD);
+	VOID __stdcall _d4bof(DWORD);
+	VOID __stdcall _d4eof(DWORD);
+	VOID __stdcall _d4deleted(DWORD);
+	VOID __stdcall _d4goBof(DWORD);
+	VOID __stdcall _d4skip(DWORD, DWORD);
+	VOID __stdcall _d4lockAll(DWORD);
+	VOID __stdcall _d4unlock(DWORD);
+	VOID __stdcall _d4changed(DWORD, DWORD);
+	VOID __stdcall _d4field(DWORD, DWORD);
+	VOID __stdcall _u4freeDefault(DWORD);
+	VOID __stdcall _code4optStart(DWORD);
+	VOID __stdcall _code4initLow(DWORD, DWORD, DWORD);
+	VOID __stdcall _code4initUndo(DWORD);
+	VOID __stdcall _code4close(DWORD);
+	VOID __stdcall _error4text(DWORD, DWORD);
+	VOID __stdcall _error4default(DWORD, DWORD, DWORD);
+	VOID __stdcall _expr4parseLow(DWORD, DWORD, DWORD);
+	VOID __stdcall _expr4source(DWORD);
+	VOID __stdcall _expr4true(DWORD);
+}
+
+#define LIBEXP(a) VOID __declspec(naked) __stdcall ex_##a() { _asm { jmp _##a } }
+
+LIBEXP(c4ltoa45)
+LIBEXP(c4dtoa45)
+LIBEXP(c4atod)
+LIBEXP(c4atol)
+LIBEXP(f4ptr)
+LIBEXP(f4name)
+LIBEXP(f4type)
+LIBEXP(f4len)
+LIBEXP(f4decimals)
+LIBEXP(d4delete)
+LIBEXP(d4close)
+LIBEXP(d4pack)
+LIBEXP(d4fieldJ)
+LIBEXP(d4numFields)
+LIBEXP(d4open)
+LIBEXP(d4openClone)
+LIBEXP(d4appendBlank)
+LIBEXP(d4bof)
+LIBEXP(d4eof)
+LIBEXP(d4deleted)
+LIBEXP(d4goBof)
+LIBEXP(d4skip)
+LIBEXP(d4lockAll)
+LIBEXP(d4unlock)
+LIBEXP(d4changed)
+LIBEXP(d4field)
+LIBEXP(u4freeDefault)
+LIBEXP(code4optStart)
+LIBEXP(code4initLow)
+LIBEXP(code4initUndo)
+LIBEXP(code4close)
+LIBEXP(error4text)
+LIBEXP(error4default)
+LIBEXP(expr4parseLow)
+LIBEXP(expr4source)
+LIBEXP(expr4true)
+
 DOUBLE __fastcall MathRound(DOUBLE number)
 {
 	DOUBLE floorVal = MathFloor(number);

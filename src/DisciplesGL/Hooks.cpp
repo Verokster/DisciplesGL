@@ -116,6 +116,8 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x007C5E30, 0x005A2DB5, 0x005A2E7A, 0x00000000,
 		0x005293DA, 0x00000000, 0x005EEA92, 0x004DD0CB, 0x00403C95, 0x005117EC,
+
+		0x005B65E5, 0x005ACF83, 0x005AD23E,
 #pragma endregion
 
 #pragma region v1 .41
@@ -159,6 +161,8 @@ namespace Hooks
 
 		0x0081DDDC, 0x00483DFB, 0x00483F14, 0x00824930, 0x005A9143, 0x005A9203, 0x00000000,
 		0x0052F05B, 0x0052AF13, 0x005F6A94, 0x004E17F1, 0x00403D22, 0x00516AEC,
+
+		0x005BCC74, 0x005B34F9, 0x005B37B4,
 #pragma endregion
 
 #pragma region v2 .01
@@ -202,6 +206,8 @@ namespace Hooks
 
 		0x0082B42C, 0x004863BA, 0x004864D7, 0x00831FB0, 0x005AFDA8, 0x005AFE6D, 0x00000000,
 		0x00534C77, 0x0052EC27, 0x005FE61C, 0x004E5B9A, 0x004041B0, 0x0051C0A8,
+
+		0x005C3B26, 0x005BA204, 0x005BA4BF,
 #pragma endregion
 
 #pragma region v2 .01 - Steam
@@ -245,6 +251,8 @@ namespace Hooks
 
 		0x0082C40C, 0x00486441, 0x0048656A, 0x00832F98, 0x005B0398, 0x005B043C, 0x00000000,
 		0x0053533C, 0x0052F3E8, 0x005FEB31, 0x004E5BA0, 0x00403DFF, 0x0051C6FA,
+
+		0x005C3ECC, 0x005BA707, 0x005BA9C2,
 #pragma endregion
 
 #pragma region v2 .02
@@ -288,6 +296,8 @@ namespace Hooks
 
 		0x008293AC, 0x004868AE, 0x004869CB, 0x0082FF38, 0x005AEC65, 0x005AED25, 0x00000000,
 		0x005339EE, 0x0052DB6A, 0x005FD0AC, 0x004E584B, 0x00403C7D, 0x0051B292,
+
+		0x005C277F, 0x005B8F00, 0x005B91BB,
 #pragma endregion
 
 #pragma region v2 .02 - Crack
@@ -331,6 +341,8 @@ namespace Hooks
 
 		0x0082B49C, 0x00486A6F, 0x00486B8C, 0x00832028, 0x005B056E, 0x005B0633, 0x00000000,
 		0x00535147, 0x0052F1E1, 0x005FE818, 0x004E612B, 0x004041C6, 0x0051C5C1,
+
+		0x005C3E98, 0x005BA6AA, 0x005BA965,
 #pragma endregion
 
 #pragma region v3 .00 - Steam
@@ -374,6 +386,8 @@ namespace Hooks
 
 		0x00837E7C, 0x004893E9, 0x004894F5, 0x0083AA58, 0x005B3A1E, 0x005B3ADE, 0x00000000,
 		0x0053842D, 0x005325B2, 0x00604AD3, 0x004E9495, 0x00403CB9, 0x0051F84D,
+
+		0x005C7C18, 0x005BE1F5, 0x005BE4B0,
 #pragma endregion
 
 #pragma region v3 .01a
@@ -417,6 +431,8 @@ namespace Hooks
 
 		0x00837ACC, 0x004893B4, 0x004894BC, 0x0083A6A8, 0x005B402C, 0x005B40D5, 0x00000000,
 		0x005384C4, 0x0053260D, 0x00605628, 0x004E9C47, 0x00403F62, 0x0051F785,
+
+		0x005C818B, 0x005BE762, 0x005BEA1D,
 #pragma endregion
 
 #pragma region v3 .01b
@@ -460,6 +476,8 @@ namespace Hooks
 
 		0x00835A7C, 0x00488F9D, 0x004890A5, 0x00838650, 0x005B32F2, 0x005B33B7, 0x00000000,
 		0x00537ACC, 0x00531B25, 0x00604135, 0x004E90E2, 0x00403C8B, 0x0051EB96,
+
+		0x005C7174, 0x005BD7EA, 0x005BDAA5,
 #pragma endregion
 
 #pragma region v1 .10 Editor
@@ -503,6 +521,8 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x00631120, 0x0053EF10, 0x00000000, 0x0044A591,
 		0x00478A74, 0x00000000, 0x004D26F7, 0x00415F96, 0x00402FB2, 0x0049D9D4,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v1 .41 Editor
@@ -546,6 +566,8 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x00636338, 0x00541F1F, 0x00000000, 0x0044A9C1,
 		0x00479013, 0x0047DD3B, 0x004D4DAA, 0x004162C4, 0x00402FC8, 0x0049EEE4,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .00 Editor - Steam
@@ -589,6 +611,8 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x0065E520, 0x0055E93A, 0x00000000, 0x0044D014,
 		0x004903E5, 0x00495435, 0x004F066C, 0x004166BC, 0x00403156, 0x004B65A9,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .01 Editor
@@ -632,6 +656,8 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x0065CD48, 0x0055DD64, 0x00000000, 0x0044D09A,
 		0x0048FADD, 0x00494AED, 0x004EFD1B, 0x0041683E, 0x004030B3, 0x004B5C57,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2 .02 Editor
@@ -675,6 +701,8 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x0065CD70, 0x0055DE84, 0x00000000, 0x0044D09A,
 		0x0048FADD, 0x00494AED, 0x004EFD1B, 0x0041683E, 0x004030B3, 0x004B5C57,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .00 Editor - Steam
@@ -718,6 +746,8 @@ namespace Hooks
 
 		0x00000000, 0x00000000, 0x00000000, 0x00667E44, 0x0056480E, 0x00000000, 0x0044EE74,
 		0x00493001, 0x004980CE, 0x004F48C9, 0x004169C0, 0x00403195, 0x004B91B6,
+
+		0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3 .01 Editor
@@ -760,7 +790,9 @@ namespace Hooks
 		0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00666484, 0x00563C2D, 0x00000000, 0x0044EBD5,
-		0x0049209B, 0x004970EC, 0x004F3C0C, 0x0041670E, 0x00403079, 0x004B816B
+		0x0049209B, 0x004970EC, 0x004F3C0C, 0x0041670E, 0x00403079, 0x004B816B,
+
+		0x00000000, 0x00000000, 0x00000000
 #pragma endregion
 	};
 
@@ -3821,9 +3853,13 @@ namespace Hooks
 	DWORD sub_LoadImgPackage;
 	DWORD __stdcall LoadImgPackage(DWORD** store, CHAR* dir, CHAR* filename, DWORD unknown)
 	{
-		*(store + 24) = 0;
+		store[24] = NULL;
 		if (((DWORD(__stdcall*)(DWORD**, CHAR*, CHAR*, DWORD))sub_LoadImgPackage)(store + 24, dir, "Wrapper.ff", unknown))
-			config.package = (DWORD*)store[24][0];
+			config.packages.wrapper = store[24];
+
+		store[25] = NULL;
+		if (((DWORD(__stdcall*)(DWORD**, CHAR*, CHAR*, DWORD))sub_LoadImgPackage)(store + 25, dir, "IsoClouds.ff", unknown))
+			config.packages.clouds = store[25];
 
 		return ((DWORD(__stdcall*)(DWORD**, CHAR*, CHAR*, DWORD))sub_LoadImgPackage)(store, dir, filename, unknown);
 	}
@@ -3831,10 +3867,23 @@ namespace Hooks
 	DWORD sub_0052A14E;
 	BOOL __stdcall LoadPackageIndex(DWORD* pakObj, CHAR* name, DWORD a3, DWORD a4)
 	{
-		if (config.package && (*(BOOL(__thiscall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_0052A14E)(config.package[3], name, a3, a4, config.package[5]))
-			return TRUE;
+		if (config.packages.wrapper)
+		{
+			DWORD* pak = (DWORD*)*config.packages.wrapper;
+			if ((*(BOOL(__thiscall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_0052A14E)(pak[3], name, a3, a4, pak[5]))
+				return TRUE;
+		}
 
-		return (*(BOOL(__thiscall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_0052A14E)(pakObj[3], name, a3, a4, pakObj[5]);
+		BOOL res = (*(BOOL(__thiscall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_0052A14E)(pakObj[3], name, a3, a4, pakObj[5]);
+
+		if (!res && config.packages.clouds)
+		{
+			DWORD* pak = (DWORD*)*config.packages.clouds;
+			if ((*(BOOL(__thiscall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_0052A14E)(pak[3], name, a3, a4, pak[5]))
+				return TRUE;
+		}
+
+		return res;
 	}
 
 	VOID __declspec(naked) hook_0051F886()
@@ -3844,6 +3893,126 @@ namespace Hooks
 			PUSH [ECX]
 			PUSH EAX
 			JMP LoadPackageIndex
+		}
+	}
+
+	DWORD* __stdcall CheckCloudPackage(DWORD* pak, CHAR* name)
+	{
+		return !config.packages.clouds || StrCompareNum(name, "CLOUD", 5) ? pak : config.packages.clouds;
+	}
+
+	DWORD sub_0051F87C;
+	VOID __declspec(naked) hook_005C2789()
+	{
+		__asm {
+			push [ebp+0x10]
+			push ecx
+			call CheckCloudPackage
+			mov ecx, eax
+			jmp sub_0051F87C
+		}
+	}
+
+	const FLOAT clouds_count = 15.0f;
+	const FLOAT clouds_factor = 7.0f / 3.0f;
+
+	VOID __declspec(naked) hook_005B8F00()
+	{
+		__asm {
+			cmp config.packages.clouds, 0
+			je lbl_classic
+			fmul clouds_factor
+			lbl_classic:
+			fmul config.cloudsFactor;
+			fmul clouds_count
+			retn
+		}
+	}
+
+	LONG RandomPoor(LONG max)
+	{
+		return max ? (Random() % max) : 0;
+	}
+
+	VOID __stdcall InitClouds(CloudObject* obj, SIZE* sizek)
+	{
+		if (obj->list && obj->count > 0)
+		{
+			SIZE mode = { *(LONG*)&config.mode->width, 128 };
+
+			obj->mapSize = { sizek->cx + 1, sizek->cy + 1 };
+			obj->boundsSize = { obj->mapSize.cx * 64 + mode.cx, obj->mapSize.cy * 32 + mode.cy };
+
+			CloudItem* cloud = obj->list;
+			INT count = obj->count;
+
+			LONG x = 0;
+			LONG y = 0;
+			do
+			{
+				cloud->flags = NULL;
+
+				cloud->center.x = x;
+				cloud->center.y = y;
+
+				if (++y == obj->mapSize.cy)
+				{
+					y = 0;
+					if (++x == obj->mapSize.cx)
+						x = 0;
+				}
+
+				cloud->offset.x = RandomPoor(obj->boundsSize.cx) - (obj->mapSize.cy - cloud->center.y + cloud->center.x) * 32 - mode.cx / 2;
+				cloud->offset.y = RandomPoor(obj->boundsSize.cy) - (cloud->center.y + cloud->center.x) * 16 - mode.cy / 2;
+				cloud->speed = RandomPoor(5) + 1;
+
+				++cloud;
+			} while (--count);
+		}
+	}
+
+	VOID __declspec(naked) hook_005B8F53()
+	{
+		__asm {
+			lea eax, [ebp-0x2C]
+			push eax
+			push ecx
+			call InitClouds
+
+			mov ecx, dword ptr ss:[ebp-0xC]
+			mov eax,esi
+			pop edi
+			pop esi
+			mov dword ptr fs:[0],ecx
+			pop ebx
+			leave
+			retn
+		}
+	}
+
+	VOID __stdcall CheckCloud(CloudItem* cloud, CloudObject* obj)
+	{
+		SIZE mode = { *(LONG*)&config.mode->width, 128 };
+		LONG dist = (obj->mapSize.cy - cloud->center.y + cloud->center.x) * 32 + mode.cx / 2;
+
+		if (cloud->offset.x >= (obj->boundsSize.cx) - dist)
+		{
+			cloud->offset.x = -dist;
+			cloud->offset.y = RandomPoor(obj->boundsSize.cy) - (cloud->center.y + cloud->center.x) * 16 - mode.cy / 2;
+		}
+
+		if (cloud->hasShadow && cloud->speed > 3)
+			cloud->speed = RandomPoor(3) + 1;
+	}
+
+	DWORD back_005B9214;
+	VOID __declspec(naked) hook_005B91BB()
+	{
+		__asm {
+			push [edi+0x4]
+			push esi
+			push back_005B9214
+			jmp CheckCloud
 		}
 	}
 #pragma endregion
@@ -5706,7 +5875,7 @@ namespace Hooks
 	{
 		*flagResPopup = value & 1;
 		config.toogle.resources = *flagResPopup;
-		Config::Set(CONFIG_SETTINGS, "ShowResources", config.toogle.resources);
+		Config::Set(CONFIG_WRAPPER, "ShowResources", config.toogle.resources);
 	}
 
 	VOID __declspec(naked) hook_004869CB()
@@ -5723,7 +5892,7 @@ namespace Hooks
 	VOID __stdcall SetBanners(DWORD value)
 	{
 		config.toogle.banners = value & 1;
-		Config::Set(CONFIG_SETTINGS, "ShowBanners", config.toogle.banners);
+		Config::Set(CONFIG_WRAPPER, "ShowBanners", config.toogle.banners);
 	}
 
 	VOID __declspec(naked) hook_005AED25()
@@ -6157,12 +6326,22 @@ namespace Hooks
 		// Custom Package
 		if (hookSpace->pkg_size)
 		{
-			PatchByte(hooker, hookSpace->pkg_size + 1, 104);
+			PatchByte(hooker, hookSpace->pkg_size + 1, 105);
 			sub_LoadImgPackage = RedirectCall(hooker, hookSpace->pkg_load, LoadImgPackage);
 			sub_005A9A1E = hookSpace->pkg_sub + baseOffset;
 
 			PatchHook(hooker, hookSpace->pkg_entry_load, hook_0051F886);
 			sub_0052A14E = hookSpace->pkg_entry_sub + baseOffset;
+
+			// Show clouds
+			if (hookSpace->clouds_hook)
+			{
+				sub_0051F87C = RedirectCall(hooker, hookSpace->clouds_hook, hook_005C2789);
+				PatchCall(hooker, hookSpace->clouds_init, hook_005B8F00, 1);
+				PatchHook(hooker, hookSpace->clouds_init + 83, hook_005B8F53);
+				PatchHook(hooker, hookSpace->clouds_check, hook_005B91BB);
+				back_005B9214 = hookSpace->clouds_check + 89 + baseOffset;
+			}
 
 			// Mirror battle bg
 			sub_005A9AE9 = RedirectCall(hooker, hookSpace->btlLoadBack_1, hook_005AEF44);

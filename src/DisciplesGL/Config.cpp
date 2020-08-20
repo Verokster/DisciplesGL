@@ -291,6 +291,7 @@ namespace Config
 				config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 				config.updateMode = UpdateCPP;
 				config.mouseScroll.lButton = config.mouseScroll.mButton = TRUE;
+				config.cloudsFactor = 1.0f;
 
 				CHAR* buffer = (CHAR*)MemoryAlloc(8192);
 				if (buffer)
@@ -352,7 +353,7 @@ namespace Config
 					ptr = Add(ptr, "UpdateMode", (INT)config.updateMode, "Image comparison. Affects on rendering performance (0 - none; 1 - classic 'default'; 2 - alternative)");
 					ptr = Add(ptr, "FastAI", config.ai.fast, "Increases AI performance, but may cause an unexpected game crash (0 - no 'default'; 1 - yes)");
 					ptr = Add(ptr, "MouseScroll", 3, "Allows map scrolling by pressing mouse button (0 - no; 1 - left button; 2 - middle button; 3 - both buttons 'default')");
-
+					ptr = Add(ptr, "CloudsFactor", 1, "Defines clouds count multiplier (1 - min 'default')");
 					*ptr = NULL;
 
 					WritePrivateProfileSection(CONFIG_WRAPPER, buffer + (*(WORD*)buffer == '\r\n' ? 2 : 0), config.file);
@@ -553,6 +554,11 @@ namespace Config
 
 				config.mouseScroll.lButton = value & 1;
 				config.mouseScroll.mButton = value & 2;
+
+				value = Config::Get(CONFIG_WRAPPER, "CloudsFactor", 1);
+				if (value < 1)
+					value = 1;
+				config.cloudsFactor = (FLOAT)value;
 			}
 
 			{
