@@ -2830,6 +2830,8 @@ namespace Hooks
 			return config.mode->width;
 		case SM_CYSCREEN:
 			return config.mode->height;
+		case SM_SWAPBUTTON:
+			return FALSE;
 		default:
 			return GetSystemMetrics(nIndex);
 		}
@@ -4104,7 +4106,7 @@ namespace Hooks
 #pragma region Map direction bit - mask Fix
 	VOID __stdcall SetMapBitMask96(BYTE* mask, POINT* p)
 	{
-		if (p->x >= 0 && p->y >= 0 && p->x < 144 && p->y < 144)
+		if (p->x >= 0 && p->y >= 0 && p->x < 96 && p->y < 96)
 		{
 			BYTE* address = &mask[16 * p->y] + (p->x >> 3);
 			*address |= 1 << (p->x & 7);
@@ -5395,32 +5397,6 @@ namespace Hooks
 	}
 #pragma endregion
 
-#pragma region Skip Draw
-	DWORD sub_00512BF0;
-	VOID __declspec(naked) hook_00512BF0()
-	{
-		__asm {
-			MOV EAX, config.drawEnabled
-			TEST EAX, EAX
-			JNZ lbl_draw
-
-			MOV EDX, [ECX]
-			MOV EAX, [EDX+48]
-			MOV ECX, [EAX+20]
-			MOV EAX, [ECX+8]
-			PUSH 1
-			PUSH 0
-			PUSH EAX
-			MOV ECX, [EAX]
-			CALL [ECX+44]
-			RETN
-
-			lbl_draw:
-			JMP sub_00512BF0
-		}
-	}
-#pragma endregion
-
 #pragma region Sphere fix
 	VOID __declspec(naked) hook_00650628()
 	{
@@ -5787,7 +5763,7 @@ namespace Hooks
 				{
 					LONG x = mouseAction.checkPos.x - pt->x;
 					LONG y = mouseAction.checkPos.y - pt->y;
-					mouseAction.moved = (LONG)sqrtf(FLOAT(x * x + y * y)) >= 32;
+					mouseAction.moved = (LONG)MathSqrtFloat(FLOAT(x * x + y * y)) >= 32;
 				}
 
 				if (mouseAction.button != LBUTTON || mouseAction.moved)
@@ -5834,6 +5810,7 @@ namespace Hooks
 
 					if (reset)
 					{
+						// To screen offset
 						offset = { (offset.x - offset.y) / 2, (offset.x + offset.y) / 4 };
 
 						mouseAction.mapPos = mapPos;
@@ -5993,7 +5970,7 @@ namespace Hooks
 
 	BOOL PatchImportFunction(HOOKER hooker, const CHAR* function, VOID* addr)
 	{
-		DWORD address = PatchImport(hooker, function, addr);
+		DWORD address = PatchImportByName(hooker, function, addr);
 		if (address)
 		{
 			BYTE block[6];
@@ -6098,10 +6075,10 @@ namespace Hooks
 				}
 
 				{
-					PatchImport(hooker, "CreateFileA", CreateFileHook);
-					PatchImport(hooker, "GetFileSize", GetFileSizeHook);
-					PatchImport(hooker, "ReadFile", ReadFileHook);
-					PatchImport(hooker, "CloseHandle", CloseHandleHook);
+					PatchImportByName(hooker, "CreateFileA", CreateFileHook);
+					PatchImportByName(hooker, "GetFileSize", GetFileSizeHook);
+					PatchImportByName(hooker, "ReadFile", ReadFileHook);
+					PatchImportByName(hooker, "CloseHandle", CloseHandleHook);
 				}
 
 				hud.pitch = config.mode->width + 179;
@@ -6417,7 +6394,7 @@ namespace Hooks
 			config.randPos.x = Random();
 			config.randPos.y = Random();
 
-			PatchImport(hooker, "_BinkCopyToBuffer@28", BinkCopyToBufferHook, &pBinkCopyToBuffer);
+			PatchImportByName(hooker, "_BinkCopyToBuffer@28", BinkCopyToBufferHook, &pBinkCopyToBuffer);
 			Convert565toRGB = config.renderer == RendererGDI ? ConvertToBGR : ConvertToRGB;
 
 			PatchBlock(hooker, hookSpace->pixel, (VOID*)pixelFunctions, sizeof(pixelFunctions));
@@ -6659,7 +6636,7 @@ namespace Hooks
 					if (hookSpace->btlFileGetStr)
 						sub_fgets = RedirectCall(hooker, hookSpace->btlFileGetStr, SteamFileGetStrHook);
 					else
-						PatchImport(hooker, "fgets", FileGetStrHook);
+						PatchImportByName(hooker, "fgets", FileGetStrHook);
 				}
 
 				// Debug & message position
@@ -6696,57 +6673,57 @@ namespace Hooks
 		HOOKER hooker = CreateHooker(GetModuleHandle(NULL));
 		{
 			{
-				PatchImport(hooker, "GetDeviceCaps", GetDeviceCapsHook);
-				PatchImport(hooker, "GetForegroundWindow", GetForegroundWindowHook);
+				PatchImportByName(hooker, "GetDeviceCaps", GetDeviceCapsHook);
+				PatchImportByName(hooker, "GetForegroundWindow", GetForegroundWindowHook);
 
-				PatchImport(hooker, "CreateWindowExA", CreateWindowExHook);
-				PatchImport(hooker, "RegisterClassA", RegisterClassHook);
+				PatchImportByName(hooker, "CreateWindowExA", CreateWindowExHook);
+				PatchImportByName(hooker, "RegisterClassA", RegisterClassHook);
 
-				PatchImport(hooker, "SetWindowLongA", SetWindowLongHook);
+				PatchImportByName(hooker, "SetWindowLongA", SetWindowLongHook);
 
-				PatchImport(hooker, "MessageBoxA", MessageBoxHook);
+				PatchImportByName(hooker, "MessageBoxA", MessageBoxHook);
 
-				if (!PatchImport(hooker, "RegisterWindowMessageA", RegisterWindowMessageHook))
-					PatchImport(hooker, "RegisterClipboardFormatA", RegisterWindowMessageHook); // for cracks
+				if (!PatchImportByName(hooker, "RegisterWindowMessageA", RegisterWindowMessageHook))
+					PatchImportByName(hooker, "RegisterClipboardFormatA", RegisterWindowMessageHook); // for cracks
 
-				PatchImport(hooker, "SetThreadPriority", SetThreadPriorityHook);
+				PatchImportByName(hooker, "SetThreadPriority", SetThreadPriorityHook);
 
-				PatchImport(hooker, "ShowCursor", ShowCursorHook);
-				PatchImport(hooker, "ClipCursor", ClipCursorHook);
+				PatchImportByName(hooker, "ShowCursor", ShowCursorHook);
+				PatchImportByName(hooker, "ClipCursor", ClipCursorHook);
 
-				PatchImport(hooker, "GetClientRect", GetClientRectHook);
-				PatchImport(hooker, "GetWindowRect", GetWindowRectHook);
+				PatchImportByName(hooker, "GetClientRect", GetClientRectHook);
+				PatchImportByName(hooker, "GetWindowRect", GetWindowRectHook);
 
-				PatchImport(hooker, "GetOpenFileNameA", GetOpenFileNameHook);
-				PatchImport(hooker, "GetSaveFileNameA", GetSaveFileNameHook);
+				PatchImportByName(hooker, "GetOpenFileNameA", GetOpenFileNameHook);
+				PatchImportByName(hooker, "GetSaveFileNameA", GetSaveFileNameHook);
 
-				PatchImport(hooker, "isalpha", IsAlphaHook);
-				PatchImport(hooker, "isalnum", IsAlNumHook);
-				PatchImport(hooker, "isdigit", IsDigitHook);
-				PatchImport(hooker, "isspace", IsSpaceHook);
-				PatchImport(hooker, "ispunct", IsPunctHook);
-				PatchImport(hooker, "iscntrl", IsCntrlHook);
-				PatchImport(hooker, "isupper", IsUpperHook);
-				PatchImport(hooker, "toupper", ToUpperHook);
-				PatchImport(hooker, "tolower", ToLowerHook);
-				PatchImport(hooker, "strchr", StrCharHook);
-				PatchImport(hooker, "memchr", MemoryCharHook);
+				PatchImportByName(hooker, "isalpha", IsAlphaHook);
+				PatchImportByName(hooker, "isalnum", IsAlNumHook);
+				PatchImportByName(hooker, "isdigit", IsDigitHook);
+				PatchImportByName(hooker, "isspace", IsSpaceHook);
+				PatchImportByName(hooker, "ispunct", IsPunctHook);
+				PatchImportByName(hooker, "iscntrl", IsCntrlHook);
+				PatchImportByName(hooker, "isupper", IsUpperHook);
+				PatchImportByName(hooker, "toupper", ToUpperHook);
+				PatchImportByName(hooker, "tolower", ToLowerHook);
+				PatchImportByName(hooker, "strchr", StrCharHook);
+				PatchImportByName(hooker, "memchr", MemoryCharHook);
 
 				if (config.locales.current.oem && config.locales.current.ansi)
 				{
-					PatchImport(hooker, "OemToCharA", OemToCharHook);
-					PatchImport(hooker, "CharToOemA", CharToOemHook);
+					PatchImportByName(hooker, "OemToCharA", OemToCharHook);
+					PatchImportByName(hooker, "CharToOemA", CharToOemHook);
 				}
 
-				PatchImport(hooker, "CoCreateInstance", CoCreateInstanceHook);
+				PatchImportByName(hooker, "CoCreateInstance", CoCreateInstanceHook);
 			}
 
 			if (config.version)
 			{
-				PatchImport(hooker, "PeekMessageA", PeekMessageHook);
-				PatchImport(hooker, "GetCursorPos", GetCursorPosHookV1);
-				PatchImport(hooker, "ClientToScreen", ClientToScreenHook);
-				PatchImport(hooker, "GetDoubleClickTime", GetDoubleClickTimeHook);
+				PatchImportByName(hooker, "PeekMessageA", PeekMessageHook);
+				PatchImportByName(hooker, "GetCursorPos", GetCursorPosHookV1);
+				PatchImportByName(hooker, "ClientToScreen", ClientToScreenHook);
+				PatchImportByName(hooker, "GetDoubleClickTime", GetDoubleClickTimeHook);
 
 				const AddressSpaceV1* hookSpace = addressArrayV1;
 				DWORD hookCount = sizeof(addressArrayV1) / sizeof(AddressSpaceV1);
@@ -6763,7 +6740,7 @@ namespace Hooks
 				} while (--hookCount);
 
 				if (!hookCount)
-					PatchImport(hooker, "timeGetTime", timeGetTimeHook);
+					PatchImportByName(hooker, "timeGetTime", timeGetTimeHook);
 			}
 			else
 			{
@@ -6771,10 +6748,10 @@ namespace Hooks
 				PatchImportFunction(hooker, "DirectDrawCreate", Main::DrawCreate);
 				PatchImportFunction(hooker, "DirectDrawCreateEx", Main::DrawCreateEx);
 
-				PatchImport(hooker, "GetCursorPos", GetCursorPosHookV2);
-				PatchImport(hooker, "SetCursorPos", SetCursorPosHook);
-				PatchImport(hooker, "GetAsyncKeyState", GetKeyState);
-				PatchImport(hooker, "GetSystemMetrics", GetSystemMetricsHook);
+				PatchImportByName(hooker, "GetCursorPos", GetCursorPosHookV2);
+				PatchImportByName(hooker, "SetCursorPos", SetCursorPosHook);
+				PatchImportByName(hooker, "GetAsyncKeyState", GetKeyState);
+				PatchImportByName(hooker, "GetSystemMetrics", GetSystemMetricsHook);
 
 				const AddressSpaceV2* defaultSpace = NULL;
 				const AddressSpaceV2* equalSpace = NULL;
@@ -6802,7 +6779,7 @@ namespace Hooks
 				if (defaultSpace)
 					LoadV2(hooker, defaultSpace);
 				else if (!hookCount)
-					PatchImport(hooker, "timeGetTime", timeGetTimeHook);
+					PatchImportByName(hooker, "timeGetTime", timeGetTimeHook);
 			}
 		}
 		ReleaseHooker(hooker);

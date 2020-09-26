@@ -82,6 +82,7 @@ extern "C"
 #define MathPower(a, b) pow(a, b)
 #define MathSinus(x) sin(x)
 #define MathCosinus(x) cos(x)
+#define MathSqrtFloat(x) sqrtf(x)
 #define StrPrint(buf, fmt, ...) sprintf(buf, fmt, __VA_ARGS__)
 #define StrPrintVar(buf, fmt, va) vsprintf(buf, fmt, va)
 #define StrLength(str) strlen(str)
