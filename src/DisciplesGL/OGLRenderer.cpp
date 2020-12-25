@@ -173,7 +173,7 @@ BOOL OGLRenderer::ReadFrame(BYTE* dstData, Rect* rect, DWORD pitch, BOOL isBGR, 
 	else
 		format = GL_RGB;
 
-	GLReadPixels(rect->x, rect->y, rect->width, rect->height, isBGR ? GL_BGR_EXT : GL_RGB, GL_UNSIGNED_BYTE, dstData);
+	GLReadPixels(rect->x, rect->y, rect->width, rect->height, format, GL_UNSIGNED_BYTE, dstData);
 	
 	return TRUE;
 }

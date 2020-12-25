@@ -52,9 +52,6 @@
     <ClCompile Include="PngLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IPlay4.cpp">
-      <Filter>Source Files\Play</Filter>
-    </ClCompile>
     <ClCompile Include="StateBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -144,9 +141,6 @@
     <ClInclude Include="PngLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IPlay4.h">
-      <Filter>Header Files\Play</Filter>
-    </ClInclude>
     <ClInclude Include="StateBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -208,12 +202,6 @@
     </Filter>
     <Filter Include="Source Files\Draw\Open">
       <UniqueIdentifier>{0eb1e642-cba5-4583-908a-569f77f37fe0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Play">
-      <UniqueIdentifier>{a47ef214-8f46-47ae-993a-d312779bb4de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Play">
-      <UniqueIdentifier>{72212ce8-8632-4de7-9446-6a281fac3242}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Render">
       <UniqueIdentifier>{7f07b90e-79e9-4f7c-9ce4-99edb31b492b}</UniqueIdentifier>

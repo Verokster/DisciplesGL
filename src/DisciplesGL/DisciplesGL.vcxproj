@@ -243,7 +243,6 @@
     <ClCompile Include="IDrawPalette.cpp" />
     <ClCompile Include="IDrawSurface7.cpp" />
     <ClCompile Include="IDrawUnknown.cpp" />
-    <ClCompile Include="IPlay4.cpp" />
     <ClCompile Include="MidRenderer.cpp" />
     <ClCompile Include="NewRenderer.cpp" />
     <ClCompile Include="OGLRenderer.cpp" />
@@ -277,7 +276,6 @@
     <ClInclude Include="IDrawPalette.h" />
     <ClInclude Include="IDrawSurface7.h" />
     <ClInclude Include="IDrawUnknown.h" />
-    <ClInclude Include="IPlay4.h" />
     <ClInclude Include="MidRenderer.h" />
     <ClInclude Include="NewRenderer.h" />
     <ClInclude Include="OGLRenderer.h" />

@@ -23,8 +23,11 @@
 */
 
 #pragma once
-// #pragma comment(lib, "hooker.lib")
-// #pragma comment(linker, "/DLL /ENTRY:HookMain@12")
+
+#ifdef _HOOKER_LIB
+#pragma comment(lib, "hooker.lib")
+#pragma comment(linker, "/DLL /ENTRY:HookMain@12")
+#endif  // _HOOKER_LIB
 
 enum RedirectType
 {
@@ -34,6 +37,7 @@ enum RedirectType
 };
 
 typedef VOID* HOOKER;
+typedef unsigned __int64 QWORD;
 
 extern "C"
 {
@@ -75,6 +79,15 @@ extern "C"
 	BOOL __stdcall ReadBlock(HOOKER hooker, DWORD address, VOID* block, DWORD size);
 
 	/// <summary>
+	/// Reads pointer value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="lpValue"></param>
+	/// <returns></returns>
+	BOOL __stdcall ReadPtr(HOOKER hooker, DWORD address, VOID** lpValue);
+
+	/// <summary>
 	/// Reads byte value
 	/// </summary>
 	/// <param name="hooker"></param>
@@ -102,6 +115,60 @@ extern "C"
 	BOOL __stdcall ReadDWord(HOOKER hooker, DWORD address, DWORD* lpValue);
 
 	/// <summary>
+	/// Reads quad word value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="lpValue"></param>
+	/// <returns></returns>
+	BOOL __stdcall ReadQWord(HOOKER hooker, DWORD address, QWORD* lpValue);
+
+	/// <summary>
+	/// Reads short value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="lpValue"></param>
+	/// <returns></returns>
+	BOOL __stdcall ReadShort(HOOKER hooker, DWORD address, SHORT* lpValue);
+
+	/// <summary>
+	/// Reads long value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="lpValue"></param>
+	/// <returns></returns>
+	BOOL __stdcall ReadLong(HOOKER hooker, DWORD address, LONG* lpValue);
+
+	/// <summary>
+	/// Reads long long value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="lpValue"></param>
+	/// <returns></returns>
+	BOOL __stdcall ReadLongLong(HOOKER hooker, DWORD address, LONGLONG* lpValue);
+
+	/// <summary>
+	/// Reads float value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="lpValue"></param>
+	/// <returns></returns>
+	BOOL __stdcall ReadFloat(HOOKER hooker, DWORD address, FLOAT* lpValue);
+
+	/// <summary>
+	/// Reads double float value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="lpValue"></param>
+	/// <returns></returns>
+	BOOL __stdcall ReadDouble(HOOKER hooker, DWORD address, DOUBLE* lpValue);
+
+	/// <summary>
 	/// Find data block address
 	/// </summary>
 	/// <param name="hooker"></param>
@@ -110,7 +177,19 @@ extern "C"
 	/// <param name="flags"></param>
 	/// <param name="start"></param>
 	/// <returns></returns>
-	DWORD __stdcall FindBlock(HOOKER hooker, VOID* block, DWORD size, DWORD flags = 0, DWORD start = 0);
+	DWORD __stdcall FindBlock(HOOKER hooker, const VOID* block, DWORD size, DWORD flags = 0, DWORD start = 0);
+	
+	/// <summary>
+	/// Find data block address by bit mask
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="block"></param>
+	/// <param name="mask"></param>
+	/// <param name="size"></param>
+	/// <param name="flags"></param>
+	/// <param name="start"></param>
+	/// <returns></returns>
+	DWORD __stdcall FindBlockByMask(HOOKER hooker, const VOID* block, const VOID* mask, DWORD size, DWORD flags = 0, DWORD start = 0);
 	
 	/// <summary>
 	/// Find relative function call
@@ -150,7 +229,7 @@ extern "C"
 	/// <param name="hookAddress"></param>
 	/// <param name="nopCount"></param>
 	/// <returns></returns>
-	BOOL __stdcall PatchHook(HOOKER hooker, DWORD address, VOID* hookAddress, DWORD nopCount = 0);
+	BOOL __stdcall PatchHook(HOOKER hooker, DWORD address, const VOID* hookAddress, DWORD nopCount = 0);
 
 	/// <summary>
 	/// Writes call to new function
@@ -160,7 +239,7 @@ extern "C"
 	/// <param name="funcAddress"></param>
 	/// <param name="nopCount"></param>
 	/// <returns></returns>
-	BOOL __stdcall PatchCall(HOOKER hooker, DWORD address, VOID* funcAddress, DWORD nopCount = 0);
+	BOOL __stdcall PatchCall(HOOKER hooker, DWORD address, const VOID* funcAddress, DWORD nopCount = 0);
 
 	/// <summary>
 	/// Fill bytes by specified value
@@ -188,7 +267,7 @@ extern "C"
 	/// <param name="address"></param>
 	/// <param name="block"></param>
 	/// <returns></returns>
-	BOOL __stdcall PatchHex(HOOKER hooker, DWORD address, CHAR* hex);
+	BOOL __stdcall PatchHex(HOOKER hooker, DWORD address, const CHAR* hex);
 
 	/// <summary>
 	/// Writes new data block
@@ -198,7 +277,27 @@ extern "C"
 	/// <param name="block"></param>
 	/// <param name="size"></param>
 	/// <returns></returns>
-	BOOL __stdcall PatchBlock(HOOKER hooker, DWORD address, VOID* block, DWORD size);
+	BOOL __stdcall PatchBlock(HOOKER hooker, DWORD address, const VOID* block, DWORD size);
+	
+	/// <summary>
+	/// Writes new data block by bit mask
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="block"></param>
+	/// <param name="mask"></param>
+	/// <param name="size"></param>
+	/// <returns></returns>
+	BOOL __stdcall PatchBlockByMask(HOOKER hooker, DWORD address, const VOID* block, const VOID* mask, DWORD size);
+
+	/// <summary>
+	/// Writes new pointer value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="value"></param>
+	/// <returns></returns>
+	BOOL __stdcall PatchPtr(HOOKER hooker, DWORD address, const VOID* value);
 
 	/// <summary>
 	/// Writes new byte value
@@ -228,13 +327,67 @@ extern "C"
 	BOOL __stdcall PatchDWord(HOOKER hooker, DWORD address, DWORD value);
 
 	/// <summary>
+	/// Writes new quad word value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="value"></param>
+	/// <returns></returns>
+	BOOL __stdcall PatchQWord(HOOKER hooker, DWORD address, QWORD value);
+
+	/// <summary>
+	/// Writes new short value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="value"></param>
+	/// <returns></returns>
+	BOOL __stdcall PatchShort(HOOKER hooker, DWORD address, SHORT value);
+
+	/// <summary>
+	/// Writes new long value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="value"></param>
+	/// <returns></returns>
+	BOOL __stdcall PatchLong(HOOKER hooker, DWORD address, LONG value);
+
+	/// <summary>
+	/// Writes new long long value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="value"></param>
+	/// <returns></returns>
+	BOOL __stdcall PatchLongLong(HOOKER hooker, DWORD address, LONGLONG value);
+
+	/// <summary>
+	/// Writes new float value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="value"></param>
+	/// <returns></returns>
+	BOOL __stdcall PatchFloat(HOOKER hooker, DWORD address, FLOAT value);
+
+	/// <summary>
+	/// Writes new double float value
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="value"></param>
+	/// <returns></returns>
+	BOOL __stdcall PatchDouble(HOOKER hooker, DWORD address, DOUBLE value);
+
+	/// <summary>
 	/// Redirect relative call to new address
 	/// </summary>
 	/// <param name="hooker"></param>
 	/// <param name="address"></param>
 	/// <param name="funcAddress"></param>
 	/// <returns></returns>
-	DWORD __stdcall RedirectCall(HOOKER hooker, DWORD address, VOID* funcAddress);
+	DWORD __stdcall RedirectCall(HOOKER hooker, DWORD address, const VOID* funcAddress);
 
 	/// <summary>
 	/// Redirects module imported function and retrives old address
@@ -244,7 +397,7 @@ extern "C"
 	/// <param name="funcAddress"></param>
 	/// <param name="old_value"></param>
 	/// <returns></returns>
-	DWORD __stdcall PatchImportByName(HOOKER hooker, const CHAR* name, VOID* funcAddress, DWORD* old_value = NULL);
+	DWORD __stdcall PatchImportByName(HOOKER hooker, const CHAR* name, const VOID* funcAddress, DWORD* old_value = NULL);
 	
 	/// <summary>
 	/// Redirects module imported function and retrives old address
@@ -254,7 +407,7 @@ extern "C"
 	/// <param name="funcAddress"></param>
 	/// <param name="old_value"></param>
 	/// <returns></returns>
-	DWORD __stdcall PatchImportByOrdinal(HOOKER hooker, DWORD ordinal, VOID* funcAddress, DWORD* old_value = NULL);
+	DWORD __stdcall PatchImportByOrdinal(HOOKER hooker, DWORD ordinal, const VOID* funcAddress, DWORD* old_value = NULL);
 
 	/// <summary>
 	/// Redirects module exported function and retrives old address
@@ -264,7 +417,7 @@ extern "C"
 	/// <param name="funcAddress"></param>
 	/// <param name="old_value"></param>
 	/// <returns></returns>
-	DWORD __stdcall PatchExport(HOOKER hooker, const CHAR* name, VOID* funcAddress, DWORD* old_value = NULL);
+	DWORD __stdcall PatchExport(HOOKER hooker, const CHAR* name, const VOID* funcAddress, DWORD* old_value = NULL);
 
 	/// <summary>
 	/// Redirects module entry point and retrives old address
@@ -272,7 +425,7 @@ extern "C"
 	/// <param name="hooker"></param>
 	/// <param name="funcAddress"></param>
 	/// <returns></returns>
-	DWORD __stdcall PatchEntry(HOOKER hooker, VOID* funcAddress);
+	DWORD __stdcall PatchEntry(HOOKER hooker, const VOID* funcAddress);
 	
 	/// <summary>
 	/// Redirect all imports to other module

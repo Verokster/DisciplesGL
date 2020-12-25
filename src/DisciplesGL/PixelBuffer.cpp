@@ -369,12 +369,11 @@ namespace CPP
 		ptr1 += slice;
 		ptr2 += slice;
 
-		DWORD i = count;
 		for (DWORD i = 0; i < count; ++i)
-			if (*(ptr1 - i) != *(ptr2 - i))
+			if (ptr1[-i] != ptr2[-i])
 				return count - i;
 
-		return i;
+		return 0;
 	}
 
 	BOOL __fastcall BlockForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2, POINT* p)
@@ -428,57 +427,35 @@ namespace CPP
 	DWORD __fastcall SideForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2)
 	{
 		DWORD count = width;
-
 		ptr1 += slice;
 		ptr2 += slice;
-
-		for (LONG y = 0; y < height; ++y)
+		for (LONG x = 0; x < width; ++x, ++ptr1, ++ptr2)
 		{
-			for (LONG x = 0; x < width; ++x)
-			{
-				if (ptr1[x] != ptr2[x])
-				{
-					width = x;
-					if (!width)
-						return count;
-
-					break;
-				}
-			}
-
-			ptr1 += pitch;
-			ptr2 += pitch;
+			DWORD* cmp1 = ptr1;
+			DWORD* cmp2 = ptr2;
+			for (LONG y = 0; y < height; ++y, cmp1 += pitch, cmp2 += pitch)
+				if (*cmp1 != *cmp2)
+					return count - x;
 		}
 
-		return count - width;
+		return 0;
 	}
 
 	DWORD __fastcall SideBackwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2)
 	{
 		DWORD count = width;
-
 		ptr1 += slice;
 		ptr2 += slice;
-
-		for (LONG y = 0; y < height; ++y)
+		for (LONG x = 0; x < width; ++x, --ptr1, --ptr2)
 		{
-			for (LONG x = 0; x < width; ++x)
-			{
-				if (ptr1[-x] != ptr2[-x])
-				{
-					width = x;
-					if (!width)
-						return count;
-
-					break;
-				}
-			}
-
-			ptr1 -= pitch;
-			ptr2 -= pitch;
+			DWORD* cmp1 = ptr1;
+			DWORD* cmp2 = ptr2;
+			for (LONG y = 0; y < height; ++y, cmp1 -= pitch, cmp2 -= pitch)
+				if (*cmp1 != *cmp2)
+					return count - x;
 		}
 
-		return count - width;
+		return 0;
 	}
 }
 

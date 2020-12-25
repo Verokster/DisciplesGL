@@ -413,7 +413,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 					}
 					else
 					{
-						MemoryZero(this->frameBuffer, frameSize.height * config.mode->width * (this->isTrueColor ? sizeof(DWORD) : sizeof(WORD)));
+						MemoryZero(this->frameBuffer, frameSize.height * config.mode->width * sizeof(WORD));
 						GLTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frameSize.width, frameSize.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frameBuffer);
 					}
 				}
@@ -474,7 +474,7 @@ BOOL NewRenderer::RenderInner(BOOL ready, BOOL force, StateBufferAligned** lpSta
 				break;
 			}
 
-			this->program->Use(this->texSize, stateBuffer->isBack);
+			this->program->Use(this->viewSize, stateBuffer->isBack);
 			{
 				GLViewport(this->ddraw->viewport.rectangle.x, this->ddraw->viewport.rectangle.y + this->ddraw->viewport.offset, this->ddraw->viewport.rectangle.width, this->ddraw->viewport.rectangle.height);
 

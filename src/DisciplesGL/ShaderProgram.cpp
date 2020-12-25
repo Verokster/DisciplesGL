@@ -25,8 +25,6 @@
 #include "stdafx.h"
 #include "ShaderProgram.h"
 
-#define M_PI 3.14159265358979323846f
-
 ShaderProgram::ShaderProgram(const CHAR* version, DWORD vertexName, DWORD fragmentName, DWORD flags, ShaderProgram* last)
 {
 	this->last = last;
@@ -112,7 +110,7 @@ VOID ShaderProgram::Update(DWORD texSize, Adjustment* colors)
 	{
 		*this->colors = *colors;
 
-		GLUniform1f(this->loc.hue, (2.0f * colors->hueShift - 1.0f) * M_PI);
+		GLUniform1f(this->loc.hue, FLOAT((2.0 * colors->hueShift - 1.0) * M_PI));
 		GLUniform1f(this->loc.sat, (FLOAT)MathPower(2.0f * colors->saturation, 1.5849625f));
 
 		GLUniform4f(this->loc.input.left,

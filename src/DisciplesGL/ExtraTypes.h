@@ -450,7 +450,8 @@ struct LevelsData {
 	HDC hDc;
 	HBITMAP hBmp;
 	DWORD* data;
-	LevelColorsFloat* colors;
+	DWORD bmpData[100 * 516];
+	LevelColorsFloat colors[256];
 	FLOAT delta;
 	Adjustment values;
 };
@@ -504,4 +505,14 @@ struct CloudObject {
 		};
 		RECT boundsRect;
 	};
+};
+
+class OpenDraw;
+struct DialogParams {
+	HWND hWnd;
+	BOOL isGrayed;
+	OpenDraw* ddraw;
+	BOOL isFullscreen;
+	ULONG_PTR cookie;
+	RECT clip;
 };

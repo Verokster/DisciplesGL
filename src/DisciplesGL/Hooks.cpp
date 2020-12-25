@@ -34,7 +34,6 @@
 #include "Resource.h"
 #include "Window.h"
 #include "PngLib.h"
-#include "IPlay4.h"
 #include "Hooker.h"
 
 #define CHECKVALUE (WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX)
@@ -974,25 +973,27 @@ namespace Hooks
 		return ddraw ? ddraw->hWnd : hWnd;
 	}
 
+	INT_PTR __stdcall DialogBoxParamHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND, DLGPROC lpDialogFunc, LPARAM dwInitParam)
+	{
+		INT_PTR res;
+		DialogParams params = { hWndMain, TRUE, NULL };
+		Window::BeginDialog(&params);
+		{
+			res = DialogBoxParam(hInstance, lpTemplateName, params.hWnd, lpDialogFunc, dwInitParam);
+		}
+		Window::EndDialog(&params);
+		return res;
+	}
+
 	INT __stdcall MessageBoxHook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)
 	{
-		RECT rc;
-		GetClipCursor(&rc);
-
 		INT res;
-		ClipCursor(NULL);
+		DialogParams params = { hWndMain, TRUE, NULL };
+		Window::BeginDialog(&params);
 		{
-			ULONG_PTR cookie = NULL;
-			if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
-				cookie = NULL;
-
 			res = MessageBox(hWnd, lpText, lpCaption, uType);
-
-			if (cookie)
-				DeactivateActCtxC(0, cookie);
 		}
-		ClipCursor(&rc);
-
+		Window::EndDialog(&params);
 		return res;
 	}
 
@@ -1265,19 +1266,12 @@ namespace Hooks
 	const CLSID CLSID_DirectDraw = { 0xD7B70EE0, 0x4340, 0x11CF, 0xB0, 0x63, 0x00, 0x20, 0xAF, 0xC2, 0xCD, 0x35 };
 	const IID IID_IDirectDraw4 = { 0x9C59509A, 0x39BD, 0x11D1, 0x8C, 0x4A, 0x00, 0xC0, 0x4F, 0xD9, 0x30, 0xC5 };
 
-	const CLSID CLSID_DirectPlay = { 0xD1EB6D20, 0x8923, 0x11D0, 0x9D, 0x97, 0x0, 0xA0, 0xC9, 0xA, 0x43, 0xCB };
-	const IID IID_IDirectPlay4A = { 0xAB1C531, 0x4745, 0x11D1, 0xA7, 0xA1, 0x0, 0x0, 0xF8, 0x3, 0xAB, 0xFC };
-
 	HRESULT __stdcall CoCreateInstanceHook(REFCLSID rclsid, LPUNKNOWN pUnkOuter, DWORD dwClsContext, REFIID riid, LPVOID* ppv)
 	{
 		if (!MemoryCompare(&rclsid, &CLSID_DirectDraw, sizeof(CLSID)) && !MemoryCompare(&riid, &IID_IDirectDraw4, sizeof(IID)))
 			return Main::DrawCreateEx(NULL, ppv, riid, NULL);
 
-		HRESULT res = CoCreateInstance(rclsid, pUnkOuter, dwClsContext, riid, ppv);
-		if (!res && !MemoryCompare(&rclsid, &CLSID_DirectPlay, sizeof(CLSID)) && !MemoryCompare(&riid, &IID_IDirectPlay4A, sizeof(IID)))
-			*ppv = new IPlay4((LPDIRECTPLAY4)*ppv, hWndMain);
-
-		return res;
+		return CoCreateInstance(rclsid, pUnkOuter, dwClsContext, riid, ppv);
 	}
 
 #pragma region 32 BPP
@@ -3104,29 +3098,25 @@ namespace Hooks
 
 	BOOL __stdcall GetOpenFileNameHook(LPOPENFILENAMEA lpofn)
 	{
-		BOOL wasWindowed = config.windowedMode;
-		if (!wasWindowed)
-			SendMessage(hWndMain, WM_COMMAND, IDM_RES_FULL_SCREEN, NULL);
-
-		BOOL res = GetOpenFileName(lpofn);
-
-		if (!wasWindowed && config.windowedMode)
-			SendMessage(hWndMain, WM_COMMAND, IDM_RES_FULL_SCREEN, NULL);
-
+		BOOL res;
+		DialogParams params = { hWndMain, TRUE, NULL };
+		Window::BeginDialog(&params);
+		{
+			res = GetOpenFileName(lpofn);
+		}
+		Window::EndDialog(&params);
 		return res;
 	}
 
 	BOOL __stdcall GetSaveFileNameHook(LPOPENFILENAMEA lpofn)
 	{
-		BOOL wasWindowed = config.windowedMode;
-		if (!wasWindowed)
-			SendMessage(hWndMain, WM_COMMAND, IDM_RES_FULL_SCREEN, NULL);
-
-		BOOL res = GetSaveFileName(lpofn);
-
-		if (!wasWindowed && config.windowedMode)
-			SendMessage(hWndMain, WM_COMMAND, IDM_RES_FULL_SCREEN, NULL);
-
+		BOOL res;
+		DialogParams params = { hWndMain, TRUE, NULL };
+		Window::BeginDialog(&params);
+		{
+			res = GetSaveFileName(lpofn);
+		}
+		Window::EndDialog(&params);
 		return res;
 	}
 
@@ -6250,34 +6240,34 @@ namespace Hooks
 		// Map move by mouse press
 		if (ReadDWord(hooker, hookSpace->iso_view_interface, &sub_DeleteIsoView) && ReadDWord(hooker, hookSpace->iso_view_interface + 8, &sub_MouseMove) && ReadDWord(hooker, hookSpace->iso_view_interface + 12, &sub_MouseAction))
 		{
-			PatchDWord(hooker, hookSpace->iso_view_interface, (DWORD)DeleteIsoView);
-			PatchDWord(hooker, hookSpace->iso_view_interface + 8, (DWORD)hook_006D79B4);
-			PatchDWord(hooker, hookSpace->iso_view_interface + 12, (DWORD)hook_006D79B8);
+			PatchPtr(hooker, hookSpace->iso_view_interface, DeleteIsoView);
+			PatchPtr(hooker, hookSpace->iso_view_interface + 8, hook_006D79B4);
+			PatchPtr(hooker, hookSpace->iso_view_interface + 12, hook_006D79B8);
 
 			if (hookSpace->iso_view_info_interface && ReadDWord(hooker, hookSpace->iso_view_info_interface, &sub_DeleteIsoInfoView))
 			{
-				PatchDWord(hooker, hookSpace->iso_view_info_interface, (DWORD)DeleteIsoInfoView);
-				PatchDWord(hooker, hookSpace->iso_view_info_interface + 8, (DWORD)hook_006D79B4);
-				PatchDWord(hooker, hookSpace->iso_view_info_interface + 12, (DWORD)hook_006D79B8);
+				PatchPtr(hooker, hookSpace->iso_view_info_interface, DeleteIsoInfoView);
+				PatchPtr(hooker, hookSpace->iso_view_info_interface + 8, hook_006D79B4);
+				PatchPtr(hooker, hookSpace->iso_view_info_interface + 12, hook_006D79B8);
 			}
 
 			if (hookSpace->iso_view_events_interface && ReadDWord(hooker, hookSpace->iso_view_events_interface, &sub_DeleteIsoEventsView))
 			{
-				PatchDWord(hooker, hookSpace->iso_view_events_interface, (DWORD)DeleteIsoEventsView);
-				PatchDWord(hooker, hookSpace->iso_view_events_interface + 8, (DWORD)hook_006D79B4);
-				PatchDWord(hooker, hookSpace->iso_view_events_interface + 12, (DWORD)hook_006D79B8);
+				PatchPtr(hooker, hookSpace->iso_view_events_interface, DeleteIsoEventsView);
+				PatchPtr(hooker, hookSpace->iso_view_events_interface + 8, hook_006D79B4);
+				PatchPtr(hooker, hookSpace->iso_view_events_interface + 12, hook_006D79B8);
 			}
 
 			if (hookSpace->iso_view_map_interface && ReadDWord(hooker, hookSpace->iso_view_map_interface, &sub_DeleteIsoMapView) && ReadDWord(hooker, hookSpace->iso_view_map_interface + 12, &sub_MouseActionMap))
 			{
-				PatchDWord(hooker, hookSpace->iso_view_map_interface, (DWORD)DeleteIsoMapView);
-				PatchDWord(hooker, hookSpace->iso_view_map_interface + 8, (DWORD)hook_006D79B4);
-				PatchDWord(hooker, hookSpace->iso_view_map_interface + 12, (DWORD)hook_005CB460);
+				PatchPtr(hooker, hookSpace->iso_view_map_interface, DeleteIsoMapView);
+				PatchPtr(hooker, hookSpace->iso_view_map_interface + 8, hook_006D79B4);
+				PatchPtr(hooker, hookSpace->iso_view_map_interface + 12, hook_005CB460);
 			}
 
 			if (hookSpace->radio_objects_interface && ReadDWord(hooker, hookSpace->radio_objects_interface, &sub_DeleteRadioObjects))
 			{
-				PatchDWord(hooker, hookSpace->radio_objects_interface, (DWORD)DeleteRadioObjects);
+				PatchPtr(hooker, hookSpace->radio_objects_interface, DeleteRadioObjects);
 				sub_CreateRadio = RedirectCall(hooker, hookSpace->radio_objects_create, CreateRadioObjects);
 			}
 
@@ -6356,7 +6346,7 @@ namespace Hooks
 
 		// Editor owner trigger
 		if (hookSpace->banners_owner_trigger && ReadDWord(hooker, hookSpace->banners_owner_trigger + 3, &sub_SpinOwnerCallback))
-			PatchDWord(hooker, hookSpace->banners_owner_trigger + 3, (DWORD)hook_SpinOwnerCallback);
+			PatchPtr(hooker, hookSpace->banners_owner_trigger + 3, hook_SpinOwnerCallback);
 
 		// Editor check alpanum for map name
 		{
@@ -6375,7 +6365,7 @@ namespace Hooks
 
 		// Scenarous list
 		{
-			PatchDWord(hooker, hookSpace->scene_sort_hook + 3, (DWORD)CompareScenes); // Sort by title
+			PatchPtr(hooker, hookSpace->scene_sort_hook + 3, CompareScenes); // Sort by title
 
 			sub_CopyStrObject = RedirectCall(hooker, hookSpace->scene_print_hook, hook_004E584B);
 
@@ -6404,13 +6394,13 @@ namespace Hooks
 			PatchHook(hooker, hookSpace->fillColor, hook_0055D283); // Fill color
 			PatchCall(hooker, hookSpace->minimapGround, DrawMinimapGround); // Minimap ground
 			PatchHook(hooker, hookSpace->minimapObjects, hook_0055D419); // Draw minimap object
-			PatchDWord(hooker, hookSpace->clearGround, (DWORD)ClearGround); // Clear ground
+			PatchPtr(hooker, hookSpace->clearGround, ClearGround); // Clear ground
 			PatchHook(hooker, hookSpace->mapGround, hook_005B5660); // Draw map ground
 			PatchHook(hooker, hookSpace->waterBorders, hook_005B5560); // Draw water borders
 
 			PatchHook(hooker, hookSpace->symbol, hook_005280D9); // Draw Symbol
 			PatchCall(hooker, hookSpace->faces, DrawFaces);
-			PatchDWord(hooker, hookSpace->buildings, (DWORD)DrawCastleBuildings);
+			PatchPtr(hooker, hookSpace->buildings, DrawCastleBuildings);
 
 			PatchHook(hooker, hookSpace->horLine, hook_0053056A); // Draw Horizontal Line
 			PatchHook(hooker, hookSpace->verLine, hook_00530603); // Draw Vertical Line
@@ -6534,11 +6524,11 @@ namespace Hooks
 
 					FLOAT ky = (h - w) * 0.5f;
 
-					INT x = (INT)MathRound(w + ky);
-					INT y = (INT)MathRound(ky);
+					LONG x = (LONG)MathRound(w + ky);
+					LONG y = (LONG)MathRound(ky);
 
-					PatchDWord(hooker, hookSpace->mini_rect_patch + 3, *(DWORD*)&x);
-					PatchDWord(hooker, hookSpace->mini_rect_patch + 8 + 3, *(DWORD*)&y);
+					PatchLong(hooker, hookSpace->mini_rect_patch + 3, x);
+					PatchLong(hooker, hookSpace->mini_rect_patch + 8 + 3, y);
 				}
 
 				// Fix right side curve
@@ -6554,16 +6544,16 @@ namespace Hooks
 
 				if (config.mode->width > 1152)
 				{
-					PatchDWord(hooker, hookSpace->maxSize_1 + 2, (DWORD)&config.mode->width);
-					PatchDWord(hooker, hookSpace->maxSize_2 + 2, (DWORD)&config.mode->width);
-					PatchDWord(hooker, hookSpace->maxSize_3 + 6 + 2, (DWORD)&config.mode->width);
+					PatchPtr(hooker, hookSpace->maxSize_1 + 2, &config.mode->width);
+					PatchPtr(hooker, hookSpace->maxSize_2 + 2, &config.mode->width);
+					PatchPtr(hooker, hookSpace->maxSize_3 + 6 + 2, &config.mode->width);
 				}
 
 				if (config.mode->height > 1152)
 				{
-					PatchDWord(hooker, hookSpace->maxSize_1 + 29 + 2, (DWORD)&config.mode->height);
-					PatchDWord(hooker, hookSpace->maxSize_2 + 28 + 2, (DWORD)&config.mode->height);
-					PatchDWord(hooker, hookSpace->maxSize_3 + 2, (DWORD)&config.mode->height);
+					PatchPtr(hooker, hookSpace->maxSize_1 + 29 + 2, &config.mode->height);
+					PatchPtr(hooker, hookSpace->maxSize_2 + 28 + 2, &config.mode->height);
+					PatchPtr(hooker, hookSpace->maxSize_3 + 2, &config.mode->height);
 				}
 
 				// Centre battle background
@@ -6669,6 +6659,13 @@ namespace Hooks
 				ReleaseHooker(hooker);
 			}
 		}
+
+		HOOKER user = CreateHooker(GetModuleHandle("USER32.dll"));
+		{
+			PatchExport(user, "MessageBoxA", MessageBoxHook);
+			PatchExport(user, "DialogBoxParamA", DialogBoxParamHook);
+		}
+		ReleaseHooker(user);
 
 		HOOKER hooker = CreateHooker(GetModuleHandle(NULL));
 		{
@@ -6778,7 +6775,8 @@ namespace Hooks
 
 				if (defaultSpace)
 					LoadV2(hooker, defaultSpace);
-				else if (!hookCount)
+
+				if (!config.speed.hooked)
 					PatchImportByName(hooker, "timeGetTime", timeGetTimeHook);
 			}
 		}

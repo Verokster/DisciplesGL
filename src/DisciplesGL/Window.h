@@ -26,11 +26,14 @@
 
 namespace Window
 {
-	BOOL __fastcall GetMenuByChildID(MenuItemData* mData);
-	VOID __fastcall CheckMenu(MenuType type);
+	VOID __fastcall BeginDialog(DialogParams*);
+	VOID __fastcall EndDialog(DialogParams*);
+
+	BOOL __fastcall GetMenuByChildID(MenuItemData*);
+	VOID __fastcall CheckMenu(MenuType);
 	VOID __fastcall CheckMenu();
 
-	VOID __fastcall SetCaptureKeys(BOOL state);
-	VOID __fastcall SetCaptureWindow(HWND hWnd);
-	VOID __fastcall SetCapturePanel(HWND hWnd);
+	VOID __fastcall SetCaptureKeys(BOOL);
+	VOID __fastcall SetCaptureWindow(HWND);
+	VOID __fastcall SetCapturePanel(HWND);
 }

@@ -36,12 +36,78 @@
 #include "PngLib.h"
 
 #define WM_REDRAW_CANVAS 0x8001
-#define M_PI 3.14159265358979323846
 
 namespace Window
 {
 	HHOOK OldKeysHook;
 	WNDPROC OldWindowProc, OldPanelProc;
+
+	VOID __fastcall BeginDialog(DialogParams* params)
+	{
+		params->ddraw = Main::FindOpenDrawByWindow(params->hWnd);
+		if (params->ddraw)
+		{
+			if (!config.windowedMode && !config.borderless.real)
+			{
+				params->ddraw->RenderStop();
+
+				config.borderless.mode = TRUE;
+				if (params->isGrayed)
+					config.colors.current = &inactiveColors;
+
+				params->ddraw->RenderStart();
+			}
+			else
+			{
+				if (params->isGrayed)
+				{
+					config.colors.current = &inactiveColors;
+					params->ddraw->Redraw();
+				}
+			}
+		}
+		else
+		{
+			GetClipCursor(&params->clip);
+			ClipCursor(NULL);
+		}
+
+		if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &params->cookie))
+			params->cookie = NULL;
+	}
+
+	VOID __fastcall EndDialog(DialogParams* params)
+	{
+		if (params->cookie)
+			DeactivateActCtxC(0, params->cookie);
+
+		if (params->ddraw)
+		{
+			if (!config.windowedMode && !config.borderless.real)
+			{
+				params->ddraw->RenderStop();
+
+				config.borderless.mode = FALSE;
+				if (params->isGrayed)
+					config.colors.current = &config.colors.active;
+
+				params->ddraw->RenderStart();
+			}
+			else
+			{
+				if (params->isGrayed)
+				{
+					config.colors.current = &config.colors.active;
+					params->ddraw->Redraw();
+				}
+			}
+		}
+		else
+			ClipCursor(&params->clip);
+
+		if (params->hWnd)
+			SetForegroundWindow(params->hWnd);
+	}
 
 	BYTE __fastcall CubicInterpolate(BYTE p0, BYTE p1, BYTE p2, BYTE p3, FLOAT x)
 	{
@@ -1041,9 +1107,6 @@ namespace Window
 		switch (uMsg)
 		{
 		case WM_INITDIALOG: {
-			SetWindowLong(hDlg, GWL_EXSTYLE, NULL);
-			EnumChildWindows(hDlg, EnumChildProc, NULL);
-
 			SendDlgItemMessage(hDlg, IDC_TRK_HUE, TBM_SETRANGE, FALSE, MAKELPARAM(0, 360));
 			SendDlgItemMessage(hDlg, IDC_TRK_SAT, TBM_SETRANGE, FALSE, MAKELPARAM(0, 1000));
 			SendDlgItemMessage(hDlg, IDC_TRK_IN_LEFT, TBM_SETRANGE, FALSE, MAKELPARAM(0, 255));
@@ -1086,124 +1149,125 @@ namespace Window
 			SendDlgItemMessage(hDlg, IDC_LBL_OUT_RIGHT, WM_SETTEXT, NULL, (WPARAM)text);
 
 			LevelsData* levelsData = (LevelsData*)MemoryAlloc(sizeof(LevelsData));
-			MemoryZero(levelsData, sizeof(LevelsData));
-			levelsData->delta = 0.7f;
-			levelsData->values = config.colors.active;
-
-			SetWindowLong(hDlg, GWLP_USERDATA, (LONG)levelsData);
-
-			OpenDraw* ddraw = Main::FindOpenDrawByWindow(GetParent(hDlg));
-			if (ddraw && ddraw->attachedSurface && ddraw->attachedSurface->indexBuffer)
+			if (levelsData)
 			{
-				OpenDrawSurface* surface = ddraw->attachedSurface;
-				StateBufferAligned* buffer = (StateBufferAligned*)surface->indexBuffer;
+				SetWindowLong(hDlg, GWLP_USERDATA, (LONG)levelsData);
+				MemoryZero(levelsData, sizeof(LevelsData));
+				levelsData->delta = 0.7f;
+				levelsData->values = config.colors.active;
 
-				Size size;
-				if (buffer->borders != BordersNone)
+				OpenDraw* ddraw = Main::FindOpenDrawByWindow(GetParent(hDlg));
+				if (ddraw && ddraw->attachedSurface && ddraw->attachedSurface->indexBuffer)
 				{
-					BOOL wide = config.battle.active && config.battle.wide;
+					OpenDrawSurface* surface = ddraw->attachedSurface;
+					StateBufferAligned* buffer = (StateBufferAligned*)surface->indexBuffer;
 
-					if (wide)
-						size = { WIDE_WIDTH, WIDE_HEIGHT };
+					Size size;
+					if (buffer->borders != BordersNone)
+					{
+						BOOL wide = config.battle.active && config.battle.wide;
+
+						if (wide)
+							size = { WIDE_WIDTH, WIDE_HEIGHT };
+						else
+							size = { *(DWORD*)&GAME_WIDTH, *(DWORD*)&GAME_HEIGHT };
+					}
 					else
-						size = { *(DWORD*)&GAME_WIDTH, *(DWORD*)&GAME_HEIGHT };
-				}
-				else
-					size = *(Size*)&surface->mode;
+						size = *(Size*)&surface->mode;
 
-				DWORD left = (surface->mode.width - size.width) >> 1;
-				DWORD top = (surface->mode.height - size.height) >> 1;
-				DWORD pitch = surface->mode.width;
+					DWORD left = (surface->mode.width - size.width) >> 1;
+					DWORD top = (surface->mode.height - size.height) >> 1;
+					DWORD pitch = surface->mode.width;
 
-				LevelColors levels[256];
-				MemoryZero(levels, sizeof(levels));
+					LevelColors levels[256];
+					MemoryZero(levels, sizeof(levels));
 
-				if (config.bpp32Hooked)
-				{
-					DWORD* data = (DWORD*)surface->indexBuffer->data + top * pitch + left;
-					pitch -= size.width;
-
-					DWORD height = size.height;
-					do
+					if (config.bpp32Hooked)
 					{
-						DWORD width = size.width;
+						DWORD* data = (DWORD*)surface->indexBuffer->data + top * pitch + left;
+						pitch -= size.width;
+
+						DWORD height = size.height;
 						do
 						{
-							BYTE* b = (BYTE*)data++;
-							++levels[*b++].red;
-							++levels[*b++].green;
-							++levels[*b].blue;
-						} while (--width);
+							DWORD width = size.width;
+							do
+							{
+								BYTE* b = (BYTE*)data++;
+								++levels[*b++].red;
+								++levels[*b++].green;
+								++levels[*b].blue;
+							} while (--width);
 
-						data += pitch;
-					} while (--height);
-				}
-				else
-				{
-					WORD* data = (WORD*)surface->indexBuffer->data + top * pitch + left;
-					pitch -= size.width;
-
-					DWORD height = size.height;
-					do
+							data += pitch;
+						} while (--height);
+					}
+					else
 					{
-						DWORD width = size.width;
+						WORD* data = (WORD*)surface->indexBuffer->data + top * pitch + left;
+						pitch -= size.width;
+
+						DWORD height = size.height;
 						do
 						{
-							WORD p = *data++;
-							DWORD px = ((p & 0xF800) >> 8) | ((p & 0x07E0) << 5) | ((p & 0x001F) << 19);
+							DWORD width = size.width;
+							do
+							{
+								WORD p = *data++;
+								DWORD px = ((p & 0xF800) >> 8) | ((p & 0x07E0) << 5) | ((p & 0x001F) << 19);
 
-							BYTE* b = (BYTE*)&px;
-							++levels[*b++].red;
-							++levels[*b++].green;
-							++levels[*b].blue;
-						} while (--width);
+								BYTE* b = (BYTE*)&px;
+								++levels[*b++].red;
+								++levels[*b++].green;
+								++levels[*b].blue;
+							} while (--width);
 
-						data += pitch;
-					} while (--height);
-				}
+							data += pitch;
+						} while (--height);
+					}
 
-				levelsData->hDc = CreateCompatibleDC(NULL);
-				if (levelsData->hDc)
-				{
-					HWND hImg = GetDlgItem(hDlg, IDC_CANVAS);
-					RECT rc;
-					GetClientRect(hImg, &rc);
-
-					BITMAPINFO bmi;
-					MemoryZero(&bmi, sizeof(BITMAPINFO));
-					bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-					bmi.bmiHeader.biWidth = rc.right;
-					bmi.bmiHeader.biHeight = 100;
-					bmi.bmiHeader.biPlanes = 1;
-					bmi.bmiHeader.biBitCount = 32;
-					bmi.bmiHeader.biXPelsPerMeter = 1;
-					bmi.bmiHeader.biYPelsPerMeter = 1;
-
-					levelsData->hBmp = CreateDIBSection(levelsData->hDc, (BITMAPINFO*)&bmi, DIB_RGB_COLORS, (VOID**)&levelsData->data, NULL, 0);
-					if (levelsData->hBmp)
+					levelsData->hDc = CreateCompatibleDC(NULL);
+					if (levelsData->hDc)
 					{
-						SelectObject(levelsData->hDc, levelsData->hBmp);
+						HWND hImg = GetDlgItem(hDlg, IDC_CANVAS);
+						RECT rc;
+						GetClientRect(hImg, &rc);
 
-						DWORD total = size.width * size.height;
-						levelsData->colors = (LevelColorsFloat*)MemoryAlloc(sizeof(LevelColorsFloat) * 256);
+						BITMAPINFO bmi;
+						MemoryZero(&bmi, sizeof(BITMAPINFO));
+						bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+						bmi.bmiHeader.biWidth = rc.right;
+						bmi.bmiHeader.biHeight = 100;
+						bmi.bmiHeader.biPlanes = 1;
+						bmi.bmiHeader.biBitCount = 32;
+						bmi.bmiHeader.biXPelsPerMeter = 1;
+						bmi.bmiHeader.biYPelsPerMeter = 1;
 
-						LevelColors* src = levels;
-						LevelColorsFloat* dst = levelsData->colors;
-						DWORD count = 256;
-						do
+						levelsData->hBmp = CreateDIBSection(levelsData->hDc, (BITMAPINFO*)&bmi, DIB_RGB_COLORS, (VOID**)&levelsData->data, NULL, 0);
+						if (levelsData->hBmp)
 						{
-							dst->red = (FLOAT)src->red / total;
-							dst->green = (FLOAT)src->green / total;
-							dst->blue = (FLOAT)src->blue / total;
+							SelectObject(levelsData->hDc, levelsData->hBmp);
 
-							++src;
-							++dst;
-						} while (--count);
+							DWORD total = size.width * size.height;
+
+							LevelColors* src = levels;
+							LevelColorsFloat* dst = levelsData->colors;
+							DWORD count = 256;
+							do
+							{
+								dst->red = (FLOAT)src->red / total;
+								dst->green = (FLOAT)src->green / total;
+								dst->blue = (FLOAT)src->blue / total;
+
+								++src;
+								++dst;
+							} while (--count);
+						}
 					}
 				}
 			}
 
-			SetWindowLong(hDlg, GWL_EXSTYLE, GetWindowLong(hDlg, GWL_EXSTYLE) | WS_EX_DLGMODALFRAME);
+			EnumChildWindows(hDlg, EnumChildProc, NULL);
 			UpdateWindow(hDlg);
 			break;
 		}
@@ -1274,6 +1338,7 @@ namespace Window
 
 			rc = { pt.x, pt.y, pt.x + (rc.right - rc.left), pt.y + (rc.bottom - rc.top) };
 			InvalidateRect(hDlg, &rc, FALSE);
+			return NULL;
 		}
 
 		case WM_DRAWITEM: {
@@ -1282,7 +1347,7 @@ namespace Window
 				DRAWITEMSTRUCT* paint = (DRAWITEMSTRUCT*)lParam;
 
 				LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
-				if (levelsData && levelsData->colors)
+				if (levelsData)
 				{
 					LevelColorsFloat prep[260];
 					{
@@ -1425,9 +1490,8 @@ namespace Window
 							levels[258] = levels[257];
 						}
 
-						DWORD bmpData[100 * 516];
 						{
-							MemoryZero(bmpData, 100 * 516 * sizeof(DWORD));
+							MemoryZero(levelsData->bmpData, sizeof(levelsData->bmpData));
 
 							INT index;
 							struct {
@@ -1459,7 +1523,7 @@ namespace Window
 								dark = { 0xD0, 0x50 };
 							}
 
-							DWORD* dst = bmpData + 1;
+							DWORD* dst = levelsData->bmpData + 1;
 							for (DWORD i = 0; i < 100; ++i)
 							{
 								LevelColors* src = levels + 1;
@@ -1515,33 +1579,35 @@ namespace Window
 
 								dst += 2;
 							}
-						}
 
-						HWND hImg = GetDlgItem(hDlg, IDC_CANVAS);
+							HWND hImg = GetDlgItem(hDlg, IDC_CANVAS);
 
-						RECT rc;
-						GetClientRect(hImg, &rc);
+							RECT rc;
+							GetClientRect(hImg, &rc);
 
-						for (LONG i = 0; i < rc.right; ++i)
-						{
-							FLOAT pos = (FLOAT)i / rc.right * 514.0f;
-							DWORD index = DWORD(pos);
-							pos -= (FLOAT)index;
-
-							DWORD* dest = levelsData->data + i;
-							for (DWORD j = 0; j < 100; ++j)
+							for (LONG i = 0; i < rc.right; ++i)
 							{
-								BYTE* src = (BYTE*)&bmpData[j * 516 + index];
-								BYTE* dst = (BYTE*)dest;
+								FLOAT pos = (FLOAT)i / rc.right * 514.0f;
+								DWORD index = DWORD(pos);
+								pos -= (FLOAT)index;
 
-								for (DWORD j = 0; j < 3; ++j, ++src)
-									dst[j] = CubicInterpolate(src[0], src[4], src[8], src[12], pos);
+								DWORD* dest = levelsData->data + i;
+								for (DWORD j = 0; j < 100; ++j)
+								{
+									BYTE* src = (BYTE*)&levelsData->bmpData[j * 516 + index];
+									BYTE* dst = (BYTE*)dest;
 
-								dest += rc.right;
+									for (DWORD j = 0; j < 3; ++j, ++src)
+										dst[j] = CubicInterpolate(src[0], src[4], src[8], src[12], pos);
+
+									dest += rc.right;
+								}
 							}
+
+							if (levelsData->hBmp)
+								BitBlt(paint->hDC, 0, 0, rc.right, 100, levelsData->hDc, 0, 0, SRCCOPY);
 						}
 
-						BitBlt(paint->hDC, 0, 0, rc.right, 100, levelsData->hDc, 0, 0, SRCCOPY);
 						return TRUE;
 					}
 				}
@@ -1559,30 +1625,25 @@ namespace Window
 			case IDC_BTN_OK: {
 				LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
 				if (levelsData)
-				{
 					levelsData->values = config.colors.active;
 
-					Config::Set(CONFIG_COLORS, "HueSat", MAKELONG(DWORD(config.colors.active.hueShift * 1000.0f), DWORD(config.colors.active.saturation * 1000.0f)));
-					Config::Set(CONFIG_COLORS, "RgbInput", MAKELONG(DWORD(config.colors.active.input.left.rgb * 1000.0f), DWORD(config.colors.active.input.right.rgb * 1000.0f)));
-					Config::Set(CONFIG_COLORS, "RedInput", MAKELONG(DWORD(config.colors.active.input.left.red * 1000.0f), DWORD(config.colors.active.input.right.red * 1000.0f)));
-					Config::Set(CONFIG_COLORS, "GreenInput", MAKELONG(DWORD(config.colors.active.input.left.green * 1000.0f), DWORD(config.colors.active.input.right.green * 1000.0f)));
-					Config::Set(CONFIG_COLORS, "BlueInput", MAKELONG(DWORD(config.colors.active.input.left.blue * 1000.0f), DWORD(config.colors.active.input.right.blue * 1000.0f)));
-					Config::Set(CONFIG_COLORS, "RgbGamma", DWORD(config.colors.active.gamma.rgb * 1000.0f));
-					Config::Set(CONFIG_COLORS, "RedGamma", DWORD(config.colors.active.gamma.red * 1000.0f));
-					Config::Set(CONFIG_COLORS, "GreenGamma", DWORD(config.colors.active.gamma.green * 1000.0f));
-					Config::Set(CONFIG_COLORS, "BlueGamma", DWORD(config.colors.active.gamma.blue * 1000.0f));
-					Config::Set(CONFIG_COLORS, "RgbOutput", MAKELONG(DWORD(config.colors.active.output.left.rgb * 1000.0f), DWORD(config.colors.active.output.right.rgb * 1000.0f)));
-					Config::Set(CONFIG_COLORS, "RedOutput", MAKELONG(DWORD(config.colors.active.output.left.red * 1000.0f), DWORD(config.colors.active.output.right.red * 1000.0f)));
-					Config::Set(CONFIG_COLORS, "GreenOutput", MAKELONG(DWORD(config.colors.active.output.left.green * 1000.0f), DWORD(config.colors.active.output.right.green * 1000.0f)));
-					Config::Set(CONFIG_COLORS, "BlueOutput", MAKELONG(DWORD(config.colors.active.output.left.blue * 1000.0f), DWORD(config.colors.active.output.right.blue * 1000.0f)));
-				}
-
-				SendMessage(hDlg, WM_CLOSE, NULL, NULL);
-				return NULL;
+				Config::Set(CONFIG_COLORS, "HueSat", MAKELONG(DWORD(config.colors.active.hueShift * 1000.0f), DWORD(config.colors.active.saturation * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "RgbInput", MAKELONG(DWORD(config.colors.active.input.left.rgb * 1000.0f), DWORD(config.colors.active.input.right.rgb * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "RedInput", MAKELONG(DWORD(config.colors.active.input.left.red * 1000.0f), DWORD(config.colors.active.input.right.red * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "GreenInput", MAKELONG(DWORD(config.colors.active.input.left.green * 1000.0f), DWORD(config.colors.active.input.right.green * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "BlueInput", MAKELONG(DWORD(config.colors.active.input.left.blue * 1000.0f), DWORD(config.colors.active.input.right.blue * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "RgbGamma", DWORD(config.colors.active.gamma.rgb * 1000.0f));
+				Config::Set(CONFIG_COLORS, "RedGamma", DWORD(config.colors.active.gamma.red * 1000.0f));
+				Config::Set(CONFIG_COLORS, "GreenGamma", DWORD(config.colors.active.gamma.green * 1000.0f));
+				Config::Set(CONFIG_COLORS, "BlueGamma", DWORD(config.colors.active.gamma.blue * 1000.0f));
+				Config::Set(CONFIG_COLORS, "RgbOutput", MAKELONG(DWORD(config.colors.active.output.left.rgb * 1000.0f), DWORD(config.colors.active.output.right.rgb * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "RedOutput", MAKELONG(DWORD(config.colors.active.output.left.red * 1000.0f), DWORD(config.colors.active.output.right.red * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "GreenOutput", MAKELONG(DWORD(config.colors.active.output.left.green * 1000.0f), DWORD(config.colors.active.output.right.green * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "BlueOutput", MAKELONG(DWORD(config.colors.active.output.left.blue * 1000.0f), DWORD(config.colors.active.output.right.blue * 1000.0f)));
 			}
 
 			case IDC_BTN_CANCEL: {
-				SendMessage(hDlg, WM_CLOSE, NULL, NULL);
+				EndDialog(hDlg, TRUE);
 				return NULL;
 			}
 
@@ -1663,7 +1724,7 @@ namespace Window
 				SendDlgItemMessage(hDlg, IDC_LBL_OUT_RIGHT, WM_SETTEXT, NULL, (WPARAM) "255");
 
 				LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
-				if (levelsData && levelsData->colors)
+				if (levelsData)
 				{
 					{
 						LevelColorsFloat found = { 0.0, 0.0, 0.0 };
@@ -1926,22 +1987,26 @@ namespace Window
 		}
 
 		case WM_CLOSE: {
+			EndDialog(hDlg, TRUE);
+			break;
+		}
+
+		case WM_DESTROY: {
 			LevelsData* levelsData = (LevelsData*)GetWindowLong(hDlg, GWLP_USERDATA);
 			if (levelsData)
 			{
 				SetWindowLong(hDlg, GWLP_USERDATA, NULL);
-				config.colors.active = levelsData->values;
-				if (levelsData->colors)
+				if (levelsData->hDc)
 				{
-					MemoryFree(levelsData->colors);
-					DeleteObject(levelsData->hBmp);
 					DeleteDC(levelsData->hDc);
+					if (levelsData->hBmp)
+						DeleteObject(levelsData->hBmp);
 				}
 
+				config.colors.active = levelsData->values;
 				MemoryFree(levelsData);
 			}
-
-			EndDialog(hDlg, TRUE);
+			break;
 		}
 
 		default:
@@ -2271,42 +2336,25 @@ namespace Window
 
 			case IDM_HELP_ABOUT_APPLICATION:
 			case IDM_HELP_ABOUT_WRAPPER: {
-				config.colors.current = &inactiveColors;
 
-				OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-				if (ddraw)
-					ddraw->Redraw();
-
+				DialogParams params = { hWnd, TRUE, NULL };
+				BeginDialog(&params);
 				{
-					ULONG_PTR cookie = NULL;
-					if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
-						cookie = NULL;
-
 					LPARAM id;
 					DLGPROC proc;
 					if (wParam == IDM_HELP_ABOUT_APPLICATION)
 					{
-						id = cookie ? IDD_ABOUT_APPLICATION : IDD_ABOUT_APPLICATION_OLD;
+						id = params.cookie ? IDD_ABOUT_APPLICATION : IDD_ABOUT_APPLICATION_OLD;
 						proc = (DLGPROC)AboutApplicationProc;
 					}
 					else
 					{
-						id = cookie ? IDD_ABOUT_WRAPPER : IDD_ABOUT_WRAPPER_OLD;
+						id = params.cookie ? IDD_ABOUT_WRAPPER : IDD_ABOUT_WRAPPER_OLD;
 						proc = (DLGPROC)AboutWrapperProc;
 					}
-
 					DialogBoxParam(hDllModule, MAKEINTRESOURCE(id), hWnd, proc, id);
-
-					if (cookie)
-						DeactivateActCtxC(0, cookie);
 				}
-
-				config.colors.current = &config.colors.active;
-
-				if (ddraw)
-					ddraw->Redraw();
-
-				SetForegroundWindow(hWnd);
+				EndDialog(&params);
 				return NULL;
 			}
 
@@ -2514,18 +2562,12 @@ namespace Window
 			}
 
 			case IDM_COLOR_ADJUST: {
+				DialogParams params = { hWnd, FALSE, NULL };
+				BeginDialog(&params);
 				{
-					ULONG_PTR cookie = NULL;
-					if (hActCtx && hActCtx != INVALID_HANDLE_VALUE && !ActivateActCtxC(hActCtx, &cookie))
-						cookie = NULL;
-
 					DialogBox(hDllModule, MAKEINTRESOURCE(IDD_COLOR_ADJUSTMENT), hWnd, (DLGPROC)ColorAdjustmentProc);
-
-					if (cookie)
-						DeactivateActCtxC(0, cookie);
 				}
-
-				SetForegroundWindow(hWnd);
+				EndDialog(&params);
 				return NULL;
 			}
 
