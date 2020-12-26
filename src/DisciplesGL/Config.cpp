@@ -24,6 +24,7 @@
 
 #include "stdafx.h"
 #include "Config.h"
+#include "intrin.h"
 #include "Resource.h"
 #include "Window.h"
 
@@ -289,7 +290,7 @@ namespace Config
 				config.locales.current.id = GetUserDefaultLCID();
 				config.msgTimeScale.time = 15;
 				config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
-				config.updateMode = UpdateCPP;
+				config.updateMode = UpdateSSE;
 				config.mouseScroll.lButton = config.mouseScroll.mButton = TRUE;
 				config.cloudsFactor = 1.0f;
 
@@ -350,7 +351,7 @@ namespace Config
 					ptr = Add(ptr, "ScreenshotLevel", *(INT*)&config.snapshot.level, "Compression level for PNG screenshots (0 - 9, 5 - 'default')");
 					ptr = Add(ptr, "Locale", *(INT*)&config.locales.current.id, "Locale id (by default is determined by system locale)");
 					ptr = Add(ptr, "MessageTimeout", config.msgTimeScale.time, "In-game messages timeout in seconds (15 'default')");
-					ptr = Add(ptr, "UpdateMode", (INT)config.updateMode, "Image comparison. Affects on rendering performance (0 - none; 1 - classic 'default'; 2 - alternative)");
+					ptr = Add(ptr, "UpdateMode", (INT)config.updateMode, "Image comparison. Affects on rendering performance (0 - none; 1 - SSE2 'default'; 2 - classic 'default'; 3 - alternative)");
 					ptr = Add(ptr, "FastAI", config.ai.fast, "Increases AI performance, but may cause an unexpected game crash (0 - no 'default'; 1 - yes)");
 					ptr = Add(ptr, "MouseScroll", 3, "Allows map scrolling by pressing mouse button (0 - no; 1 - left button; 2 - middle button; 3 - both buttons 'default')");
 					ptr = Add(ptr, "CloudsFactor", 1, "Defines clouds count multiplier (1 - min 'default')");
@@ -541,9 +542,9 @@ namespace Config
 				config.msgTimeScale.time = *(DWORD*)&value;
 				config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 
-				config.updateMode = (UpdateMode)Config::Get(CONFIG_WRAPPER, "UpdateMode", (INT)UpdateCPP);
+				config.updateMode = (UpdateMode)Config::Get(CONFIG_WRAPPER, "UpdateMode", (INT)UpdateSSE);
 				if (config.updateMode < UpdateNone || config.updateMode > UpdateASM)
-					config.updateMode = UpdateCPP;
+					config.updateMode = UpdateSSE;
 
 				if (!config.isEditor)
 					config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
@@ -770,6 +771,15 @@ namespace Config
 		}
 		else
 			config.singleWindow = TRUE;
+
+		if (config.updateMode == UpdateSSE)
+		{
+			INT cpuinfo[4];
+			__cpuid(cpuinfo, 1);
+			BOOL isSSE2 = cpuinfo[3] & (1 << 26) || FALSE;
+			if (!isSSE2)
+				config.updateMode = UpdateCPP;
+		}
 
 		config.singleThread = TRUE;
 		DWORD processMask, systemMask;

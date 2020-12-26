@@ -24,6 +24,7 @@
 
 #include "stdafx.h"
 #include "PixelBuffer.h"
+#include "intrin.h"
 #include "Config.h"
 
 namespace ASM
@@ -459,6 +460,251 @@ namespace CPP
 	}
 }
 
+namespace SSE
+{
+	DWORD __fastcall ForwardCompare(DWORD count, DWORD slice, DWORD* ptr1, DWORD* ptr2)
+	{
+		__m128i* a = (__m128i*)(ptr1 + slice);
+		__m128i* b = (__m128i*)(ptr2 + slice);
+		count >>= 2;
+		do
+		{
+			if (_mm_movemask_epi8(_mm_cmpeq_epi32(_mm_load_si128(a), _mm_load_si128(b))) != 0xFFFF)
+				return count << 2;
+
+			++a;
+			++b;
+		} while (--count);
+
+		return 0;
+	}
+
+	DWORD __fastcall BackwardCompare(DWORD count, DWORD slice, DWORD* ptr1, DWORD* ptr2)
+	{
+		__m128i* a = (__m128i*)(ptr1 + slice - 3);
+		__m128i* b = (__m128i*)(ptr2 + slice - 3);
+		count >>= 2;
+
+		do
+		{
+			if (_mm_movemask_epi8(_mm_cmpeq_epi32(_mm_load_si128(a), _mm_load_si128(b))) != 0xFFFF)
+				return count << 2;
+
+			--a;
+			--b;
+		} while (--count);
+
+		return 0;
+	}
+
+	BOOL __fastcall BlockForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2, POINT* p)
+	{
+		pitch -= width;
+		pitch >>= 2;
+		width >>= 2;
+
+		__m128i* a = (__m128i*)(ptr1 + slice);
+		__m128i* b = (__m128i*)(ptr2 + slice);
+		for (LONG y = 0; y < height; ++y, a += pitch, b += pitch)
+		{
+			DWORD count = width;
+			do
+			{
+				INT mask = _mm_movemask_epi8(_mm_cmpeq_epi32(_mm_load_si128(a), _mm_load_si128(b)));
+				if (mask != 0xFFFF)
+				{
+					LONG c = 3;
+					do
+					{
+						if (!(mask & 0x000F))
+							break;
+						mask >>= 4;
+					} while (--c);
+
+					p->x = ((width - count) << 2) + 3 - c;
+					p->y = y;
+					return TRUE;
+				}
+
+				++a;
+				++b;
+			} while (--count);
+		}
+
+		return FALSE;
+	}
+
+	BOOL __fastcall BlockBackwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2, POINT* p)
+	{
+		pitch -= width;
+		pitch >>= 2;
+		width >>= 2;
+
+		__m128i* a = (__m128i*)(ptr1 + slice - 3);
+		__m128i* b = (__m128i*)(ptr2 + slice - 3);
+		for (LONG y = 0; y < height; ++y, a -= pitch, b -= pitch)
+		{
+			DWORD count = width;
+			do
+			{
+				INT mask = _mm_movemask_epi8(_mm_cmpeq_epi32(_mm_load_si128(a), _mm_load_si128(b)));
+				if (mask != 0xFFFF)
+				{
+					LONG c = 3;
+					do
+					{
+						if (!(mask & 0xF000))
+							break;
+						mask <<= 4;
+					} while (--c);
+
+					p->x = (count << 2) - (4 - c);
+					p->y = height - y - 1;
+					return TRUE;
+				}
+
+				--a;
+				--b;
+			} while (--count);
+		}
+
+		return FALSE;
+	}
+
+	DWORD __fastcall SideForwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2)
+	{
+		DWORD count = width;
+		LONG swd = width >> 2;
+		DWORD spt = pitch >> 2;
+
+		__m128i* a = (__m128i*)(ptr1 + slice);
+		__m128i* b = (__m128i*)(ptr2 + slice);
+
+		LONG i = 0, j;
+		for (i = 0; i < swd; ++i, ++a, ++b)
+		{
+			__m128i* cmp1 = a;
+			__m128i* cmp2 = b;
+			for (j = 0; j < height; ++j, cmp1 += spt, cmp2 += spt)
+			{
+				INT mask = _mm_movemask_epi8(_mm_cmpeq_epi32(_mm_load_si128(cmp1), _mm_load_si128(cmp2)));
+				if (mask != 0xFFFF)
+				{
+					LONG c = 3;
+					do
+					{
+						if (!(mask & 0x000F))
+							break;
+						mask >>= 4;
+					} while (--c);
+
+					++j;
+					a = cmp1 + spt;
+					b = cmp2 + spt;
+					width = (i << 2) + 3 - c;
+					goto lbl_dword;
+				}
+			}
+		}
+
+		j = 0;
+
+	lbl_dword:;
+		ptr1 = (DWORD*)a;
+		ptr2 = (DWORD*)b;
+		for (LONG x = i << 2; x < width; ++x, ++ptr1, ++ptr2)
+		{
+			DWORD* cmp1 = ptr1;
+			DWORD* cmp2 = ptr2;
+			for (LONG y = j; y < height; ++y, cmp1 += pitch, cmp2 += pitch)
+				if (*cmp1 != *cmp2)
+					return count - x;
+		}
+
+		return count - width;
+	}
+
+	DWORD __fastcall SideBackwardCompare(LONG width, LONG height, DWORD pitch, DWORD slice, DWORD* ptr1, DWORD* ptr2)
+	{
+		DWORD count = width;
+		LONG swd = width >> 2;
+		DWORD spt = pitch >> 2;
+
+		__m128i* a = (__m128i*)(ptr1 + slice - 3);
+		__m128i* b = (__m128i*)(ptr2 + slice - 3);
+
+		LONG i = 0, j;
+		for (i = 0; i < swd; ++i, --a, --b)
+		{
+			__m128i* cmp1 = a;
+			__m128i* cmp2 = b;
+			for (j = 0; j < height; ++j, cmp1 -= spt, cmp2 -= spt)
+			{
+				INT mask = _mm_movemask_epi8(_mm_cmpeq_epi32(_mm_load_si128(cmp1), _mm_load_si128(cmp2)));
+				if (mask != 0xFFFF)
+				{
+					LONG c = 3;
+					do
+					{
+						if (!(mask & 0xF000))
+							break;
+						mask <<= 4;
+					} while (--c);
+
+					++j;
+					a = cmp1 - spt;
+					b = cmp2 - spt;
+					width = (i << 2) + 3 - c;
+					goto lbl_dword;
+				}
+			}
+		}
+
+		j = 0;
+
+	lbl_dword:;
+		ptr1 = (DWORD*)a + 3;
+		ptr2 = (DWORD*)b + 3;
+		for (LONG x = i << 2; x < width; ++x, --ptr1, --ptr2)
+		{
+			DWORD* cmp1 = ptr1;
+			DWORD* cmp2 = ptr2;
+			for (LONG y = j; y < height; ++y, cmp1 -= pitch, cmp2 -= pitch)
+				if (*cmp1 != *cmp2)
+					return count - x;
+		}
+
+		return count - width;
+	}
+}
+
+const UpdateFlow uASM = {
+	ASM::ForwardCompare,
+	ASM::BackwardCompare,
+	ASM::BlockForwardCompare,
+	ASM::BlockBackwardCompare,
+	ASM::SideForwardCompare,
+	ASM::SideBackwardCompare
+};
+
+const UpdateFlow uCCP = {
+	CPP::ForwardCompare,
+	CPP::BackwardCompare,
+	CPP::BlockForwardCompare,
+	CPP::BlockBackwardCompare,
+	CPP::SideForwardCompare,
+	CPP::SideBackwardCompare
+};
+
+const UpdateFlow uSSE = {
+	SSE::ForwardCompare,
+	SSE::BackwardCompare,
+	SSE::BlockForwardCompare,
+	SSE::BlockBackwardCompare,
+	SSE::SideForwardCompare,
+	SSE::SideBackwardCompare
+};
+
 PixelBuffer::PixelBuffer(BOOL isTrue)
 {
 	this->last = { 0, 0 };
@@ -471,29 +717,24 @@ PixelBuffer::PixelBuffer(BOOL isTrue)
 
 	switch (config.updateMode)
 	{
+	case UpdateSSE:
+		if (!((config.mode->width * (isTrue ? sizeof(DWORD) : sizeof(WORD))) & 15))
+		{
+			this->flow = &uSSE;
+			this->alt = &uCCP;
+			break;
+		}
 	case UpdateCPP:
-		this->ForwardCompare = CPP::ForwardCompare;
-		this->BackwardCompare = CPP::BackwardCompare;
-		this->BlockForwardCompare = CPP::BlockForwardCompare;
-		this->BlockBackwardCompare = CPP::BlockBackwardCompare;
-		this->SideForwardCompare = CPP::SideForwardCompare;
-		this->SideBackwardCompare = CPP::SideBackwardCompare;
+		this->flow = &uCCP;
+		this->alt = &uCCP;
 		break;
 	case UpdateASM:
-		this->ForwardCompare = ASM::ForwardCompare;
-		this->BackwardCompare = ASM::BackwardCompare;
-		this->BlockForwardCompare = ASM::BlockForwardCompare;
-		this->BlockBackwardCompare = ASM::BlockBackwardCompare;
-		this->SideForwardCompare = ASM::SideForwardCompare;
-		this->SideBackwardCompare = ASM::SideBackwardCompare;
+		this->flow = &uASM;
+		this->alt = &uASM;
 		break;
 	default:
-		this->ForwardCompare = NULL;
-		this->BackwardCompare = NULL;
-		this->BlockForwardCompare = NULL;
-		this->BlockBackwardCompare = NULL;
-		this->SideForwardCompare = NULL;
-		this->SideBackwardCompare = NULL;
+		this->flow = NULL;
+		this->alt = NULL;
 		break;
 	}
 }
@@ -515,7 +756,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 	BOOL res = FALSE;
 	if (checkOnly)
 	{
-		if (!this->ForwardCompare || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
+		if (!this->flow || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
 		{
 			this->last = this->primaryBuffer->size;
 			res = TRUE;
@@ -538,7 +779,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 			}
 
 			POINT p;
-			if (this->BlockForwardCompare(width, this->last.height, this->pitch, top * this->pitch + left, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data, &p))
+			if (this->alt->BlockForwardCompare(width, this->last.height, this->pitch, top * this->pitch + left, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data, &p))
 				res = TRUE;
 		}
 	}
@@ -546,7 +787,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 	{
 		GLPixelStorei(GL_UNPACK_ROW_LENGTH, config.mode->width);
 
-		if (!this->ForwardCompare || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
+		if (!this->flow || this->primaryBuffer->size.width != this->last.width || this->primaryBuffer->size.height != this->last.height)
 		{
 			this->last = this->primaryBuffer->size;
 
@@ -561,8 +802,8 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 		{
 			DWORD left, right;
 			DWORD length = this->pitch * config.mode->height;
-			if ((left = this->ForwardCompare(length, 0, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data))
-				&& (right = this->BackwardCompare(length, length - 1, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data)))
+			if ((left = this->flow->ForwardCompare(length, 0, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data))
+				&& (right = this->flow->BackwardCompare(length, length - 1, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data)))
 			{
 				DWORD top = (length - left) / this->pitch;
 				DWORD bottom = (right - 1) / this->pitch + 1;
@@ -581,7 +822,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 							rt = this->last.width;
 
 						RECT rc = { *(LONG*)&x, *(LONG*)&y, *(LONG*)&rt, *(LONG*)&bt };
-						this->UpdateBlock(&rc, &offset);
+						this->UpdateBlock(&rc, &offset, this->flow);
 					}
 				}
 
@@ -609,7 +850,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 						right = offset.right;
 
 					RECT rc = { x, y, right, bottom };
-					if (this->UpdateBlock(&rc, (POINT*)&offset))
+					if (this->UpdateBlock(&rc, (POINT*)&offset, this->alt))
 						res = TRUE;
 				}
 			}
@@ -635,7 +876,7 @@ BOOL PixelBuffer::Update(StateBufferAligned** lpStateBuffer, BOOL swap, BOOL che
 	return res;
 }
 
-BOOL PixelBuffer::UpdateBlock(RECT* rect, POINT* offset)
+BOOL PixelBuffer::UpdateBlock(RECT* rect, POINT* offset, const UpdateFlow* flow)
 {
 	if (!this->isTrue)
 	{
@@ -646,8 +887,8 @@ BOOL PixelBuffer::UpdateBlock(RECT* rect, POINT* offset)
 	RECT rc;
 	LONG width = rect->right-- - rect->left;
 	LONG height = rect->bottom-- - rect->top;
-	if (this->BlockForwardCompare(width, height, this->pitch, rect->top * this->pitch + rect->left, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data, (POINT*)&rc.left)
-		&& this->BlockBackwardCompare(width, height, this->pitch, rect->bottom * this->pitch + rect->right, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data, (POINT*)&rc.right))
+	if (flow->BlockForwardCompare(width, height, this->pitch, rect->top * this->pitch + rect->left, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data, (POINT*)&rc.left)
+		&& flow->BlockBackwardCompare(width, height, this->pitch, rect->bottom * this->pitch + rect->right, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data, (POINT*)&rc.right))
 	{
 		if (rc.left > rc.right)
 		{
@@ -666,11 +907,11 @@ BOOL PixelBuffer::UpdateBlock(RECT* rect, POINT* offset)
 		{
 			width = rc.left - rect->left;
 			if (width)
-				rc.left -= this->SideForwardCompare(width, height, this->pitch, (rc.top + 1) * this->pitch + rect->left, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data);
+				rc.left -= flow->SideForwardCompare(width, height, this->pitch, (rc.top + 1) * this->pitch + rect->left, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data);
 
 			width = rect->right - rc.right;
 			if (width)
-				rc.right += this->SideBackwardCompare(width, height, this->pitch, (rc.bottom - 1) * this->pitch + rect->right, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data);
+				rc.right += flow->SideBackwardCompare(width, height, this->pitch, (rc.bottom - 1) * this->pitch + rect->right, (DWORD*)this->primaryBuffer->data, (DWORD*)this->secondaryBuffer->data);
 		}
 
 		Rect rect = { rc.left, rc.top, rc.right - rc.left + 1, height + 1 };

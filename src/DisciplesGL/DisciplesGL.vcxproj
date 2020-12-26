@@ -70,6 +70,8 @@
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <OutDir>D:\Games\Disciples II\Gallean%27s Return</OutDir>
+    <TargetName>C4dll-R</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 1|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -77,6 +79,8 @@
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <OutDir>D:\Games\Sacred Lands\Exe</OutDir>
+    <TargetName>C4dll-R</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <GenerateManifest>false</GenerateManifest>
@@ -84,6 +88,8 @@
     <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <TargetName>C4dll-R</TargetName>
+    <OutDir>D:\Games\Disciples II\Gallean%27s Return</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2|Win32'">
     <Midl>
@@ -120,7 +126,6 @@
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
-      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4dll-R$(TargetExt)</OutputFile>
       <StackReserveSize>
       </StackReserveSize>
       <EntryPointSymbol>DllMain</EntryPointSymbol>
@@ -167,7 +172,6 @@
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
-      <OutputFile>D:\Games\Sacred Lands\Exe\C4dll-R$(TargetExt)</OutputFile>
       <StackReserveSize>
       </StackReserveSize>
       <EntryPointSymbol>DllMain</EntryPointSymbol>
@@ -206,6 +210,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <ControlFlowGuard>false</ControlFlowGuard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <ResourceCompile />
     <Link>
@@ -215,7 +220,6 @@
       <BaseAddress>0x60000000</BaseAddress>
       <SectionAlignment>4096</SectionAlignment>
       <ModuleDefinitionFile>$(ProjectDir)module.def</ModuleDefinitionFile>
-      <OutputFile>D:\Games\Disciples II\Gallean's Return\C4dll-R$(TargetExt)</OutputFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <LinkErrorReporting>NoErrorReport</LinkErrorReporting>
       <CLRSupportLastError>Disabled</CLRSupportLastError>
@@ -233,6 +237,9 @@
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)tools\PEUpdater.exe" "$(TargetPath)" linker 5 A os 4 0 subs 4 0</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Allocation.cpp" />

@@ -137,9 +137,6 @@ VOID GDIRenderer::RenderFrame(BOOL ready, BOOL force, StateBufferAligned** lpSta
 	StateBufferAligned* stateBuffer = *lpStateBuffer;
 	Size* frameSize = &stateBuffer->size;
 
-	this->CheckView(FALSE);
-	Rect* rect = &this->ddraw->viewport.rectangle;
-
 	HDC hDcDraw;
 	if (this->isTrue)
 		hDcDraw = stateBuffer->hDc;
@@ -147,25 +144,18 @@ VOID GDIRenderer::RenderFrame(BOOL ready, BOOL force, StateBufferAligned** lpSta
 	{
 		hDcDraw = this->hDcTemp;
 
-		DWORD pitch = config.mode->width;
-		WORD* src = (WORD*)stateBuffer->data + rect->y * pitch + rect->x;
-		DWORD* dst = (DWORD*)this->tempData + rect->y * pitch + rect->x;
-		pitch -= rect->width;
-
-		DWORD height = rect->height;
+		WORD* src = (WORD*)stateBuffer->data;
+		DWORD* dst = (DWORD*)this->tempData;
+		DWORD count = config.mode->width * config.mode->height;
 		do
 		{
-			DWORD width = rect->width;
-			do
-			{
-				WORD px = *src++;
-				*dst++ = ((px & 0xF800) << 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 3) | ALPHA_COMPONENT;
-			} while (--width);
-
-			src += pitch;
-			dst += pitch;
-		} while (--height);
+			WORD px = *src++;
+			*dst++ = ((px & 0xF800) << 8) | ((px & 0x07E0) << 5) | ((px & 0x001F) << 3) | ALPHA_COMPONENT;
+		} while (--count);
 	}
+
+	this->CheckView(FALSE);
+	Rect* rect = &this->ddraw->viewport.rectangle;
 
 	if (stateBuffer->isBack)
 	{

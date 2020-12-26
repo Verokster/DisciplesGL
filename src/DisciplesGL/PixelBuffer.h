@@ -34,6 +34,15 @@ typedef DWORD(__fastcall* COMPARE)(DWORD, DWORD, DWORD*, DWORD*);
 typedef BOOL(__fastcall* BLOCKCOMPARE)(LONG, LONG, DWORD, DWORD, DWORD*, DWORD*, POINT*);
 typedef DWORD(__fastcall* SIDECOMPARE)(LONG, LONG, DWORD, DWORD, DWORD*, DWORD*);
 
+struct UpdateFlow {
+	COMPARE ForwardCompare;
+	COMPARE BackwardCompare;
+	BLOCKCOMPARE BlockForwardCompare;
+	BLOCKCOMPARE BlockBackwardCompare;
+	SIDECOMPARE SideForwardCompare;
+	SIDECOMPARE SideBackwardCompare;
+};
+
 class PixelBuffer : public Allocation {
 private:
 	Size last;
@@ -43,14 +52,10 @@ private:
 	StateBufferAligned* primaryBuffer;
 	StateBufferAligned* secondaryBuffer;
 
-	COMPARE ForwardCompare;
-	COMPARE BackwardCompare;
-	BLOCKCOMPARE BlockForwardCompare;
-	BLOCKCOMPARE BlockBackwardCompare;
-	SIDECOMPARE SideForwardCompare;
-	SIDECOMPARE SideBackwardCompare;
+	const UpdateFlow* flow;
+	const UpdateFlow* alt;
 
-	BOOL UpdateBlock(RECT*, POINT*);
+	BOOL UpdateBlock(RECT*, POINT*, const UpdateFlow*);
 
 public:
 	PixelBuffer(BOOL);
