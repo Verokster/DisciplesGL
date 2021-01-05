@@ -23,6 +23,7 @@
 */
 
 #include "StdAfx.h"
+#include "intrin.h"
 #include "OpenDrawSurface.h"
 #include "OpenDraw.h"
 #include "Hooks.h"
@@ -795,6 +796,40 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 			{
 				Hooks::isBink = FALSE;
 
+				if (config.isSSE2)
+				{
+					DWORD count = width >> 2;
+					if (count)
+					{
+						DWORD sStep = sWidth - (count << 2);
+						DWORD dStep = dWidth - (count << 2);
+
+						__m128i* s = (__m128i*)src;
+						__m128i* d = (__m128i*)dst;
+						__m128i k = _mm_set1_epi32(ALPHA_COMPONENT);
+
+						DWORD h = height;
+						do
+						{
+							DWORD w = count;
+							do
+								_mm_storeu_si128(d++, _mm_or_si128(_mm_loadu_si128(s++), k));
+							while (--w);
+
+							s = (__m128i*)((DWORD*)s + sStep);
+							d = (__m128i*)((DWORD*)d + dStep);
+						} while (--h);
+
+						count <<= 2;
+						width -= count;
+						if (!width)
+							return DD_OK;
+
+						src += count;
+						dst += count;
+					}
+				}
+
 				sWidth -= width;
 				dWidth -= width;
 
@@ -877,6 +912,48 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			DWORD colorKey = surface->colorKey.dwColorSpaceHighValue;
 			if (colorKey)
 			{
+				if (config.isSSE2)
+				{
+					DWORD count = width >> 2;
+					if (count)
+					{
+						DWORD sStep = sWidth - (count << 2);
+						DWORD dStep = dWidth - (count << 2);
+
+						__m128i* s = (__m128i*)src;
+						__m128i* d = (__m128i*)dst;
+						__m128i k = _mm_set1_epi32(COLORKEY_CHECK);
+						__m128i n = _mm_set1_epi32(COLORKEY_AND);
+
+						DWORD h = height;
+						do
+						{
+							DWORD w = count;
+							do
+							{
+								__m128i a = _mm_loadu_si128(s);
+								__m128i mask = _mm_cmpeq_epi32(_mm_and_si128(a, n), k);
+								if (_mm_movemask_epi8(mask) != 0xFFFF)
+									_mm_storeu_si128(d, _mm_or_si128(_mm_andnot_si128(mask, a), _mm_and_si128(mask, _mm_loadu_si128(d))));
+
+								++s;
+								++d;
+							} while (--w);
+
+							s = (__m128i*)((DWORD*)s + sStep);
+							d = (__m128i*)((DWORD*)d + dStep);
+						} while (--h);
+
+						count <<= 2;
+						width -= count;
+						if (!width)
+							return DD_OK;
+
+						src += count;
+						dst += count;
+					}
+				}
+
 				sWidth -= width;
 				dWidth -= width;
 
@@ -915,6 +992,47 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			WORD colorKey = LOWORD(surface->colorKey.dwColorSpaceLowValue);
 			if (colorKey)
 			{
+				if (config.isSSE2)
+				{
+					DWORD count = width >> 3;
+					if (count)
+					{
+						DWORD sStep = sWidth - (count << 3);
+						DWORD dStep = dWidth - (count << 3);
+
+						__m128i* s = (__m128i*)src;
+						__m128i* d = (__m128i*)dst;
+						__m128i k = _mm_set1_epi16(colorKey);
+
+						DWORD h = height;
+						do
+						{
+							DWORD w = count;
+							do
+							{
+								__m128i a = _mm_loadu_si128(s);
+								__m128i mask = _mm_cmpeq_epi16(a, k);
+								if (_mm_movemask_epi8(mask) != 0xFFFF)
+									_mm_storeu_si128(d, _mm_or_si128(_mm_andnot_si128(mask, a), _mm_and_si128(mask, _mm_loadu_si128(d))));
+
+								++s;
+								++d;
+							} while (--w);
+
+							s = (__m128i*)((WORD*)s + sStep);
+							d = (__m128i*)((WORD*)d + dStep);
+						} while (--h);
+
+						count <<= 3;
+						width -= count;
+						if (!width)
+							return DD_OK;
+
+						src += count;
+						dst += count;
+					}
+				}
+
 				sWidth -= width;
 				dWidth -= width;
 

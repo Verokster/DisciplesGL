@@ -772,14 +772,11 @@ namespace Config
 		else
 			config.singleWindow = TRUE;
 
-		if (config.updateMode == UpdateSSE)
-		{
-			INT cpuinfo[4];
-			__cpuid(cpuinfo, 1);
-			BOOL isSSE2 = cpuinfo[3] & (1 << 26) || FALSE;
-			if (!isSSE2)
-				config.updateMode = UpdateCPP;
-		}
+		INT cpuinfo[4];
+		__cpuid(cpuinfo, 1);
+		config.isSSE2 = cpuinfo[3] & (1 << 26) || FALSE;
+		if (!config.isSSE2 && config.updateMode == UpdateSSE)
+			config.updateMode = UpdateCPP;
 
 		config.singleThread = TRUE;
 		DWORD processMask, systemMask;

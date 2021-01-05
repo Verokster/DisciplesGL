@@ -196,6 +196,7 @@ struct ConfigItems {
 	BOOL resHooked;
 	BOOL alwaysActive;
 	BOOL coldCPU;
+	BOOL isSSE2;
 	BOOL singleWindow;
 	BOOL singleThread;
 	DOUBLE syncStep;
