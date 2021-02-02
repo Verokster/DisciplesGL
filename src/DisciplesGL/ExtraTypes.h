@@ -129,8 +129,10 @@ union Levels
 };
 
 struct Adjustment {
-	FLOAT hueShift;
-	FLOAT saturation;
+	struct {
+		FLOAT hueShift;
+		FLOAT saturation;
+	} satHue;
 	struct {
 		Levels left;
 		Levels right;

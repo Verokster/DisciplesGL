@@ -805,35 +805,6 @@ namespace Hooks
 	HWND hWndMain;
 	UINT uAiMsg;
 
-	WinMessage* messages;
-	WinMessage* __fastcall FindWinMessage(LPCSTR msg)
-	{
-		WinMessage* current = messages;
-		while (current)
-		{
-			if (!StrCompare(current->name, msg))
-				return current;
-
-			current = current->prev;
-		}
-
-		return NULL;
-	}
-
-	WinMessage* __fastcall FindWinMessage(UINT id)
-	{
-		WinMessage* current = messages;
-		while (current)
-		{
-			if (current->id == id)
-				return current;
-
-			current = current->prev;
-		}
-
-		return NULL;
-	}
-
 	DWORD aiTime;
 	VOID BeginAI()
 	{
@@ -882,7 +853,12 @@ namespace Hooks
 
 	UINT __stdcall RegisterWindowMessageHook(LPCSTR lpString)
 	{
-		WinMessage* msg = FindWinMessage(lpString);
+		static WinMessage* messages;
+
+		WinMessage* msg = messages;
+		while (msg && StrCompare(msg->name, lpString))
+			msg = msg->prev;
+
 		if (!msg)
 		{
 			msg = (WinMessage*)MemoryAlloc(sizeof(WinMessage));
@@ -1027,9 +1003,8 @@ namespace Hooks
 		{
 			if (hWnd == hWndMain)
 			{
-				RECT rect = { 0, 0, (LONG)config.mode->width, (LONG)config.mode->height };
-				AdjustWindowRect(&rect, config.windowedMode ? WS_WINDOWED : WS_FULLSCREEN,
-					config.windowedMode);
+				RECT rect = { 0, 0, *(LONG*)&config.mode->width, *(LONG*)&config.mode->height };
+				AdjustWindowRect(&rect, config.windowedMode ? WS_WINDOWED : WS_FULLSCREEN, config.windowedMode);
 
 				lpRect->right = lpRect->left + rect.right - rect.left;
 				lpRect->bottom = lpRect->top + rect.bottom - rect.top;
@@ -1195,11 +1170,11 @@ namespace Hooks
 	VOID __declspec(naked) hook_cursorPos()
 	{
 		__asm {
-			MOV EAX, config.windowedMode
-			TEST EAX, EAX
-			JZ lbl_win
-			JMP GetCursorPosHookV2a
-			lbl_win : JMP cursorPos
+			mov eax, config.windowedMode
+			test eax, eax
+			jz lbl_win
+			jmp GetCursorPosHookV2a
+			lbl_win : jmp cursorPos
 		}
 	}
 
@@ -1289,12 +1264,12 @@ namespace Hooks
 	VOID __declspec(naked) hook_005A6311()
 	{
 		__asm {
-			SHL EAX, 0x1
-			IMUL EAX, [ESI + 0x4]
-			POP EDX
-			PUSH EBX
-			PUSH EDX
-			RETN
+			shl eax, 0x1
+			imul eax, [esi+0x4]
+			pop edx
+			push ebx
+			push edx
+			retn
 		}
 	}
 
@@ -1302,21 +1277,21 @@ namespace Hooks
 	VOID __declspec(naked) hook_005BACE1()
 	{
 		__asm {
-			SHL EAX, 0x2
-			IMUL EAX, [EBP - 0x14]
-			JMP back_005BACE7
+			shl eax, 0x2
+			imul eax, [ebp-0x14]
+			jmp back_005BACE7
 		}
 	}
 
 	VOID __declspec(naked) hook_00674400()
 	{
 		__asm {
-			SHL EAX, 0x1
-			IMUL EAX, [EDI + 0x4]
-			POP EDX
-			PUSH EAX
-			PUSH EDX
-			RETN
+			shl eax, 0x1
+			imul eax, [edi+0x4]
+			pop edx
+			push eax
+			push edx
+			retn
 		}
 	}
 
@@ -1324,12 +1299,12 @@ namespace Hooks
 	{
 		__asm
 		{
-			POP EDI
-			PUSH 0x0
-			PUSH EDI
-			XOR EDI, EDI
-			SHL EAX, 0x2
-			RETN
+			pop edi
+			push 0x0
+			push edi
+			xor edi, edi
+			shl eax, 0x2
+			retn
 		}
 	}
 #pragma endregion
@@ -1906,7 +1881,7 @@ namespace Hooks
 		Pixel_DoubleLighter };
 #pragma endregion
 
-	BOOL __fastcall Clip(LONG* shiftX, LONG* shiftY, LONG* left, LONG* top, LONG* width, LONG* height, RECT* clipper)
+	BOOL Clip(LONG* shiftX, LONG* shiftY, LONG* left, LONG* top, LONG* width, LONG* height, RECT* clipper)
 	{
 		if (*left < clipper->left)
 		{
@@ -1931,7 +1906,7 @@ namespace Hooks
 		return *width > 0 && *height > 0;
 	}
 
-	VOID __stdcall DrawMinimapObjects(BlitObject* obj, VOID* data, RECT* rect, DWORD pitch, DWORD colorKey, POINT* loc)
+	VOID __fastcall DrawMinimapObjects(BlitObject* obj, DWORD /*edx*/, VOID* data, RECT* rect, DWORD pitch, DWORD colorKey, POINT* loc)
 	{
 		if (data && rect->left <= rect->right && rect->top <= rect->bottom && (colorKey <= (obj->isTrueColor ? 0xFFFFu : 0xFFu) || colorKey == 0xFFFFFFFF))
 		{
@@ -2066,18 +2041,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __declspec(naked) hook_0055D419()
-	{
-		__asm
-		{
-			POP EAX
-			PUSH ECX
-			PUSH EAX
-			JMP DrawMinimapObjects
-		}
-	}
-
-	VOID __stdcall FillColor(BlitObject* obj, DWORD color, RECT* rect)
+	VOID __fastcall FillColor(BlitObject* obj, DWORD /*edx*/, DWORD color, RECT* rect)
 	{
 		if (obj->isTrueColor)
 		{
@@ -2122,18 +2086,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __declspec(naked) hook_0055D283()
-	{
-		__asm
-		{
-			POP EAX
-			PUSH ECX
-			PUSH EAX
-			JMP FillColor
-		}
-	}
-
-	VOID __stdcall DrawWaterBorders(DWORD* thisObj, BlitObject* obj, POINT* loc, RECT* rect)
+	VOID __fastcall DrawWaterBorders(DWORD* thisObj, DWORD /*edx*/, BlitObject* obj, POINT* loc, RECT* rect)
 	{
 		DWORD pitch = obj->pitch >> 1;
 
@@ -2198,18 +2151,7 @@ namespace Hooks
 		} while (TRUE);
 	}
 
-	VOID __declspec(naked) hook_005B5560()
-	{
-		__asm
-		{
-			POP EAX
-			PUSH ECX
-			PUSH EAX
-			JMP DrawWaterBorders
-		}
-	}
-
-	VOID __stdcall DrawGround(DWORD* thisObj, BlitObject* obj, POINT* srcLoc, POINT* dstLoc, RECT* rect, BYTE* blendMask, DWORD* alphaMask)
+	VOID __fastcall DrawGround(DWORD* thisObj, DWORD /*edx*/, BlitObject* obj, POINT* srcLoc, POINT* dstLoc, RECT* rect, BYTE* blendMask, DWORD* alphaMask)
 	{
 		DWORD pitch = obj->pitch >> 1;
 
@@ -2319,17 +2261,6 @@ namespace Hooks
 			Pixel_BlitBlendWithColorKey(blendList, blendCount, 0xF81F);
 	}
 
-	VOID __declspec(naked) hook_005B5660()
-	{
-		__asm
-		{
-			POP EAX
-			PUSH ECX
-			PUSH EAX
-			JMP DrawGround
-		}
-	}
-
 	VOID __stdcall ClearGround(BlitObject* obj, POINT* loc, RECT* rect)
 	{
 		DWORD pitch = obj->pitch >> 1;
@@ -2384,7 +2315,7 @@ namespace Hooks
 		} while (TRUE);
 	}
 
-	VOID __stdcall DrawSymbol(DWORD* obj, DWORD* data, LONG dstPitch, LONG left, LONG top, RECT* clipper, RECT* rect, DWORD colorFill, DWORD colorShadow, BYTE castShadow, CHAR symbol)
+	VOID __fastcall DrawSymbol(DWORD* obj, DWORD /*edx*/, DWORD* data, LONG dstPitch, LONG left, LONG top, RECT* clipper, RECT* rect, DWORD colorFill, DWORD colorShadow, BYTE castShadow, CHAR symbol)
 	{
 		if (symbol != '\n' && symbol != '\r')
 		{
@@ -2470,17 +2401,6 @@ namespace Hooks
 		}
 	}
 
-	VOID __declspec(naked) hook_005280D9()
-	{
-		__asm
-		{
-			POP EAX
-			PUSH ECX
-			PUSH EAX
-			JMP DrawSymbol
-		}
-	}
-
 	VOID __stdcall DrawLineHorizontal(DWORD* data, SIZE* sizePitch, LONG left, LONG top, LONG width, DWORD colorFill)
 	{
 		POINT shift = { 0, 0 };
@@ -2496,11 +2416,6 @@ namespace Hooks
 				*dst++ = colorFill;
 			while (--width);
 		}
-	}
-
-	VOID __declspec(naked) hook_0053056A()
-	{
-		__asm { JMP DrawLineHorizontal }
 	}
 
 	VOID __stdcall DrawLineVertical(DWORD* data, SIZE* sizePitch, LONG left, LONG top, LONG height, DWORD colorFill)
@@ -2520,11 +2435,6 @@ namespace Hooks
 				dst += sizePitch->cx;
 			} while (--height);
 		}
-	}
-
-	VOID __declspec(naked) hook_00530603()
-	{
-		__asm { JMP DrawLineVertical }
 	}
 
 	VOID __stdcall DrawMinimapGround(DWORD* thisObj, LONG left, LONG top, BlitObject* obj)
@@ -2599,7 +2509,7 @@ namespace Hooks
 	VOID __stdcall DrawCastleBuildings(DWORD* thisObj, BlitObject* obj)
 	{
 		obj->color = 0xF81F;
-		FillColor(obj, obj->color, &obj->rect);
+		FillColor(obj, NULL, obj->color, &obj->rect);
 
 		LONG width = thisObj[12];
 		LONG height = thisObj[13];
@@ -2777,15 +2687,15 @@ namespace Hooks
 	VOID __declspec(naked) hook_005383A5()
 	{
 		__asm {
-			MOV EAX, [EBP - 0x1C]
-			PUSH EAX
-			CALL Color565toRGB
-			MOV [EBP - 0x1C], EAX
+			mov eax, [ebp-0x1C]
+			push eax
+			call Color565toRGB
+			mov [ebp-0x1C], eax
 
-			MOV EAX, [EBP - 0x14]
-			TEST EAX, EAX
+			mov eax, [ebp-0x14]
+			test eax, eax
 
-			JMP back_005383AA
+			jmp back_005383AA
 		}
 	}
 
@@ -2793,17 +2703,17 @@ namespace Hooks
 	VOID __declspec(naked) hook_005383F7()
 	{
 		__asm {
-			SHL EBX, 0x1
-			MOV ECX, EAX
-			MOV EAX, [ECX + 0x4]
-			IMUL EAX, EBX
-			ADD ESI, EAX
-			MOV EAX, [ECX]
-			MOV ECX, [EBP - 0x1C]
-			MOV [EAX * 0x4 + ESI], ECX
-			INC EDI
+			shl ebx, 0x1
+			mov ecx, eax
+			mov eax, [ecx+0x4]
+			imul eax, ebx
+			add esi, eax
+			mov eax, [ecx]
+			mov ecx, [ebp-0x1C]
+			mov [eax*0x4+esi], ecx
+			inc edi
 
-			JMP back_00538413
+			jmp back_00538413
 		}
 	}
 
@@ -2836,11 +2746,11 @@ namespace Hooks
 	{
 		__asm
 		{
-			MOV EAX, [ESI]
-			ADD EAX, 0x198
-			PUSH EAX
-			PUSH back_00611CEF
-			JMP SetResolution
+			mov eax, [esi]
+			add eax, 0x198
+			push eax
+			push back_00611CEF
+			jmp SetResolution
 		}
 	}
 
@@ -2855,14 +2765,14 @@ namespace Hooks
 	VOID __declspec(naked) hook_00538FEB()
 	{
 		__asm {
-			CALL [EAX+0x24]
+			call [eax+0x24]
 
-			PUSH EAX
-			PUSH EDI
-			CALL CheckBordersV2
+			push eax
+			push edi
+			call CheckBordersV2
 
-			XOR EAX, EAX
-			RETN
+			xor eax, eax
+			retn
 		}
 	}
 
@@ -2870,37 +2780,37 @@ namespace Hooks
 	VOID __declspec(naked) hook_00489124()
 	{
 		__asm {
-			CMP [ESI + 0x68] , EBX
-			JE lbl_success
-			CMP config.borders.active, EBX
-			JE lbl_back
+			cmp [esi+0x68], ebx
+			je lbl_success
+			cmp config.borders.active, ebx
+			je lbl_back
 
-			lbl_success : MOV EAX, [ECX]
-						  ADD ESI, 0x64
+			lbl_success : mov eax, [ecx]
+						  add esi, 0x64
 
-						  MOV EDX, [ESI + 0x4]
-						  CMP config.borders.active, EBX
-						  JE lbl_continue
-						  SHR EDX, 0x1
+						  mov edx, [esi+0x4]
+						  cmp config.borders.active, ebx
+						  je lbl_continue
+						  shr edx, 0x1
 
-						  lbl_continue : PUSH EDX
-										 MOV EDX, [ESI]
-										 CMP config.borders.active, EBX
-										 JE lbl_continue2
-										 SHR EDX, 0x1
+						  lbl_continue : push edx
+										 mov edx, [esi]
+										 cmp config.borders.active, ebx
+										 je lbl_continue2
+										 shr edx, 0x1
 
-										 lbl_continue2 : PUSH EDX
-														MOV ESI, ESP
-														PUSH EBX
-														PUSH EBX
-														PUSH EBX
-														PUSH ESI
-														PUSH EDI
-														CALL[EAX + 0x14]
+										 lbl_continue2 : push edx
+														mov esi, esp
+														push ebx
+														push ebx
+														push ebx
+														push esi
+														push edi
+														call [eax+0x14]
 
-														ADD ESP, 0x8
+														add esp, 0x8
 
-														lbl_back : JMP back_00489136
+														lbl_back : jmp back_00489136
 		}
 	}
 #pragma endregion
@@ -2910,7 +2820,7 @@ namespace Hooks
 	DWORD* mapSpeed;
 
 	TimeScale gameSpeed;
-	DWORD __fastcall GetTimeSpeed(TimeScale* time, DOUBLE scale)
+	DWORD GetTimeSpeed(TimeScale* time, DOUBLE scale)
 	{
 		if (time->scale != scale)
 		{
@@ -2948,7 +2858,7 @@ namespace Hooks
 			*mapSpeed = config.speed.enabled ? DWORD(33.0 / config.speed.value) : 33;
 	}
 
-	VOID __fastcall SetGameSpeed()
+	VOID SetGameSpeed()
 	{
 		SetAnimSpeed();
 		SetMapSpeed();
@@ -2958,10 +2868,9 @@ namespace Hooks
 	{
 		__asm
 		{
-			LEA EAX, [ESI+0x98]
-			MOV animSpeed, EAX
-			CALL SetAnimSpeed
-			RETN
+			lea eax, [esi+0x98]
+			mov animSpeed, eax
+			jmp SetAnimSpeed
 		}
 	}
 
@@ -2969,14 +2878,14 @@ namespace Hooks
 	{
 		__asm
 		{
-			PUSH ECX
+			push ecx
 
-			LEA EAX, [ESI+0x34]
-			MOV animSpeed, EAX
-			CALL SetAnimSpeed
+			lea eax, [esi+0x34]
+			mov animSpeed, eax
+			call SetAnimSpeed
 
-			POP ECX
-			RETN
+			pop ecx
+			retn
 		}
 	}
 
@@ -2984,14 +2893,14 @@ namespace Hooks
 	{
 		__asm
 		{
-			PUSH ECX
+			push ecx
 
-			LEA EAX, [ESI+0x34]
-			MOV mapSpeed, EAX
-			CALL SetMapSpeed
+			lea eax, [esi+0x34]
+			mov mapSpeed, eax
+			call SetMapSpeed
 
-			POP ECX
-			RETN
+			pop ecx
+			retn
 		}
 	}
 #pragma endregion
@@ -3000,11 +2909,11 @@ namespace Hooks
 	{
 		__asm
 		{
-			PUSH EAX
-			CALL GetDoubleClickTimeHook
-			MOV ECX, EAX
-			POP EAX
-			RETN
+			push eax
+			call GetDoubleClickTimeHook
+			mov ecx, eax
+			pop eax
+			retn
 		}
 	}
 
@@ -3018,10 +2927,10 @@ namespace Hooks
 	VOID __declspec(naked) hook_004DFC7A()
 	{
 		__asm {
-			POP EAX
-			MOV ECX, [ECX]
-			PUSH [ECX + 0x44]
-			PUSH EAX
+			pop eax
+			mov ecx, [ecx]
+			push [ecx+0x44]
+			push eax
 			JMP GetScrollTime
 		}
 	}
@@ -3029,11 +2938,11 @@ namespace Hooks
 	VOID __declspec(naked) hook_0053CA08()
 	{
 		__asm {
-			POP EAX
-			MOV ECX,  [ECX]
-			PUSH [ECX + 0x40]
-			PUSH EAX
-			JMP GetScrollTime
+			pop eax
+			mov ecx, [ecx]
+			push [ecx+0x40]
+			push eax
+			jmp GetScrollTime
 		}
 	}
 
@@ -3060,22 +2969,22 @@ namespace Hooks
 	VOID __declspec(naked) hook_0053D185()
 	{
 		__asm {
-			POP ECX
+			pop ecx
 
-			PUSH EAX
-			PUSH EAX
+			push eax
+			push eax
 
-			PUSH ECX
-			PUSH EAX
+			push ecx
+			push eax
 
-			LEA ECX, [ESP+0x8]
-			PUSH ECX
-			CALL GetScrollOffset
+			lea ecx, [esp+0x8]
+			push ecx
+			call GetScrollOffset
 
-			POP EAX
-			MOV EDI, [EAX]
+			pop eax
+			mov edi, [eax]
 			
-			RETN
+			retn
 		}
 	}
 
@@ -3083,16 +2992,16 @@ namespace Hooks
 	{
 		__asm
 		{
-			POP ECX
+			pop ecx
 
-			PUSH EAX
-			PUSH EAX
-			MOV EAX, ESP
-			PUSH ESI
-			PUSH EAX
+			push eax
+			push eax
+			mov eax, esp
+			push esi
+			push eax
 
-			PUSH ECX
-			JMP GetScrollOffset
+			push ecx
+			jmp GetScrollOffset
 		}
 	}
 
@@ -3155,11 +3064,11 @@ namespace Hooks
 	VOID __declspec(naked) hook_004F1464()
 	{
 		__asm {
-			MOV EAX, [ESP+0x4]
-			PUSH EAX
-			PUSH ECX
-			CALL DrawDialog
-			RETN 0x4
+			mov eax, [esp+0x4]
+			push eax
+			push ecx
+			call DrawDialog
+			retn 0x4
 		}
 	}
 
@@ -3169,22 +3078,22 @@ namespace Hooks
 	VOID __declspec(naked) hook_005AE161()
 	{
 		__asm {
-			MOV EAX, [ESP+0x4]
-			MOV ECX, [EAX]
-			PUSH ECX
+			mov eax, [esp+0x4]
+			mov ecx, [eax]
+			push ecx
 
-			PUSH EAX
-			MOV EAX, sub_006ACED2
-			CALL sub_005AE161;
+			push eax
+			mov eax, sub_006ACED2
+			call sub_005AE161;
 
-			POP ECX
-			CMP ECX, 0x1
-			JNE non_wait
+			pop ecx
+			cmp ecx, 0x1
+			jne non_wait
 
-			MOV waitObject, EAX
+			mov waitObject, eax
 
 			non_wait:
-			RETN 0x4
+			retn 0x4
 		}
 	}
 
@@ -3192,22 +3101,22 @@ namespace Hooks
 	VOID __declspec(naked) hook_0053C095()
 	{
 		__asm {
-			CMP ECX, waitObject
-			JNE lbl_non
-			MOV config.ai.waiting, 0x1
-			JMP lbl_cont
+			cmp ecx, waitObject
+			jne lbl_non
+			mov config.ai.waiting, 0x1
+			jmp lbl_cont
 			
 			lbl_non:
-			MOV config.ai.waiting, 0x0
+			mov config.ai.waiting, 0x0
 
 			lbl_cont:
-			MOV EAX, [ESP+0x8]
-			PUSH EAX
-			MOV EAX, [ESP+0x8]
-			PUSH EAX
-			CALL sub_0052EE9E
+			mov eax, [esp+0x8]
+			push eax
+			mov eax, [esp+0x8]
+			push eax
+			call sub_0052EE9E
 
-			RETN 0x8
+			retn 0x8
 		}
 	}
 #pragma endregion
@@ -3217,17 +3126,17 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062891A()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
-			RETN 0x4
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
+			retn 0x4
 
-			non_wide :
-			LEA ECX, [EBP-0x1C]
-			PUSH ECX
-			MOV ECX, [EBP-0x30]
-			CALL sub_00629FAA
-			RETN 0x4
+			non_wide:
+			lea ecx, [ebp-0x1C]
+			push ecx
+			mov ecx, [ebp-0x30]
+			call sub_00629FAA
+			retn 0x4
 		}
 	}
 
@@ -3235,16 +3144,16 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062F524()
 	{
 		__asm {
- 			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
-			RETN
+ 			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
+			retn
 
-			non_wide :
-			PUSH EBP
-			MOV EBP, ESP
-			SUB ESP, 0x10
-			JMP back_0062F52A
+			non_wide:
+			push ebp
+			mov ebp, esp
+			sub esp, 0x10
+			jmp back_0062F52A
 		}
 	}
 
@@ -3252,97 +3161,97 @@ namespace Hooks
 	VOID __declspec(naked) hook_00625683()
 	{
 		__asm {
- 			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
-			RETN 0x4
+ 			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
+			retn 0x4
 
-			non_wide :
-			PUSH EBP
-			MOV EBP, ESP
-			PUSH ECX
-			PUSH ESI
-			JMP back_00625688
+			non_wide:
+			push ebp
+			mov ebp, esp
+			push ecx
+			push esi
+			jmp back_00625688
 		}
 	}
 
 	VOID __declspec(naked) hook_00624F2F()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 
-			INC EDX
-			RETN
+			inc edx
+			retn
 
-			non_wide :
-			MOV DL, [ECX+0x0B55]
-			RETN
+			non_wide:
+			mov dl, [ecx+0x0B55]
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_0062ED48()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 
-			MOV DL, [ECX+0x14F7]
-			RETN
+			mov dl, [ecx+0x14F7]
+			retn
 
-			non_wide :
-			MOV DL, [ECX+0x14F6]
-			RETN
+			non_wide:
+			mov dl, [ecx+0x14F6]
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_0062521D()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 			
-			MOV ECX, [ECX+0x1C]
-			MOV EAX, [ECX+0x9E4]
-			MOV EAX, [EAX+0x8]
-			MOV [EAX+0x50], 0x1
-			MOV EAX, [ECX+0x9E8]
-			MOV EAX, [EAX+0x8]
-			MOV [EAX+0x50], 0x1
-			RETN
+			mov ecx, [ecx+0x1C]
+			mov eax, [ecx+0x9E4]
+			mov eax, [eax+0x8]
+			mov [eax+0x50], 0x1
+			mov eax, [ecx+0x9E8]
+			mov eax, [eax+0x8]
+			mov [eax+0x50], 0x1
+			retn
 
-			non_wide :
-			PUSH EBP
-			MOV EBP, ESP
-			SUB ESP, 0x10
-			JMP back_0062F52A
+			non_wide:
+			push ebp
+			mov ebp, esp
+			sub esp, 0x10
+			jmp back_0062F52A
 		}
 	}
 
 	VOID __declspec(naked) hook_0062DAA8()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 			
-			MOV ECX, [ECX+0x1C]
-			MOV EAX, [ECX+0x1384]
-			MOV EAX, [EAX+0x8]
-			MOV [EAX+0x50], 0x1
-			MOV EAX, [ECX+0x1388]
-			MOV EAX, [EAX+0x8]
-			MOV [EAX+0x50], 0x1
-			RETN
+			mov ecx, [ecx+0x1C]
+			mov eax, [ecx+0x1384]
+			mov eax, [eax+0x8]
+			mov [eax+0x50], 0x1
+			mov eax, [ecx+0x1388]
+			mov eax, [eax+0x8]
+			mov [eax+0x50], 0x1
+			retn
 
-			non_wide :
-			PUSH EBP
-			MOV EBP, ESP
-			SUB ESP, 0x10
-			JMP back_0062F52A
+			non_wide:
+			push ebp
+			mov ebp, esp
+			sub esp, 0x10
+			jmp back_0062F52A
 		}
 	}
 
@@ -3350,165 +3259,165 @@ namespace Hooks
 	VOID __declspec(naked) hook_0062F5B8()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
+			mov eax, config.battle.wide
+			test eax, eax
 			JZ non_wide
-			RETN
+			retn
 
-			non_wide :
-			JMP sub_00643E80
+			non_wide:
+			jmp sub_00643E80
 		}
 	}
 
 	VOID __declspec(naked) hook_00625EAE()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			POP EAX
-			ADD ECX, 0x30
-			PUSH ECX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			pop eax
+			add ecx, 0x30
+			push ecx
+			jz non_wide
 
-			PUSH 0x1
-			PUSH 0x1
-			PUSH EAX
-			RETN
+			push 0x1
+			push 0x1
+			push eax
+			retn
 
-			non_wide :
-			PUSH 0x1
-			PUSH 0x0
-			PUSH EAX
-			RETN
+			non_wide:
+			push 0x1
+			push 0x0
+			push eax
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_00625EFD()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 
-			ADD ECX, 0x9F8
-			RETN
+			add ecx, 0x9F8
+			retn
 
-			non_wide :
-			ADD ECX, 0x9E4
-			RETN
+			non_wide:
+			add ecx, 0x9E4
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_0062635D()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			POP EAX
-			ADD EDX, 0x30
-			PUSH EDX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			pop eax
+			add edx, 0x30
+			push edx
+			jz non_wide
 
-			PUSH 0x1
-			PUSH 0x0
-			PUSH EAX
-			RETN
+			push 0x1
+			push 0x0
+			push eax
+			retn
 
-			non_wide :
-			PUSH 0x1
-			PUSH 0x1
-			PUSH EAX
-			RETN
+			non_wide:
+			push 0x1
+			push 0x1
+			push eax
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_006263AC()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 
-			ADD ECX, 0x9E4
-			RETN
+			add ecx, 0x9E4
+			retn
 
-			non_wide :
-			ADD ECX, 0x9F8
-			RETN
+			non_wide:
+			add ecx, 0x9F8
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_0062E7FB()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			POP EAX
-			ADD ECX, 0x30
-			PUSH ECX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			pop eax
+			add ecx, 0x30
+			push ecx
+			jz non_wide
 
-			PUSH 0x0
-			PUSH EAX
-			RETN
+			push 0x0
+			push eax
+			retn
 
-			non_wide :
-			PUSH 0x1
-			PUSH EAX
-			RETN
+			non_wide:
+			push 0x1
+			push eax
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_0062E848()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 
-			ADD ECX, 0x1398
-			RETN
+			add ecx, 0x1398
+			retn
 
-			non_wide :
-			ADD ECX, 0x1384
-			RETN
+			non_wide:
+			add ecx, 0x1384
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_0062ECA9()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			POP EAX
-			ADD EDX, 0x30
-			PUSH EDX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			pop eax
+			add edx, 0x30
+			push edx
+			jz non_wide
 
-			PUSH 0x1
-			PUSH EAX
-			RETN
+			push 0x1
+			push eax
+			retn
 
-			non_wide :
-			PUSH 0x0
-			PUSH EAX
-			RETN
+			non_wide:
+			push 0x0
+			push eax
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_0062ECFC()
 	{
 		__asm {
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 
-			ADD ECX, 0x1384
-			RETN
+			add ecx, 0x1384
+			retn
 
-			non_wide :
-			ADD ECX, 0x1398
-			RETN
+			non_wide:
+			add ecx, 0x1398
+			retn
 		}
 	}
 
@@ -3531,36 +3440,36 @@ namespace Hooks
 	VOID __declspec(naked) hook_006244CA()
 	{
 		__asm {
-			CALL CalcWideBattle
+			call CalcWideBattle
 
-			LEA ECX, dlgNames
+			lea ecx, dlgNames
 
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 
-			ADD ECX, 0x4
+			add ecx, 0x4
 			
-			non_wide :
-			MOV ECX, [ECX]
-			RETN
+			non_wide:
+			mov ecx, [ecx]
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_0062476C()
 	{
 		__asm {
-			LEA EDX, dlgNames
+			lea edx, dlgNames
 
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 
-			ADD EDX, 0x4
+			add edx, 0x4
 			
-			non_wide :
-			MOV EDX, [EDX]
-			RETN
+			non_wide:
+			mov edx, [edx]
+			retn
 		}
 	}
 
@@ -3594,64 +3503,64 @@ namespace Hooks
 	VOID __declspec(naked) hook_00625387()
 	{
 		__asm {
-			MOV EDX, config.battle.wide
-			TEST EDX, EDX
-			JZ non_wide
+			mov edx, config.battle.wide
+			test edx, edx
+			jz non_wide
 
-			PUSH ECX
-			PUSH EAX
-			CALL ChangeBattleIndices
-			POP ECX
+			push ecx
+			push eax
+			call ChangeBattleIndices
+			pop ecx
 
-			non_wide :
-			JMP sub_00625387
+			non_wide:
+			jmp sub_00625387
 		}
 	}
 
 	VOID __declspec(naked) hook_0063E6B8()
 	{
 		__asm {
-			PUSH [EAX]
-			SUB ESI, [EAX]
+			push [eax]
+			sub esi, [eax]
 
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JZ non_wide
+			mov eax, config.battle.wide
+			test eax, eax
+			jz non_wide
 
-			SAR ESI, 0x1
-			POP EAX
-			MOV [EBP-0x8], ESI
-			RETN
+			sar esi, 0x1
+			pop eax
+			mov [ebp-0x8], esi
+			retn
 
-			non_wide :
-			POP EAX
-			SUB EAX, 950
-			SHR EAX, 1
+			non_wide:
+			pop eax
+			sub eax, 950
+			shr eax, 0x1
 
 			MOV ECX, [EBP+0x10]
-			TEST CL, CL
-			JNZ mirror
+			test cl, cl
+			jnz mirror
 
-			XOR ESI, ESI
-			SUB ESI, EAX
-			MOV [EBP-0x8], ESI
-			RETN
+			xor esi, esi
+			sub esi, eax
+			mov [ebp-0x8], esi
+			retn
 
 			mirror:
-			ADD ESI, EAX
-			MOV [EBP-0x8], ESI
-			RETN
+			add esi, eax
+			mov [ebp-0x8], esi
+			retn
 		}
 	}
 
-	struct {
-		Stream stream;
-		BOOL loaded;
-		BOOL unloaded;
-	} dlgOptions;
-
-	BOOL __fastcall GetStr(CHAR* str, INT num, FILE* stream)
+	BOOL GetStr(CHAR* str, INT num, FILE* stream)
 	{
+		static struct {
+			Stream stream;
+			BOOL loaded;
+			BOOL unloaded;
+		} dlgOptions;
+
 		if (!dlgOptions.loaded)
 		{
 			dlgOptions.loaded = TRUE;
@@ -3802,20 +3711,20 @@ namespace Hooks
 	VOID __declspec(naked) hook_005AEF44()
 	{
 		__asm {
-			MOV EAX, [ESP+0x4]
-			PUSH EAX
-			PUSH [ECX]
-			CALL GetBattleBg
-			RETN 0x4
+			mov eax, [esp+0x4]
+			push eax
+			push [ecx]
+			call GetBattleBg
+			retn 0x4
 		}
 	}
 
 	VOID __declspec(naked) hook_00529AEB()
 	{
 		__asm {
-			AND ECX, 0x7FFFFFFF
-			MOV [EAX+0x4], ECX
-			RETN 0x4
+			and ecx, 0x7FFFFFFF
+			mov [eax+0x4], ecx
+			retn 0x4
 		}
 	}
 
@@ -3857,7 +3766,7 @@ namespace Hooks
 	}
 
 	DWORD sub_0052A14E;
-	BOOL __stdcall LoadPackageIndex(DWORD* pakObj, CHAR* name, DWORD a3, DWORD a4)
+	BOOL __fastcall LoadPackageIndex(DWORD** pakObj, DWORD /*edx*/, CHAR* name, DWORD a3, DWORD a4)
 	{
 		if (config.packages.wrapper)
 		{
@@ -3866,7 +3775,7 @@ namespace Hooks
 				return TRUE;
 		}
 
-		BOOL res = (*(BOOL(__thiscall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_0052A14E)(pakObj[3], name, a3, a4, pakObj[5]);
+		BOOL res = (*(BOOL(__thiscall*)(DWORD, CHAR*, DWORD, DWORD, DWORD))sub_0052A14E)(pakObj[0][3], name, a3, a4, pakObj[0][5]);
 
 		if (!res && config.packages.clouds)
 		{
@@ -3876,16 +3785,6 @@ namespace Hooks
 		}
 
 		return res;
-	}
-
-	VOID __declspec(naked) hook_0051F886()
-	{
-		__asm {
-			POP EAX
-			PUSH [ECX]
-			PUSH EAX
-			JMP LoadPackageIndex
-		}
 	}
 
 	DWORD* __stdcall CheckCloudPackage(DWORD* pak, CHAR* name)
@@ -3914,6 +3813,7 @@ namespace Hooks
 			cmp config.packages.clouds, 0
 			je lbl_classic
 			fmul clouds_factor
+
 			lbl_classic:
 			fmul config.cloudsFactor;
 			fmul clouds_count
@@ -3971,11 +3871,11 @@ namespace Hooks
 			push ecx
 			call InitClouds
 
-			mov ecx, dword ptr ss:[ebp-0xC]
+			mov ecx, [ebp-0xC]
 			mov eax,esi
 			pop edi
 			pop esi
-			mov dword ptr fs:[0],ecx
+			mov dword ptr fs:[0], ecx
 			pop ebx
 			leave
 			retn
@@ -4009,7 +3909,7 @@ namespace Hooks
 	}
 #pragma endregion
 
-#pragma region Debug window& messages
+#pragma region Debug window & messages
 	VOID __stdcall CalcDebugPOsition(POINT* point)
 	{
 		if (Config::IsZoomed())
@@ -4027,16 +3927,16 @@ namespace Hooks
 	VOID __declspec(naked) hook_0052EAAE()
 	{
 		__asm {
-			PUSH EAX
+			push eax
 
-			LEA EAX, [EBP-8]
-			PUSH EAX
-			CALL CalcDebugPOsition
+			lea eax, [ebp-0x8]
+			push eax
+			call CalcDebugPOsition
 
-			POP EAX
-			XOR ECX, ECX
+			pop eax
+			xor ecx, ecx
 
-			RETN
+			retn
 		}
 	}
 
@@ -4061,16 +3961,16 @@ namespace Hooks
 	VOID __declspec(naked) hook_00484DD1()
 	{
 		__asm {
-			PUSH ECX
+			push ecx
 
-			MOV EAX, [ESP+0xC]
-			PUSH EAX
-			PUSH ESI
-			CALL CalcMessage
+			mov eax, [esp+0xC]
+			push eax
+			push esi
+			call CalcMessage
 			
-			POP ECX
-			MOV EAX, [ECX]
-			JMP DWORD PTR [EAX+0x14]
+			pop ecx
+			mov eax, [ecx]
+			jmp dword ptr [eax+0x14]
 		}
 	}
 
@@ -4083,12 +3983,12 @@ namespace Hooks
 	VOID __declspec(naked) hook_00484CD0()
 	{
 		__asm {
-			PUSH ECX
+			push ecx
 
-			CALL MessageTimeout
+			call MessageTimeout
 			
-			POP ECX
-			RETN
+			pop ecx
+			retn
 		}
 	}
 #pragma endregion
@@ -4107,12 +4007,12 @@ namespace Hooks
 	{
 		__asm
 		{
-			MOV EAX, [ESP+0x4]
-			PUSH EAX
-			PUSH ECX
-			CALL SetMapBitMask96
+			mov eax, [esp+0x4]
+			push eax
+			push ecx
+			call SetMapBitMask96
 
-			RETN 0x4
+			retn 0x4
 		}
 	}
 
@@ -4129,18 +4029,19 @@ namespace Hooks
 	{
 		__asm
 		{
-			MOV EAX, [ESP+0x4]
-			PUSH EAX
-			PUSH ECX
-			CALL SetMapBitMask144
+			mov eax, [esp+0x4]
+			push eax
+			push ecx
+			call SetMapBitMask144
 
-			RETN 0x4
+			retn 0x4
 		}
 	}
 #pragma endregion
 
 #pragma region Locale
 	// all these functions needed as msvcrt check int not byte
+	// wrappers needed as parameter CHAR is not truncated
 	INT __cdecl IsAlphaHook(BYTE ch)
 	{
 		return IsAlpha(ch);
@@ -4196,10 +4097,10 @@ namespace Hooks
 		return MemoryChar(block, ch, length);
 	}
 
-	BYTE wideCharBuffer[4096];
-
-	BOOL __fastcall ConvertChars(const CHAR* srcData, UINT srcCP, CHAR* dstData, UINT dstCP)
+	BOOL ConvertChars(const CHAR* srcData, UINT srcCP, CHAR* dstData, UINT dstCP)
 	{
+		static BYTE wideCharBuffer[4096];
+
 		DWORD srcLength = StrLength(srcData);
 		if (srcLength)
 		{
@@ -4271,7 +4172,7 @@ namespace Hooks
 #pragma region Print text
 	DWORD gameObject;
 	DWORD sub_PrintText;
-	VOID __fastcall PrintText(CHAR* str)
+	VOID PrintText(CHAR* str)
 	{
 		if (gameObject)
 			((VOID(__thiscall*)(DWORD, CHAR*))(sub_PrintText))(gameObject, str);
@@ -4282,8 +4183,8 @@ namespace Hooks
 	{
 		__asm
 		{
-			MOV gameObject, ECX
-			JMP sub_GameObjectInit
+			mov gameObject, ecx
+			jmp sub_GameObjectInit
 		}
 	}
 
@@ -4291,14 +4192,14 @@ namespace Hooks
 	VOID __declspec(naked) hook_0048A93C()
 	{
 		__asm {
-			MOV EAX, gameObject
-			CMP ECX, EAX
-			JNE lbl_return
+			mov eax, gameObject
+			cmp ecx, eax
+			jne lbl_return
 
-			XOR EAX, EAX
-			MOV gameObject, EAX
+			xor eax, eax
+			mov gameObject, eax
 
-			lbl_return : JMP sub_GameObjectDeInit
+			lbl_return: jmp sub_GameObjectDeInit
 		}
 	}
 #pragma endregion
@@ -4317,16 +4218,16 @@ namespace Hooks
 	VOID __declspec(naked) InterlockHook()
 	{
 		__asm {
-			PUSH ECX
-			MOV EAX, [ESP+0x8]
-			PUSH EAX
-			CALL sub_EndLock
-			POP ECX
-			MOV EAX, [ECX]
-			TEST EAX, EAX
-			JZ lbl_retn
-			MOV DWORD PTR [EAX], 0xFFFFFF
-			lbl_retn: RETN 0x4
+			push ecx
+			mov eax, [esp+0x8]
+			push eax
+			call sub_EndLock
+			pop ecx
+			mov eax, [ecx]
+			test eax, eax
+			jz lbl_retn
+			mov [eax], 0x00FFFFFF
+			lbl_retn: retn 0x4
 		}
 	}
 #pragma endregion
@@ -4352,18 +4253,18 @@ namespace Hooks
 	VOID __declspec(naked) StartAiTurnHook()
 	{
 		__asm {
-			CALL sub_GetQueueCommands
-			MOV config.ai.turn, 1
-			RETN
+			call sub_GetQueueCommands
+			mov config.ai.turn, 0x1
+			retn
 		}
 	}
 
 	VOID __declspec(naked) EndAiTurnHook()
 	{
 		__asm {
-			CALL sub_GetQueueCommands
-			MOV config.ai.turn, 0
-			RETN
+			call sub_GetQueueCommands
+			mov config.ai.turn, 0x0
+			retn
 		}
 	}
 #pragma endregion
@@ -4477,15 +4378,15 @@ namespace Hooks
 	{
 		__asm
 		{
-			POP EBX
-			LEAVE
+			pop ebx
+			leave
 
-			MOV ECX, [ESP+0x8]
-			PUSH ECX
-			PUSH EAX
-			CALL LoadImageV1
+			mov ecx, [esp+0x8]
+			push ecx
+			push eax
+			call LoadImageV1
 
-			RETN 0x8
+			retn 0x8
 		}
 	}
 
@@ -4638,17 +4539,17 @@ namespace Hooks
 	{
 		__asm
 		{
-			POP EAX
-			PUSH EDI
-			MOV EDI, [ESP+0x30]
-			PUSH EAX
+			pop eax
+			push edi
+			mov edi, [esp+0x30]
+			push eax
 
-			MOV EAX, [ESP+0x28]
-			PUSH EDI
-			PUSH EAX
-			CALL StartDecodeImage
+			mov eax, [esp+0x28]
+			push edi
+			push eax
+			call StartDecodeImage
 
-			RETN
+			retn
 		}
 	}
 
@@ -4956,14 +4857,14 @@ namespace Hooks
 	{
 		__asm
 		{
-			MOV [ESP+0x30], EDI
+			mov [esp+0x30], edi
 
-			POP EDI
-			POP ESI
-			POP EBP
-			POP EBX
-			ADD ESP, 0x10
-			JMP EndDecodeImage
+			pop edi
+			pop esi
+			pop ebp
+			pop ebx
+			add esp, 0x10
+			jmp EndDecodeImage
 		}
 	}
 
@@ -4978,14 +4879,14 @@ namespace Hooks
 	{
 		__asm
 		{
-			PUSH ECX
-			MOV EAX, [ESP+0x10]
-			PUSH EAX
-			CALL CreateIsoDialog
+			push ecx
+			mov eax, [esp+0x10]
+			push eax
+			call CreateIsoDialog
 
-			POP ECX
-			MOV EAX, off_0046541D
-			RETN
+			pop ecx
+			mov eax, off_0046541D
+			retn
 		}
 	}
 
@@ -5046,19 +4947,19 @@ namespace Hooks
 	{
 		__asm
 		{
-			PUSH ECX
-			MOV EAX, [ESP+0x1C]
-			PUSH EAX
-			MOV EAX, [ESP+0x1C]
-			PUSH EAX
-			LEA EAX, [ESP+0x18]
-			PUSH EAX
-			CALL CreateViewDialog
+			push ecx
+			mov eax, [esp+0x1C]
+			push eax
+			mov eax, [esp+0x1C]
+			push eax
+			lea eax, [esp+0x18]
+			push eax
+			call CreateViewDialog
 
-			POP ECX
-			MOV EAX, off_0055106A
+			pop ecx
+			mov eax, off_0055106A
 
-			RETN
+			retn
 		}
 	}
 
@@ -5073,7 +4974,7 @@ namespace Hooks
 		return hFile;
 	}
 
-	DWORD __fastcall CalcStrNumbers(Stream* stream)
+	DWORD CalcStrNumbers(Stream* stream)
 	{
 		DWORD res = 0;
 		BOOL found = FALSE;
@@ -5344,16 +5245,16 @@ namespace Hooks
 	VOID __declspec(naked) hook_004E746D()
 	{
 		__asm {
-			MOV EAX, [ECX]
-			CALL DWORD PTR [EAX+0xC]
-			PUSH EAX
+			mov eax, [ecx]
+			call dword ptr [eax+0xC]
+			push eax
 
-			PUSH EAX
-			PUSH ESI
-			CALL DialogCreateHook
+			push eax
+			push esi
+			call DialogCreateHook
 
-			POP EAX
-			RETN
+			pop eax
+			retn
 		}
 	}
 
@@ -5376,13 +5277,13 @@ namespace Hooks
 	{
 		__asm
 		{
-			PUSH ECX
+			push ecx
 
-			PUSH ECX
-			CALL DialogDeleteHook
+			push ecx
+			call DialogDeleteHook
 
-			POP ECX
-			JMP sub_004E74F1
+			pop ecx
+			jmp sub_004E74F1
 		}
 	}
 #pragma endregion
@@ -5391,50 +5292,54 @@ namespace Hooks
 	VOID __declspec(naked) hook_00650628()
 	{
 		__asm {
-			MOV EAX, config.mode
-			MOV EAX, [EAX]
-			SAR EAX, 1
-			ADD EDX, EAX
+			mov eax, config.mode
+			mov eax, [eax]
+			sar eax, 0x1
+			add edx, eax
 
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JNZ lbl_wide
-			MOV EAX, GAME_WIDTH
-			JMP lbl_cont
+			mov eax, config.battle.wide
+			test eax, eax
+			jnz lbl_wide
+			mov eax, GAME_WIDTH
+			jmp lbl_cont
+
 			lbl_wide:
-			MOV EAX, WIDE_WIDTH
-			lbl_cont:
-			SAR EAX, 1
-			SUB EDX, EAX
+			mov eax, WIDE_WIDTH
 
-			MOV EAX, [EBP-0x38]
-			MOV [EAX], EDX
-			RETN
+			lbl_cont:
+			sar eax, 0x1
+			sub edx, eax
+
+			mov eax, [ebp-0x38]
+			mov [eax], edx
+			retn
 		}
 	}
 
 	VOID __declspec(naked) hook_00650674()
 	{
 		__asm {
-			MOV EAX, config.mode
-			MOV EAX, [EAX+0x4]
-			SAR EAX, 1
-			ADD EDX, EAX
+			mov eax, config.mode
+			mov eax, [eax+0x4]
+			sar eax, 0x1
+			add edx, eax
 
-			MOV EAX, config.battle.wide
-			TEST EAX, EAX
-			JNZ lbl_wide
-			MOV EAX, GAME_HEIGHT
-			JMP lbl_cont
+			mov eax, config.battle.wide
+			test eax, eax
+			jnz lbl_wide
+			mov eax, GAME_HEIGHT
+			jmp lbl_cont
+
 			lbl_wide:
-			MOV EAX, WIDE_HEIGHT
-			lbl_cont:
-			SAR EAX, 1
-			SUB EDX, EAX
+			mov eax, WIDE_HEIGHT
 
-			MOV EAX, [EBP-0x40]
-			MOV [EAX], EDX
-			RETN
+			lbl_cont:
+			sar eax, 0x1
+			sub edx, eax
+
+			mov eax, [ebp-0x40]
+			mov [eax], edx
+			retn
 		}
 	}
 #pragma endregion
@@ -5454,7 +5359,7 @@ namespace Hooks
 			mov [eax+0x8], edx
 			mov edx, [eax+0x4]
 			mov eax, [edx+0xC]
-			mov byte ptr [eax+0xC], 1
+			mov byte ptr [eax+0xC], 0x1
 			jmp sub_PlaySpell
 		}
 	}
@@ -5469,7 +5374,7 @@ namespace Hooks
 			mov [eax+0x8], edx
 			mov edx, [eax+0x4]
 			mov eax, [edx+0xC]
-			mov byte ptr [eax+0x14], 1
+			mov byte ptr [eax+0x14], 0x1
 			jmp sub_PlayDeath
 		}
 	}
@@ -5484,7 +5389,7 @@ namespace Hooks
 			mov [eax+0x8], edx
 			mov edx, [eax+0x4]
 			mov eax, [edx+0x8]
-			mov byte ptr [eax+0x5], 1
+			mov byte ptr [eax+0x5], 0x1
 			jmp sub_PlayRuin
 		}
 	}
@@ -5574,7 +5479,7 @@ namespace Hooks
 	VOID __declspec(naked) DeleteIsoView(DWORD obj)
 	{
 		__asm {
-			mov mouseAction.deleted, 1
+			mov mouseAction.deleted, 0x1
 			jmp sub_DeleteIsoView
 		}
 	}
@@ -5583,7 +5488,7 @@ namespace Hooks
 	VOID __declspec(naked) DeleteIsoInfoView(DWORD obj)
 	{
 		__asm {
-			mov mouseAction.deleted, 1
+			mov mouseAction.deleted, 0x1
 			jmp sub_DeleteIsoInfoView
 		}
 	}
@@ -5592,7 +5497,7 @@ namespace Hooks
 	VOID __declspec(naked) DeleteIsoEventsView(DWORD obj)
 	{
 		__asm {
-			mov mouseAction.deleted, 1
+			mov mouseAction.deleted, 0x1
 			jmp sub_DeleteIsoEventsView
 		}
 	}
@@ -5601,7 +5506,7 @@ namespace Hooks
 	VOID __declspec(naked) DeleteIsoMapView(DWORD obj)
 	{
 		__asm {
-			mov mouseAction.deleted, 1
+			mov mouseAction.deleted, 0x1
 			jmp sub_DeleteIsoMapView
 		}
 	}
@@ -5612,14 +5517,14 @@ namespace Hooks
 		__asm {
 			cmp ecx, mouseAction.radioObjects
 			jne lbl_cont
-			mov mouseAction.radioObjects, 0
+			mov mouseAction.radioObjects, 0x0
 
 			lbl_cont:
 			jmp sub_DeleteRadioObjects
 		}
 	}
 
-	DWORD* __fastcall GetAreaObject(DWORD* global)
+	DWORD* GetAreaObject(DWORD* global)
 	{
 		if (config.isEditor)
 			return (DWORD*)((DWORD*)global[4])[mouseAction.offset.area];
@@ -5628,7 +5533,7 @@ namespace Hooks
 	}
 
 	DWORD sub_MouseAction;
-	BOOL __stdcall MouseAction(DWORD* global, UINT uMsg, POINT* pt)
+	BOOL __fastcall MouseAction(DWORD* global, DWORD /*edx*/, UINT uMsg, POINT* pt)
 	{
 		if (*mouseAction.allow)
 		{
@@ -5681,18 +5586,8 @@ namespace Hooks
 		return ((BOOL(__thiscall*)(DWORD*, UINT, POINT*))sub_MouseAction)(global, uMsg, pt);
 	}
 
-	VOID __declspec(naked) hook_006D79B8()
-	{
-		__asm {
-			pop eax
-			push ecx
-			push eax
-			jmp MouseAction
-		}
-	}
-
 	DWORD sub_MouseActionMap;
-	BOOL __stdcall MouseActionMap(DWORD* global, UINT uMsg, POINT* pt)
+	BOOL __fastcall MouseActionMap(DWORD* global, DWORD /*edx*/, UINT uMsg, POINT* pt)
 	{
 		if (*mouseAction.allow)
 		{
@@ -5732,18 +5627,8 @@ namespace Hooks
 		return ((BOOL(__thiscall*)(DWORD*, UINT, POINT*))sub_MouseActionMap)(global, uMsg, pt);
 	}
 
-	VOID __declspec(naked) hook_005CB460()
-	{
-		__asm {
-			pop eax
-			push ecx
-			push eax
-			jmp MouseActionMap
-		}
-	}
-
 	DWORD sub_MouseMove;
-	BOOL __stdcall MouseMove(DWORD* global, POINT* pt)
+	BOOL __fastcall MouseMove(DWORD* global, DWORD /*edx*/, POINT* pt)
 	{
 		if (*mouseAction.allow && mouseAction.dialog == global)
 		{
@@ -5824,16 +5709,6 @@ namespace Hooks
 
 		return ((BOOL(__thiscall*)(DWORD*, POINT*))sub_MouseMove)(global, pt);
 	}
-
-	VOID __declspec(naked) hook_006D79B4()
-	{
-		__asm {
-			pop eax
-			push ecx
-			push eax
-			jmp MouseMove
-		}
-	}
 #pragma endregion
 
 #pragma region Banners and resources popup
@@ -5868,7 +5743,7 @@ namespace Hooks
 			mov [ecx], al
 			push eax
 			call SetBanners
-			retn 4
+			retn 0x4
 		}
 	}
 
@@ -5924,7 +5799,7 @@ namespace Hooks
 	}
 
 	DWORD sub_CopyStrObject;
-	StringObject* __stdcall AddScenarioSize(StringObject* dst, StringObject* src)
+	StringObject* __fastcall AddScenarioSize(StringObject* dst, DWORD /*edx*/, StringObject* src)
 	{
 		DWORD* scene = (DWORD*)src - 14;
 
@@ -5941,16 +5816,6 @@ namespace Hooks
 
 		return dst;
 	}
-
-	VOID __declspec(naked) hook_004E584B()
-	{
-		__asm {
-			pop eax
-			push ecx
-			push eax
-			jmp AddScenarioSize
-		}
-	}
 #pragma endregion
 
 	BOOL __stdcall FakeEntryPoint(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
@@ -5960,7 +5825,7 @@ namespace Hooks
 
 	BOOL PatchImportFunction(HOOKER hooker, const CHAR* function, VOID* addr)
 	{
-		DWORD address = PatchImportByName(hooker, function, addr);
+		DWORD address = PatchImportByName(hooker, function, addr, NULL, TRUE);
 		if (address)
 		{
 			BYTE block[6];
@@ -5979,7 +5844,7 @@ namespace Hooks
 	}
 
 #pragma optimize("s", on)
-	VOID __fastcall LoadV1(HOOKER hooker, const AddressSpaceV1* hookSpace)
+	VOID LoadV1(HOOKER hooker, const AddressSpaceV1* hookSpace)
 	{
 		// Game Speed
 		{
@@ -6103,7 +5968,7 @@ namespace Hooks
 		}
 	}
 
-	VOID __fastcall LoadV2(HOOKER hooker, const AddressSpaceV2* hookSpace)
+	VOID LoadV2(HOOKER hooker, const AddressSpaceV2* hookSpace)
 	{
 		DWORD baseOffset = GetBaseOffset(hooker);
 
@@ -6241,28 +6106,28 @@ namespace Hooks
 		if (ReadDWord(hooker, hookSpace->iso_view_interface, &sub_DeleteIsoView) && ReadDWord(hooker, hookSpace->iso_view_interface + 8, &sub_MouseMove) && ReadDWord(hooker, hookSpace->iso_view_interface + 12, &sub_MouseAction))
 		{
 			PatchPtr(hooker, hookSpace->iso_view_interface, DeleteIsoView);
-			PatchPtr(hooker, hookSpace->iso_view_interface + 8, hook_006D79B4);
-			PatchPtr(hooker, hookSpace->iso_view_interface + 12, hook_006D79B8);
+			PatchPtr(hooker, hookSpace->iso_view_interface + 8, MouseMove);
+			PatchPtr(hooker, hookSpace->iso_view_interface + 12, MouseAction);
 
 			if (hookSpace->iso_view_info_interface && ReadDWord(hooker, hookSpace->iso_view_info_interface, &sub_DeleteIsoInfoView))
 			{
 				PatchPtr(hooker, hookSpace->iso_view_info_interface, DeleteIsoInfoView);
-				PatchPtr(hooker, hookSpace->iso_view_info_interface + 8, hook_006D79B4);
-				PatchPtr(hooker, hookSpace->iso_view_info_interface + 12, hook_006D79B8);
+				PatchPtr(hooker, hookSpace->iso_view_info_interface + 8, MouseMove);
+				PatchPtr(hooker, hookSpace->iso_view_info_interface + 12, MouseAction);
 			}
 
 			if (hookSpace->iso_view_events_interface && ReadDWord(hooker, hookSpace->iso_view_events_interface, &sub_DeleteIsoEventsView))
 			{
 				PatchPtr(hooker, hookSpace->iso_view_events_interface, DeleteIsoEventsView);
-				PatchPtr(hooker, hookSpace->iso_view_events_interface + 8, hook_006D79B4);
-				PatchPtr(hooker, hookSpace->iso_view_events_interface + 12, hook_006D79B8);
+				PatchPtr(hooker, hookSpace->iso_view_events_interface + 8, MouseMove);
+				PatchPtr(hooker, hookSpace->iso_view_events_interface + 12, MouseAction);
 			}
 
 			if (hookSpace->iso_view_map_interface && ReadDWord(hooker, hookSpace->iso_view_map_interface, &sub_DeleteIsoMapView) && ReadDWord(hooker, hookSpace->iso_view_map_interface + 12, &sub_MouseActionMap))
 			{
 				PatchPtr(hooker, hookSpace->iso_view_map_interface, DeleteIsoMapView);
-				PatchPtr(hooker, hookSpace->iso_view_map_interface + 8, hook_006D79B4);
-				PatchPtr(hooker, hookSpace->iso_view_map_interface + 12, hook_005CB460);
+				PatchPtr(hooker, hookSpace->iso_view_map_interface + 8, MouseMove);
+				PatchPtr(hooker, hookSpace->iso_view_map_interface + 12, MouseActionMap);
 			}
 
 			if (hookSpace->radio_objects_interface && ReadDWord(hooker, hookSpace->radio_objects_interface, &sub_DeleteRadioObjects))
@@ -6297,7 +6162,7 @@ namespace Hooks
 			sub_LoadImgPackage = RedirectCall(hooker, hookSpace->pkg_load, LoadImgPackage);
 			sub_005A9A1E = hookSpace->pkg_sub + baseOffset;
 
-			PatchHook(hooker, hookSpace->pkg_entry_load, hook_0051F886);
+			PatchHook(hooker, hookSpace->pkg_entry_load, LoadPackageIndex);
 			sub_0052A14E = hookSpace->pkg_entry_sub + baseOffset;
 
 			// Show clouds
@@ -6367,7 +6232,7 @@ namespace Hooks
 		{
 			PatchPtr(hooker, hookSpace->scene_sort_hook + 3, CompareScenes); // Sort by title
 
-			sub_CopyStrObject = RedirectCall(hooker, hookSpace->scene_print_hook, hook_004E584B);
+			sub_CopyStrObject = RedirectCall(hooker, hookSpace->scene_print_hook, AddScenarioSize);
 
 			if (!config.isEditor)
 				PatchByte(hooker, hookSpace->scene_print_hook + 13, 0xEB); // remove (Custom) check
@@ -6391,19 +6256,19 @@ namespace Hooks
 
 			// =================================================================
 
-			PatchHook(hooker, hookSpace->fillColor, hook_0055D283); // Fill color
+			PatchHook(hooker, hookSpace->fillColor, FillColor); // Fill color
 			PatchCall(hooker, hookSpace->minimapGround, DrawMinimapGround); // Minimap ground
-			PatchHook(hooker, hookSpace->minimapObjects, hook_0055D419); // Draw minimap object
+			PatchHook(hooker, hookSpace->minimapObjects, DrawMinimapObjects); // Draw minimap object
 			PatchPtr(hooker, hookSpace->clearGround, ClearGround); // Clear ground
-			PatchHook(hooker, hookSpace->mapGround, hook_005B5660); // Draw map ground
-			PatchHook(hooker, hookSpace->waterBorders, hook_005B5560); // Draw water borders
+			PatchHook(hooker, hookSpace->mapGround, DrawGround); // Draw map ground
+			PatchHook(hooker, hookSpace->waterBorders, DrawWaterBorders); // Draw water borders
 
-			PatchHook(hooker, hookSpace->symbol, hook_005280D9); // Draw Symbol
+			PatchHook(hooker, hookSpace->symbol, DrawSymbol); // Draw Symbol
 			PatchCall(hooker, hookSpace->faces, DrawFaces);
 			PatchPtr(hooker, hookSpace->buildings, DrawCastleBuildings);
 
-			PatchHook(hooker, hookSpace->horLine, hook_0053056A); // Draw Horizontal Line
-			PatchHook(hooker, hookSpace->verLine, hook_00530603); // Draw Vertical Line
+			PatchHook(hooker, hookSpace->horLine, DrawLineHorizontal); // Draw Horizontal Line
+			PatchHook(hooker, hookSpace->verLine, DrawLineVertical); // Draw Vertical Line
 
 			// =================================================================
 

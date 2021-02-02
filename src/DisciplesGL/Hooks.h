@@ -335,8 +335,8 @@ namespace Hooks
 	};
 
 	INT __stdcall MessageBoxHook(HWND, LPCSTR, LPCSTR, UINT);
-	VOID __fastcall PrintText(CHAR* str);
-	VOID __fastcall SetGameSpeed();
+	VOID PrintText(CHAR* str);
+	VOID SetGameSpeed();
 
 	VOID Load();
 }

@@ -57,14 +57,14 @@ extern const Adjustment defaultColors;
 
 namespace Config
 {
-	BOOL __fastcall Load();
-	INT __fastcall Get(const CHAR*, const CHAR*, INT);
-	DWORD __fastcall Get(const CHAR*, const CHAR*, CHAR*, CHAR*, DWORD);
-	BOOL __fastcall Set(const CHAR*, const CHAR*, INT);
-	BOOL __fastcall Set(const CHAR*, const CHAR*, CHAR*);
-	CHAR* __fastcall Add(CHAR*, const CHAR*, INT, const CHAR* = NULL);
-	BOOL __fastcall IsZoomed();
-	VOID __fastcall CalcZoomed(Size* dst, Size* src, DWORD scale);
-	VOID __fastcall CalcZoomed();
-	VOID __fastcall UpdateLocale();
+	BOOL Load();
+	INT Get(const CHAR*, const CHAR*, INT);
+	DWORD Get(const CHAR*, const CHAR*, CHAR*, CHAR*, DWORD);
+	BOOL Set(const CHAR*, const CHAR*, INT);
+	BOOL Set(const CHAR*, const CHAR*, CHAR*);
+	CHAR* Add(CHAR*, const CHAR*, INT, const CHAR* = NULL);
+	BOOL IsZoomed();
+	VOID CalcZoomed(Size* dst, Size* src, DWORD scale);
+	VOID CalcZoomed();
+	VOID UpdateLocale();
 }

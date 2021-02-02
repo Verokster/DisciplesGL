@@ -198,7 +198,7 @@ namespace Config
 		return TRUE;
 	}
 
-	BOOL __fastcall Load()
+	BOOL Load()
 	{
 		HMODULE hModule = GetModuleHandle(NULL);
 
@@ -383,8 +383,8 @@ namespace Config
 			}
 
 			{
-				config.colors.active.hueShift = 0.5f;
-				config.colors.active.saturation = 0.5f;
+				config.colors.active.satHue.hueShift = 0.5f;
+				config.colors.active.satHue.saturation = 0.5f;
 				Config::Set(CONFIG_COLORS, "HueSat", 0x01F401F4);
 
 				config.colors.active.input.left.rgb = 0.0f;
@@ -627,8 +627,8 @@ namespace Config
 
 			{
 				INT value = Config::Get(CONFIG_COLORS, "HueSat", 0x01F401F4);
-				config.colors.active.hueShift = 0.001f * min(1000, max(0, LOWORD(value)));
-				config.colors.active.saturation = 0.001f * min(1000, max(0, HIWORD(value)));
+				config.colors.active.satHue.hueShift = 0.001f * min(1000, max(0, LOWORD(value)));
+				config.colors.active.satHue.saturation = 0.001f * min(1000, max(0, HIWORD(value)));
 
 				value = Config::Get(CONFIG_COLORS, "RgbInput", 0x03E80000);
 				if (LOWORD(value) < HIWORD(value))
@@ -909,29 +909,29 @@ namespace Config
 		return TRUE;
 	}
 
-	INT __fastcall Get(const CHAR* app, const CHAR* key, INT default)
+	INT Get(const CHAR* app, const CHAR* key, INT default)
 	{
 		return GetPrivateProfileInt(app, key, (INT) default, config.file);
 	}
 
-	DWORD __fastcall Get(const CHAR* app, const CHAR* key, CHAR* default, CHAR* returnString, DWORD nSize)
+	DWORD Get(const CHAR* app, const CHAR* key, CHAR* default, CHAR* returnString, DWORD nSize)
 	{
 		return GetPrivateProfileString(app, key, default, returnString, nSize, config.file);
 	}
 
-	BOOL __fastcall Set(const CHAR* app, const CHAR* key, INT value)
+	BOOL Set(const CHAR* app, const CHAR* key, INT value)
 	{
 		CHAR res[20];
-		StrPrint(res, "%d", value);
+		StrFromInt(value, res, 10);
 		return WritePrivateProfileString(app, key, res, config.file);
 	}
 
-	BOOL __fastcall Set(const CHAR* app, const CHAR* key, CHAR* value)
+	BOOL Set(const CHAR* app, const CHAR* key, CHAR* value)
 	{
 		return WritePrivateProfileString(app, key, value, config.file);
 	}
 
-	CHAR* __fastcall Add(CHAR* ptr, const CHAR* key, INT value, const CHAR* comments)
+	CHAR* Add(CHAR* ptr, const CHAR* key, INT value, const CHAR* comments)
 	{
 		if (comments)
 		{
@@ -951,12 +951,12 @@ namespace Config
 		return ptr;
 	}
 
-	BOOL __fastcall IsZoomed()
+	BOOL IsZoomed()
 	{
 		return config.zoom.glallow && config.zoom.enabled && config.borders.active && (!config.battle.active || !config.battle.wide || config.battle.zoomable);
 	}
 
-	VOID __fastcall CalcZoomed(Size* dst, Size* src, DWORD scale)
+	VOID CalcZoomed(Size* dst, Size* src, DWORD scale)
 	{
 		FLOAT k = (FLOAT)src->width / src->height;
 		if (k >= 4.0f / 3.0f)
@@ -973,7 +973,7 @@ namespace Config
 		}
 	}
 
-	VOID __fastcall CalcZoomed(SizeFloat* dst, SizeFloat* src, DWORD scale)
+	VOID CalcZoomed(SizeFloat* dst, SizeFloat* src, DWORD scale)
 	{
 		FLOAT k = src->width / src->height;
 		if (k >= 4.0f / 3.0f)
@@ -990,7 +990,7 @@ namespace Config
 		}
 	}
 
-	VOID __fastcall CalcZoomed()
+	VOID CalcZoomed()
 	{
 		CalcZoomed(&config.zoom.size, (Size*)config.mode, config.zoom.value);
 
@@ -998,7 +998,7 @@ namespace Config
 		CalcZoomed(&config.zoom.sizeFloat, &size, config.zoom.value);
 	}
 
-	VOID __fastcall UpdateLocale()
+	VOID UpdateLocale()
 	{
 		if (config.locales.current.id)
 		{

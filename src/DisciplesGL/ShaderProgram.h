@@ -27,9 +27,34 @@
 #include "Allocation.h"
 #include "ExtraTypes.h"
 
-#define SHADER_DOUBLE 0x1
-#define SHADER_LEVELS 0x2
+#define SHADER_TEXSIZE 0x1
+#define SHADER_DOUBLE 0x2
 #define SHADER_ALPHA 0x4
+#define SHADER_SATHUE 0x8
+#define SHADER_LEVELS_IN_RGB 0x10
+#define SHADER_LEVELS_IN_A 0x20
+#define SHADER_LEVELS_GAMMA_RGB 0x40
+#define SHADER_LEVELS_GAMMA_A 0x80
+#define SHADER_LEVELS_OUT_RGB 0x100
+#define SHADER_LEVELS_OUT_A 0x200
+
+#define SHADER_LEVELS_IN (SHADER_LEVELS_IN_RGB | SHADER_LEVELS_IN_A)
+#define SHADER_LEVELS_GAMMA (SHADER_LEVELS_GAMMA_RGB | SHADER_LEVELS_GAMMA_A)
+#define SHADER_LEVELS_OUT (SHADER_LEVELS_OUT_RGB | SHADER_LEVELS_OUT_A)
+
+#define SHADER_LEVELS (SHADER_SATHUE | SHADER_LEVELS_IN | SHADER_LEVELS_GAMMA | SHADER_LEVELS_OUT)
+
+#define CMP_SATHUE 0x000003
+#define CMP_LEVELS_IN_A 0x000044
+#define CMP_LEVELS_IN_RGB 0x0003B8
+#define CMP_LEVELS_GAMMA_A 0x000400
+#define CMP_LEVELS_GAMMA_RGB 0x003800
+#define CMP_LEVELS_OUT_A 0x044000
+#define CMP_LEVELS_OUT_RGB 0x3B8000
+
+#define CMP_LEVELS_IN (CMP_LEVELS_IN_RGB | CMP_LEVELS_IN_A)
+#define CMP_LEVELS_GAMMA (CMP_LEVELS_GAMMA_RGB | CMP_LEVELS_GAMMA_A)
+#define CMP_LEVELS_OUT (CMP_LEVELS_OUT_RGB | CMP_LEVELS_OUT_A)
 
 class ShaderProgram : public Allocation {
 private:
@@ -37,8 +62,7 @@ private:
 	DWORD texSize;
 	struct {
 		GLint texSize;
-		GLint hue;
-		GLint sat;
+		GLint satHue;
 		struct {
 			GLint left;
 			GLint right;
@@ -60,4 +84,5 @@ public:
 
 	VOID Use();
 	VOID Update(DWORD, Adjustment*);
+	static DWORD CompareAdjustments(const Adjustment*, const Adjustment*);
 };

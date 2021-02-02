@@ -396,8 +396,9 @@ extern "C"
 	/// <param name="name"></param>
 	/// <param name="funcAddress"></param>
 	/// <param name="old_value"></param>
+	/// <param name="erace"></param>
 	/// <returns></returns>
-	DWORD __stdcall PatchImportByName(HOOKER hooker, const CHAR* name, const VOID* funcAddress, DWORD* old_value = NULL);
+	DWORD __stdcall PatchImportByName(HOOKER hooker, const CHAR* name, const VOID* funcAddress = NULL, DWORD* old_value = NULL, BOOL erace = FALSE);
 	
 	/// <summary>
 	/// Redirects module imported function and retrives old address
@@ -406,8 +407,9 @@ extern "C"
 	/// <param name="ordinal"></param>
 	/// <param name="funcAddress"></param>
 	/// <param name="old_value"></param>
+	/// <param name="erace"></param>
 	/// <returns></returns>
-	DWORD __stdcall PatchImportByOrdinal(HOOKER hooker, DWORD ordinal, const VOID* funcAddress, DWORD* old_value = NULL);
+	DWORD __stdcall PatchImportByOrdinal(HOOKER hooker, DWORD ordinal, const VOID* funcAddress = NULL, DWORD* old_value = NULL, BOOL erace = FALSE);
 
 	/// <summary>
 	/// Redirects module exported function and retrives old address

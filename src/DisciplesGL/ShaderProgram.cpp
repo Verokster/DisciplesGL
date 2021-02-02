@@ -52,8 +52,20 @@ ShaderProgram::ShaderProgram(const CHAR* version, DWORD vertexName, DWORD fragme
 		StrCat(prefix, "#define ALPHA\n");
 	if (this->flags & SHADER_DOUBLE)
 		StrCat(prefix, "#define DOUBLE\n");
-	if (this->flags & SHADER_LEVELS)
-		StrCat(prefix, "#define LEVELS\n");
+	if (this->flags & SHADER_SATHUE)
+		StrCat(prefix, "#define SATHUE\n");
+	if (this->flags & SHADER_LEVELS_IN_RGB)
+		StrCat(prefix, "#define LEV_IN_RGB\n");
+	if (this->flags & SHADER_LEVELS_IN_A)
+		StrCat(prefix, "#define LEV_IN_A\n");
+	if (this->flags & SHADER_LEVELS_GAMMA_RGB)
+		StrCat(prefix, "#define LEV_GAMMA_RGB\n");
+	if (this->flags & SHADER_LEVELS_GAMMA_A)
+		StrCat(prefix, "#define LEV_GAMMA_A\n");
+	if (this->flags & SHADER_LEVELS_OUT_RGB)
+		StrCat(prefix, "#define LEV_OUT_RGB\n");
+	if (this->flags & SHADER_LEVELS_OUT_A)
+		StrCat(prefix, "#define LEV_OUT_A\n");
 
 	GLuint vShader = GL::CompileShaderSource(vertexName, prefix, GL_VERTEX_SHADER);
 	GLuint fShader = GL::CompileShaderSource(fragmentName, prefix, GL_FRAGMENT_SHADER);
@@ -76,15 +88,23 @@ ShaderProgram::ShaderProgram(const CHAR* version, DWORD vertexName, DWORD fragme
 	if (loc >= 0)
 		GLUniform1i(loc, 1);
 
-	this->loc.texSize = GLGetUniformLocation(this->id, "texSize");
+	if (this->flags & SHADER_TEXSIZE)
+		this->loc.texSize = GLGetUniformLocation(this->id, "texSize");
 
-	if (this->flags & SHADER_LEVELS)
+	if (this->flags & SHADER_SATHUE)
+		this->loc.satHue = GLGetUniformLocation(this->id, "satHue");
+
+	if (this->flags & SHADER_LEVELS_IN)
 	{
-		this->loc.hue = GLGetUniformLocation(this->id, "hue");
-		this->loc.sat = GLGetUniformLocation(this->id, "sat");
 		this->loc.input.left = GLGetUniformLocation(this->id, "in_left");
 		this->loc.input.right = GLGetUniformLocation(this->id, "in_right");
+	}
+
+	if (this->flags & SHADER_LEVELS_GAMMA)
 		this->loc.gamma = GLGetUniformLocation(this->id, "gamma");
+
+	if (this->flags & SHADER_LEVELS_OUT)
+	{
 		this->loc.output.left = GLGetUniformLocation(this->id, "out_left");
 		this->loc.output.right = GLGetUniformLocation(this->id, "out_right");
 	}
@@ -100,52 +120,77 @@ ShaderProgram::~ShaderProgram()
 
 VOID ShaderProgram::Update(DWORD texSize, Adjustment* colors)
 {
-	if (this->loc.texSize >= 0 && this->texSize != texSize)
+	if ((this->flags & SHADER_TEXSIZE) && this->texSize != texSize)
 	{
 		this->texSize = texSize;
 		GLUniform2f(this->loc.texSize, (FLOAT)LOWORD(texSize), (FLOAT)HIWORD(texSize));
 	}
 
-	if ((this->flags & SHADER_LEVELS) && MemoryCompare(this->colors, colors, sizeof(Adjustment)))
+	if (this->flags & SHADER_LEVELS)
 	{
-		*this->colors = *colors;
+		DWORD cmp = CompareAdjustments(this->colors, colors);
 
-		GLUniform1f(this->loc.hue, FLOAT((2.0 * colors->hueShift - 1.0) * M_PI));
-		GLUniform1f(this->loc.sat, (FLOAT)MathPower(2.0f * colors->saturation, 1.5849625f));
+		if ((this->flags & SHADER_SATHUE) && (cmp & CMP_SATHUE))
+		{
+			this->colors->satHue = colors->satHue;
+			GLUniform2f(this->loc.satHue, (FLOAT)MathPower(2.0f * colors->satHue.saturation, 1.5849625f), FLOAT((2.0 * colors->satHue.hueShift - 1.0) * M_PI));
+		}
 
-		GLUniform4f(this->loc.input.left,
-			colors->input.left.red,
-			colors->input.left.green,
-			colors->input.left.blue,
-			colors->input.left.rgb);
+		if ((this->flags & SHADER_LEVELS_IN) && (cmp & CMP_LEVELS_IN))
+		{
+			this->colors->input = colors->input;
+			GLUniform4f(this->loc.input.left,
+				colors->input.left.red,
+				colors->input.left.green,
+				colors->input.left.blue,
+				colors->input.left.rgb);
+			GLUniform4f(this->loc.input.right,
+				colors->input.right.red,
+				colors->input.right.green,
+				colors->input.right.blue,
+				colors->input.right.rgb);
+		}
 
-		GLUniform4f(this->loc.input.right,
-			colors->input.right.red,
-			colors->input.right.green,
-			colors->input.right.blue,
-			colors->input.right.rgb);
+		if ((this->flags & SHADER_LEVELS_GAMMA) && (cmp & CMP_LEVELS_GAMMA))
+		{
+			this->colors->gamma = colors->gamma;
+			GLUniform4f(this->loc.gamma,
+				1.0f / (FLOAT)MathPower(2.0f * colors->gamma.red, 3.32f),
+				1.0f / (FLOAT)MathPower(2.0f * colors->gamma.green, 3.32f),
+				1.0f / (FLOAT)MathPower(2.0f * colors->gamma.blue, 3.32f),
+				1.0f / (FLOAT)MathPower(2.0f * colors->gamma.rgb, 3.32f));
+		}
 
-		GLUniform4f(this->loc.gamma,
-			1.0f / (FLOAT)MathPower(2.0f * colors->gamma.red, 3.32f),
-			1.0f / (FLOAT)MathPower(2.0f * colors->gamma.green, 3.32f),
-			1.0f / (FLOAT)MathPower(2.0f * colors->gamma.blue, 3.32f),
-			1.0f / (FLOAT)MathPower(2.0f * colors->gamma.rgb, 3.32f));
-
-		GLUniform4f(this->loc.output.left,
-			colors->output.left.red,
-			colors->output.left.green,
-			colors->output.left.blue,
-			colors->output.left.rgb);
-
-		GLUniform4f(this->loc.output.right,
-			colors->output.right.red,
-			colors->output.right.green,
-			colors->output.right.blue,
-			colors->output.right.rgb);
+		if ((this->flags & SHADER_LEVELS_OUT) && (cmp & CMP_LEVELS_OUT))
+		{
+			this->colors->output = colors->output;
+			GLUniform4f(this->loc.output.left,
+				colors->output.left.red,
+				colors->output.left.green,
+				colors->output.left.blue,
+				colors->output.left.rgb);
+			GLUniform4f(this->loc.output.right,
+				colors->output.right.red,
+				colors->output.right.green,
+				colors->output.right.blue,
+				colors->output.right.rgb);
+		}
 	}
 }
 
 VOID ShaderProgram::Use()
 {
 	GLUseProgram(this->id);
+}
+
+DWORD ShaderProgram::CompareAdjustments(const Adjustment* cmp1, const Adjustment* cmp2)
+{
+	DWORD res = 0;
+	const DWORD* src = (const DWORD*)cmp1;
+	const DWORD* dst = (const DWORD*)cmp2;
+	for (DWORD i = 0; i < sizeof(Adjustment) / sizeof(FLOAT); ++i)
+		if (src[i] != dst[i])
+			res |= (1 << i);
+
+	return res;
 }

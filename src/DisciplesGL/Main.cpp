@@ -52,7 +52,7 @@ namespace Main
 		return DD_OK;
 	}
 
-	OpenDraw* __fastcall FindOpenDrawByWindow(HWND hWnd)
+	OpenDraw* FindOpenDrawByWindow(HWND hWnd)
 	{
 		OpenDraw* ddraw = drawList;
 		while (ddraw)
@@ -66,7 +66,7 @@ namespace Main
 		return NULL;
 	}
 
-	BOOL __fastcall LoadResource(LPCSTR name, Stream* stream)
+	BOOL LoadResource(LPCSTR name, Stream* stream)
 	{
 		HGLOBAL hResourceData;
 		HRSRC hResource = FindResource(hDllModule, name, RT_RCDATA);
@@ -87,14 +87,14 @@ namespace Main
 		return FALSE;
 	}
 
-	VOID __fastcall ShowError(UINT id, CHAR* file, DWORD line)
+	VOID ShowError(UINT id, CHAR* file, DWORD line)
 	{
 		CHAR message[256];
 		LoadString(hDllModule, id, message, sizeof(message));
 		ShowError(message, file, line);
 	}
 
-	VOID __fastcall ShowError(CHAR* message, CHAR* file, DWORD line)
+	VOID ShowError(CHAR* message, CHAR* file, DWORD line)
 	{
 		CHAR dest[400];
 		StrPrint(dest, "%s\n\n\nFILE %s\nLINE %d", message, file, line);
@@ -104,32 +104,32 @@ namespace Main
 		Exit(EXIT_FAILURE);
 	}
 
-	VOID __fastcall ShowInfo(UINT id)
+	VOID ShowInfo(UINT id)
 	{
 		CHAR message[256];
 		LoadString(hDllModule, id, message, sizeof(message));
 		ShowInfo(message);
 	}
 
-	VOID __fastcall ShowInfo(CHAR* message)
+	VOID ShowInfo(CHAR* message)
 	{
 		Hooks::MessageBoxHook(NULL, message, "Information", MB_OK | MB_ICONASTERISK | MB_TASKMODAL);
 	}
 
-	BOOL __fastcall ShowWarn(UINT id)
+	BOOL ShowWarn(UINT id)
 	{
 		CHAR message[256];
 		LoadString(hDllModule, id, message, sizeof(message));
 		return ShowWarn(message);
 	}
 
-	BOOL __fastcall ShowWarn(CHAR* message)
+	BOOL ShowWarn(CHAR* message)
 	{
 		return Hooks::MessageBoxHook(NULL, message, "Warning", MB_OKCANCEL | MB_ICONWARNING | MB_TASKMODAL) == IDOK;
 	}
 
 #ifdef _DEBUG
-	VOID __fastcall CheckError(CHAR* file, DWORD line)
+	VOID CheckError(CHAR* file, DWORD line)
 	{
 		DWORD statusCode = GLGetError();
 
@@ -177,7 +177,7 @@ namespace Main
 	}
 #endif
 
-	VOID __fastcall LoadBack(VOID* buffer, DWORD width, DWORD height)
+	VOID LoadBack(VOID* buffer, DWORD width, DWORD height)
 	{
 		Stream stream;
 		MemoryZero(&stream, sizeof(Stream));

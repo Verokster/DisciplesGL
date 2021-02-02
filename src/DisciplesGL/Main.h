@@ -35,20 +35,20 @@ namespace Main
 	HRESULT __stdcall DrawCreate(GUID* lpGUID, LPDIRECTDRAW* lplpDD, IUnknown* pUnkOuter);
 	HRESULT __stdcall DrawCreateEx(GUID* lpGuid, LPVOID* lplpDD, REFIID iid, IUnknown* pUnkOuter);
 
-	OpenDraw* __fastcall FindOpenDrawByWindow(HWND hWnd);
+	OpenDraw* FindOpenDrawByWindow(HWND hWnd);
 
-	BOOL __fastcall LoadResource(LPCSTR name, Stream* stream);
+	BOOL LoadResource(LPCSTR name, Stream* stream);
 
-	VOID __fastcall ShowError(UINT id, CHAR* file, DWORD line);
-	VOID __fastcall ShowError(CHAR* message, CHAR* file, DWORD line);
-	VOID __fastcall ShowInfo(UINT id);
-	VOID __fastcall ShowInfo(CHAR* message);
-	BOOL __fastcall ShowWarn(UINT id);
-	BOOL __fastcall ShowWarn(CHAR* message);
+	VOID ShowError(UINT id, CHAR* file, DWORD line);
+	VOID ShowError(CHAR* message, CHAR* file, DWORD line);
+	VOID ShowInfo(UINT id);
+	VOID ShowInfo(CHAR* message);
+	BOOL ShowWarn(UINT id);
+	BOOL ShowWarn(CHAR* message);
 
 #ifdef _DEBUG
-	VOID __fastcall CheckError(CHAR* file, DWORD line);
+	VOID CheckError(CHAR* file, DWORD line);
 #endif
 
-	VOID __fastcall LoadBack(VOID* buffer, DWORD width, DWORD height);
+	VOID LoadBack(VOID* buffer, DWORD width, DWORD height);
 }

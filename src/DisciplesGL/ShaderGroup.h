@@ -33,6 +33,7 @@ private:
 	DWORD vertexName;
 	DWORD fragmentName;
 	DWORD flags;
+	BOOL update;
 	Adjustment* colors;
 	ShaderProgram* current;
 	ShaderProgram* list;

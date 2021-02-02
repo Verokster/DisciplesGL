@@ -42,7 +42,7 @@ namespace Window
 	HHOOK OldKeysHook;
 	WNDPROC OldWindowProc, OldPanelProc;
 
-	VOID __fastcall BeginDialog(DialogParams* params)
+	VOID BeginDialog(DialogParams* params)
 	{
 		params->ddraw = Main::FindOpenDrawByWindow(params->hWnd);
 		if (params->ddraw)
@@ -76,7 +76,7 @@ namespace Window
 			params->cookie = NULL;
 	}
 
-	VOID __fastcall EndDialog(DialogParams* params)
+	VOID EndDialog(DialogParams* params)
 	{
 		if (params->cookie)
 			DeactivateActCtxC(0, params->cookie);
@@ -109,7 +109,7 @@ namespace Window
 			SetForegroundWindow(params->hWnd);
 	}
 
-	BYTE __fastcall CubicInterpolate(BYTE p0, BYTE p1, BYTE p2, BYTE p3, FLOAT x)
+	BYTE CubicInterpolate(BYTE p0, BYTE p1, BYTE p2, BYTE p3, FLOAT x)
 	{
 		INT d = INT(p1 + 0.5 * x * (p2 - p0 + x * (2 * p0 - 5 * p1 + 4 * p2 - p3 + x * (3 * (p1 - p2) + p3 - p0))));
 		if (d > 0xFF)
@@ -119,7 +119,7 @@ namespace Window
 		return LOBYTE(d);
 	}
 
-	BOOL __fastcall GetMenuByChildID(HMENU hParent, MenuItemData* mData, INT index)
+	BOOL GetMenuByChildID(HMENU hParent, MenuItemData* mData, INT index)
 	{
 		HMENU hMenu = GetSubMenu(hParent, index);
 
@@ -142,7 +142,7 @@ namespace Window
 		return FALSE;
 	}
 
-	BOOL __fastcall GetMenuByChildID(MenuItemData* mData)
+	BOOL GetMenuByChildID(MenuItemData* mData)
 	{
 		INT count = GetMenuItemCount(config.menu);
 		for (INT i = 0; i < count; ++i)
@@ -153,7 +153,7 @@ namespace Window
 		return FALSE;
 	}
 
-	VOID __fastcall CheckEnablePopup(MenuItemData* mData, DWORD flags)
+	VOID CheckEnablePopup(MenuItemData* mData, DWORD flags)
 	{
 		if (GetMenuByChildID(mData))
 		{
@@ -169,7 +169,7 @@ namespace Window
 		}
 	}
 
-	VOID __fastcall CheckMenu(MenuType type)
+	VOID CheckMenu(MenuType type)
 	{
 		switch (type)
 		{
@@ -628,7 +628,7 @@ namespace Window
 		}
 	}
 
-	VOID __fastcall CheckMenu()
+	VOID CheckMenu()
 	{
 		CheckMenu(MenuLocale);
 		CheckMenu(MenuAspect);
@@ -651,7 +651,7 @@ namespace Window
 		CheckMenu(MenuMsgTimeScale);
 	}
 
-	VOID __fastcall FilterChanged(HWND hWnd, const CHAR* name, INT value)
+	VOID FilterChanged(HWND hWnd, const CHAR* name, INT value)
 	{
 		Config::Set(CONFIG_WRAPPER, name, value);
 
@@ -663,7 +663,7 @@ namespace Window
 		}
 	}
 
-	VOID __fastcall InterpolationChanged(HWND hWnd, InterpolationFilter filter)
+	VOID InterpolationChanged(HWND hWnd, InterpolationFilter filter)
 	{
 		config.image.interpolation = config.gl.version.value >= GL_VER_2_0 || filter < InterpolateHermite ? filter : InterpolateLinear;
 
@@ -703,7 +703,7 @@ namespace Window
 		CheckMenu(MenuInterpolate);
 	}
 
-	VOID __fastcall UpscalingChanged(HWND hWnd, UpscalingFilter filter)
+	VOID UpscalingChanged(HWND hWnd, UpscalingFilter filter)
 	{
 		config.image.upscaling = config.gl.version.value >= GL_VER_3_0 ? filter : UpscaleNone;
 
@@ -756,42 +756,42 @@ namespace Window
 		CheckMenu(MenuUpscale);
 	}
 
-	VOID __fastcall SelectScaleNxMode(HWND hWnd, BYTE value)
+	VOID SelectScaleNxMode(HWND hWnd, BYTE value)
 	{
 		config.image.scaleNx = value;
 		Config::Set(CONFIG_WRAPPER, "ScaleNx", *(INT*)&config.image.scaleNx);
 		UpscalingChanged(hWnd, UpscaleScaleNx);
 	}
 
-	VOID __fastcall SelectXSalMode(HWND hWnd, BYTE value)
+	VOID SelectXSalMode(HWND hWnd, BYTE value)
 	{
 		config.image.xSal = value;
 		Config::Set(CONFIG_WRAPPER, "XSal", *(INT*)&config.image.xSal);
 		UpscalingChanged(hWnd, UpscaleXSal);
 	}
 
-	VOID __fastcall SelectEagleMode(HWND hWnd, BYTE value)
+	VOID SelectEagleMode(HWND hWnd, BYTE value)
 	{
 		config.image.eagle = value;
 		Config::Set(CONFIG_WRAPPER, "Eagle", *(INT*)&config.image.eagle);
 		UpscalingChanged(hWnd, UpscaleEagle);
 	}
 
-	VOID __fastcall SelectScaleHQMode(HWND hWnd, BYTE value)
+	VOID SelectScaleHQMode(HWND hWnd, BYTE value)
 	{
 		config.image.scaleHQ = value;
 		Config::Set(CONFIG_WRAPPER, "ScaleHQ", *(INT*)&config.image.scaleHQ);
 		UpscalingChanged(hWnd, UpscaleScaleHQ);
 	}
 
-	VOID __fastcall SelectXBRZMode(HWND hWnd, BYTE value)
+	VOID SelectXBRZMode(HWND hWnd, BYTE value)
 	{
 		config.image.xBRz = value;
 		Config::Set(CONFIG_WRAPPER, "XBRZ", *(INT*)&config.image.xBRz);
 		UpscalingChanged(hWnd, UpscaleXBRZ);
 	}
 
-	VOID __fastcall SelectRenderer(HWND hWnd, RendererType renderer)
+	VOID SelectRenderer(HWND hWnd, RendererType renderer)
 	{
 		if (renderer == config.renderer)
 			return;
@@ -1117,8 +1117,8 @@ namespace Window
 
 			SendDlgItemMessage(hDlg, IDC_RAD_RGB, BM_SETCHECK, BST_CHECKED, NULL);
 
-			SendDlgItemMessage(hDlg, IDC_TRK_HUE, TBM_SETPOS, TRUE, DWORD(config.colors.active.hueShift * 360.0f));
-			SendDlgItemMessage(hDlg, IDC_TRK_SAT, TBM_SETPOS, TRUE, DWORD(config.colors.active.saturation * 1000.0f));
+			SendDlgItemMessage(hDlg, IDC_TRK_HUE, TBM_SETPOS, TRUE, DWORD(config.colors.active.satHue.hueShift * 360.0f));
+			SendDlgItemMessage(hDlg, IDC_TRK_SAT, TBM_SETPOS, TRUE, DWORD(config.colors.active.satHue.saturation * 1000.0f));
 			SendDlgItemMessage(hDlg, IDC_TRK_IN_LEFT, TBM_SETPOS, TRUE, DWORD(config.colors.active.input.left.rgb * 255.0f));
 			SendDlgItemMessage(hDlg, IDC_TRK_IN_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.active.input.right.rgb * 255.0f));
 			SendDlgItemMessage(hDlg, IDC_TRK_GAMMA, TBM_SETPOS, TRUE, DWORD(config.colors.active.gamma.rgb * 1000.0f));
@@ -1126,11 +1126,11 @@ namespace Window
 			SendDlgItemMessage(hDlg, IDC_TRK_OUT_RIGHT, TBM_SETPOS, TRUE, DWORD(config.colors.active.output.right.rgb * 255.0f));
 
 			CHAR text[16];
-			FLOAT val = 360.0f * config.colors.active.hueShift - 180.0f;
+			FLOAT val = 360.0f * config.colors.active.satHue.hueShift - 180.0f;
 			StrPrint(text, val ? "%+0.f" : "%0.f", val);
 			SendDlgItemMessage(hDlg, IDC_LBL_HUE, WM_SETTEXT, NULL, (WPARAM)text);
 
-			StrPrint(text, "%.2f", MathPower(2.0f * config.colors.active.saturation, 1.5849625007211561f));
+			StrPrint(text, "%.2f", MathPower(2.0f * config.colors.active.satHue.saturation, 1.5849625007211561f));
 			SendDlgItemMessage(hDlg, IDC_LBL_SAT, WM_SETTEXT, NULL, (WPARAM)text);
 
 			StrPrint(text, "%0.f", 255.0f * config.colors.active.input.left.rgb);
@@ -1351,8 +1351,8 @@ namespace Window
 				{
 					LevelColorsFloat prep[260];
 					{
-						FLOAT h = 2.0f * config.colors.active.hueShift - 1.0f;
-						FLOAT s = (FLOAT)MathPower(2.0f * config.colors.active.saturation, 1.5849625007211561f);
+						FLOAT h = 2.0f * config.colors.active.satHue.hueShift - 1.0f;
+						FLOAT s = (FLOAT)MathPower(2.0f * config.colors.active.satHue.saturation, 1.5849625007211561f);
 
 						FLOAT vsu = s * (FLOAT)MathCosinus(h * M_PI);
 						FLOAT vsw = s * (FLOAT)MathSinus(h * M_PI);
@@ -1627,7 +1627,7 @@ namespace Window
 				if (levelsData)
 					levelsData->values = config.colors.active;
 
-				Config::Set(CONFIG_COLORS, "HueSat", MAKELONG(DWORD(config.colors.active.hueShift * 1000.0f), DWORD(config.colors.active.saturation * 1000.0f)));
+				Config::Set(CONFIG_COLORS, "HueSat", MAKELONG(DWORD(config.colors.active.satHue.hueShift * 1000.0f), DWORD(config.colors.active.satHue.saturation * 1000.0f)));
 				Config::Set(CONFIG_COLORS, "RgbInput", MAKELONG(DWORD(config.colors.active.input.left.rgb * 1000.0f), DWORD(config.colors.active.input.right.rgb * 1000.0f)));
 				Config::Set(CONFIG_COLORS, "RedInput", MAKELONG(DWORD(config.colors.active.input.left.red * 1000.0f), DWORD(config.colors.active.input.right.red * 1000.0f)));
 				Config::Set(CONFIG_COLORS, "GreenInput", MAKELONG(DWORD(config.colors.active.input.left.green * 1000.0f), DWORD(config.colors.active.input.right.green * 1000.0f)));
@@ -1648,8 +1648,8 @@ namespace Window
 			}
 
 			case IDC_BTN_RESET: {
-				config.colors.active.hueShift = 0.5f;
-				config.colors.active.saturation = 0.5f;
+				config.colors.active.satHue.hueShift = 0.5f;
+				config.colors.active.satHue.saturation = 0.5f;
 
 				for (DWORD i = 0; i < 4; ++i)
 				{
@@ -1690,8 +1690,8 @@ namespace Window
 			}
 
 			case IDC_BTN_AUTO: {
-				config.colors.active.hueShift = 0.5f;
-				config.colors.active.saturation = 0.5f;
+				config.colors.active.satHue.hueShift = 0.5f;
+				config.colors.active.satHue.saturation = 0.5f;
 
 				for (DWORD i = 0; i < 4; ++i)
 				{
@@ -1861,7 +1861,7 @@ namespace Window
 			switch (id)
 			{
 			case IDC_TRK_HUE: {
-				config.colors.active.hueShift = (FLOAT)value / 360.0f;
+				config.colors.active.satHue.hueShift = (FLOAT)value / 360.0f;
 
 				DWORD val = value - 180;
 				StrPrint(text, val ? "%+d" : "%d", val);
@@ -1869,7 +1869,7 @@ namespace Window
 				break;
 			}
 			case IDC_TRK_SAT: {
-				config.colors.active.saturation = 0.001f * value;
+				config.colors.active.satHue.saturation = 0.001f * value;
 
 				StrPrint(text, "%.2f", MathPower(0.002f * value, 1.5849625007211561f));
 				SendDlgItemMessage(hDlg, IDC_LBL_SAT, WM_SETTEXT, NULL, (WPARAM)text);
@@ -3032,7 +3032,7 @@ namespace Window
 		}
 	}
 
-	VOID __fastcall SetCaptureKeys(BOOL state)
+	VOID SetCaptureKeys(BOOL state)
 	{
 		if (state)
 		{
@@ -3046,12 +3046,12 @@ namespace Window
 		}
 	}
 
-	VOID __fastcall SetCaptureWindow(HWND hWnd)
+	VOID SetCaptureWindow(HWND hWnd)
 	{
 		OldWindowProc = (WNDPROC)SetWindowLong(hWnd, GWL_WNDPROC, (LPARAM)WindowProc);
 	}
 
-	VOID __fastcall SetCapturePanel(HWND hWnd)
+	VOID SetCapturePanel(HWND hWnd)
 	{
 		OldPanelProc = (WNDPROC)SetWindowLong(hWnd, GWL_WNDPROC, (LPARAM)PanelProc);
 	}

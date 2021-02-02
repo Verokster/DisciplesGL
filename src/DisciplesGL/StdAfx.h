@@ -98,6 +98,7 @@ extern "C"
 #define StrChar(str, ch) strchr(str, ch)
 #define StrStr(str, substr) strstr(str, substr)
 #define StrToInt(src) atoi(src)
+#define StrFromInt(val, str, radix) _itoa(val, str, radix)
 #define FileGetStr(str, num, stream) fgets(str, num, stream)
 #define Random() rand()
 #define SeedRandom(seed) srand(seed)
@@ -113,9 +114,9 @@ extern "C"
 #define ToLower(ch) tolower(ch)
 #define Exit(code) exit(code)
 
-DOUBLE __fastcall MathRound(DOUBLE);
-VOID* __fastcall AlignedAlloc(size_t size);
-VOID __fastcall AlignedFree(VOID* block);
+DOUBLE MathRound(DOUBLE);
+VOID* AlignedAlloc(size_t size);
+VOID AlignedFree(VOID* block);
 
 extern HMODULE hDllModule;
 extern HANDLE hActCtx;

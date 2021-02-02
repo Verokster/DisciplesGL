@@ -36,10 +36,13 @@ ShaderGroup::ShaderGroup(const CHAR* version, DWORD vertexName, DWORD fragmentNa
 	if (this->flags & SHADER_LEVELS)
 	{
 		this->colors = (Adjustment*)MemoryAlloc(sizeof(Adjustment));
-		*this->colors = *config.colors.current;
+		this->update = TRUE;
 	}
 	else
+	{
 		this->colors = NULL;
+		this->update = FALSE;
+	}
 
 	this->current = NULL;
 	this->list = NULL;
@@ -61,24 +64,39 @@ ShaderGroup::~ShaderGroup()
 
 BOOL ShaderGroup::Check()
 {
-	if (MemoryCompare(this->colors, config.colors.current, sizeof(Adjustment)))
-	{
-		*this->colors = *config.colors.current;
-		return TRUE;
-	}
-
-	return FALSE;
+	return this->update = this->update || (this->flags & SHADER_LEVELS) && MemoryCompare(this->colors, config.colors.current, sizeof(Adjustment));
 }
 
 VOID ShaderGroup::Use(DWORD texSize, BOOL isBack)
 {
-	DWORD flags = NULL;
-	if ((this->flags & SHADER_LEVELS) && MemoryCompare(this->colors, &defaultColors, sizeof(Adjustment)))
-		flags |= SHADER_LEVELS;
+	if (this->update)
+	{
+		this->update = FALSE;
+		*this->colors = *config.colors.current;
+	}
+
+	DWORD flags = this->flags & (SHADER_TEXSIZE | SHADER_ALPHA);
 	if ((this->flags & SHADER_DOUBLE) && isBack)
 		flags |= SHADER_DOUBLE;
-	if (this->flags & SHADER_ALPHA)
-		flags |= SHADER_ALPHA;
+
+	if (this->flags & SHADER_LEVELS)
+	{
+		DWORD cmp = ShaderProgram::CompareAdjustments(this->colors, &defaultColors);
+		if (cmp & CMP_SATHUE)
+			flags |= this->flags & SHADER_SATHUE;
+		if (cmp & CMP_LEVELS_IN_RGB)
+			flags |= this->flags & SHADER_LEVELS_IN_RGB;
+		if (cmp & CMP_LEVELS_IN_A)
+			flags |= this->flags & SHADER_LEVELS_IN_A;
+		if (cmp & CMP_LEVELS_GAMMA_RGB)
+			flags |= this->flags & SHADER_LEVELS_GAMMA_RGB;
+		if (cmp & CMP_LEVELS_GAMMA_A)
+			flags |= this->flags & SHADER_LEVELS_GAMMA_A;
+		if (cmp & CMP_LEVELS_OUT_RGB)
+			flags |= this->flags & SHADER_LEVELS_OUT_RGB;
+		if (cmp & CMP_LEVELS_OUT_A)
+			flags |= this->flags & SHADER_LEVELS_OUT_A;
+	}
 
 	if (this->current && this->current->flags == flags)
 		this->current->Use();

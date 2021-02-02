@@ -53,7 +53,7 @@ protected:
 
 	static VOID GLBindTexFilter(GLuint, GLint);
 	static VOID GLBindTexParameter(GLuint, GLint);
-	static DWORD __fastcall GetPow2(DWORD);
+	static DWORD GetPow2(DWORD);
 	static DWORD __stdcall RenderThread(LPVOID);
 
 public:

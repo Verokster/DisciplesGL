@@ -80,7 +80,7 @@ OpenDrawSurface::~OpenDrawSurface()
 	this->ReleaseBuffer();
 }
 
-StateBufferBorder* __fastcall LoadBufferImage(LPSTR resourceId)
+StateBufferBorder* LoadBufferImage(LPSTR resourceId)
 {
 	StateBufferBorder* buffer = NULL;
 
@@ -196,7 +196,7 @@ StateBufferBorder* __fastcall LoadBufferImage(LPSTR resourceId)
 	return buffer;
 }
 
-StateBufferBorder* __fastcall CreateBufferImage(DWORD width, DWORD height)
+StateBufferBorder* CreateBufferImage(DWORD width, DWORD height)
 {
 	StateBufferBorder* buffer = new StateBufferBorder(width, height, width * height * sizeof(DWORD));
 

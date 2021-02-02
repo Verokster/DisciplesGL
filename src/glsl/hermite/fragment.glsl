@@ -27,12 +27,29 @@ uniform sampler2D tex01;
 uniform sampler2D tex02;
 #endif
 uniform vec2 texSize;
-#ifdef LEVELS
-uniform float hue;
-uniform float sat;
+#if defined(LEV_IN_RGB) || defined(LEV_IN_A)
+#define LEV_IN
+#endif
+#if defined(LEV_GAMMA_RGB) || defined(LEV_GAMMA_A)
+#define LEV_GAMMA
+#endif
+#if defined(LEV_OUT_RGB) || defined(LEV_OUT_A)
+#define LEV_OUT
+#endif
+#if defined(LEV_IN) || defined(LEV_GAMMA) || defined(LEV_OUT)
+#define LEVELS
+#endif
+#ifdef SATHUE
+uniform vec2 satHue;
+#endif
+#ifdef LEV_IN
 uniform vec4 in_left;
 uniform vec4 in_right;
+#endif
+#ifdef LEV_GAMMA
 uniform vec4 gamma;
+#endif
+#ifdef LEV_OUT
 uniform vec4 out_left;
 uniform vec4 out_right;
 #endif
@@ -63,8 +80,8 @@ vec4 hermite(sampler2D tex, vec2 coord) {
 	return COMPAT_TEXTURE(tex, uv / texSize);
 }
 
-#ifdef LEVELS
-vec3 satHue(vec3 color) {
+#ifdef SATHUE
+vec3 saturate(vec3 color) {
 	const mat3 mrgb = mat3(	  1.0,    1.0,    1.0,
 							0.956, -0.272, -1.107,
 							0.621, -0.647,  1.705 );
@@ -73,8 +90,8 @@ vec3 satHue(vec3 color) {
 							0.587, -0.274, -0.523,
 							0.114, -0.321,  0.311 );
 
-	float su = sat * cos(hue);
-	float sw = sat * sin(hue);
+	float su = satHue.x * cos(satHue.y);
+	float sw = satHue.x * sin(satHue.y);
 
 	mat3 mhsv = mat3(1.0, 0.0,  0.0,
 					 0.0, su, sw,
@@ -82,15 +99,28 @@ vec3 satHue(vec3 color) {
 
 	return mrgb * mhsv * myiq * color;
 }
-
+#endif
+#ifdef LEVELS
 vec3 levels(vec3 color) {
+#ifdef LEV_IN_RGB
 	color = clamp((color - in_left.rgb) / (in_right.rgb - in_left.rgb), 0.0, 1.0);
+#endif
+#ifdef LEV_GAMMA_RGB
 	color = pow(color, gamma.rgb);
+#endif
+#ifdef LEV_OUT_RGB
 	color = clamp(color * (out_right.rgb - out_left.rgb) + out_left.rgb, 0.0, 1.0);
-
-	color = clamp((color - in_left.aaa) / (in_right.aaa - in_left.aaa), 0.0, 1.0);
+#endif
+#ifdef LEV_IN_A
+	color = clamp((color - in_left.a) / (in_right.a - in_left.a), 0.0, 1.0);
+#endif
+#ifdef LEV_GAMMA_A
 	color = pow(color, gamma.aaa);
-	return clamp(color * (out_right.aaa - out_left.aaa) + out_left.aaa, 0.0, 1.0);
+#endif
+#ifdef LEV_OUT_A
+	color = clamp(color * (out_right.a - out_left.a) + out_left.a, 0.0, 1.0);
+#endif
+	return color;
 }
 #endif
 
@@ -103,8 +133,10 @@ void main() {
 	vec3 color = hermite(tex01, fTex).rgb;
 #endif
 
+#ifdef SATHUE
+	color = saturate(color);
+#endif
 #ifdef LEVELS
-	color = satHue(color);
 	color = levels(color);
 #endif
 	

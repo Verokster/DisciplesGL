@@ -95,7 +95,6 @@ GLBINDATTRIBLOCATION GLBindAttribLocation;
 GLGETUNIFORMLOCATION GLGetUniformLocation;
 
 GLUNIFORM1I GLUniform1i;
-GLUNIFORM1F GLUniform1f;
 GLUNIFORM2F GLUniform2f;
 GLUNIFORM4F GLUniform4f;
 
@@ -119,7 +118,7 @@ HMODULE hGLModule;
 namespace GL
 {
 #pragma optimize("s", on)
-	VOID __fastcall LoadFunction(CHAR* buffer, const CHAR* prefix, const CHAR* name, PROC* func, const CHAR* sufix = NULL)
+	VOID LoadFunction(CHAR* buffer, const CHAR* prefix, const CHAR* name, VOID* func, const CHAR* sufix = NULL)
 	{
 		StrCopy(buffer, prefix);
 		StrCat(buffer, name);
@@ -127,23 +126,24 @@ namespace GL
 		if (sufix)
 			StrCat(buffer, sufix);
 
-		*func = wglGetProcAddress(buffer);
-		if ((INT)*func >= -1 && (INT)*func <= 3)
+		PROC* fn = (PROC*)func;
+		*fn = wglGetProcAddress(buffer);
+		if (*(INT*)fn >= -1 && *(INT*)fn <= 3)
 		{
 			if (!hGLModule)
 				hGLModule = GetModuleHandle("OPENGL32.dll");
-			*func = GetProcAddress(hGLModule, buffer);
+			*fn = GetProcAddress(hGLModule, buffer);
 
-			if (!*func && !sufix)
+			if (!*fn && !sufix)
 			{
-				LoadFunction(buffer, prefix, name, func, "EXT");
-				if (!*func)
-					LoadFunction(buffer, prefix, name, func, "ARB");
+				LoadFunction(buffer, prefix, name, fn, "EXT");
+				if (!*fn)
+					LoadFunction(buffer, prefix, name, fn, "ARB");
 			}
 		}
 	}
 
-	BOOL __fastcall GetContext(HDC hDc, HGLRC* lpHRc, DWORD major, DWORD minor, BOOL showError)
+	BOOL GetContext(HDC hDc, HGLRC* lpHRc, DWORD major, DWORD minor, BOOL showError)
 	{
 		DWORD wglAttributes[] = {
 			WGL_CONTEXT_MAJOR_VERSION_ARB, major,
@@ -172,10 +172,10 @@ namespace GL
 		return FALSE;
 	}
 
-	VOID __fastcall CreateContextAttribs(HDC hDc, HGLRC* hRc)
+	VOID CreateContextAttribs(HDC hDc, HGLRC* hRc)
 	{
 		CHAR buffer[256];
-		LoadFunction(buffer, PREFIX_WGL, "CreateContextAttribs", (PROC*)&WGLCreateContextAttribs, "ARB");
+		LoadFunction(buffer, PREFIX_WGL, "CreateContextAttribs", &WGLCreateContextAttribs, "ARB");
 
 		if (WGLCreateContextAttribs)
 		{
@@ -183,91 +183,90 @@ namespace GL
 				GetContext(hDc, hRc, 1, 4, TRUE);
 		}
 
-		LoadFunction(buffer, PREFIX_WGL, "GetExtensionsString", (PROC*)&WGLGetExtensionsString, "EXT");
+		LoadFunction(buffer, PREFIX_WGL, "GetExtensionsString", &WGLGetExtensionsString, "EXT");
 		if (WGLGetExtensionsString)
 		{
 			CHAR* extensions = (CHAR*)WGLGetExtensionsString();
 			if (StrStr(extensions, "WGL_EXT_swap_control"))
-				LoadFunction(buffer, PREFIX_WGL, "SwapInterval", (PROC*)&WGLSwapInterval, "EXT");
+				LoadFunction(buffer, PREFIX_WGL, "SwapInterval", &WGLSwapInterval, "EXT");
 		}
 
-		LoadFunction(buffer, PREFIX_GL, "GetString", (PROC*)&GLGetString);
-		LoadFunction(buffer, PREFIX_GL, "TexCoord2f", (PROC*)&GLTexCoord2f);
-		LoadFunction(buffer, PREFIX_GL, "Vertex2s", (PROC*)&GLVertex2s);
-		LoadFunction(buffer, PREFIX_GL, "Begin", (PROC*)&GLBegin);
-		LoadFunction(buffer, PREFIX_GL, "End", (PROC*)&GLEnd);
-		LoadFunction(buffer, PREFIX_GL, "Viewport", (PROC*)&GLViewport);
-		LoadFunction(buffer, PREFIX_GL, "MatrixMode", (PROC*)&GLMatrixMode);
-		LoadFunction(buffer, PREFIX_GL, "LoadIdentity", (PROC*)&GLLoadIdentity);
-		LoadFunction(buffer, PREFIX_GL, "Ortho", (PROC*)&GLOrtho);
-		LoadFunction(buffer, PREFIX_GL, "Finish", (PROC*)&GLFinish);
-		LoadFunction(buffer, PREFIX_GL, "Enable", (PROC*)&GLEnable);
-		LoadFunction(buffer, PREFIX_GL, "Disable", (PROC*)&GLDisable);
-		LoadFunction(buffer, PREFIX_GL, "BindTexture", (PROC*)&GLBindTexture);
-		LoadFunction(buffer, PREFIX_GL, "DeleteTextures", (PROC*)&GLDeleteTextures);
-		LoadFunction(buffer, PREFIX_GL, "TexParameteri", (PROC*)&GLTexParameteri);
-		LoadFunction(buffer, PREFIX_GL, "TexEnvi", (PROC*)&GLTexEnvi);
-		LoadFunction(buffer, PREFIX_GL, "GetTexImage", (PROC*)&GLGetTexImage);
-		LoadFunction(buffer, PREFIX_GL, "TexImage2D", (PROC*)&GLTexImage2D);
-		LoadFunction(buffer, PREFIX_GL, "TexSubImage2D", (PROC*)&GLTexSubImage2D);
-		LoadFunction(buffer, PREFIX_GL, "GenTextures", (PROC*)&GLGenTextures);
-		LoadFunction(buffer, PREFIX_GL, "GetIntegerv", (PROC*)&GLGetIntegerv);
-		LoadFunction(buffer, PREFIX_GL, "Clear", (PROC*)&GLClear);
-		LoadFunction(buffer, PREFIX_GL, "ClearColor", (PROC*)&GLClearColor);
-		LoadFunction(buffer, PREFIX_GL, "BlendFunc", (PROC*)&GLBlendFunc);
-		LoadFunction(buffer, PREFIX_GL, "ReadPixels", (PROC*)&GLReadPixels);
-		LoadFunction(buffer, PREFIX_GL, "PixelStorei", (PROC*)&GLPixelStorei);
+		LoadFunction(buffer, PREFIX_GL, "GetString", &GLGetString);
+		LoadFunction(buffer, PREFIX_GL, "TexCoord2f", &GLTexCoord2f);
+		LoadFunction(buffer, PREFIX_GL, "Vertex2s", &GLVertex2s);
+		LoadFunction(buffer, PREFIX_GL, "Begin", &GLBegin);
+		LoadFunction(buffer, PREFIX_GL, "End", &GLEnd);
+		LoadFunction(buffer, PREFIX_GL, "Viewport", &GLViewport);
+		LoadFunction(buffer, PREFIX_GL, "MatrixMode", &GLMatrixMode);
+		LoadFunction(buffer, PREFIX_GL, "LoadIdentity", &GLLoadIdentity);
+		LoadFunction(buffer, PREFIX_GL, "Ortho", &GLOrtho);
+		LoadFunction(buffer, PREFIX_GL, "Finish", &GLFinish);
+		LoadFunction(buffer, PREFIX_GL, "Enable", &GLEnable);
+		LoadFunction(buffer, PREFIX_GL, "Disable", &GLDisable);
+		LoadFunction(buffer, PREFIX_GL, "BindTexture", &GLBindTexture);
+		LoadFunction(buffer, PREFIX_GL, "DeleteTextures", &GLDeleteTextures);
+		LoadFunction(buffer, PREFIX_GL, "TexParameteri", &GLTexParameteri);
+		LoadFunction(buffer, PREFIX_GL, "TexEnvi", &GLTexEnvi);
+		LoadFunction(buffer, PREFIX_GL, "GetTexImage", &GLGetTexImage);
+		LoadFunction(buffer, PREFIX_GL, "TexImage2D", &GLTexImage2D);
+		LoadFunction(buffer, PREFIX_GL, "TexSubImage2D", &GLTexSubImage2D);
+		LoadFunction(buffer, PREFIX_GL, "GenTextures", &GLGenTextures);
+		LoadFunction(buffer, PREFIX_GL, "GetIntegerv", &GLGetIntegerv);
+		LoadFunction(buffer, PREFIX_GL, "Clear", &GLClear);
+		LoadFunction(buffer, PREFIX_GL, "ClearColor", &GLClearColor);
+		LoadFunction(buffer, PREFIX_GL, "BlendFunc", &GLBlendFunc);
+		LoadFunction(buffer, PREFIX_GL, "ReadPixels", &GLReadPixels);
+		LoadFunction(buffer, PREFIX_GL, "PixelStorei", &GLPixelStorei);
 
 #ifdef _DEBUG
-		LoadFunction(buffer, PREFIX_GL, "GetError", (PROC*)&GLGetError);
+		LoadFunction(buffer, PREFIX_GL, "GetError", &GLGetError);
 #endif
 
-		LoadFunction(buffer, PREFIX_GL, "ActiveTexture", (PROC*)&GLActiveTexture);
-		LoadFunction(buffer, PREFIX_GL, "GenBuffers", (PROC*)&GLGenBuffers);
-		LoadFunction(buffer, PREFIX_GL, "DeleteBuffers", (PROC*)&GLDeleteBuffers);
-		LoadFunction(buffer, PREFIX_GL, "BindBuffer", (PROC*)&GLBindBuffer);
-		LoadFunction(buffer, PREFIX_GL, "BufferData", (PROC*)&GLBufferData);
-		LoadFunction(buffer, PREFIX_GL, "BufferSubData", (PROC*)&GLBufferSubData);
-		LoadFunction(buffer, PREFIX_GL, "DrawArrays", (PROC*)&GLDrawArrays);
+		LoadFunction(buffer, PREFIX_GL, "ActiveTexture", &GLActiveTexture);
+		LoadFunction(buffer, PREFIX_GL, "GenBuffers", &GLGenBuffers);
+		LoadFunction(buffer, PREFIX_GL, "DeleteBuffers", &GLDeleteBuffers);
+		LoadFunction(buffer, PREFIX_GL, "BindBuffer", &GLBindBuffer);
+		LoadFunction(buffer, PREFIX_GL, "BufferData", &GLBufferData);
+		LoadFunction(buffer, PREFIX_GL, "BufferSubData", &GLBufferSubData);
+		LoadFunction(buffer, PREFIX_GL, "DrawArrays", &GLDrawArrays);
 
-		LoadFunction(buffer, PREFIX_GL, "EnableVertexAttribArray", (PROC*)&GLEnableVertexAttribArray);
-		LoadFunction(buffer, PREFIX_GL, "VertexAttribPointer", (PROC*)&GLVertexAttribPointer);
+		LoadFunction(buffer, PREFIX_GL, "EnableVertexAttribArray", &GLEnableVertexAttribArray);
+		LoadFunction(buffer, PREFIX_GL, "VertexAttribPointer", &GLVertexAttribPointer);
 
-		LoadFunction(buffer, PREFIX_GL, "CreateShader", (PROC*)&GLCreateShader);
-		LoadFunction(buffer, PREFIX_GL, "DeleteShader", (PROC*)&GLDeleteShader);
-		LoadFunction(buffer, PREFIX_GL, "CreateProgram", (PROC*)&GLCreateProgram);
-		LoadFunction(buffer, PREFIX_GL, "DeleteProgram", (PROC*)&GLDeleteProgram);
-		LoadFunction(buffer, PREFIX_GL, "ShaderSource", (PROC*)&GLShaderSource);
-		LoadFunction(buffer, PREFIX_GL, "CompileShader", (PROC*)&GLCompileShader);
-		LoadFunction(buffer, PREFIX_GL, "AttachShader", (PROC*)&GLAttachShader);
-		LoadFunction(buffer, PREFIX_GL, "DetachShader", (PROC*)&GLDetachShader);
-		LoadFunction(buffer, PREFIX_GL, "LinkProgram", (PROC*)&GLLinkProgram);
-		LoadFunction(buffer, PREFIX_GL, "UseProgram", (PROC*)&GLUseProgram);
-		LoadFunction(buffer, PREFIX_GL, "GetShaderiv", (PROC*)&GLGetShaderiv);
-		LoadFunction(buffer, PREFIX_GL, "GetShaderInfoLog", (PROC*)&GLGetShaderInfoLog);
+		LoadFunction(buffer, PREFIX_GL, "CreateShader", &GLCreateShader);
+		LoadFunction(buffer, PREFIX_GL, "DeleteShader", &GLDeleteShader);
+		LoadFunction(buffer, PREFIX_GL, "CreateProgram", &GLCreateProgram);
+		LoadFunction(buffer, PREFIX_GL, "DeleteProgram", &GLDeleteProgram);
+		LoadFunction(buffer, PREFIX_GL, "ShaderSource", &GLShaderSource);
+		LoadFunction(buffer, PREFIX_GL, "CompileShader", &GLCompileShader);
+		LoadFunction(buffer, PREFIX_GL, "AttachShader", &GLAttachShader);
+		LoadFunction(buffer, PREFIX_GL, "DetachShader", &GLDetachShader);
+		LoadFunction(buffer, PREFIX_GL, "LinkProgram", &GLLinkProgram);
+		LoadFunction(buffer, PREFIX_GL, "UseProgram", &GLUseProgram);
+		LoadFunction(buffer, PREFIX_GL, "GetShaderiv", &GLGetShaderiv);
+		LoadFunction(buffer, PREFIX_GL, "GetShaderInfoLog", &GLGetShaderInfoLog);
 
-		LoadFunction(buffer, PREFIX_GL, "BindAttribLocation", (PROC*)&GLBindAttribLocation);
-		LoadFunction(buffer, PREFIX_GL, "GetUniformLocation", (PROC*)&GLGetUniformLocation);
+		LoadFunction(buffer, PREFIX_GL, "BindAttribLocation", &GLBindAttribLocation);
+		LoadFunction(buffer, PREFIX_GL, "GetUniformLocation", &GLGetUniformLocation);
 
-		LoadFunction(buffer, PREFIX_GL, "Uniform1i", (PROC*)&GLUniform1i);
-		LoadFunction(buffer, PREFIX_GL, "Uniform1f", (PROC*)&GLUniform1f);
-		LoadFunction(buffer, PREFIX_GL, "Uniform2f", (PROC*)&GLUniform2f);
-		LoadFunction(buffer, PREFIX_GL, "Uniform4f", (PROC*)&GLUniform4f);
+		LoadFunction(buffer, PREFIX_GL, "Uniform1i", &GLUniform1i);
+		LoadFunction(buffer, PREFIX_GL, "Uniform2f", &GLUniform2f);
+		LoadFunction(buffer, PREFIX_GL, "Uniform4f", &GLUniform4f);
 
-		LoadFunction(buffer, PREFIX_GL, "GenVertexArrays", (PROC*)&GLGenVertexArrays);
-		LoadFunction(buffer, PREFIX_GL, "BindVertexArray", (PROC*)&GLBindVertexArray);
-		LoadFunction(buffer, PREFIX_GL, "DeleteVertexArrays", (PROC*)&GLDeleteVertexArrays);
+		LoadFunction(buffer, PREFIX_GL, "GenVertexArrays", &GLGenVertexArrays);
+		LoadFunction(buffer, PREFIX_GL, "BindVertexArray", &GLBindVertexArray);
+		LoadFunction(buffer, PREFIX_GL, "DeleteVertexArrays", &GLDeleteVertexArrays);
 
-		LoadFunction(buffer, PREFIX_GL, "GenFramebuffers", (PROC*)&GLGenFramebuffers);
-		LoadFunction(buffer, PREFIX_GL, "DeleteFramebuffers", (PROC*)&GLDeleteFramebuffers);
-		LoadFunction(buffer, PREFIX_GL, "BindFramebuffer", (PROC*)&GLBindFramebuffer);
-		LoadFunction(buffer, PREFIX_GL, "FramebufferTexture2D", (PROC*)&GLFramebufferTexture2D);
+		LoadFunction(buffer, PREFIX_GL, "GenFramebuffers", &GLGenFramebuffers);
+		LoadFunction(buffer, PREFIX_GL, "DeleteFramebuffers", &GLDeleteFramebuffers);
+		LoadFunction(buffer, PREFIX_GL, "BindFramebuffer", &GLBindFramebuffer);
+		LoadFunction(buffer, PREFIX_GL, "FramebufferTexture2D", &GLFramebufferTexture2D);
 
-		LoadFunction(buffer, PREFIX_GL, "GenRenderbuffers", (PROC*)&GLGenRenderbuffers);
-		LoadFunction(buffer, PREFIX_GL, "DeleteRenderbuffers", (PROC*)&GLDeleteRenderbuffers);
-		LoadFunction(buffer, PREFIX_GL, "BindRenderbuffer", (PROC*)&GLBindRenderbuffer);
-		LoadFunction(buffer, PREFIX_GL, "RenderbufferStorage", (PROC*)&GLRenderbufferStorage);
-		LoadFunction(buffer, PREFIX_GL, "FramebufferRenderbuffer", (PROC*)&GLFramebufferRenderbuffer);
+		LoadFunction(buffer, PREFIX_GL, "GenRenderbuffers", &GLGenRenderbuffers);
+		LoadFunction(buffer, PREFIX_GL, "DeleteRenderbuffers", &GLDeleteRenderbuffers);
+		LoadFunction(buffer, PREFIX_GL, "BindRenderbuffer", &GLBindRenderbuffer);
+		LoadFunction(buffer, PREFIX_GL, "RenderbufferStorage", &GLRenderbufferStorage);
+		LoadFunction(buffer, PREFIX_GL, "FramebufferRenderbuffer", &GLFramebufferRenderbuffer);
 
 		if (!config.gl.version.real)
 		{
@@ -339,14 +338,14 @@ namespace GL
 		}
 	}
 
-	VOID __fastcall ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)
+	VOID ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)
 	{
 		MemoryZero(pfd, sizeof(PIXELFORMATDESCRIPTOR));
 		pfd->nSize = sizeof(PIXELFORMATDESCRIPTOR);
 		pfd->nVersion = 1;
 	}
 
-	VOID __fastcall PreparePixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)
+	VOID PreparePixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)
 	{
 		ResetPixelFormatDescription(pfd);
 
@@ -362,7 +361,7 @@ namespace GL
 		pfd->cColorBits = (bpp == 16 || bpp == 24) ? (BYTE)bpp : 32;
 	}
 
-	INT __fastcall PreparePixelFormat(PIXELFORMATDESCRIPTOR* pfd)
+	INT PreparePixelFormat(PIXELFORMATDESCRIPTOR* pfd)
 	{
 		PreparePixelFormatDescription(pfd);
 
@@ -394,7 +393,7 @@ namespace GL
 						if (wglMakeCurrent(hDc, hRc))
 						{
 							CHAR buffer[32];
-							LoadFunction(buffer, PREFIX_WGL, "ChoosePixelFormat", (PROC*)&WGLChoosePixelFormat, "ARB");
+							LoadFunction(buffer, PREFIX_WGL, "ChoosePixelFormat", &WGLChoosePixelFormat, "ARB");
 							if (WGLChoosePixelFormat)
 							{
 								INT glAttributes[] = {
@@ -430,7 +429,7 @@ namespace GL
 		return res;
 	}
 
-	VOID __fastcall ResetPixelFormat()
+	VOID ResetPixelFormat()
 	{
 		HWND hWnd = CreateWindowEx(
 			WS_EX_APPWINDOW,
@@ -463,7 +462,7 @@ namespace GL
 		}
 	}
 
-	GLuint __fastcall CompileShaderSource(DWORD name, CHAR* prefix, GLenum type)
+	GLuint CompileShaderSource(DWORD name, CHAR* prefix, GLenum type)
 	{
 		HGLOBAL hResourceData;
 		LPVOID pData = NULL;
@@ -515,7 +514,7 @@ namespace GL
 		return shader;
 	}
 
-	HGLRC __fastcall Init(HWND hWnd, HDC* lpHDC)
+	HGLRC Init(HWND hWnd, HDC* lpHDC)
 	{
 		HGLRC hRc = NULL;
 		*lpHDC = ::GetDC(hWnd);
@@ -553,7 +552,7 @@ namespace GL
 		return hRc;
 	}
 
-	VOID __fastcall Release(HWND hWnd, HDC* lpHDC, HGLRC* lpHRC)
+	VOID Release(HWND hWnd, HDC* lpHDC, HGLRC* lpHRC)
 	{
 		if (*lpHDC)
 		{
