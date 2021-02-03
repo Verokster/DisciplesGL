@@ -74,12 +74,6 @@ COMPAT_IN vec2 fTex;
 #endif
 
 #ifdef SATHUE
-#ifdef LEV_HUE
-float inter(vec3 c) {
-	return c.g + 0.5 * satHue.y * (c.b - c.r + satHue.y * (c.r - 5.0 * c.g + 4.0 * c.b + satHue.y * (3.0 * (c.g - c.b))));
-}
-
-#ifdef SATHUE
 vec3 saturate(vec3 color) {
 #ifdef LEV_HUE
 #ifdef LEV_HUE_L
