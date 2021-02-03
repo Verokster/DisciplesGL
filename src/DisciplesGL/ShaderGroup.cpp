@@ -82,8 +82,10 @@ VOID ShaderGroup::Use(DWORD texSize, BOOL isBack)
 	if (this->flags & SHADER_LEVELS)
 	{
 		DWORD cmp = ShaderProgram::CompareAdjustments(this->colors, &defaultColors);
-		if (cmp & CMP_SATHUE)
-			flags |= this->flags & SHADER_SATHUE;
+		if ((cmp & CMP_HUE) && (this->flags & SHADER_HUE))
+			flags |= this->colors->satHue.hueShift < 0.5f ? SHADER_HUE_L : SHADER_HUE_R;
+		if (cmp & CMP_SAT)
+			flags |= this->flags & SHADER_SAT;
 		if (cmp & CMP_LEVELS_IN_RGB)
 			flags |= this->flags & SHADER_LEVELS_IN_RGB;
 		if (cmp & CMP_LEVELS_IN_A)

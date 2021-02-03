@@ -119,6 +119,11 @@ namespace Window
 		return LOBYTE(d);
 	}
 
+	FLOAT CubicInterpolate(FLOAT p0, FLOAT p1, FLOAT p2, FLOAT x)
+	{
+		return p1 + 0.5 * x * (p2 - p0 + x * (p0 - 5.0 * p1 + 4.0 * p2 + x * (3.0 * (p1 - p2))));
+	}
+
 	BOOL GetMenuByChildID(HMENU hParent, MenuItemData* mData, INT index)
 	{
 		HMENU hMenu = GetSubMenu(hParent, index);
@@ -1130,7 +1135,7 @@ namespace Window
 			StrPrint(text, val ? "%+0.f" : "%0.f", val);
 			SendDlgItemMessage(hDlg, IDC_LBL_HUE, WM_SETTEXT, NULL, (WPARAM)text);
 
-			StrPrint(text, "%.2f", MathPower(2.0f * config.colors.active.satHue.saturation, 1.5849625007211561f));
+			StrPrint(text, "%.2f", 4.0f * config.colors.active.satHue.saturation * config.colors.active.satHue.saturation);
 			SendDlgItemMessage(hDlg, IDC_LBL_SAT, WM_SETTEXT, NULL, (WPARAM)text);
 
 			StrPrint(text, "%0.f", 255.0f * config.colors.active.input.left.rgb);
@@ -1352,22 +1357,7 @@ namespace Window
 					LevelColorsFloat prep[260];
 					{
 						FLOAT h = 2.0f * config.colors.active.satHue.hueShift - 1.0f;
-						FLOAT s = (FLOAT)MathPower(2.0f * config.colors.active.satHue.saturation, 1.5849625007211561f);
-
-						FLOAT vsu = s * (FLOAT)MathCosinus(h * M_PI);
-						FLOAT vsw = s * (FLOAT)MathSinus(h * M_PI);
-
-						LevelColorsFloat mat[3] = {
-							{ 0.299f + 0.701f * vsu + 0.168f * vsw,
-								0.587f - 0.587f * vsu + 0.330f * vsw,
-								0.114f - 0.114f * vsu - 0.497f * vsw },
-							{ 0.299f - 0.299f * vsu - 0.328f * vsw,
-								0.587f + 0.413f * vsu + 0.035f * vsw,
-								0.114f - 0.114f * vsu + 0.292f * vsw },
-							{ 0.299f - 0.300f * vsu + 1.25f * vsw,
-								0.587f - 0.588f * vsu - 1.05f * vsw,
-								0.114f + 0.886f * vsu - 0.203f * vsw }
-						};
+						FLOAT s = 4.0f * config.colors.active.satHue.saturation * config.colors.active.satHue.saturation;
 
 						MemoryZero(prep, sizeof(prep));
 
@@ -1384,13 +1374,30 @@ namespace Window
 							levels.output.chanel[i] = config.colors.active.output.right.chanel[i] - config.colors.active.output.left.chanel[i];
 						}
 
+						INT sh = 0;
+						if (h < 0.0f)
+						{
+							sh++;
+							h = 1.0f + h;
+						}
+
 						LevelColorsFloat* src = levelsData->colors;
 						for (DWORD i = 0; i < 256; ++i, ++src)
 						{
 							FLOAT dx = (FLOAT)i / 255.0f;
 
-							LevelColorsFloat* mt = mat;
-							for (DWORD j = 0; j < 3; ++j, ++mt)
+							LevelColorsFloat ex;
+							FLOAT sss = 0;
+							for (DWORD j = 0; j < 3; ++j)
+							{
+								INT v = j - sh;
+								FLOAT c = CubicInterpolate(src->chanel[(v - 1 + 3) % 3], src->chanel[(v + 3) % 3], src->chanel[(v + 1 + 3) % 3], h);
+								ex.chanel[j] = c;
+								sss += c;
+							}
+							sss /= 3;
+
+							for (DWORD j = 0; j < 3; ++j)
 							{
 								FLOAT k = dx;
 								for (DWORD s = 2, idx = j + 1; s; --s, idx = 0)
@@ -1402,7 +1409,7 @@ namespace Window
 									k = min(1.0f, max(0.0f, k));
 								}
 
-								prep[(DWORD)(k * 255.0f) + 2].chanel[j] += mt->red * src->red + mt->green * src->green + mt->blue * src->blue;
+								prep[(DWORD)(k * 255.0f) + 2].chanel[j] += sss - (sss - ex.chanel[j]) * s;
 							}
 						}
 					}
@@ -1871,7 +1878,7 @@ namespace Window
 			case IDC_TRK_SAT: {
 				config.colors.active.satHue.saturation = 0.001f * value;
 
-				StrPrint(text, "%.2f", MathPower(0.002f * value, 1.5849625007211561f));
+				StrPrint(text, "%.2f", 0.000004f * (value * value));
 				SendDlgItemMessage(hDlg, IDC_LBL_SAT, WM_SETTEXT, NULL, (WPARAM)text);
 				break;
 			}

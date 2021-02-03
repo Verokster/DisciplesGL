@@ -39,7 +39,11 @@ uniform vec2 texSize;
 #if defined(LEV_IN) || defined(LEV_GAMMA) || defined(LEV_OUT)
 #define LEVELS
 #endif
-#ifdef SATHUE
+#if defined(LEV_HUE_L) || defined(LEV_HUE_R)
+#define LEV_HUE
+#endif
+#if defined(LEV_HUE) || defined(LEV_SAT)
+#define SATHUE
 uniform vec2 satHue;
 #endif
 #ifdef LEV_IN
@@ -142,24 +146,21 @@ vec4 hermite(sampler2D tex, vec2 coord) {
 
 #ifdef SATHUE
 vec3 saturate(vec3 color) {
-	const mat3 mrgb = mat3(	  1.0,    1.0,    1.0,
-							0.956, -0.272, -1.107,
-							0.621, -0.647,  1.705 );
-
-	const mat3 myiq = mat3(	0.299,  0.596,  0.211,
-							0.587, -0.274, -0.523,
-							0.114, -0.321,  0.311 );
-
-	float su = satHue.x * cos(satHue.y);
-	float sw = satHue.x * sin(satHue.y);
-
-	mat3 mhsv = mat3(1.0, 0.0,  0.0,
-					 0.0, su, sw,
-					 0.0, -sw,  su );
-
-	return mrgb * mhsv * myiq * color;
+#ifdef LEV_HUE
+#ifdef LEV_HUE_L
+	color = color.brg + 0.5 * satHue.y * (color - color.gbr + satHue.y * (color.gbr - 5.0 * color.brg + 4.0 * color + 3.0 * satHue.y * (color.brg - color)));
+#else
+	color = color + 0.5 * satHue.y * (color.gbr - color.brg + satHue.y * (color.brg - 5.0 * color + 4.0 * color.gbr + 3.0 * satHue.y * (color - color.gbr)));
+#endif
+#endif
+#ifdef LEV_SAT
+	float s = dot(color, vec3(1.0)) / 3.0;
+	color = (color - s) * satHue.x + s;
+#endif
+	return color;
 }
 #endif
+
 #ifdef LEVELS
 vec3 levels(vec3 color) {
 #ifdef LEV_IN_RGB

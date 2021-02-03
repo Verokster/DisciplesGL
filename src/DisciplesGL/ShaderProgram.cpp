@@ -52,8 +52,12 @@ ShaderProgram::ShaderProgram(const CHAR* version, DWORD vertexName, DWORD fragme
 		StrCat(prefix, "#define ALPHA\n");
 	if (this->flags & SHADER_DOUBLE)
 		StrCat(prefix, "#define DOUBLE\n");
-	if (this->flags & SHADER_SATHUE)
-		StrCat(prefix, "#define SATHUE\n");
+	if (this->flags & SHADER_HUE_L)
+		StrCat(prefix, "#define LEV_HUE_L\n");
+	if (this->flags & SHADER_HUE_R)
+		StrCat(prefix, "#define LEV_HUE_R\n");
+	if (this->flags & SHADER_SAT)
+		StrCat(prefix, "#define LEV_SAT\n");
 	if (this->flags & SHADER_LEVELS_IN_RGB)
 		StrCat(prefix, "#define LEV_IN_RGB\n");
 	if (this->flags & SHADER_LEVELS_IN_A)
@@ -133,7 +137,8 @@ VOID ShaderProgram::Update(DWORD texSize, Adjustment* colors)
 		if ((this->flags & SHADER_SATHUE) && (cmp & CMP_SATHUE))
 		{
 			this->colors->satHue = colors->satHue;
-			GLUniform2f(this->loc.satHue, (FLOAT)MathPower(2.0f * colors->satHue.saturation, 1.5849625f), FLOAT((2.0 * colors->satHue.hueShift - 1.0) * M_PI));
+			FLOAT hue = 2.0f * colors->satHue.hueShift;
+			GLUniform2f(this->loc.satHue, 4.0f * colors->satHue.saturation * colors->satHue.saturation, hue < 1.0f ? hue : hue - 1.0f);
 		}
 
 		if ((this->flags & SHADER_LEVELS_IN) && (cmp & CMP_LEVELS_IN))
