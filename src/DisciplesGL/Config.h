@@ -66,5 +66,6 @@ namespace Config
 	BOOL IsZoomed();
 	VOID CalcZoomed(Size* dst, Size* src, DWORD scale);
 	VOID CalcZoomed();
+	VOID CalcScroll();
 	VOID UpdateLocale();
 }

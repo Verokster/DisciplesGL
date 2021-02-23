@@ -26,7 +26,6 @@
 #include "intrin.h"
 #include "OpenDrawSurface.h"
 #include "OpenDraw.h"
-#include "Hooks.h"
 #include "Main.h"
 #include "Config.h"
 #include "Resource.h"
@@ -50,17 +49,14 @@ OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, SurfaceTyp
 	this->secondaryBuffer = NULL;
 	this->backBuffer = NULL;
 
-	this->mode.width = 0;
-	this->mode.height = 0;
-	this->mode.bpp = 0;
+	this->mode = { 0 };
 
 	this->redraw = FALSE;
 	this->drawEnabled = TRUE;
 	if (type == SurfaceSecondary)
 		config.drawEnabled = TRUE;
 
-	this->colorKey.dwColorSpaceLowValue = 0;
-	this->colorKey.dwColorSpaceHighValue = 0;
+	this->colorKey = { 0 };
 }
 
 OpenDrawSurface::~OpenDrawSurface()
@@ -447,7 +443,7 @@ VOID OpenDrawSurface::Flush()
 			else
 				surfaceBuffer->borders = BordersNone;
 
-			surfaceBuffer->isBack = (config.borders.active || !config.resHooked && !config.version && config.isEditor) && config.background.allowed && config.background.enabled;
+			surfaceBuffer->isBack = (config.borders.active || !config.resHooked && !config.type.sacred && config.type.editor) && config.background.allowed && config.background.enabled;
 		}
 
 		BOOL isSync = !config.ai.thinking && !config.ai.waiting && config.coldCPU;
@@ -693,16 +689,12 @@ HRESULT __stdcall OpenDrawSurface::GetPalette(IDrawPalette** lplpDDPalette)
 HRESULT __stdcall OpenDrawSurface::SetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDColorKey)
 {
 	// 8 - DDCKEY_SRCBLT
-	if (lpDDColorKey && lpDDColorKey->dwColorSpaceLowValue)
+	this->colorKey.enabled = (BOOL)lpDDColorKey;
+	if (this->colorKey.enabled)
 	{
-		DWORD colorKey = lpDDColorKey->dwColorSpaceLowValue;
-		this->colorKey.dwColorSpaceLowValue = colorKey;
-		this->colorKey.dwColorSpaceHighValue = ((colorKey & 0x001F) << 3) | ((colorKey & 0x07E0) << 5) | ((colorKey & 0xF800) << 8) | ALPHA_COMPONENT;
-	}
-	else
-	{
-		this->colorKey.dwColorSpaceLowValue = 0;
-		this->colorKey.dwColorSpaceHighValue = 0;
+		DWORD color = lpDDColorKey->dwColorSpaceLowValue;
+		this->colorKey.low = color;
+		this->colorKey.high = ((color & 0x001F) << 3) | ((color & 0x07E0) << 5) | ((color & 0xF800) << 8) | ALPHA_COMPONENT;
 	}
 
 	return DD_OK;
@@ -710,9 +702,12 @@ HRESULT __stdcall OpenDrawSurface::SetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDC
 
 HRESULT __stdcall OpenDrawSurface::GetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDColorKey)
 {
+	if (!this->colorKey.enabled)
+		return DDERR_NOCOLORKEY;
+
 	// 8 - DDCKEY_SRCBLT
-	lpDDColorKey->dwColorSpaceLowValue = this->colorKey.dwColorSpaceLowValue;
-	lpDDColorKey->dwColorSpaceHighValue = this->colorKey.dwColorSpaceLowValue;
+	lpDDColorKey->dwColorSpaceLowValue = this->colorKey.low;
+	lpDDColorKey->dwColorSpaceHighValue = this->colorKey.low;
 
 	return DD_OK;
 }
@@ -792,9 +787,9 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 			DWORD* src = (DWORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
 			DWORD* dst = (DWORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
-			if (Hooks::isBink)
+			if (config.isBink)
 			{
-				Hooks::isBink = FALSE;
+				config.isBink = FALSE;
 
 				if (config.isSSE2)
 				{
@@ -909,9 +904,9 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			DWORD* src = (DWORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
 			DWORD* dst = (DWORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
-			DWORD colorKey = surface->colorKey.dwColorSpaceHighValue;
-			if (colorKey)
+			if (surface->colorKey.enabled)
 			{
+				DWORD colorKey = surface->colorKey.high;
 				if (config.isSSE2)
 				{
 					DWORD count = width >> 2;
@@ -989,9 +984,10 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			WORD* src = (WORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
 			WORD* dst = (WORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
-			WORD colorKey = LOWORD(surface->colorKey.dwColorSpaceLowValue);
-			if (colorKey)
+			if (surface->colorKey.enabled)
 			{
+				WORD colorKey = LOWORD(surface->colorKey.low);
+
 				if (config.isSSE2)
 				{
 					DWORD count = width >> 3;

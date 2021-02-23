@@ -109,21 +109,6 @@ namespace Window
 			SetForegroundWindow(params->hWnd);
 	}
 
-	BYTE CubicInterpolate(BYTE p0, BYTE p1, BYTE p2, BYTE p3, FLOAT x)
-	{
-		INT d = INT(p1 + 0.5 * x * (p2 - p0 + x * (2 * p0 - 5 * p1 + 4 * p2 - p3 + x * (3 * (p1 - p2) + p3 - p0))));
-		if (d > 0xFF)
-			d = 0xFF;
-		else if (d < 0)
-			d = 0;
-		return LOBYTE(d);
-	}
-
-	FLOAT CubicInterpolate(FLOAT p0, FLOAT p1, FLOAT p2, FLOAT x)
-	{
-		return p1 + 0.5 * x * (p2 - p0 + x * (p0 - 5.0 * p1 + 4.0 * p2 + x * (3.0 * (p1 - p2))));
-	}
-
 	BOOL GetMenuByChildID(HMENU hParent, MenuItemData* mData, INT index)
 	{
 		HMENU hMenu = GetSubMenu(hParent, index);
@@ -395,7 +380,7 @@ namespace Window
 			{
 				--count;
 				BOOL enabled;
-				if (config.version)
+				if (config.type.sacred)
 				{
 					if (!config.resHooked)
 						enabled = id == IDM_RES_640_480;
@@ -404,10 +389,12 @@ namespace Window
 				}
 				else
 				{
-					if (!config.resHooked)
+					if (config.resHooked)
+						enabled = id != IDM_RES_640_480;
+					else if (config.version.major.high >= 2003)
 						enabled = id == IDM_RES_800_600 || id == IDM_RES_1024_768 || id == IDM_RES_1280_1024;
 					else
-						enabled = id != IDM_RES_640_480;
+						enabled = id == IDM_RES_800_600;
 				}
 
 				EnableMenuItem(config.menu, id, MF_BYCOMMAND | (enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
@@ -524,8 +511,8 @@ namespace Window
 		break;
 
 		case MenuFastAI: {
-			EnableMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (!config.isEditor ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-			CheckMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (!config.isEditor && config.ai.fast ? MF_CHECKED : MF_UNCHECKED));
+			EnableMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (!config.type.editor ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_FAST_AI, MF_BYCOMMAND | (!config.type.editor && config.ai.fast ? MF_CHECKED : MF_UNCHECKED));
 		}
 		break;
 
@@ -577,10 +564,9 @@ namespace Window
 			mData.childId = IDM_MSG_5;
 			if (GetMenuByChildID(&mData))
 			{
+				EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (config.msgTimeScale.hooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 				if (config.msgTimeScale.hooked)
 				{
-					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_ENABLED);
-
 					UINT count = (UINT)GetMenuItemCount(mData.hMenu);
 					for (UINT i = 0; i < count; ++i)
 					{
@@ -588,8 +574,6 @@ namespace Window
 						CheckMenuItem(mData.hMenu, i, MF_BYPOSITION | (id - IDM_MSG_0 == config.msgTimeScale.time ? MF_CHECKED : MF_UNCHECKED));
 					}
 				}
-				else
-					EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
 			}
 		}
 		break;
@@ -628,6 +612,89 @@ namespace Window
 			}
 		}
 
+		case MenuSceneSort: {
+			MenuItemData mData;
+			mData.childId = IDM_SCENE_SORT_NAME;
+			if (GetMenuByChildID(&mData))
+			{
+				EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (config.scene.sort.hooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+				if (config.scene.sort.hooked)
+				{
+					CheckMenuItem(config.menu, IDM_SCENE_SORT_NAME, MF_BYCOMMAND | MF_UNCHECKED);
+					CheckMenuItem(config.menu, IDM_SCENE_SORT_FILE, MF_BYCOMMAND | MF_UNCHECKED);
+					CheckMenuItem(config.menu, IDM_SCENE_SORT_SIZE_ASC, MF_BYCOMMAND | MF_UNCHECKED);
+					CheckMenuItem(config.menu, IDM_SCENE_SORT_SIZE_DESC, MF_BYCOMMAND | MF_UNCHECKED);
+
+					switch (config.scene.sort.value)
+					{
+					case SceneByFile:
+						CheckMenuItem(config.menu, IDM_SCENE_SORT_NAME, MF_BYCOMMAND | MF_CHECKED);
+						break;
+
+					case SceneBySizeAsc:
+						CheckMenuItem(config.menu, IDM_SCENE_SORT_SIZE_ASC, MF_BYCOMMAND | MF_CHECKED);
+						break;
+
+					case SceneBySizeDesc:
+						CheckMenuItem(config.menu, IDM_SCENE_SORT_SIZE_DESC, MF_BYCOMMAND | MF_CHECKED);
+						break;
+
+					default:
+						CheckMenuItem(config.menu, IDM_SCENE_SORT_NAME, MF_BYCOMMAND | MF_CHECKED);
+						break;
+					}
+				}
+			}
+
+			break;
+		}
+
+		case MenuSceneAll: {
+			EnableMenuItem(config.menu, IDM_SCENE_ALL, MF_BYCOMMAND | (!config.type.editor ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_SCENE_ALL, MF_BYCOMMAND | (config.scene.all ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
+
+		case MenuEditorMode: {
+			MenuItemData mData;
+			mData.childId = IDM_EDITOR_SCENE;
+			if (GetMenuByChildID(&mData))
+			{
+				EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (config.type.editor ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+				CheckMenuItem(config.menu, IDM_EDITOR_SCENE, MF_BYCOMMAND | (!config.editorCamp ? MF_CHECKED : MF_UNCHECKED));
+				CheckMenuItem(config.menu, IDM_EDITOR_CAMP, MF_BYCOMMAND | (config.editorCamp ? MF_CHECKED : MF_UNCHECKED));
+			}
+			
+			break;
+		}
+
+		case MenuScroll: {
+			MenuItemData mData;
+			mData.childId = IDM_MAP_LMB;
+			if (GetMenuByChildID(&mData))
+				EnableMenuItem(mData.hParent, mData.index, MF_BYPOSITION | (config.scroll.buttons.hooked || config.scroll.edge.hooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+
+			break;
+		}
+
+		case MenuScrollLMB: {
+			EnableMenuItem(config.menu, IDM_MAP_LMB, MF_BYCOMMAND | (config.scroll.buttons.hooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_MAP_LMB, MF_BYCOMMAND | (config.scroll.buttons.left ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
+
+		case MenuScrollMMB: {
+			EnableMenuItem(config.menu, IDM_MAP_MMB, MF_BYCOMMAND | (config.scroll.buttons.hooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_MAP_MMB, MF_BYCOMMAND | (config.scroll.buttons.middle ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
+
+		case MenuScrollEdge: {
+			EnableMenuItem(config.menu, IDM_MAP_EDGE, MF_BYCOMMAND | (config.scroll.edge.hooked ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(config.menu, IDM_MAP_EDGE, MF_BYCOMMAND | (config.scroll.edge.active ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
+
 		default:
 			break;
 		}
@@ -654,6 +721,14 @@ namespace Window
 		CheckMenu(MenuBattle);
 		CheckMenu(MenuSnapshot);
 		CheckMenu(MenuMsgTimeScale);
+		CheckMenu(MenuRenderer);
+		CheckMenu(MenuSceneSort);
+		CheckMenu(MenuSceneAll);
+		CheckMenu(MenuEditorMode);
+		CheckMenu(MenuScroll);
+		CheckMenu(MenuScrollLMB);
+		CheckMenu(MenuScrollMMB);
+		CheckMenu(MenuScrollEdge);
 	}
 
 	VOID FilterChanged(HWND hWnd, const CHAR* name, INT value)
@@ -670,193 +745,100 @@ namespace Window
 
 	VOID InterpolationChanged(HWND hWnd, InterpolationFilter filter)
 	{
-		config.image.interpolation = config.gl.version.value >= GL_VER_2_0 || filter < InterpolateHermite ? filter : InterpolateLinear;
-
+		if (config.image.interpolation != filter)
 		{
-			CHAR format[32];
-			LoadString(hDllModule, IDS_TEXT_INTERPOLATIN, format, sizeof(format));
+			config.image.interpolation = filter;
 
-			DWORD id;
-			switch (config.image.interpolation)
 			{
-			case InterpolateLinear:
-				id = IDS_TEXT_FILT_LINEAR;
-				break;
-			case InterpolateHermite:
-				id = IDS_TEXT_FILT_HERMITE;
-				break;
-			case InterpolateCubic:
-				id = IDS_TEXT_FILT_CUBIC;
-				break;
-			case InterpolateLanczos:
-				id = IDS_TEXT_FILT_LANCZOS;
-				break;
-			default:
-				id = IDS_TEXT_FILT_OFF;
-				break;
+				CHAR format[32];
+				LoadString(hDllModule, IDS_TEXT_INTERPOLATIN, format, sizeof(format));
+
+				DWORD id;
+				switch (config.image.interpolation)
+				{
+				case InterpolateLinear:
+					id = IDS_TEXT_FILT_LINEAR;
+					break;
+				case InterpolateHermite:
+					id = IDS_TEXT_FILT_HERMITE;
+					break;
+				case InterpolateCubic:
+					id = IDS_TEXT_FILT_CUBIC;
+					break;
+				case InterpolateLanczos:
+					id = IDS_TEXT_FILT_LANCZOS;
+					break;
+				default:
+					id = IDS_TEXT_FILT_OFF;
+					break;
+				}
+
+				CHAR str[32];
+				LoadString(hDllModule, id, str, sizeof(str));
+
+				CHAR text[64];
+				StrPrint(text, "%s: %s", format, str);
+				Hooks::PrintText(text);
 			}
 
-			CHAR str[32];
-			LoadString(hDllModule, id, str, sizeof(str));
-
-			CHAR text[64];
-			StrPrint(text, "%s: %s", format, str);
-			Hooks::PrintText(text);
+			FilterChanged(hWnd, "Interpolation", (INT)config.image.interpolation);
+			CheckMenu(MenuInterpolate);
 		}
-
-		FilterChanged(hWnd, "Interpolation", (INT)config.image.interpolation);
-		CheckMenu(MenuInterpolate);
 	}
 
 	VOID UpscalingChanged(HWND hWnd, UpscalingFilter filter)
 	{
-		config.image.upscaling = config.gl.version.value >= GL_VER_3_0 ? filter : UpscaleNone;
-
+		if (config.image.upscaling != filter)
 		{
-			CHAR format[32];
-			LoadString(hDllModule, IDS_TEXT_UPSCALING, format, sizeof(format));
-
-			DWORD id, value;
-			switch (config.image.upscaling)
-			{
-			case UpscaleScaleNx:
-				id = IDS_TEXT_FILT_SCALENX;
-				value = config.image.scaleNx;
-				break;
-			case UpscaleEagle:
-				id = IDS_TEXT_FILT_EAGLE;
-				value = config.image.eagle;
-				break;
-			case UpscaleXSal:
-				id = IDS_TEXT_FILT_XSAL;
-				value = config.image.xSal;
-				break;
-			case UpscaleScaleHQ:
-				id = IDS_TEXT_FILT_SCALEHQ;
-				value = config.image.scaleHQ;
-				break;
-			case UpscaleXBRZ:
-				id = IDS_TEXT_FILT_XBRZ;
-				value = config.image.xBRz;
-				break;
-			default:
-				id = IDS_TEXT_FILT_NONE;
-				break;
-			}
-
-			CHAR str[32];
-			LoadString(hDllModule, id, str, sizeof(str));
-
-			CHAR text[64];
-
-			if (config.image.upscaling)
-				StrPrint(text, "%s: %s x%d", format, str, value);
-			else
-				StrPrint(text, "%s: %s", format, str);
-
-			Hooks::PrintText(text);
-		}
-
-		FilterChanged(hWnd, "Upscaling", (INT)config.image.upscaling);
-		CheckMenu(MenuUpscale);
-	}
-
-	VOID SelectScaleNxMode(HWND hWnd, BYTE value)
-	{
-		config.image.scaleNx = value;
-		Config::Set(CONFIG_WRAPPER, "ScaleNx", *(INT*)&config.image.scaleNx);
-		UpscalingChanged(hWnd, UpscaleScaleNx);
-	}
-
-	VOID SelectXSalMode(HWND hWnd, BYTE value)
-	{
-		config.image.xSal = value;
-		Config::Set(CONFIG_WRAPPER, "XSal", *(INT*)&config.image.xSal);
-		UpscalingChanged(hWnd, UpscaleXSal);
-	}
-
-	VOID SelectEagleMode(HWND hWnd, BYTE value)
-	{
-		config.image.eagle = value;
-		Config::Set(CONFIG_WRAPPER, "Eagle", *(INT*)&config.image.eagle);
-		UpscalingChanged(hWnd, UpscaleEagle);
-	}
-
-	VOID SelectScaleHQMode(HWND hWnd, BYTE value)
-	{
-		config.image.scaleHQ = value;
-		Config::Set(CONFIG_WRAPPER, "ScaleHQ", *(INT*)&config.image.scaleHQ);
-		UpscalingChanged(hWnd, UpscaleScaleHQ);
-	}
-
-	VOID SelectXBRZMode(HWND hWnd, BYTE value)
-	{
-		config.image.xBRz = value;
-		Config::Set(CONFIG_WRAPPER, "XBRZ", *(INT*)&config.image.xBRz);
-		UpscalingChanged(hWnd, UpscaleXBRZ);
-	}
-
-	VOID SelectRenderer(HWND hWnd, RendererType renderer)
-	{
-		if (renderer == config.renderer)
-			return;
-
-		if (renderer == RendererGDI || config.renderer == RendererGDI)
-		{
-			Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&renderer);
-			Main::ShowInfo(IDS_INFO_RESTART);
-		}
-		else
-		{
-			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-			if (ddraw)
-				ddraw->RenderStop();
+			config.image.upscaling = filter;
 
 			{
-				config.renderer = renderer;
-				Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&renderer);
+				CHAR format[32];
+				LoadString(hDllModule, IDS_TEXT_UPSCALING, format, sizeof(format));
 
+				DWORD id, value;
+				switch (config.image.upscaling)
 				{
-					CHAR str1[32];
-					LoadString(hDllModule, IDS_TEXT_RENDERER, str1, sizeof(str1));
-
-					DWORD id;
-					switch (config.renderer)
-					{
-					case RendererOpenGL1:
-						id = IDS_REND_GL1;
-						break;
-
-					case RendererOpenGL2:
-						id = IDS_REND_GL2;
-						break;
-
-					case RendererOpenGL3:
-						id = IDS_REND_GL3;
-						break;
-
-					case RendererGDI:
-						id = IDS_REND_GDI;
-						break;
-
-					default:
-						id = IDS_REND_AUTO;
-						break;
-					}
-
-					CHAR str2[32];
-					LoadString(hDllModule, id, str2, sizeof(str2));
-
-					CHAR text[64];
-					StrPrint(text, "%s: %s", str1, str2);
-					Hooks::PrintText(text);
+				case UpscaleScaleNx:
+					id = IDS_TEXT_FILT_SCALENX;
+					value = config.image.scaleNx;
+					break;
+				case UpscaleEagle:
+					id = IDS_TEXT_FILT_EAGLE;
+					value = config.image.eagle;
+					break;
+				case UpscaleXSal:
+					id = IDS_TEXT_FILT_XSAL;
+					value = config.image.xSal;
+					break;
+				case UpscaleScaleHQ:
+					id = IDS_TEXT_FILT_SCALEHQ;
+					value = config.image.scaleHQ;
+					break;
+				case UpscaleXBRZ:
+					id = IDS_TEXT_FILT_XBRZ;
+					value = config.image.xBRz;
+					break;
+				default:
+					id = IDS_TEXT_FILT_NONE;
+					break;
 				}
 
-				CheckMenu(MenuRenderer);
+				CHAR str[32];
+				LoadString(hDllModule, id, str, sizeof(str));
+
+				CHAR text[64];
+
+				if (config.image.upscaling)
+					StrPrint(text, "%s: %s x%d", format, str, value);
+				else
+					StrPrint(text, "%s: %s", format, str);
+
+				Hooks::PrintText(text);
 			}
 
-			if (ddraw)
-				ddraw->RenderStart();
+			FilterChanged(hWnd, "Upscaling", (INT)config.image.upscaling);
+			CheckMenu(MenuUpscale);
 		}
 	}
 
@@ -902,12 +884,13 @@ namespace Window
 
 			CHAR path[MAX_PATH];
 			CHAR temp[100];
-
-			GetModuleFileName(NULL, path, sizeof(path));
+			GetDlgItemText(hDlg, IDC_VERSION, temp, sizeof(temp));
+			StrPrint(path, temp, config.version.major.high, config.version.major.low, config.version.minor.high, config.version.minor.low);
+			SetDlgItemText(hDlg, IDC_VERSION, path);
 
 			DWORD hSize;
+			GetModuleFileName(NULL, path, sizeof(path));
 			DWORD verSize = GetFileVersionInfoSize(path, &hSize);
-
 			if (verSize)
 			{
 				CHAR* verData = (CHAR*)MemoryAlloc(verSize);
@@ -916,15 +899,6 @@ namespace Window
 					{
 						VOID* buffer;
 						UINT size;
-						if (VerQueryValue(verData, "\\", &buffer, &size) && size)
-						{
-							VS_FIXEDFILEINFO* verInfo = (VS_FIXEDFILEINFO*)buffer;
-
-							GetDlgItemText(hDlg, IDC_VERSION, temp, sizeof(temp));
-							StrPrint(path, temp, HIWORD(verInfo->dwProductVersionMS), LOWORD(verInfo->dwProductVersionMS), HIWORD(verInfo->dwProductVersionLS), LOWORD(verInfo->dwProductVersionLS));
-							SetDlgItemText(hDlg, IDC_VERSION, path);
-						}
-
 						DWORD* lpTranslate;
 						if (VerQueryValue(verData, "\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &size) && size)
 						{
@@ -1378,7 +1352,7 @@ namespace Window
 						if (h < 0.0f)
 						{
 							sh++;
-							h = 1.0f + h;
+							h++;
 						}
 
 						LevelColorsFloat* src = levelsData->colors;
@@ -1390,8 +1364,10 @@ namespace Window
 							FLOAT sss = 0;
 							for (DWORD j = 0; j < 3; ++j)
 							{
-								INT v = j - sh;
-								FLOAT c = CubicInterpolate(src->chanel[(v - 1 + 3) % 3], src->chanel[(v + 3) % 3], src->chanel[(v + 1 + 3) % 3], h);
+								FLOAT p0 = src->chanel[(j - sh + 2) % 3];
+								FLOAT p1 = src->chanel[(j - sh + 3) % 3];
+								FLOAT p2 = src->chanel[(j - sh + 4) % 3];
+								FLOAT c = p1 + 0.5 * h * (p2 - p0 + h * (p0 - 5.0 * p1 + 4.0 * p2 + h * (3.0 * (p1 - p2))));
 								ex.chanel[j] = c;
 								sss += c;
 							}
@@ -1406,7 +1382,6 @@ namespace Window
 									k = min(1.0f, max(0.0f, k));
 									k = (FLOAT)MathPower(k, levels.gamma.chanel[idx]);
 									k = k * levels.output.chanel[idx] + config.colors.active.output.left.chanel[idx];
-									k = min(1.0f, max(0.0f, k));
 								}
 
 								prep[(DWORD)(k * 255.0f) + 2].chanel[j] += sss - (sss - ex.chanel[j]) * s;
@@ -1605,7 +1580,10 @@ namespace Window
 									BYTE* dst = (BYTE*)dest;
 
 									for (DWORD j = 0; j < 3; ++j, ++src)
-										dst[j] = CubicInterpolate(src[0], src[4], src[8], src[12], pos);
+									{
+										INT d = INT(src[4] + 0.5 * pos * (src[8] - src[0] + pos * (2 * src[0] - 5 * src[4] + 4 * src[8] - src[12] + pos * (3 * (src[4] - src[8]) + src[12] - src[0]))));
+										dst[j] = LOBYTE(min(255, max(0, d)));
+									}
 
 									dest += rc.right;
 								}
@@ -2124,6 +2102,9 @@ namespace Window
 		}
 
 		case WM_ACTIVATEAPP: {
+			if (!(BOOL)wParam)
+				ReleaseCapture();
+
 			if (!config.alwaysActive)
 				config.colors.current = (BOOL)wParam ? &config.colors.active : &inactiveColors;
 
@@ -2284,7 +2265,7 @@ namespace Window
 
 					return NULL;
 				}
-				else if (!config.version && wParam == VK_F12)
+				else if (!config.type.sacred && wParam == VK_F12)
 					return NULL;
 			}
 			else
@@ -2297,30 +2278,46 @@ namespace Window
 
 					return NULL;
 				}
-				else if (config.version && wParam == VK_F10)
+				else if (config.type.sacred && wParam == VK_F10)
 					return NULL;
 			}
 
+			config.scroll.isWheel = FALSE;
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
 
+		case WM_MOUSEWHEEL: {
+			config.scroll.isWheel = TRUE;
+			return CallWindowProc(OldWindowProc, hWnd, WM_KEYDOWN, GET_WHEEL_DELTA_WPARAM(wParam) < 0 ? VK_DOWN : VK_UP, 1);
+		}
+
 		case WM_MOUSEMOVE:
-		case WM_MOUSEWHEEL:
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONDOWN:
-		case WM_RBUTTONUP:
-		case WM_MBUTTONDOWN:
-		case WM_MBUTTONUP: {
-			OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+		{
+			lbl_mouse: OpenDraw* ddraw = Main::FindOpenDrawByWindow(GetForegroundWindow());
 			if (ddraw)
 			{
 				POINT p = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 				ddraw->ScaleMouse(&p);
 				lParam = MAKELONG(p.x, p.y);
+				return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 			}
 
-			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		}
+
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_MBUTTONDOWN: {
+			if (config.windowedMode)
+				SetCapture(hWnd);
+			goto lbl_mouse;
+		}
+
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONUP: {
+			ReleaseCapture();
+			goto lbl_mouse;
 		}
 
 		case WM_COMMAND: {
@@ -2377,7 +2374,7 @@ namespace Window
 							ddraw->SetFullscreenMode();
 
 						config.windowedMode = !config.windowedMode;
-						Config::Set(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", config.windowedMode);
+						Config::Set(CONFIG_DISCIPLE, config.type.sacred ? "InWindow" : "DisplayMode", config.windowedMode);
 
 						if (!config.windowedMode)
 						{
@@ -2454,28 +2451,12 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_FILT_OFF: {
-				InterpolationChanged(hWnd, InterpolateNearest);
-				return NULL;
-			}
-
-			case IDM_FILT_LINEAR: {
-				InterpolationChanged(hWnd, InterpolateLinear);
-				return NULL;
-			}
-
-			case IDM_FILT_HERMITE: {
-				InterpolationChanged(hWnd, InterpolateHermite);
-				return NULL;
-			}
-
-			case IDM_FILT_CUBIC: {
-				InterpolationChanged(hWnd, InterpolateCubic);
-				return NULL;
-			}
-
+			case IDM_FILT_OFF:
+			case IDM_FILT_LINEAR:
+			case IDM_FILT_HERMITE:
+			case IDM_FILT_CUBIC:
 			case IDM_FILT_LANCZOS: {
-				InterpolationChanged(hWnd, InterpolateLanczos);
+				InterpolationChanged(hWnd, InterpolationFilter(wParam - IDM_FILT_OFF));
 				return NULL;
 			}
 
@@ -2484,58 +2465,44 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_FILT_SCALENX_2X: {
-				SelectScaleNxMode(hWnd, 2);
-				return NULL;
-			}
-
+			case IDM_FILT_SCALENX_2X:
 			case IDM_FILT_SCALENX_3X: {
-				SelectScaleNxMode(hWnd, 3);
+				config.image.scaleNx = 2 + wParam - IDM_FILT_SCALENX_2X;
+				Config::Set(CONFIG_WRAPPER, "ScaleNx", *(INT*)&config.image.scaleNx);
+				UpscalingChanged(hWnd, UpscaleScaleNx);
 				return NULL;
 			}
 
 			case IDM_FILT_XSAL_2X: {
-				SelectXSalMode(hWnd, 2);
+				config.image.xSal = 2;
+				Config::Set(CONFIG_WRAPPER, "XSal", *(INT*)&config.image.xSal);
+				UpscalingChanged(hWnd, UpscaleXSal);
 				return NULL;
 			}
 
 			case IDM_FILT_EAGLE_2X: {
-				SelectEagleMode(hWnd, 2);
+				config.image.eagle = 2;
+				Config::Set(CONFIG_WRAPPER, "Eagle", *(INT*)&config.image.eagle);
+				UpscalingChanged(hWnd, UpscaleEagle);
 				return NULL;
 			}
 
-			case IDM_FILT_SCALEHQ_2X: {
-				SelectScaleHQMode(hWnd, 2);
-				return NULL;
-			}
-
+			case IDM_FILT_SCALEHQ_2X:
 			case IDM_FILT_SCALEHQ_4X: {
-				SelectScaleHQMode(hWnd, 4);
+				config.image.scaleHQ = 2 + wParam - IDM_FILT_SCALEHQ_2X;
+				Config::Set(CONFIG_WRAPPER, "ScaleHQ", *(INT*)&config.image.scaleHQ);
+				UpscalingChanged(hWnd, UpscaleScaleHQ);
 				return NULL;
 			}
 
-			case IDM_FILT_XRBZ_2X: {
-				SelectXBRZMode(hWnd, 2);
-				return NULL;
-			}
-
-			case IDM_FILT_XRBZ_3X: {
-				SelectXBRZMode(hWnd, 3);
-				return NULL;
-			}
-
-			case IDM_FILT_XRBZ_4X: {
-				SelectXBRZMode(hWnd, 4);
-				return NULL;
-			}
-
-			case IDM_FILT_XRBZ_5X: {
-				SelectXBRZMode(hWnd, 5);
-				return NULL;
-			}
-
+			case IDM_FILT_XRBZ_2X:
+			case IDM_FILT_XRBZ_3X: 
+			case IDM_FILT_XRBZ_4X: 
+			case IDM_FILT_XRBZ_5X: 
 			case IDM_FILT_XRBZ_6X: {
-				SelectXBRZMode(hWnd, 6);
+				config.image.xBRz = 2 + wParam - IDM_FILT_XRBZ_2X;
+				Config::Set(CONFIG_WRAPPER, "XBRZ", *(INT*)&config.image.xBRz);
+				UpscalingChanged(hWnd, UpscaleXBRZ);
 				return NULL;
 			}
 
@@ -2692,28 +2659,178 @@ namespace Window
 				return NULL;
 			}
 
-			case IDM_REND_AUTO: {
-				SelectRenderer(hWnd, RendererAuto);
+			case IDM_REND_AUTO:
+			case IDM_REND_GL1:
+			case IDM_REND_GL2:
+			case IDM_REND_GL3:
+			case IDM_REND_GDI:
+			{
+				RendererType val = RendererType(wParam - IDM_REND_AUTO);
+				if (config.renderer != val)
+				{
+					if (val == RendererGDI || config.renderer == RendererGDI)
+					{
+						Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&val);
+						Main::ShowInfo(IDS_INFO_RESTART);
+					}
+					else
+					{
+						OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+						if (ddraw)
+							ddraw->RenderStop();
+
+						{
+							config.renderer = val;
+							Config::Set(CONFIG_WRAPPER, "Renderer", *(INT*)&config.renderer);
+
+							{
+								CHAR str1[32];
+								LoadString(hDllModule, IDS_TEXT_RENDERER, str1, sizeof(str1));
+
+								DWORD id;
+								switch (config.renderer)
+								{
+								case RendererOpenGL1:
+									id = IDS_REND_GL1;
+									break;
+
+								case RendererOpenGL2:
+									id = IDS_REND_GL2;
+									break;
+
+								case RendererOpenGL3:
+									id = IDS_REND_GL3;
+									break;
+
+								case RendererGDI:
+									id = IDS_REND_GDI;
+									break;
+
+								default:
+									id = IDS_REND_AUTO;
+									break;
+								}
+
+								CHAR str2[32];
+								LoadString(hDllModule, id, str2, sizeof(str2));
+
+								CHAR text[64];
+								StrPrint(text, "%s: %s", str1, str2);
+								Hooks::PrintText(text);
+							}
+
+							CheckMenu(MenuRenderer);
+						}
+
+						if (ddraw)
+							ddraw->RenderStart();
+					}
+				}
+
 				return NULL;
 			}
 
-			case IDM_REND_GL1: {
-				SelectRenderer(hWnd, RendererOpenGL1);
+			case IDM_SCENE_SORT_NAME:
+			case IDM_SCENE_SORT_FILE:
+			case IDM_SCENE_SORT_SIZE_ASC:
+			case IDM_SCENE_SORT_SIZE_DESC: {
+				SceneSort val = SceneSort(wParam - IDM_SCENE_SORT_NAME);
+				if (config.scene.sort.value != val)
+				{
+					config.scene.sort.value = val;
+					Config::Set(CONFIG_WRAPPER, "SceneSort", *(INT*)&config.scene.sort.value);
+
+					Main::ShowInfo(IDS_INFO_RESTART);
+					CheckMenu(MenuSceneSort);
+				}
+
 				return NULL;
 			}
 
-			case IDM_REND_GL2: {
-				SelectRenderer(hWnd, RendererOpenGL2);
+			case IDM_SCENE_ALL: {
+				config.scene.all = !config.scene.all;
+				Config::Set(CONFIG_DISCIPLE, "IncludeCampaign", config.scene.all);
+					Main::ShowInfo(IDS_INFO_RESTART);
+				CheckMenu(MenuSceneAll);
 				return NULL;
 			}
 
-			case IDM_REND_GL3: {
-				SelectRenderer(hWnd, RendererOpenGL3);
+			case IDM_EDITOR_SCENE:
+			case IDM_EDITOR_CAMP: {
+				BOOL val = wParam == IDM_EDITOR_CAMP;
+				if (config.editorCamp != val)
+				{
+					config.editorCamp = val;
+					Config::Set(CONFIG_DISCIPLE, "ScenEditDatabase", config.editorCamp);
+					Main::ShowInfo(IDS_INFO_RESTART);
+					CheckMenu(MenuEditorMode);
+				}
+
 				return NULL;
 			}
 
-			case IDM_REND_GDI: {
-				SelectRenderer(hWnd, RendererGDI);
+			case IDM_BORDERS_OFF:
+			case IDM_BORDERS_CLASSIC:
+			case IDM_BORDERS_ALTERNATIVE: {
+				if (config.borders.allowed)
+				{
+					config.borders.type = BordersType(wParam - IDM_BORDERS_OFF);
+					Config::Set(CONFIG_WRAPPER, "Borders", (INT)config.borders.type);
+
+					{
+						CHAR str1[32];
+						LoadString(hDllModule, IDS_BORDERS, str1, sizeof(str1));
+
+						CHAR str2[32];
+						switch (config.borders.type)
+						{
+						case BordersClassic:
+							LoadString(hDllModule, IDS_BORDERS_CLASSIC, str2, sizeof(str2));
+							break;
+
+						case BordersAlternative:
+							LoadString(hDllModule, IDS_BORDERS_ALTERNATIVE, str2, sizeof(str2));
+							break;
+
+						default:
+							LoadString(hDllModule, IDS_OFF, str2, sizeof(str2));
+							break;
+						}
+
+						CHAR text[64];
+						StrPrint(text, "%s: %s", str1, str2);
+
+						Hooks::PrintText(text);
+					}
+
+					OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
+					if (ddraw)
+						ddraw->Redraw();
+
+					CheckMenu(MenuBorders);
+				}
+
+				return NULL;
+			}
+
+			case IDM_MAP_LMB: {
+				config.scroll.buttons.left = !config.scroll.buttons.left;
+				Config::Set(CONFIG_WRAPPER, "MouseScroll", config.scroll.buttons.left | (config.scroll.buttons.middle << 1));
+				CheckMenu(MenuScrollLMB);
+				return NULL;
+			}
+
+			case IDM_MAP_MMB: {
+				config.scroll.buttons.middle = !config.scroll.buttons.middle;
+				Config::Set(CONFIG_WRAPPER, "MouseScroll", config.scroll.buttons.left | (config.scroll.buttons.middle << 1));
+				CheckMenu(MenuScrollMMB);
+				return NULL;
+			}
+
+			case IDM_MAP_EDGE: {
+				config.scroll.edge.active = !config.scroll.edge.active;
+				Config::Set(CONFIG_WRAPPER, "EdgeScroll", config.scroll.edge.active);
+				CheckMenu(MenuScrollEdge);
 				return NULL;
 			}
 
@@ -2732,7 +2849,7 @@ namespace Window
 							Config::Set(CONFIG_WRAPPER, "DisplayWidth", (INT)config.resolution.width);
 							Config::Set(CONFIG_WRAPPER, "DisplayHeight", (INT)config.resolution.height);
 						}
-						else if (!config.version)
+						else if (!config.type.sacred)
 						{
 							INT mode;
 							if (config.resolution.width == 1280)
@@ -2769,7 +2886,7 @@ namespace Window
 						else
 							config.zoom.enabled = FALSE;
 
-						if (!config.version)
+						if (!config.type.sacred)
 							Config::Set(CONFIG_DISCIPLE, "EnableZoom", config.zoom.enabled);
 						Config::Set(CONFIG_WRAPPER, "EnableZoom", config.zoom.enabled);
 
@@ -2795,48 +2912,6 @@ namespace Window
 							ddraw->Redraw();
 
 						CheckMenu(MenuStretch);
-					}
-
-					return NULL;
-				}
-				else if (wParam >= IDM_BORDERS_OFF && wParam <= IDM_BORDERS_ALTERNATIVE)
-				{
-					if (config.borders.allowed)
-					{
-						config.borders.type = BordersType(wParam - IDM_BORDERS_OFF);
-						Config::Set(CONFIG_WRAPPER, "Borders", (INT)config.borders.type);
-
-						{
-							CHAR str1[32];
-							LoadString(hDllModule, IDS_BORDERS, str1, sizeof(str1));
-
-							CHAR str2[32];
-							switch (config.borders.type)
-							{
-							case BordersClassic:
-								LoadString(hDllModule, IDS_BORDERS_CLASSIC, str2, sizeof(str2));
-								break;
-
-							case BordersAlternative:
-								LoadString(hDllModule, IDS_BORDERS_ALTERNATIVE, str2, sizeof(str2));
-								break;
-
-							default:
-								LoadString(hDllModule, IDS_OFF, str2, sizeof(str2));
-								break;
-							}
-
-							CHAR text[64];
-							StrPrint(text, "%s: %s", str1, str2);
-
-							Hooks::PrintText(text);
-						}
-
-						OpenDraw* ddraw = Main::FindOpenDrawByWindow(hWnd);
-						if (ddraw)
-							ddraw->Redraw();
-
-						CheckMenu(MenuBorders);
 					}
 
 					return NULL;

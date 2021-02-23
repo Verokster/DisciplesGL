@@ -210,7 +210,7 @@ VOID OpenDraw::TakeSnapshot(Size* size, VOID* stateData, BOOL isTrueColor)
 		const CHAR* format;
 		const CHAR* extension;
 		DWORD offset;
-		if (config.version)
+		if (config.type.sacred)
 		{
 			StrCopy(ptr, "\\SDUMP???.*");
 			format = "\\SDUMP%03d.%s";
@@ -568,18 +568,19 @@ BOOL OpenDraw::CheckViewport(BOOL isDouble)
 
 VOID OpenDraw::ScaleMouse(LPPOINT p)
 {
+	SIZE* sz = (SIZE*)&config.mode->width;
 	if (!Config::IsZoomed())
 	{
-		p->x = LONG((FLOAT)((p->x - this->viewport.rectangle.x) * config.mode->width) / this->viewport.rectangle.width);
-		p->y = LONG((FLOAT)((p->y - this->viewport.rectangle.y) * config.mode->height) / this->viewport.rectangle.height);
+		p->x = LONG((FLOAT)((p->x - this->viewport.rectangle.x) * sz->cx) / this->viewport.rectangle.width);
+		p->y = LONG((FLOAT)((p->y - this->viewport.rectangle.y) * sz->cy) / this->viewport.rectangle.height);
 	}
 	else
 	{
 		FLOAT kx = config.zoom.sizeFloat.width / config.mode->width;
 		FLOAT ky = config.zoom.sizeFloat.height / config.mode->height;
 
-		p->x = LONG((FLOAT)((p->x - this->viewport.rectangle.x) * config.mode->width) / this->viewport.rectangle.width * kx) + ((config.mode->width - config.zoom.size.width) >> 1);
-		p->y = LONG((FLOAT)((p->y - this->viewport.rectangle.y) * config.mode->height) / this->viewport.rectangle.height * ky) + ((config.mode->height - config.zoom.size.height) >> 1);
+		p->x = LONG((FLOAT)((p->x - this->viewport.rectangle.x) * sz->cx) / this->viewport.rectangle.width * kx) + ((config.mode->width - config.zoom.size.width) >> 1);
+		p->y = LONG((FLOAT)((p->y - this->viewport.rectangle.y) * sz->cy) / this->viewport.rectangle.height * ky) + ((config.mode->height - config.zoom.size.height) >> 1);
 	}
 }
 

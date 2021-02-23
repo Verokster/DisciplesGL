@@ -19,6 +19,7 @@
     <ProjectGuid>{62a3e190-3331-4f08-9a9f-24315d6a805e}</ProjectGuid>
     <RootNamespace>Disciples2GL</RootNamespace>
     <ProjectName>DisciplesGL</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -168,7 +169,7 @@
       <SectionAlignment>
       </SectionAlignment>
       <AssemblyDebug>true</AssemblyDebug>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;msimg32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;crt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;shw32.lib;hooker.lib;cb63.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;msimg32.lib;opengl32.lib;shell32.lib;ole32.lib;comdlg32.lib;winmm.lib;version.lib;_msvcrt.lib;vcruntime.lib;ucrt.lib;msvcrt.lib;shw32.lib;hooker.lib;cb63.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
@@ -239,6 +240,10 @@
       <Command>"$(SolutionDir)tools\PEUpdater.exe" "$(TargetPath)" linker 5 A os 4 0 subs 4 0</Command>
     </PostBuildEvent>
     <ProjectReference />
+    <ProjectReference />
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Allocation.cpp" />

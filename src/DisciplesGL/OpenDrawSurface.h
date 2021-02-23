@@ -33,7 +33,11 @@ class OpenDraw;
 
 class OpenDrawSurface : public IDrawSurface7 {
 private:
-	DDCOLORKEY colorKey;
+	struct {
+		BOOL enabled;
+		DWORD low;
+		DWORD high;
+	} colorKey;
 	StateBuffer* backBuffer;
 
 	VOID SwapBuffers();

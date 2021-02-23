@@ -140,7 +140,7 @@ vec3 levels(vec3 color) {
 	color = pow(color, gamma.rgb);
 #endif
 #ifdef LEV_OUT_RGB
-	color = clamp(color * (out_right.rgb - out_left.rgb) + out_left.rgb, 0.0, 1.0);
+	color = color * (out_right.rgb - out_left.rgb) + out_left.rgb;
 #endif
 #ifdef LEV_IN_A
 	color = clamp((color - in_left.a) / (in_right.a - in_left.a), 0.0, 1.0);
@@ -149,7 +149,7 @@ vec3 levels(vec3 color) {
 	color = pow(color, gamma.aaa);
 #endif
 #ifdef LEV_OUT_A
-	color = clamp(color * (out_right.a - out_left.a) + out_left.a, 0.0, 1.0);
+	color = color * (out_right.a - out_left.a) + out_left.a;
 #endif
 	return color;
 }

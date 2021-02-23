@@ -15,7 +15,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Manifest
 //
 
-IDM_MANIFEST				RT_MANIFEST				"module.manifest"
+IDR_MANIFEST				RT_MANIFEST				"module.manifest"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -107,7 +107,12 @@ IDR_MENU MENU DISCARDABLE
 BEGIN
 	POPUP "&File"
 	BEGIN
-		MENUITEM "&Reset Configuration"				IDM_FILE_RESET
+		POPUP "&Editor Mode"
+		BEGIN
+			MENUITEM "Scenarios",					IDM_EDITOR_SCENE
+			MENUITEM "Campaigns",					IDM_EDITOR_CAMP
+		END
+		MENUITEM "&Reset Wrapper"					IDM_FILE_RESET
 		MENUITEM SEPARATOR
 		MENUITEM "&Quit",							IDM_FILE_QUIT
 	END
@@ -238,6 +243,7 @@ BEGIN
 			MENUITEM "&Exclusive",					IDM_MODE_EXCLUSIVE
 		END
 		MENUITEM "&Widescreen Battle",				IDM_MODE_WIDEBATTLE
+		MENUITEM SEPARATOR
 		POPUP "Game &Speed\a"
 		BEGIN
 			MENUITEM "1.0x",						IDM_SPEED_1_0
@@ -271,16 +277,36 @@ BEGIN
 			MENUITEM "25 seconds",					IDM_MSG_25
 			MENUITEM "30 seconds",					IDM_MSG_30
 		END
+		POPUP "Map &Scroll"
+		BEGIN
+			MENUITEM "Left Mouse Button",			IDM_MAP_LMB
+			MENUITEM "Middle Mouse Button",			IDM_MAP_MMB
+			MENUITEM SEPARATOR
+			MENUITEM "Edge Detection",				IDM_MAP_EDGE
+		END
+		MENUITEM SEPARATOR
 		MENUITEM "Fast &AI",						IDM_FAST_AI
-		MENUITEM "Always &Active",					IDM_ALWAYS_ACTIVE
 		MENUITEM "&Cold CPU",						IDM_PATCH_CPU
+		MENUITEM "Always &Active",					IDM_ALWAYS_ACTIVE
+		MENUITEM SEPARATOR
+		POPUP "&Scenarios"
+		BEGIN
+			POPUP "&Order By"
+			BEGIN
+				MENUITEM "Title (Name)",			IDM_SCENE_SORT_NAME
+				MENUITEM "File Name",				IDM_SCENE_SORT_FILE
+				MENUITEM "Size (Asc)",				IDM_SCENE_SORT_SIZE_ASC
+				MENUITEM "Size (Desc)",				IDM_SCENE_SORT_SIZE_DESC
+			END
+			MENUITEM "&Show All",					IDM_SCENE_ALL
+		END
 		MENUITEM SEPARATOR
 		POPUP "&Locale"
 		BEGIN
 			MENUITEM "Default",						IDM_LOCALE_DEFAULT
 			MENUITEM SEPARATOR
 		END
-		POPUP "Screenshot"
+		POPUP "&Screenshot"
 		BEGIN
 			MENUITEM "&BMP",						IDM_SCR_BMP
 			MENUITEM "&PNG",						IDM_SCR_PNG
@@ -456,8 +482,8 @@ IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2021,2,3,1770
- PRODUCTVERSION 1,7,6,0
+ FILEVERSION 2021,2,23,1844
+ PRODUCTVERSION 1,8,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -473,10 +499,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2021.02.03.1770"
+			VALUE "FileVersion", "2021.02.23.1844"
 			VALUE "LegalCopyright", "© 2021 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4dll-R.dll"
-			VALUE "ProductVersion", "1.7.6"
+			VALUE "ProductVersion", "1.8.0"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

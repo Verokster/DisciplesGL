@@ -33,72 +33,43 @@ namespace Hooks
 		DWORD unk_3;
 	};
 
-	typedef DWORD**(__stdcall* BEGINLOCK)(LOCK*);
+	typedef DWORD*(__stdcall* BEGINLOCK)(LOCK*);
 	typedef VOID(__thiscall* ENDLOCK)(LOCK*, DWORD);
 	typedef BOOL(__stdcall* PRINTSTRING)(StringObject*, const CHAR*, CHAR*);
-	typedef CHAR*(__thiscall* COPYSTRING)(StringObject*, CHAR*, DWORD);
+	typedef CHAR*(__thiscall* COPYSTRING)(StringObject*, const CHAR*, DWORD);
 
 	//======================================================================= 
-	#define BINKYAINVERT          0x00000800L // Reverse Y and A planes when blitting (for debugging) 
-	#define BINKFRAMERATE         0x00001000L // Override fr (call BinkFrameRate first) 
-	#define BINKPRELOADALL        0x00002000L // Preload the entire animation 
-	#define BINKSNDTRACK          0x00004000L // Set the track number to play 
-	#define BINKOLDFRAMEFORMAT    0x00008000L // using the old Bink frame format (internal use only) 
-	#define BINKRBINVERT          0x00010000L // use reversed R and B planes (internal use only) 
-	#define BINKGRAYSCALE         0x00020000L // Force Bink to use grayscale 
-	#define BINKNOMMX             0x00040000L // Don't use MMX 
-	#define BINKNOSKIP            0x00080000L // Don't skip frames if falling behind 
-	#define BINKALPHA             0x00100000L // Decompress alpha plane (if present) 
-	#define BINKNOFILLIOBUF       0x00200000L // Don't Fill the IO buffer (in BinkOpen and BinkCopyTo) 
-	#define BINKSIMULATE          0x00400000L // Simulate the speed (call BinkSim first) 
-	#define BINKFILEHANDLE        0x00800000L // Use when passing in a file handle 
-	#define BINKIOSIZE            0x01000000L // Set an io size (call BinkIOSize first) 
-	#define BINKIOPROCESSOR       0x02000000L // Set an io processor (call BinkIO first) 
-	#define BINKFROMMEMORY        0x04000000L // Use when passing in a pointer to the file 
-	#define BINKNOTHREADEDIO      0x08000000L // Don't use a background thread for IO 
-	#define BINKNOFRAMEBUFFERS    0x00000400L // Don't allocate internal frame buffers - application must call BinkRegisterFrameBuffers 
-	#define BINKNOYPLANE          0x00000200L // Don't decompress the Y plane (internal flag) 
-	#define BINKRUNNINGASYNC      0x00000100L // This frame is decompressing asynchronously 
- 
-	#define BINKSURFACEFAST       0x00000000L 
-	#define BINKSURFACESLOW       0x08000000L 
-	#define BINKSURFACEDIRECT     0x04000000L 
- 
-	#define BINKCOPYALL           0x80000000L // copy all pixels (not just changed) 
-	#define BINKCOPY2XH           0x10000000L // Force doubling height scaling 
-	#define BINKCOPY2XHI          0x20000000L // Force interleaving height scaling 
-	#define BINKCOPY2XW           0x30000000L // copy the width zoomed by two 
-	#define BINKCOPY2XWH          0x40000000L // copy the width and height zoomed by two 
-	#define BINKCOPY2XWHI         0x50000000L // copy the width and height zoomed by two 
-	#define BINKCOPY1XI           0x60000000L // copy the width and height zoomed by two 
-	#define BINKCOPYNOSCALING     0x70000000L // Force scaling off 
- 
-	#define BINKSURFACEP8          0 
-	#define BINKSURFACE24          1 
-	#define BINKSURFACE24R         2 
-	#define BINKSURFACE32          3 
-	#define BINKSURFACE32R         4 
-	#define BINKSURFACE32A         5 
-	#define BINKSURFACE32RA        6 
-	#define BINKSURFACE4444        7 
-	#define BINKSURFACE5551        8 
-	#define BINKSURFACE555         9 
-	#define BINKSURFACE565        10 
-	#define BINKSURFACE655        11 
-	#define BINKSURFACE664        12 
-	#define BINKSURFACEYUY2       13 
-	#define BINKSURFACEUYVY       14 
-	#define BINKSURFACEYV12       15 
-	#define BINKSURFACEMASK       15 
 
-	extern BOOL isBink;
+	#define BINKCOPYALL           0x80000000L
+ 
+	#define BINKSURFACEP8 0
+	#define BINKSURFACE24 1
+	#define BINKSURFACE24R 2
+	#define BINKSURFACE32 3
+	#define BINKSURFACE32R 4
+	#define BINKSURFACE32A 5
+	#define BINKSURFACE32RA 6
+	#define BINKSURFACE4444 7
+	#define BINKSURFACE5551 8
+	#define BINKSURFACE555 9
+	#define BINKSURFACE565 10
+	#define BINKSURFACE655 11
+	#define BINKSURFACE664 12
+	#define BINKSURFACEYUY2 13
+	#define BINKSURFACEUYVY 14
+	#define BINKSURFACEYV12 15
+	#define BINKSURFACEMASK 15
 
 	struct AddressSpaceV1 {
+		VERSION version_major;
+		VERSION version_minor;
+
 		DWORD check;
-		DWORD value;
+
 		DWORD scroll_speed;
 		DWORD scroll_nop;
 		DWORD scroll_hook;
+		DWORD scroll_key_hook;
 
 		DWORD random_nop;
 
@@ -118,19 +89,18 @@ namespace Hooks
 
 		DWORD interlockFix;
 
+		DWORD mouse_pos_fix;
+
 		DWORD speed_anim;
 	};
 
 	struct AddressSpaceV2 {
-		DWORD version;
-		DWORD check_1;
-		DWORD value_1;
-		DWORD check_2;
-		DWORD value_2;
-
-		DWORD mapSize;
+		VERSION version;
+		VERSION version_major;
+		VERSION version_minor;
+		
+		DWORD check;
 		DWORD bitmaskFix;
-
 		DWORD random_nop;
 
 		DWORD memory_1;
@@ -197,6 +167,7 @@ namespace Hooks
 		DWORD scroll_nop_1;
 		DWORD scroll_nop_2;
 		DWORD scroll_hook;
+		DWORD scroll_key_hook;
 
 		DWORD dblclick_hook;
 
@@ -268,11 +239,10 @@ namespace Hooks
 		DWORD mouse_allow_flag;
 		DWORD map_center_get;
 		DWORD map_center_set;
-		DWORD offset_area;
-		DWORD offset_keystate;
-		DWORD offset_dialog_set;
-		DWORD offset_dialog_clear;
-		DWORD offset_dialog_get;
+
+		DWORD mouse_pos_fix;
+		DWORD mouse_pos_nop_1;
+		DWORD mouse_pos_nop_2;
 
 		DWORD startAiTurn;
 		DWORD endAiTurn;
@@ -300,7 +270,8 @@ namespace Hooks
 		DWORD locale_fix_2;
 
 		DWORD scene_sort_hook;
-		DWORD scene_print_hook;
+		DWORD scene_print_edit_hook;
+		DWORD scene_print_delete_hook;
 		DWORD str_copy;
 		DWORD str_print;
 

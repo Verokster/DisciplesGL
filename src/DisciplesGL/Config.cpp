@@ -201,8 +201,29 @@ namespace Config
 	BOOL Load()
 	{
 		HMODULE hModule = GetModuleHandle(NULL);
+		GetModuleFileName(hModule, config.file, MAX_PATH);
 
-		GetModuleFileName(hModule, config.file, MAX_PATH - 1);
+		DWORD hSize;
+		DWORD verSize = GetFileVersionInfoSize(config.file, &hSize);
+		if (verSize)
+		{
+			CHAR* verData = (CHAR*)MemoryAlloc(verSize);
+			{
+				if (GetFileVersionInfo(config.file, hSize, verSize, verData))
+				{
+					VOID* buffer;
+					UINT size;
+					if (VerQueryValue(verData, "\\", &buffer, &size) && size)
+					{
+						VS_FIXEDFILEINFO* verInfo = (VS_FIXEDFILEINFO*)buffer;
+						config.version.major.value = verInfo->dwProductVersionMS;
+						config.version.minor.value = verInfo->dwProductVersionLS;
+					}
+				}
+			}
+			MemoryFree(verData);
+		}
+
 		CHAR* p = StrLastChar(config.file, '\\');
 		*p = NULL;
 		StrCopy(p, "\\disciple.ini");
@@ -218,14 +239,14 @@ namespace Config
 			{
 				CHAR* libraryName = (CHAR*)(base + imports->Name);
 				if (!StrCompareInsensitive(libraryName, "smackw32.dll"))
-					config.version = TRUE;
+					config.type.sacred = TRUE;
 
 				if (!StrCompareInsensitive(libraryName, "comdlg32.dll"))
-					config.isEditor = TRUE;
+					config.type.editor = TRUE;
 			}
 		}
 
-		if (config.version)
+		if (config.type.sacred)
 		{
 			GAME_WIDTH = 640;
 			GAME_HEIGHT = 480;
@@ -245,7 +266,7 @@ namespace Config
 		{
 			config.windowedMode = TRUE;
 
-			if (config.version)
+			if (config.type.sacred)
 			{
 				Config::Set(CONFIG_DISCIPLE, "DDraw", TRUE);
 				Config::Set(CONFIG_DISCIPLE, "InWindow", config.windowedMode);
@@ -268,7 +289,7 @@ namespace Config
 				config.image.scaleHQ = 2;
 				config.image.xBRz = 2;
 
-				if (!config.version)
+				if (!config.type.sacred)
 				{
 					Config::Set(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
 					Config::Set(CONFIG_DISCIPLE, "EnableZoom", TRUE);
@@ -291,7 +312,8 @@ namespace Config
 				config.msgTimeScale.time = 15;
 				config.msgTimeScale.value = (FLOAT)MSG_TIMEOUT / config.msgTimeScale.time;
 				config.updateMode = UpdateSSE;
-				config.mouseScroll.lButton = config.mouseScroll.mButton = TRUE;
+				config.scroll.buttons.left = config.scroll.buttons.middle = TRUE;
+				config.scroll.edge.active = TRUE;
 				config.cloudsFactor = 1.0f;
 
 				CHAR* buffer = (CHAR*)MemoryAlloc(8192);
@@ -302,11 +324,11 @@ namespace Config
 
 					ptr = Add(ptr, "ShowBanners", config.toogle.banners, "Show in-game banners for troops (0 - no 'default'; 1 - yes)");
 					ptr = Add(ptr, "ShowResources", config.toogle.resources, "Show resources panel (0 - no 'default'; 1 - yes)");
-					ptr = Add(ptr, "SceneSort", *(INT*)&config.sceneSort, "Sort scenarios (0 - by title 'default'; 1 - by file name; 2 - by map size 'ascending'; 3 - by map size 'descending')");
+					ptr = Add(ptr, "SceneSort", *(INT*)&config.scene.sort.real, "Sort scenarios (0 - by title 'default'; 1 - by file name; 2 - by map size 'ascending'; 3 - by map size 'descending')");
 					ptr = Add(ptr, "Renderer", *(INT*)&config.renderer, "Image renderer (0 - auto 'default'; 1 - opengl 1.1; 2 - opengl 2.0; 3 - opengl 3.0; 4 - windows gdi)");
 					ptr = Add(ptr, "HD", config.hd, "Enables HD options, like 32 bpp rendering and different resolutions support (0 - no; 1 - yes 'default')");
 					
-					if (config.version)
+					if (config.type.sacred)
 					{
 						ptr = Add(ptr, "DisplayWidth", GAME_WIDTH, "Image resolution width (640 - min; 2048 - max)");
 						ptr = Add(ptr, "DisplayHeight", GAME_HEIGHT, "Image resolution height (480 - min; 1024 - max)");
@@ -327,7 +349,7 @@ namespace Config
 					ptr = Add(ptr, "ScaleHQ", config.image.scaleHQ, "ScaleHQ scale factor (2 'default')");
 					ptr = Add(ptr, "XBRZ", config.image.xBRz, "xBRZ scale factor (2 'default'; 3; 4; 5; 6)");
 
-					if (!config.version)
+					if (!config.type.sacred)
 					{
 						ptr = Add(ptr, "Borders", *(INT*)&config.borders.type, "Enables borders for in-game windows (0 - no; 1 - classic style 'default', 2 - alternative style)");
 						ptr = Add(ptr, "Background", config.background.enabled, "Enables background for in-game windows (0 - no; 1 - yes 'default')");
@@ -341,7 +363,7 @@ namespace Config
 					ptr = Add(ptr, "AlwaysActive", config.alwaysActive, "Game window is always active (0 - no 'default'; 1 - yes)");
 					ptr = Add(ptr, "ColdCPU", config.coldCPU, "Decrease CPU usage for OpenGL renderer (0 - no 'default'; 1 - yes)");
 
-					if (!config.version)
+					if (!config.type.sacred)
 					{
 						ptr = Add(ptr, "WideBattle", config.wide.allowed, "Makes window battle wider. Depends on image aspect ratio (0 - no; 1 - yes)");
 						ptr = Add(ptr, "MirrorBattle", config.battle.mirror, "Allows mirrored bacgrounds for battles (0 - no; 1 - yes 'default')");
@@ -351,9 +373,10 @@ namespace Config
 					ptr = Add(ptr, "ScreenshotLevel", *(INT*)&config.snapshot.level, "Compression level for PNG screenshots (0 - 9, 5 - 'default')");
 					ptr = Add(ptr, "Locale", *(INT*)&config.locales.current.id, "Locale id (by default is determined by system locale)");
 					ptr = Add(ptr, "MessageTimeout", config.msgTimeScale.time, "In-game messages timeout in seconds (15 'default')");
-					ptr = Add(ptr, "UpdateMode", (INT)config.updateMode, "Image comparison. Affects on rendering performance (0 - none; 1 - SSE2 'default'; 2 - classic 'default'; 3 - alternative)");
+					ptr = Add(ptr, "UpdateMode", (INT)config.updateMode, "Image comparison. Affects on rendering performance (0 - none; 1 - SSE2 'default'; 2 - classic; 3 - alternative)");
 					ptr = Add(ptr, "FastAI", config.ai.fast, "Increases AI performance, but may cause an unexpected game crash (0 - no 'default'; 1 - yes)");
-					ptr = Add(ptr, "MouseScroll", 3, "Allows map scrolling by pressing mouse button (0 - no; 1 - left button; 2 - middle button; 3 - both buttons 'default')");
+					ptr = Add(ptr, "MouseScroll", config.scroll.buttons.left | (config.scroll.buttons.middle << 1), "Allows map scrolling by pressing mouse button (0 - no; 1 - left button; 2 - middle button; 3 - both buttons 'default')");
+					ptr = Add(ptr, "EdgeScroll", config.scroll.edge.active, "Allows map scrolling on window/screen edge detection (0 - no; 1 - yes 'default')");
 					ptr = Add(ptr, "CloudsFactor", 1, "Defines clouds count multiplier (1 - min 'default')");
 					*ptr = NULL;
 
@@ -372,7 +395,7 @@ namespace Config
 				Config::Set(CONFIG_KEYS, "AspectRatio", "");
 				Config::Set(CONFIG_KEYS, "VSync", "");
 
-				if (!config.version)
+				if (!config.type.sacred)
 					Config::Set(CONFIG_KEYS, "ZoomImage", "");
 
 				config.keys.speedToggle = 5;
@@ -434,19 +457,23 @@ namespace Config
 		}
 		else
 		{
-			if (config.version && !Config::Get(CONFIG_DISCIPLE, "DDraw", TRUE) || !config.version && Config::Get(CONFIG_DISCIPLE, "UseD3D", FALSE))
+			if (config.type.sacred && !Config::Get(CONFIG_DISCIPLE, "DDraw", TRUE) || !config.type.sacred && Config::Get(CONFIG_DISCIPLE, "UseD3D", FALSE))
 				return FALSE;
 
-			config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.version ? "InWindow" : "DisplayMode", TRUE);
+			config.windowedMode = (BOOL)Config::Get(CONFIG_DISCIPLE, config.type.sacred ? "InWindow" : "DisplayMode", TRUE);
+
+			config.scene.all = (BOOL)Config::Get(CONFIG_DISCIPLE, "IncludeCampaign", FALSE);
+			config.editorCamp = (BOOL)Config::Get(CONFIG_DISCIPLE, "ScenEditDatabase", FALSE);
 
 			{
 				config.toogle.banners = (BOOL)Config::Get(CONFIG_WRAPPER, "ShowBanners", FALSE);
 				config.toogle.resources = (BOOL)Config::Get(CONFIG_WRAPPER, "ShowResources", FALSE);
 
 				INT value = Config::Get(CONFIG_WRAPPER, "SceneSort", SceneByTitle);
-				config.sceneSort = *(SceneSort*)&value;
-				if (config.sceneSort < SceneByTitle || config.sceneSort > SceneBySizeDesc)
-					config.sceneSort = SceneByTitle;
+				config.scene.sort.real = *(SceneSort*)&value;
+				if (config.scene.sort.real < SceneByTitle || config.scene.sort.real > SceneBySizeDesc)
+					config.scene.sort.real = SceneByTitle;
+				config.scene.sort.value = config.scene.sort.real;
 
 				value = Config::Get(CONFIG_WRAPPER, "Renderer", RendererAuto);
 				config.renderer = *(RendererType*)&value;
@@ -488,7 +515,7 @@ namespace Config
 				if (config.image.xBRz < 2 || config.image.xBRz > 6)
 					config.image.xBRz = 6;
 
-				if (!config.version)
+				if (!config.type.sacred)
 				{
 					BOOL value = Config::Get(CONFIG_DISCIPLE, "ShowInterfBorder", TRUE);
 					config.borders.type = (BordersType)Config::Get(CONFIG_WRAPPER, "Borders", value ? BordersClassic : BordersNone);
@@ -512,7 +539,7 @@ namespace Config
 				config.alwaysActive = (BOOL)Config::Get(CONFIG_WRAPPER, "AlwaysActive", FALSE);
 				config.coldCPU = (BOOL)Config::Get(CONFIG_WRAPPER, "ColdCPU", FALSE);
 
-				if (!config.version)
+				if (!config.type.sacred)
 				{
 					config.wide.allowed = (BOOL)Config::Get(CONFIG_WRAPPER, "WideBattle", FALSE);
 					config.battle.mirror = (BOOL)Config::Get(CONFIG_WRAPPER, "MirrorBattle", TRUE);
@@ -546,15 +573,17 @@ namespace Config
 				if (config.updateMode < UpdateNone || config.updateMode > UpdateASM)
 					config.updateMode = UpdateSSE;
 
-				if (!config.isEditor)
+				if (!config.type.editor)
 					config.ai.fast = (BOOL)Config::Get(CONFIG_WRAPPER, "FastAI", FALSE);
 
 				value = Config::Get(CONFIG_WRAPPER, "MouseScroll", 3);
 				if (value < 0 || value > 3)
 					value = 3;
 
-				config.mouseScroll.lButton = value & 1;
-				config.mouseScroll.mButton = value & 2;
+				config.scroll.buttons.left = value & 1;
+				config.scroll.buttons.middle = (value & 2) >> 1;
+
+				config.scroll.edge.active = (BOOL)Config::Get(CONFIG_WRAPPER, "EdgeScroll", TRUE);
 
 				value = Config::Get(CONFIG_WRAPPER, "CloudsFactor", 1);
 				if (value < 1)
@@ -597,7 +626,7 @@ namespace Config
 						config.keys.vSync = 0;
 				}
 
-				if (!config.version)
+				if (!config.type.sacred)
 				{
 					if (Config::Get(CONFIG_KEYS, "ZoomImage", "", buffer, sizeof(buffer)))
 					{
@@ -742,12 +771,10 @@ namespace Config
 		config.msgSnapshot = RegisterWindowMessage(WM_SNAPSHOT);
 		config.msgMenu = RegisterWindowMessage(WM_CHECK_MENU);
 
-		if (config.version)
+		if (config.type.sacred)
 			config.mode = modesList;
 		else
 		{
-			Config::Set(CONFIG_DISCIPLE, "ForceD3DPow2", FALSE);
-
 			DWORD modeIdx = Config::Get(CONFIG_DISCIPLE, "DisplaySize", 0);
 			if (modeIdx > 2)
 				modeIdx = 0;
@@ -758,6 +785,7 @@ namespace Config
 		config.resolution.height = LOWORD(config.mode->height);
 
 		Config::CalcZoomed();
+		Config::CalcScroll();
 
 		if (config.renderer != RendererGDI)
 		{
@@ -996,6 +1024,11 @@ namespace Config
 
 		SizeFloat size = { (FLOAT)config.mode->width, (FLOAT)config.mode->height };
 		CalcZoomed(&config.zoom.sizeFloat, &size, config.zoom.value);
+	}
+
+	VOID CalcScroll()
+	{
+		config.scroll.multi = DWORD(MathSqrtFloat(FLOAT(config.mode->width * config.mode->width + config.mode->height * config.mode->height)) / 800 * 10);
 	}
 
 	VOID UpdateLocale()

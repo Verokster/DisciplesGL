@@ -68,7 +68,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 				actCtx.cbSize = sizeof(ACTCTX);
 				actCtx.lpSource = path;
 				actCtx.hModule = hDllModule;
-				actCtx.lpResourceName = MAKEINTRESOURCE(IDM_MANIFEST);
+				actCtx.lpResourceName = MAKEINTRESOURCE(IDR_MANIFEST);
 				actCtx.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
 				hActCtx = CreateActCtxC(&actCtx);
 			}

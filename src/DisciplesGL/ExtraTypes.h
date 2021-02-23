@@ -26,6 +26,15 @@
 #include "windows.h"
 #include "GLib.h"
 
+union VERSION
+{
+	DWORD value;
+	struct {
+		WORD low;
+		WORD high;
+	};
+};
+
 struct Rect {
 	LONG x;
 	LONG y;
@@ -179,9 +188,39 @@ enum SceneSort
 	SceneBySizeDesc = 3
 };
 
+enum ScrollDirection
+{
+	ScrollTop = 0,
+	ScrollTopRight = 1,
+	ScrollRight = 2,
+	ScrollBottomRight = 3,
+	ScrollBottom = 4,
+	ScrollBottomLeft = 5,
+	ScrollLeft = 6,
+	ScrollTopLeft = 7,
+	ScrollCenter = 8
+};
+
+enum ScrollState
+{
+	ScrollNone = 0,
+	ScrollStarting,
+	ScrollStarted,
+	ScrollEnding,
+	ScrollEnded
+};
+
 struct ConfigItems {
-	BOOL version;
-	BOOL isEditor;
+	struct {
+		VERSION major;
+		VERSION minor;
+	} version;
+
+	struct {
+		BOOL sacred;
+		BOOL editor;
+	} type;
+
 	BOOL windowedMode;
 	DisplayMode* mode;
 	Resolution resolution;
@@ -199,16 +238,25 @@ struct ConfigItems {
 	BOOL alwaysActive;
 	BOOL coldCPU;
 	BOOL isSSE2;
+	BOOL isBink;
 	BOOL singleWindow;
 	BOOL singleThread;
+	BOOL editorCamp;
 	DOUBLE syncStep;
 	POINT randPos;
 
 	BOOL drawEnabled;
 	UpdateMode updateMode;
 
-	SceneSort sceneSort;
-	
+	struct {
+		struct {
+			BOOL hooked;
+			SceneSort real;
+			SceneSort value;
+		} sort;
+		BOOL all;
+	} scene;
+
 	FLOAT cloudsFactor;
 
 	struct {
@@ -338,9 +386,27 @@ struct ConfigItems {
 	} toogle;
 
 	struct {
-		BOOL lButton;
-		BOOL mButton;
-	} mouseScroll;
+		DWORD speed;
+		DWORD time;
+		DWORD multi;
+		FLOAT value;
+		ScrollDirection dir;
+		struct {
+			FLOAT in;
+			FLOAT out;
+		} easy;
+		ScrollState state;
+		struct {
+			BOOL left;
+			BOOL middle;
+			BOOL hooked;
+		} buttons;
+		struct {
+			BOOL active;
+			BOOL hooked;
+		} edge;
+		BOOL isWheel;
+	} scroll;
 
 	BOOL isExist;
 	CHAR file[MAX_PATH];
@@ -402,7 +468,14 @@ enum MenuType
 	MenuBattle,
 	MenuSnapshot,
 	MenuMsgTimeScale,
-	MenuRenderer
+	MenuRenderer,
+	MenuSceneSort,
+	MenuSceneAll,
+	MenuEditorMode,
+	MenuScroll,
+	MenuScrollLMB,
+	MenuScrollMMB,
+	MenuScrollEdge
 };
 
 struct SpritePosition {
@@ -473,8 +546,8 @@ struct SceneObject {
 	BYTE isNotCuston; // +32
 	BYTE unknown_0[3]; // +33
 	DWORD unknown_1; // +36
-	StringObject descriptio; // +40
-	StringObject title; // +45
+	StringObject description; // +40
+	StringObject title; // +56
 	DWORD size; // +72
 	DWORD unknown_2[3]; // +76
 	DWORD isSaveGame; // +88
