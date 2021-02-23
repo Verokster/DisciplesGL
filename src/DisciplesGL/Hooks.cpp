@@ -37,7 +37,7 @@
 #include "Hooker.h"
 
 #define PANEL_WIDTH 160
-#define NUM(a, b) (a << 16) | b
+#define NUM(a, b) ((a << 16) | b)
 #define VER(a, b, c, d) NUM(a, b), NUM(c, d)
 
 namespace Hooks
@@ -45,33 +45,59 @@ namespace Hooks
 	const BYTE nop4[] = { 0x83, 0xC4, 0x04, 0x90, 0x90 };
 
 	const AddressSpaceV1 addressArrayV1[] = {
-		// v99.12.15.1
+		// v99.8.17.1
+		VER(99, 8, 17, 1),
+		0x004C25E4, 0x004D2D75, 0x00000000, 0x004D34C1, 0x004D33A7, 0x005829B5,
+		0x005CB220, 0x005D61A8, 0x004D4FA0, 0x0052B2B9, 0x00461263, 0x004E3621, 0x004E3E06, 0x004E40AA,
+		0x004D9FE3, 0x004DA04E, 0x004BF1F1, 0x004BF8EC, 0x004D49DD, 0x00000000,
+
+		// v99.8.20.2
+		VER(99, 8, 20, 2),
+		0x004C3BD5, 0x004D439E, 0x00000000, 0x004D4AEA, 0x004D49D0, 0x00583F85,
+		0x005CD348, 0x005CDA58, 0x004D6597, 0x00545A91, 0x004623A7, 0x004E4E36, 0x004E55B6, 0x004E585A,
+		0x004DB63A, 0x004DB6A5, 0x004C063C, 0x004C0D37, 0x004D5FD4, 0x004012DA,
+
+		// v99.12.15.1a
 		VER(99, 12, 15, 1),
 		0x004CD137, 0x004DFFA4, 0x00000000, 0x004E06D3, 0x004E05B9, 0x0058F7E3,
 		0x005E6320, 0x005DB2A0, 0x004E21B5, 0x00550B69, 0x00465296, 0x004F07F5, 0x004F1006, 0x004F12AA,
-		0x004E7094, 0x004E70FF, 0x004C9AFD,
-		0x004CA224, 0x004E1BF7,
+		0x004E7094, 0x004E70FF, 0x004C9AFD, 0x004CA224, 0x004E1BF7, 0x0040120E,
 
-		// v2000.6.22.1 - Eng
+		// v99.12.15.1b
+		VER(99, 12, 15, 1),
+		0x004CD1B2, 0x004E002A, 0x00000000, 0x004E0759, 0x004E063F, 0x0058F053,
+		0x005DB2B0, 0x005E6330, 0x004E21D6, 0x005507D6, 0x004652BF, 0x004F0A1C, 0x004F11B6, 0x004F145A,
+		0x004E7316, 0x004E7381, 0x004C9AAE, 0x004CA1D5, 0x004E1C13, 0x0040120E,
+
+		// v2000.6.22.1 - Eng Steam
 		VER(2000, 6, 22, 1),
 		0x004CD13E, 0x004DFF9C, 0x00000000, 0x004E0759, 0x004E063F, 0x0058F0D3,
 		0x005E6358, 0x005DB2D8, 0x004E225C, 0x0055037A, 0x0046523E, 0x004F07B0, 0x004F0FB6, 0x004F125A,
-		0x004E712F, 0x004E719A, 0x004C9B9A,
-		0x004CA2B4, 0x004E1C9E,
+		0x004E712F, 0x004E719A, 0x004C9B9A, 0x004CA2B4, 0x004E1C9E, 0x00000000,
 
 		// v2000.6.22.1 - Rus
 		VER(2000, 6, 22, 1),
 		0x004CD408, 0x004E0323, 0x00000000, 0x004E0AA8, 0x004E098E, 0x00590E03,
 		0x005E8430, 0x005DD278, 0x004E2565, 0x0055106A, 0x0046541D, 0x004F0B39, 0x004F12D6, 0x004F157A,
-		0x004E746D, 0x004E74D8, 0x004C9D9F,
-		0x004CA4C6, 0x004E1FA7,
+		0x004E746D, 0x004E74D8, 0x004C9D9F, 0x004CA4C6, 0x004E1FA7, 0x0040120E,
+
+		// v99.8.17.2 Editor
+		VER(99, 8, 17, 2),
+		0x004444C2, 0x0044F4FD, 0x00426AE5, 0x0044FC2C, 0x0044FB12, 0x00000000,
+		0x0050C170, 0x00000000, 0x004517FC, 0x0049E957, 0x00000000, 0x004601D3, 0x00460966, 0x00460C0A,
+		0x00456896, 0x00456901, 0x004411CB, 0x004418D2, 0x0045123E, 0x00000000,
+
+		// v99.12.15.1 Editor
+		VER(99, 12, 15, 1),
+		0x00443D2A, 0x004511FC, 0x00426437, 0x004519CE, 0x004518B4, 0x00000000,
+		0x00518530, 0x00000000, 0x0045358A, 0x0049FA73, 0x00000000, 0x0046204D, 0x00462796, 0x00462A3A,
+		0x0045871D, 0x00458788, 0x00440AC2, 0x004411C9, 0x00452FC7, 0x00000000,
 
 		// v2000.6.22.1 Editor
 		VER(2000, 6, 22, 1),
 		0x00443EDE, 0x0045147D, 0x004265E3, 0x00451BE8, 0x00451ACE, 0x00000000,
 		0x00519568, 0x00000000, 0x004537B8, 0x004A041A, 0x00000000, 0x0046229D, 0x00462AF6, 0x00462D9A,
-		0x00458961, 0x004589CC, 0x00440BC6,
-		0x004412CD, 0x004531FA
+		0x00458961, 0x004589CC, 0x00440BC6, 0x004412CD, 0x004531FA, 0x00000000
 	};
 
 	const AddressSpaceV2 addressArrayV2[] = {
@@ -1243,11 +1269,9 @@ namespace Hooks
 	}
 
 	const CLSID CLSID_DirectDraw = { 0xD7B70EE0, 0x4340, 0x11CF, 0xB0, 0x63, 0x00, 0x20, 0xAF, 0xC2, 0xCD, 0x35 };
-	const IID IID_IDirectDraw4 = { 0x9C59509A, 0x39BD, 0x11D1, 0x8C, 0x4A, 0x00, 0xC0, 0x4F, 0xD9, 0x30, 0xC5 };
-
 	HRESULT __stdcall CoCreateInstanceHook(REFCLSID rclsid, LPUNKNOWN pUnkOuter, DWORD dwClsContext, REFIID riid, LPVOID* ppv)
 	{
-		if (!MemoryCompare(&rclsid, &CLSID_DirectDraw, sizeof(CLSID)) && !MemoryCompare(&riid, &IID_IDirectDraw4, sizeof(IID)))
+		if (!MemoryCompare(&rclsid, &CLSID_DirectDraw, sizeof(CLSID)))
 			return Main::DrawCreateEx(NULL, ppv, riid, NULL);
 
 		return CoCreateInstance(rclsid, pUnkOuter, dwClsContext, riid, ppv);
@@ -2905,7 +2929,6 @@ namespace Hooks
 		}
 	}
 
-	
 	DWORD __fastcall GetTimeHook(DWORD** _this)
 	{
 		_this = (DWORD**)_this[1][1];
@@ -2917,7 +2940,6 @@ namespace Hooks
 
 		return 0;
 	}
-	
 
 #pragma endregion
 
@@ -4458,39 +4480,42 @@ namespace Hooks
 			config.borders.active = !dlgStrategic || dlgObject;
 	}
 
-	DWORD** __stdcall LoadImageV1(DWORD** object, CHAR* name)
+	DWORD** __fastcall LoadImageV1(DWORD** object, CHAR* name)
 	{
-		if (!config.type.editor)
+		if (object[0] && object[1])
 		{
-			if (!StrCompare(name, "ISOX01IX"))
-				dlgAddress.game.iso01 = object[1][1];
-			else if (!StrCompare(name, "ISOX02IX"))
-				dlgAddress.game.iso02 = object[1][1];
-			else if (!StrCompare(name, "ISOWAIT"))
-				dlgAddress.game.isoWait = object[1][1];
-			else if (!StrCompare(name, "STRA00IX"))
-				dlgAddress.game.stra00 = object[1][1];
-			else if (!StrCompare(name, "STRA01IX"))
-				dlgAddress.game.stra01 = object[1][1];
-			else if (!StrCompare(name, "STRA02IX"))
-				dlgAddress.game.stra02 = object[1][1];
-		}
-		else
-		{
-			if (!StrCompare(name, "DLG_ISO"))
-				dlgAddress.editor.iso = object[1][1];
-			else if (!StrCompare(name, "DL_IPAL"))
-				dlgAddress.editor.pal = object[1][1];
-			else if (!StrCompare(name, "DLG_INFO"))
-				dlgAddress.editor.info = object[1][1];
-			else if (!StrCompare(name, "DLG_OBJ"))
-				dlgAddress.editor.object = object[1][1];
-			else if (!StrCompare(name, "DLG_MAP"))
-				dlgAddress.editor.map = object[1][1];
-			else if (!StrCompare(name, "DLG_LAND"))
-				dlgAddress.editor.land = object[1][1];
-			else if (!StrCompare(name, "DL_EXCE"))
-				dlgAddress.editor.except = object[1][1];
+			if (!config.type.editor)
+			{
+				if (!StrCompare(name, "ISOX01IX"))
+					dlgAddress.game.iso01 = object[1][1];
+				else if (!StrCompare(name, "ISOX02IX"))
+					dlgAddress.game.iso02 = object[1][1];
+				else if (!StrCompare(name, "ISOWAIT"))
+					dlgAddress.game.isoWait = object[1][1];
+				else if (!StrCompare(name, "STRA00IX"))
+					dlgAddress.game.stra00 = object[1][1];
+				else if (!StrCompare(name, "STRA01IX"))
+					dlgAddress.game.stra01 = object[1][1];
+				else if (!StrCompare(name, "STRA02IX"))
+					dlgAddress.game.stra02 = object[1][1];
+			}
+			else
+			{
+				if (!StrCompare(name, "DLG_ISO"))
+					dlgAddress.editor.iso = object[1][1];
+				else if (!StrCompare(name, "DL_IPAL"))
+					dlgAddress.editor.pal = object[1][1];
+				else if (!StrCompare(name, "DLG_INFO"))
+					dlgAddress.editor.info = object[1][1];
+				else if (!StrCompare(name, "DLG_OBJ"))
+					dlgAddress.editor.object = object[1][1];
+				else if (!StrCompare(name, "DLG_MAP"))
+					dlgAddress.editor.map = object[1][1];
+				else if (!StrCompare(name, "DLG_LAND"))
+					dlgAddress.editor.land = object[1][1];
+				else if (!StrCompare(name, "DL_EXCE"))
+					dlgAddress.editor.except = object[1][1];
+			}
 		}
 
 		return object;
@@ -4503,11 +4528,9 @@ namespace Hooks
 			pop ebx
 			leave
 
-			mov ecx, [esp+0x8]
-			push ecx
-			push eax
+			mov ecx, eax
+			mov edx, [esp+0x8]
 			call LoadImageV1
-
 			retn 0x8
 		}
 	}
@@ -5014,17 +5037,7 @@ namespace Hooks
 
 	VOID __stdcall CreateViewDialog(CHAR** name, POINT* p1, POINT* p2)
 	{
-		if (!config.type.editor)
-		{
-			if (isStrategic)
-			{
-				if (!StrCompare(*name, "DLG_ISO_VIEW"))
-					*name = "DLG_ISO_VIEW_NEW";
-				else if (!StrCompare(*name, "DLG_ISO"))
-					*name = "DLG_ISO_NEW";
-			}
-		}
-		else
+		if (config.type.editor)
 		{
 			if (!StrCompare(*name, "DLG_ISO"))
 			{
@@ -5061,6 +5074,13 @@ namespace Hooks
 				p2->x = config.mode->width;
 				p2->y = config.mode->height;
 			}
+		}
+		else if (isStrategic)
+		{
+			if (!StrCompare(*name, "DLG_ISO_VIEW"))
+				*name = "DLG_ISO_VIEW_NEW";
+			else if (!StrCompare(*name, "DLG_ISO"))
+				*name = "DLG_ISO_NEW";
 		}
 	}
 
@@ -5135,7 +5155,7 @@ namespace Hooks
 				if (Main::LoadResource(MAKEINTRESOURCE(IDR_DLG_ISO_VIEW_NEW), &dlgResources.game.isoView))
 					size += dlgResources.game.isoView.size + CalcStrNumbers(&dlgResources.game.isoView) * 9 + 4;
 
-				if (Main::LoadResource(MAKEINTRESOURCE(IDR_DLG_STRATEGIC_NEW), &dlgResources.game.stra))
+				if (Main::LoadResource(MAKEINTRESOURCE(config.version.major.value >= (NUM(99, 12)) ? IDR_DLG_STRATEGIC_NEW : IDR_DLG_STRATEGIC_OLD), &dlgResources.game.stra))
 					size += dlgResources.game.stra.size + CalcStrNumbers(&dlgResources.game.stra) * 9 + 4;
 
 				if (Main::LoadResource(MAKEINTRESOURCE(IDR_DLG_STRAT_SPELL_NEW), &dlgResources.game.straSpell))
@@ -5163,7 +5183,7 @@ namespace Hooks
 		return size;
 	}
 
-	VOID __cdecl FormatDialog(Stream* stream, CHAR** buffer, ...)
+	VOID FormatDialog(Stream* stream, CHAR** buffer, ...)
 	{
 		CHAR* format = (CHAR*)MemoryAlloc(stream->size + 1);
 		if (format)
@@ -5210,7 +5230,6 @@ namespace Hooks
 					mode->height - 480 + 254, mode->height - 480 + 274);
 
 				FormatDialog(&dlgResources.game.straSpell, &dst, mode->height - 480 + 279);
-
 				FormatDialog(&dlgResources.game.straWait, &dst, mode->height - 480 + 279);
 			}
 			else
@@ -5219,9 +5238,7 @@ namespace Hooks
 					mode->width - 640 + 461, mode->height - 480 + 451);
 
 				FormatDialog(&dlgResources.editor.map, &dst);
-
 				FormatDialog(&dlgResources.editor.land, &dst);
-
 				FormatDialog(&dlgResources.editor.except, &dst);
 			}
 
@@ -5380,18 +5397,19 @@ namespace Hooks
 		}
 	}
 
-	VOID __stdcall DialogDeleteHook(DWORD* object)
+	DWORD __fastcall DialogDeleteHook(DWORD object)
 	{
-		if (dlgStrategic == (DWORD)object)
+		if (dlgStrategic == object)
 		{
 			dlgStrategic = NULL;
 			CheckBordersV1();
 		}
-		else if (dlgObject == (DWORD)object)
+		else if (dlgObject == object)
 		{
 			dlgObject = NULL;
 			CheckBordersV1();
 		}
+		return object;
 	}
 
 	DWORD sub_004E74F1;
@@ -5399,12 +5417,8 @@ namespace Hooks
 	{
 		__asm
 		{
-			push ecx
-
-			push ecx
 			call DialogDeleteHook
-
-			pop ecx
+			mov ecx, eax
 			jmp sub_004E74F1
 		}
 	}
@@ -6031,6 +6045,14 @@ namespace Hooks
 	}
 #pragma endregion
 
+#pragma region Beat check
+	VOID __stdcall GetSystemTimeHook(LPSYSTEMTIME lpSystemTime)
+	{
+		lpSystemTime->wYear = 1999;
+		lpSystemTime->wMonth = 8;
+	}
+#pragma endregion
+
 	BOOL __stdcall FakeEntryPoint(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	{
 		return TRUE;
@@ -6099,6 +6121,13 @@ namespace Hooks
 			// Mouse move
 			PatchByte(hooker, hookSpace->mouse_pos_fix + 77 + 1, 0xBF);
 			PatchByte(hooker, hookSpace->mouse_pos_fix + 77 + 10 + 1, 0xBF);
+		}
+
+		// No CD
+		if (hookSpace->no_cd)
+		{
+			PatchDWord(hooker, hookSpace->no_cd, 0x9040C031);
+			PatchNop(hooker, hookSpace->no_cd + 4, 9);
 		}
 
 		// HD
@@ -6816,8 +6845,6 @@ namespace Hooks
 					PatchImportByName(hooker, "OemToCharA", OemToCharHook);
 					PatchImportByName(hooker, "CharToOemA", CharToOemHook);
 				}
-
-				PatchImportByName(hooker, "CoCreateInstance", CoCreateInstanceHook);
 			}
 
 			if (config.type.sacred)
@@ -6826,6 +6853,8 @@ namespace Hooks
 				PatchImportByName(hooker, "GetCursorPos", GetCursorPosHookV1);
 				PatchImportByName(hooker, "ClientToScreen", ClientToScreenHook);
 				PatchImportByName(hooker, "GetDoubleClickTime", GetDoubleClickTimeHook);
+				PatchImportByName(hooker, "CoCreateInstance", CoCreateInstanceHook);
+				PatchImportByName(hooker, "GetSystemTime", GetSystemTimeHook);
 
 				const AddressSpaceV1* hookSpace = addressArrayV1;
 				DWORD hookCount = sizeof(addressArrayV1) / sizeof(AddressSpaceV1);

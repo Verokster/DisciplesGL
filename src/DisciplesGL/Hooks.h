@@ -88,10 +88,9 @@ namespace Hooks
 		DWORD dlg_Delete;
 
 		DWORD interlockFix;
-
 		DWORD mouse_pos_fix;
-
 		DWORD speed_anim;
+		DWORD no_cd;
 	};
 
 	struct AddressSpaceV2 {
