@@ -778,67 +778,12 @@ HRESULT __stdcall OpenDrawSurface::Blt(LPRECT lpDestRect, IDrawSurface7* lpDDSrc
 			DWORD* src = (DWORD*)surface->indexBuffer->data + lpSrcRect->top * sWidth + lpSrcRect->left;
 			DWORD* dst = (DWORD*)this->indexBuffer->data + lpDestRect->top * dWidth + lpDestRect->left;
 
-			if (config.isBink)
+			do
 			{
-				config.isBink = FALSE;
-
-				if (config.isSSE2)
-				{
-					DWORD count = width >> 2;
-					if (count)
-					{
-						DWORD sStep = sWidth - (count << 2);
-						DWORD dStep = dWidth - (count << 2);
-
-						__m128i* s = (__m128i*)src;
-						__m128i* d = (__m128i*)dst;
-						__m128i k = _mm_set1_epi32(ALPHA_COMPONENT);
-
-						DWORD h = height;
-						do
-						{
-							DWORD w = count;
-							do
-								_mm_storeu_si128(d++, _mm_or_si128(_mm_loadu_si128(s++), k));
-							while (--w);
-
-							s = (__m128i*)((DWORD*)s + sStep);
-							d = (__m128i*)((DWORD*)d + dStep);
-						} while (--h);
-
-						count <<= 2;
-						width -= count;
-						if (!width)
-							return DD_OK;
-
-						src += count;
-						dst += count;
-					}
-				}
-
-				sWidth -= width;
-				dWidth -= width;
-
-				do
-				{
-					DWORD cWidth = width;
-					do
-						*dst++ = *src++ | ALPHA_COMPONENT;
-					while (--cWidth);
-
-					src += sWidth;
-					dst += dWidth;
-				} while (--height);
-			}
-			else
-			{
-				do
-				{
-					MemoryCopy(dst, src, width * sizeof(DWORD));
-					src += sWidth;
-					dst += dWidth;
-				} while (--height);
-			}
+				MemoryCopy(dst, src, width * sizeof(DWORD));
+				src += sWidth;
+				dst += dWidth;
+			} while (--height);
 		}
 		else
 		{

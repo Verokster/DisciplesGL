@@ -238,7 +238,6 @@ struct ConfigItems {
 	BOOL alwaysActive;
 	BOOL coldCPU;
 	BOOL isSSE2;
-	BOOL isBink;
 	BOOL singleWindow;
 	BOOL singleThread;
 	BOOL editorCamp;

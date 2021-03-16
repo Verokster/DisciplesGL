@@ -1277,10 +1277,27 @@ namespace Hooks
 
 #pragma region 32 BPP
 	DWORD pBinkCopyToBuffer;
-	INT __stdcall BinkCopyToBufferHook(VOID* hBnk, VOID* dest, INT pitch, DWORD height, DWORD x, DWORD y, DWORD flags)
+	LONG __stdcall BinkCopyToBufferHook(VOID* hBnk, DWORD* dest, LONG pitch, DWORD height, DWORD x, DWORD y, DWORD flags)
 	{
-		config.isBink = TRUE;
-		return ((INT(__stdcall*)(VOID*, VOID*, INT, DWORD, DWORD, DWORD, DWORD))pBinkCopyToBuffer)(hBnk, dest, pitch << 1, height, x, y, BINKCOPYALL | (config.renderer == RendererGDI ? BINKSURFACE32 : BINKSURFACE32R));
+		LONG res = ((LONG(__stdcall*)(VOID*, DWORD*, LONG, DWORD, DWORD, DWORD, DWORD))pBinkCopyToBuffer)(hBnk, dest, pitch * 2, height, x, y, BINKCOPYALL | (config.renderer == RendererGDI ? BINKSURFACE32 : BINKSURFACE32R));
+		if (!res)
+		{
+			pitch /= 2;
+			LONG width = pitch >= 0 ? pitch : -pitch;
+
+			do
+			{
+				DWORD* dst = dest;
+				dest += pitch;
+
+				LONG count = width;
+				do
+					*dst++ |= ALPHA_COMPONENT;
+				while (--count);
+			} while (--height);
+		}
+
+		return res;
 	}
 
 #pragma region Memory
@@ -2841,11 +2858,14 @@ namespace Hooks
 
 	DWORD __fastcall GetTimeHook(DWORD** _this)
 	{
-		_this = (DWORD**)_this[1][1];
-		if (_this)
+		if (_this[1])
 		{
-			DWORD func = _this[0][14];
-			return ((DWORD(__thiscall*)(DWORD**))func)(_this);
+			_this = (DWORD**)_this[1][1];
+			if (_this)
+			{
+				DWORD func = _this[0][14];
+				return ((DWORD(__thiscall*)(DWORD**))func)(_this);
+			}
 		}
 
 		return 0;
