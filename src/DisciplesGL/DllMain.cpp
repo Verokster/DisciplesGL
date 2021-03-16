@@ -23,7 +23,7 @@
 */
 
 #include "stdafx.h"
-#include "timeapi.h"
+#include "mmsystem.h"
 #include "Hooks.h"
 #include "GLib.h"
 #include "Main.h"

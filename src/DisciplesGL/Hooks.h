@@ -193,7 +193,6 @@ namespace Hooks
 		DWORD btlLoadBack_1;
 		DWORD btlLoadBack_2;
 		DWORD btlLoadBack_3;
-		DWORD btlBackHeight;
 
 		DWORD pkg_size;
 		DWORD pkg_load;
@@ -274,6 +273,7 @@ namespace Hooks
 		DWORD str_copy;
 		DWORD str_print;
 
+		DWORD no_cd;
 		DWORD clouds_hook;
 		DWORD clouds_init;
 		DWORD clouds_check;
@@ -283,7 +283,7 @@ namespace Hooks
 		DWORD* srcData;
 		DWORD* dstData;
 		DWORD length;
-		VOID* mskData;
+		BYTE* mskData;
 	};
 
 	struct BlitObject {

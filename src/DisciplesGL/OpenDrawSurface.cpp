@@ -103,10 +103,8 @@ StateBufferBorder* LoadBufferImage(LPSTR resourceId)
 						{
 							BYTE** item = list;
 							BYTE* row = data;
-							DWORD count = info_ptr->height;
-							while (count)
+							for (DWORD i = info_ptr->height; i; --i)
 							{
-								--count;
 								*item++ = (BYTE*)row;
 								row += info_ptr->rowbytes;
 							}
@@ -121,11 +119,9 @@ StateBufferBorder* LoadBufferImage(LPSTR resourceId)
 							BYTE* trs = (BYTE*)info_ptr->trans;
 							BYTE* dst = (BYTE*)palette;
 
-							DWORD colors = (DWORD)info_ptr->num_palette;
 							DWORD trans = (DWORD)info_ptr->num_trans;
-							while (colors)
+							for (DWORD i = info_ptr->num_palette; i; --i)
 							{
-								--colors;
 								*dst++ = *src++;
 								*dst++ = *src++;
 								*dst++ = *src++;
@@ -142,12 +138,8 @@ StateBufferBorder* LoadBufferImage(LPSTR resourceId)
 							if (config.renderer == RendererGDI)
 							{
 								DWORD* pal = palette;
-								colors = (DWORD)info_ptr->num_palette;
-								while (colors)
-								{
-									--colors;
+								for (DWORD i = info_ptr->num_palette; i; --i)
 									*pal++ = _byteswap_ulong(_rotl(*pal, 8));
-								}
 							}
 						}
 
@@ -272,35 +264,34 @@ VOID OpenDrawSurface::DrawBorders(VOID* data, DWORD width, DWORD height)
 		cHeight = srcBuffer->height;
 	}
 
-	DWORD* dstData = (DWORD*)data + dstY * width + dstX;
-	if (srcBuffer->isAllocated)
+	if (cWidth && cHeight)
 	{
-		DWORD* srcData = (DWORD*)srcBuffer->data + srcY * srcBuffer->width + srcX;
-
-		while (cHeight)
+		DWORD* dstData = (DWORD*)data + dstY * width + dstX;
+		if (srcBuffer->isAllocated)
 		{
-			--cHeight;
-			MemoryCopy(dstData, srcData, cWidth * sizeof(DWORD));
+			DWORD* srcData = (DWORD*)srcBuffer->data + srcY * srcBuffer->width + srcX;
 
-			srcData += srcBuffer->width;
-			dstData += width;
-		}
-	}
-	else
-	{
-		while (cHeight)
-		{
-			--cHeight;
-			DWORD* dst = dstData;
-
-			DWORD count = cWidth;
-			while (count)
+			do
 			{
-				--count;
-				*dst++ = ALPHA_COMPONENT;
-			}
+				MemoryCopy(dstData, srcData, cWidth * sizeof(DWORD));
 
-			dstData += width;
+				srcData += srcBuffer->width;
+				dstData += width;
+			} while (--cHeight);
+		}
+		else
+		{
+			do
+			{
+				DWORD* dst = dstData;
+
+				DWORD count = cWidth;
+				do
+					*dst++ = ALPHA_COMPONENT;
+				while (--count);
+
+				dstData += width;
+			} while (--cHeight);
 		}
 	}
 }
@@ -917,7 +908,7 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 
 						__m128i* s = (__m128i*)src;
 						__m128i* d = (__m128i*)dst;
-						__m128i k = _mm_set1_epi32(COLORKEY_CHECK);
+						__m128i k = _mm_set1_epi32(colorKey);
 						__m128i n = _mm_set1_epi32(COLORKEY_AND);
 
 						DWORD h = height;
@@ -957,7 +948,7 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 					DWORD count = width;
 					do
 					{
-						if ((*src & COLORKEY_AND) != COLORKEY_CHECK)
+						if ((*src & COLORKEY_AND) != colorKey)
 							*dst = *src;
 
 						++src;
@@ -987,7 +978,6 @@ HRESULT __stdcall OpenDrawSurface::BltFast(DWORD dwX, DWORD dwY, IDrawSurface7* 
 			if (surface->colorKey.enabled)
 			{
 				WORD colorKey = LOWORD(surface->colorKey.low);
-
 				if (config.isSSE2)
 				{
 					DWORD count = width >> 3;

@@ -123,7 +123,7 @@ namespace Hooks
 		0x00625CE5, 0x0063FD28, 0x00626DD3, 0x0062667F, 0x0062A06A, 0x00630C74, 0x0062696D, 0x00630D08, // btlGroupsInactive
 		0x006275FE, 0x0062764D, 0x0062767B, 0x00627AAD, 0x00627AFC, 0x00627B2A, // btlInitGroups2_3
 		0x00626AD7, 0x00631F38, 0x00625C1A, 0x00625EBC, 0x00000000, // btlFileGetStr
-		0x005B041A, 0x005B0463, 0x005B04AC, 0x0052AF8D, // btlBackHeight
+		0x005B041A, 0x005B0463, 0x005B04AC, // btlLoadBack_3
 		0x005AAE5A, 0x005AA96F, 0x005AAF1B, 0x00520A55, 0x0052B5F6, // pkg_entry_sub
 
 		0x0049031C, 0x0056D42B, 0x005AF632, 0x0053D46B, // waitShowCursor
@@ -144,7 +144,7 @@ namespace Hooks
 		0x0082B47C, 0x00486C22, 0x00486D3F, 0x00832000, 0x005B0136, 0x005B01FB, 0x00000000, // banners_owner_trigger
 		0x00534E63, 0x0052F05C, 0x004E6F0F, 0x004E60C2, 0x00000000, 0x0040406E, 0x0051C4D8, // str_print
 
-		0x005C3E70, 0x005BA60E, 0x005BA8C9, // clouds_check
+		0x004012C1, 0x005C3E70, 0x005BA60E, 0x005BA8C9, // clouds_check
 #pragma endregion
 
 #pragma region v2_01
@@ -169,7 +169,7 @@ namespace Hooks
 		0x00625C15, 0x0063FB98, 0x00626D03, 0x006265AF, 0x00629F9A, 0x00630BA4, 0x0062689D, 0x00630C38,
 		0x0062752E, 0x0062757D, 0x006275AB, 0x006279DD, 0x00627A2C, 0x00627A5A,
 		0x00626A07, 0x00631E68, 0x00625B4A, 0x00625DEC, 0x00000000,
-		0x005B008C, 0x005B00D5, 0x005B011E, 0x0052AB8A,
+		0x005B008C, 0x005B00D5, 0x005B011E,
 		0x005AAACC, 0x005AA5E1, 0x005AAB8D, 0x00520625, 0x0052B1F3,
 
 		0x0048FAB4, 0x0056CEEE, 0x005AF2A4, 0x0053D265,
@@ -190,7 +190,7 @@ namespace Hooks
 		0x0082B42C, 0x004863BA, 0x004864D7, 0x00831FB0, 0x005AFDA8, 0x005AFE6D, 0x00000000,
 		0x00534C77, 0x0052EC27, 0x004E69E7, 0x004E5B9A, 0x00000000, 0x004041B0, 0x0051C0A8,
 
-		0x005C3B26, 0x005BA204, 0x005BA4BF,
+		0x004012C1, 0x005C3B26, 0x005BA204, 0x005BA4BF,
 #pragma endregion
 
 #pragma region v2_01 - Steam
@@ -215,7 +215,7 @@ namespace Hooks
 		0x00625FB5, 0x0063FE68, 0x006270A3, 0x0062694F, 0x0062A33A, 0x00630F44, 0x00626C3D, 0x00630FD8,
 		0x006278CE, 0x0062791D, 0x0062794B, 0x00627D7D, 0x00627DCC, 0x00627DFA,
 		0x00626DA7, 0x00632208, 0x00625EEA, 0x0062618C, 0x0050B3AF,
-		0x005B065B, 0x005B06A4, 0x005B06ED, 0x0052B25E,
+		0x005B065B, 0x005B06A4, 0x005B06ED,
 		0x005AB022, 0x005AAB37, 0x005AB149, 0x00520D1B, 0x0052B8F8,
 
 		0x0048FB37, 0x005AA77E, 0x005AF894, 0x0053D936,
@@ -236,57 +236,11 @@ namespace Hooks
 		0x0082C40C, 0x00486441, 0x0048656A, 0x00832F98, 0x005B0398, 0x005B043C, 0x00000000,
 		0x0053533C, 0x0052F3E8, 0x004E69DE, 0x004E5BA0, 0x00000000, 0x00403DFF, 0x0051C6FA,
 
-		0x005C3ECC, 0x005BA707, 0x005BA9C2,
+		0x00000000, 0x005C3ECC, 0x005BA707, 0x005BA9C2,
 #pragma endregion
 
-#pragma region v2_02
-		// v2.02
-		NUM(2, 02), VER(2003, 10, 23, 1),
-		0x0056339D, 0x005C848D, 0x0066E831,
-
-		0x005B9F86, 0x005A6311, 0x005BACE1, 0x0067427E, 0x00674400, 0x005A6209,
-		0x006E9408, 0x0055D283, 0x00675771, 0x0055D419, 0x006E2894, 0x005B5660,
-		0x005B5560, 0x005280D9, 0x005ACF11, 0x006E23D0, 0x0053056A, 0x00530603,
-		0x0053835D, 0x0053839C, 0x005383A5, 0x005383F7,
-
-		0x00611C8B, 0x00611CEF, 0x00402129, 0x00538FEB,
-		0x00514DD2, 0x005193F0, 0x005144C2, 0x005C6F52, 0x005C6F13, 0x00489124, 0x00485ED6,
-		0x005151DF, 0x005152EE, 0x00667DC4,
-
-		0x00545670, 0x0054669E, 0x005464F9, 0x00546144, 0x0054585B, 0x005460F7,
-		0x005470B9, 0x0054881C, 0x00547521, 0x00546CF5, 0x00547243, 0x00546F81, 0x005476F2, 0x00547DFC,
-
-		0x0053D185, 0x0053D8A9, 0x00000000, 0x00000000, 0x0053D94B, 0x0053D7EE, 0x0053A73D,
-
-		0x00624595, 0x0063E6B8, 0x00625683, 0x00624F2F, 0x0062891A, 0x0062F524, 0x0062521D, 0x0062F5B8,
-		0x00625EAE, 0x00625EFD, 0x00625F2B, 0x0062635D, 0x006263AC, 0x006263DA,
-		0x00625387, 0x006307E8, 0x006244CA, 0x0062476C, 0x00000000,
-		0x005AEF44, 0x005AEF8D, 0x005AEFD6, 0x00529AEB,
-		0x005A9957, 0x005A946C, 0x005A9A1E, 0x0051F886, 0x0052A14E,
-
-		0x0048FF90, 0x004F146A, 0x005AE161, 0x0053C095,
-		0x0052EAAE, 0x00484DD1, 0x00484DF3, 0x00484CD0,
-		0x0048D25C, 0x00405A1A, 0x0048A93C,
-
-		0x00450417, 0x004504A4, 0x0040A438, 0x00000000,
-		0x0055D6C1, 0x004018E2, 0x0052C062, 0x0046F4D9, 0x0055D726,
-		0x006CA61C, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x0055ECCC, 0x005C7089, 0x0053CA0E, 0x0053CADA,
-
-		0x0055EE08, 0x00538D86, 0x00538EDD,
-		0x0042AC64, 0x0042ACEC,
-		0x00519FF1, 0x0051A0A9, // TODO time fix
-		0x004F21C0, 0x004EF722, 0x004F1D80,
-		0x00650628, 0x00650674,
-
-		0x008293AC, 0x004868AE, 0x004869CB, 0x0082FF38, 0x005AEC65, 0x005AED25, 0x00000000,
-		0x005339EE, 0x0052DB6A, 0x004E66AF, 0x004E584B, 0x00000000, 0x00403C7D, 0x0051B292,
-
-		0x005C277F, 0x005B8F00, 0x005B91BB,
-#pragma endregion
-
-#pragma region v2_02 - Crack
-		// v2.02 - Crack
+#pragma region v2_02a
+		// v2.02a
 		NUM(2, 02), VER(2003, 10, 23, 1),
 		0x00564C4C, 0x005C9B4B, 0x0066FFE1,
 
@@ -307,7 +261,7 @@ namespace Hooks
 		0x00625D25, 0x0063FCA8, 0x00626E13, 0x006266BF, 0x0062A0AA, 0x00630CB4, 0x006269AD, 0x00630D48,
 		0x0062763E, 0x0062768D, 0x006276BB, 0x00627AED, 0x00627B3C, 0x00627B6A,
 		0x00626B17, 0x00631F78, 0x00625C5A, 0x00625EFC, 0x00000000,
-		0x005B0852, 0x005B089B, 0x005B08E4, 0x0052B0AA,
+		0x005B0852, 0x005B089B, 0x005B08E4,
 		0x005AB292, 0x005AADA7, 0x005AB353, 0x00520B45, 0x0052B713,
 
 		0x00490169, 0x0056D6B4, 0x005AFA6A, 0x0053D735,
@@ -328,7 +282,53 @@ namespace Hooks
 		0x0082B49C, 0x00486A6F, 0x00486B8C, 0x00832028, 0x005B056E, 0x005B0633, 0x00000000,
 		0x00535147, 0x0052F1E1, 0x004E6F78, 0x004E612B, 0x00000000, 0x004041C6, 0x0051C5C1,
 
-		0x005C3E98, 0x005BA6AA, 0x005BA965,
+		0x004012D7, 0x005C3E98, 0x005BA6AA, 0x005BA965,
+#pragma endregion
+
+#pragma region v2_02b
+		// v2.02b
+		NUM(2, 02), VER(2003, 10, 23, 1),
+		0x0056339D, 0x005C848D, 0x0066E831,
+
+		0x005B9F86, 0x005A6311, 0x005BACE1, 0x0067427E, 0x00674400, 0x005A6209,
+		0x006E9408, 0x0055D283, 0x00675771, 0x0055D419, 0x006E2894, 0x005B5660,
+		0x005B5560, 0x005280D9, 0x005ACF11, 0x006E23D0, 0x0053056A, 0x00530603,
+		0x0053835D, 0x0053839C, 0x005383A5, 0x005383F7,
+
+		0x00611C8B, 0x00611CEF, 0x00402129, 0x00538FEB,
+		0x00514DD2, 0x005193F0, 0x005144C2, 0x005C6F52, 0x005C6F13, 0x00489124, 0x00485ED6,
+		0x005151DF, 0x005152EE, 0x00667DC4,
+
+		0x00545670, 0x0054669E, 0x005464F9, 0x00546144, 0x0054585B, 0x005460F7,
+		0x005470B9, 0x0054881C, 0x00547521, 0x00546CF5, 0x00547243, 0x00546F81, 0x005476F2, 0x00547DFC,
+
+		0x0053D185, 0x0053D8A9, 0x00000000, 0x00000000, 0x0053D94B, 0x0053D7EE, 0x0053A73D,
+
+		0x00624595, 0x0063E6B8, 0x00625683, 0x00624F2F, 0x0062891A, 0x0062F524, 0x0062521D, 0x0062F5B8,
+		0x00625EAE, 0x00625EFD, 0x00625F2B, 0x0062635D, 0x006263AC, 0x006263DA,
+		0x00625387, 0x006307E8, 0x006244CA, 0x0062476C, 0x00000000,
+		0x005AEF44, 0x005AEF8D, 0x005AEFD6,
+		0x005A9957, 0x005A946C, 0x005A9A1E, 0x0051F886, 0x0052A14E,
+
+		0x0048FF90, 0x004F146A, 0x005AE161, 0x0053C095,
+		0x0052EAAE, 0x00484DD1, 0x00484DF3, 0x00484CD0,
+		0x0048D25C, 0x00405A1A, 0x0048A93C,
+
+		0x00450417, 0x004504A4, 0x0040A438, 0x00000000,
+		0x0055D6C1, 0x004018E2, 0x0052C062, 0x0046F4D9, 0x0055D726,
+		0x006CA61C, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x0055ECCC, 0x005C7089, 0x0053CA0E, 0x0053CADA,
+
+		0x0055EE08, 0x00538D86, 0x00538EDD,
+		0x0042AC64, 0x0042ACEC,
+		0x00519FF1, 0x0051A0A9, // TODO time fix
+		0x004F21C0, 0x004EF722, 0x004F1D80,
+		0x00650628, 0x00650674,
+
+		0x008293AC, 0x004868AE, 0x004869CB, 0x0082FF38, 0x005AEC65, 0x005AED25, 0x00000000,
+		0x005339EE, 0x0052DB6A, 0x004E66AF, 0x004E584B, 0x00000000, 0x00403C7D, 0x0051B292,
+
+		0x00000000, 0x005C277F, 0x005B8F00, 0x005B91BB,
 #pragma endregion
 
 #pragma region v3_00
@@ -353,7 +353,7 @@ namespace Hooks
 		0x0062CCE5, 0x00646BF8, 0x0062DE6E, 0x0062D6E8, 0x0063123E, 0x006381F8, 0x0062DA08, 0x0063831D,
 		0x0062E75B, 0x0062E7A8, 0x0062E7D6, 0x0062EC09, 0x0062EC5C, 0x0062EC90,
 		0x0062DB72, 0x00639607, 0x0062CC1A, 0x0062CF25, 0x00000000,
-		0x005B36B5, 0x005B36FE, 0x005B3747, 0x0052DBDC,
+		0x005B36B5, 0x005B36FE, 0x005B3747,
 		0x005AE0F0, 0x005ADC05, 0x005AE19F, 0x00523484, 0x0052E252,
 
 		0x00492B0A, 0x00403FF6, 0x005B28DA, 0x00540212,
@@ -374,11 +374,10 @@ namespace Hooks
 		0x00835AAC, 0x0048916A, 0x0048927A, 0x00838688, 0x005B33DE, 0x005B3482, 0x00000000,
 		0x00537C14, 0x00531D04, 0x004EA19F, 0x004E9352, 0x00000000, 0x00403FA0, 0x0051EE45,
 
-		0x005C7162, 0x005BD8EA, 0x005BDBA5,
+		0x004012D4, 0x005C7162, 0x005BD8EA, 0x005BDBA5,
 #pragma endregion
 
 #pragma region v3_00 - Steam
-#pragma region v3_00 - Steam asd
 		// v3.00 - Steam
 		NUM(3, 00), VER(2003, 11, 3, 1),
 		0x005674DE, 0x005CD93F, 0x00678C51,
@@ -400,7 +399,7 @@ namespace Hooks
 		0x0062D6C5, 0x00647508, 0x0062E84E, 0x0062E0C8, 0x00631C1E, 0x00638BD8, 0x0062E3E8, 0x00638CFD,
 		0x0062F13B, 0x0062F188, 0x0062F1B6, 0x0062F5E9, 0x0062F63C, 0x0062F670,
 		0x0062E552, 0x00639FE7, 0x0062D5FA, 0x0062D905, 0x0050E535,
-		0x005B3D11, 0x005B3D5A, 0x005B3DA3, 0x0052E569,
+		0x005B3D11, 0x005B3D5A, 0x005B3DA3,
 		0x005AE718, 0x005AE22D, 0x005AE82D, 0x00523F93, 0x0052EBD2,
 
 		0x00492DB4, 0x00581521, 0x005B2F1A, 0x00540AC6,
@@ -409,7 +408,6 @@ namespace Hooks
 
 		0x0045257F, 0x0045260C, 0x0040A3D9, 0x006270CE,
 		0x005618FC, 0x00401989, 0x00530AA9, 0x004722EF, 0x00561961,
-#pragma endregion
 		0x006D5934, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00562EF2, 0x007B296C, 0x00541434, 0x00541500,
 
@@ -422,7 +420,7 @@ namespace Hooks
 		0x00837E7C, 0x004893E9, 0x004894F5, 0x0083AA58, 0x005B3A1E, 0x005B3ADE, 0x00000000,
 		0x0053842D, 0x005325B2, 0x004EA2D3, 0x004E9495, 0x00000000, 0x00403CB9, 0x0051F84D,
 
-		0x005C7C18, 0x005BE1F5, 0x005BE4B0,
+		0x00000000, 0x005C7C18, 0x005BE1F5, 0x005BE4B0,
 #pragma endregion
 
 #pragma region v3_01a
@@ -447,7 +445,7 @@ namespace Hooks
 		0x0062E345, 0x006482A8, 0x0062F4CE, 0x0062ED48, 0x0063289E, 0x00639858, 0x0062F068, 0x0063997D,
 		0x0062FDBB, 0x0062FE08, 0x0062FE36, 0x00630269, 0x006302BC, 0x006302F0,
 		0x0062F1D2, 0x0063AC67, 0x0062E27A, 0x0062E585, 0x00000000,
-		0x005B4308, 0x005B4351, 0x005B439A, 0x0052E4C0,
+		0x005B4308, 0x005B4351, 0x005B439A,
 		0x005AED4C, 0x005AE861, 0x005AEDFB, 0x00523D50, 0x0052EB29,
 
 		0x00492EEA, 0x00403FC0, 0x005B3528, 0x00540B48,
@@ -468,7 +466,7 @@ namespace Hooks
 		0x00837ACC, 0x004893B4, 0x004894BC, 0x0083A6A8, 0x005B402C, 0x005B40D5, 0x00000000,
 		0x005384C4, 0x0053260D, 0x004EAA85, 0x004E9C47, 0x00000000, 0x00403F62, 0x0051F785,
 
-		0x005C818B, 0x005BE762, 0x005BEA1D,
+		0x0040127A, 0x005C818B, 0x005BE762, 0x005BEA1D,
 #pragma endregion
 
 #pragma region v3_01b
@@ -493,7 +491,7 @@ namespace Hooks
 		0x0062CD85, 0x00646B28, 0x0062DF0E, 0x0062D788, 0x006312DE, 0x00638298, 0x0062DAA8, 0x006383BD,
 		0x0062E7FB, 0x0062E848, 0x0062E876, 0x0062ECA9, 0x0062ECFC, 0x0062ED30,
 		0x0062DC12, 0x006396A7, 0x0062CCBA, 0x0062CFC5, 0x00000000,
-		0x005B35EA, 0x005B3633, 0x005B367C, 0x0052DA66,
+		0x005B35EA, 0x005B3633, 0x005B367C,
 		0x005ADFD4, 0x005ADAE9, 0x005AE0BF, 0x005231F2, 0x0052E0E7,
 
 		0x00492942, 0x0041B1B3, 0x005B27EE, 0x005401F9,
@@ -514,7 +512,7 @@ namespace Hooks
 		0x00835A7C, 0x00488F9D, 0x004890A5, 0x00838650, 0x005B32F2, 0x005B33B7, 0x00000000,
 		0x00537ACC, 0x00531B25, 0x004E9F37, 0x004E90E2, 0x00000000, 0x00403C8B, 0x0051EB96,
 
-		0x005C7174, 0x005BD7EA, 0x005BDAA5,
+		0x00000000, 0x005C7174, 0x005BD7EA, 0x005BDAA5,
 #pragma endregion
 
 #pragma region v2_00 Editor - Steam
@@ -539,7 +537,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -560,7 +558,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x0065E520, 0x0055E93A, 0x00000000, 0x0044D014,
 		0x004903E5, 0x00495435, 0x004F066C, 0x004166BC, 0x00415D6B, 0x00403156, 0x004B65A9,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2_01 Editor
@@ -585,7 +583,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -606,7 +604,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x0065CD48, 0x0055DD64, 0x00000000, 0x0044D09A,
 		0x0048FADD, 0x00494AED, 0x004EFD1B, 0x0041683E, 0x00415ED5, 0x004030B3, 0x004B5C57,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2_02a Editor
@@ -631,7 +629,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -652,7 +650,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x0065CD70, 0x0055DE84, 0x00000000, 0x0044D09A,
 		0x0048FADD, 0x00494AED, 0x004EFD1B, 0x0041683E, 0x00415ED5, 0x004030B3, 0x004B5C57,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v2_02b Editor
@@ -677,7 +675,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -698,7 +696,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x0065CD70, 0x0055DBFD, 0x00000000, 0x0044CFB0,
 		0x0048F771, 0x004947D4, 0x004EFBAC, 0x0041675B, 0x00415DE8, 0x004030A1, 0x004B59E9,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3_00 Editor - Steam
@@ -723,7 +721,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -744,7 +742,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00667E44, 0x0056480E, 0x00000000, 0x0044EE74,
 		0x00493001, 0x004980CE, 0x004F48C9, 0x004169C0, 0x0041606F, 0x00403195, 0x004B91B6,
 
-		0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000,
 #pragma endregion
 
 #pragma region v3_01 Editor
@@ -769,7 +767,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 
 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -790,7 +788,7 @@ namespace Hooks
 		0x00000000, 0x00000000, 0x00000000, 0x00666484, 0x00563C2D, 0x00000000, 0x0044EBD5,
 		0x0049209B, 0x004970EC, 0x004F3C0C, 0x0041670E, 0x00415DBD, 0x00403079, 0x004B816B,
 
-		0x00000000, 0x00000000, 0x00000000
+		0x00000000, 0x00000000, 0x00000000, 0x00000000
 #pragma endregion
 	};
 
@@ -1335,16 +1333,6 @@ namespace Hooks
 #pragma endregion
 
 #pragma region PIXEL
-	struct {
-		BOOL mirror;
-		struct MirrorState {
-			BOOL active;
-			BOOL ready;
-			SIZE size;
-			VOID* indices;
-		} states[3];
-	} battleBgIndices;
-
 	DWORD __fastcall ConvertToRGB(DWORD color)
 	{
 		return ((color & 0x001F) << 19) | ((color & 0x07E0) << 5) | ((color & 0xF800) >> 8) | ALPHA_COMPONENT;
@@ -1358,7 +1346,7 @@ namespace Hooks
 	DWORD(__fastcall* Convert565toRGB)
 	(DWORD color);
 
-	DWORD Blend(DWORD dstData, DWORD srcData, DWORD msk)
+	DWORD __inline Blend(DWORD dstData, DWORD srcData, DWORD msk)
 	{
 		DWORD res;
 
@@ -1390,32 +1378,7 @@ namespace Hooks
 
 	VOID __stdcall Pixel_Blit_Indexed_to_565(BYTE* srcData, DWORD srcPitch, DWORD* palette, DWORD* dstData, DWORD dstPitch, RECT* rect)
 	{
-		BYTE* lpSrc = srcData + rect->top * srcPitch;
-		INT srcInc;
-
-		BOOL found = FALSE;
-		for (DWORD i = 0; i < 3; ++i)
-		{
-			if (battleBgIndices.states[i].ready && battleBgIndices.states[i].size.cx == rect->right - rect->left && battleBgIndices.states[i].size.cy == rect->bottom - rect->top)
-			{
-				battleBgIndices.states[i].ready = FALSE;
-				battleBgIndices.states[i].active = FALSE;
-				found = TRUE;
-				break;
-			}
-		}
-
-		if (found && battleBgIndices.mirror)
-		{
-			lpSrc += rect->right - 1;
-			srcInc = -1;
-		}
-		else
-		{
-			lpSrc += rect->left;
-			srcInc = 1;
-		}
-
+		BYTE* lpSrc = srcData + rect->top * srcPitch + rect->left;
 		dstPitch >>= 1;
 		DWORD* lpDst = dstData + rect->top * dstPitch + rect->left;
 
@@ -1431,10 +1394,8 @@ namespace Hooks
 
 				DWORD count = width;
 				do
-				{
-					*dst++ = _byteswap_ulong(_rotl(palette[*src], 8)) | ALPHA_COMPONENT;
-					src += srcInc;
-				} while (--count);
+					*dst++ = _byteswap_ulong(_rotl(palette[*src++], 8)) | ALPHA_COMPONENT;
+				while (--count);
 
 				lpSrc += srcPitch;
 				lpDst += dstPitch;
@@ -1449,10 +1410,8 @@ namespace Hooks
 
 				DWORD count = width;
 				do
-				{
-					*dst++ = palette[*src] | ALPHA_COMPONENT;
-					src += srcInc;
-				} while (--count);
+					*dst++ = palette[*src++] | ALPHA_COMPONENT;
+				while (--count);
 
 				lpSrc += srcPitch;
 				lpDst += dstPitch;
@@ -1536,28 +1495,25 @@ namespace Hooks
 
 	VOID __stdcall Pixel_RGB_Swap(BYTE* data, LONG pitch, SIZE* size)
 	{
-		if (config.renderer == RendererGDI)
+		if (config.renderer == RendererGDI && size->cx && size->cy)
 		{
 			DWORD height = size->cy;
-			while (height)
+			do
 			{
-				--height;
-
 				BYTE* px = data;
 
 				DWORD width = size->cx;
-				while (width)
+				do
 				{
-					--width;
 					BYTE temp = *(px + 2);
 					*(px + 2) = *px;
 					*px = temp;
 
 					px += 3;
-				}
+				} while (--width);
 
 				data += pitch;
-			}
+			} while (--height);
 		}
 	}
 
@@ -1568,15 +1524,13 @@ namespace Hooks
 
 	DWORD __stdcall Pixel_BlendSome(DWORD pix, BYTE b, BYTE g, BYTE r, BYTE msk)
 	{
-		DWORD color = r | (g << 8) | (b << 16);
-		return Blend(pix, color, msk);
+		return Blend(pix, r | (g << 8) | (b << 16), msk);
 	}
 
 	VOID __stdcall Pixel_BlitBlend(DWORD* srcData, DWORD* dstData, DWORD count, BYTE* mskData)
 	{
-		while (count)
+		for (; count; --count)
 		{
-			--count;
 			*dstData = Blend(*dstData, *srcData, *(BYTE*)mskData);
 
 			++srcData;
@@ -1587,33 +1541,38 @@ namespace Hooks
 
 	VOID __stdcall Pixel_BlitBlendWithColorKey(BlendData* blendItem, DWORD count, DWORD colorKey)
 	{
-		colorKey = Convert565toRGB(colorKey);
-		while (count)
+		if (count)
 		{
-			--count;
-			DWORD* srcData = blendItem->srcData;
-			DWORD* dstData = blendItem->dstData;
-			BYTE* mskData = (BYTE*)blendItem->mskData;
+			colorKey = Convert565toRGB(colorKey);
 
-			DWORD length = blendItem->length;
-			while (length)
+			do
 			{
-				--length;
-				if ((*dstData & COLORKEY_AND) != colorKey)
-					*dstData = Blend(*dstData, *srcData, *(BYTE*)mskData);
+				if (blendItem->length)
+				{
+					DWORD* srcData = blendItem->srcData;
+					DWORD* dstData = blendItem->dstData;
+					BYTE* mskData = blendItem->mskData;
 
-				++srcData;
-				++dstData;
-				++mskData;
-			}
+					DWORD length = blendItem->length;
+					do
+					{
+						if ((*dstData & COLORKEY_AND) != colorKey)
+							*dstData = Blend(*dstData, *srcData, *(BYTE*)mskData);
 
-			++blendItem;
+						++srcData;
+						++dstData;
+						++mskData;
+					} while (--length);
+				}
+
+				++blendItem;
+			} while (--count);
 		}
 	}
 
 	VOID __stdcall Pixel_BlitBlendAvarage(DWORD* src, LONG srcPitch, POINT* srcPos, DWORD* dst, LONG dstPitch, POINT* dstPos, SIZE* size, BYTE flag, DWORD colorKey)
 	{
-		if (!flag || flag == 0xFF || !dst)
+		if (!flag || !dst || !size->cx || !size->cy)
 			return;
 
 		colorKey = Convert565toRGB(colorKey);
@@ -1627,42 +1586,26 @@ namespace Hooks
 		dstPitch -= size->cx;
 
 		DWORD height = size->cy;
-		while (height)
+		do
 		{
-			--height;
 			DWORD width = size->cx;
-			while (width)
+			do
 			{
-				--width;
 				if ((*src & COLORKEY_AND) != colorKey)
-				{
-					DWORD s = *src & 0x000000FF;
-					DWORD d = *dst & 0x000000FF;
-					DWORD res = (d + (s - d) / 2) & 0x000000FF;
-
-					s = *src & 0x0000FF00;
-					d = *dst & 0x0000FF00;
-					res |= (d + (s - d) / 2) & 0x0000FF00;
-
-					s = *src & 0x00FF0000;
-					d = *dst & 0x00FF0000;
-					res |= (d + (s - d) / 2) & 0x00FF0000;
-
-					*dst = res | ALPHA_COMPONENT;
-				}
+					*dst = Blend(*dst, *src, flag);
 
 				++src;
 				++dst;
-			}
+			} while (--width);
 
 			src += srcPitch;
 			dst += dstPitch;
-		}
+		} while (--height);
 	}
 
 	VOID __stdcall Pixel_Add(DWORD* src, LONG srcPitch, POINT* srcPos, DWORD* dst, LONG dstPitch, POINT* dstPos, SIZE* size)
 	{
-		if (!dst)
+		if (!dst || !size->cx || !size->cy)
 			return;
 
 		srcPitch >>= 1;
@@ -1675,13 +1618,11 @@ namespace Hooks
 		dstPitch -= size->cx;
 
 		DWORD height = size->cy;
-		while (height)
+		do
 		{
-			--height;
 			DWORD width = size->cx;
-			while (width)
+			do
 			{
-				--width;
 				DWORD cs = *src++;
 				DWORD cd = *dst;
 
@@ -1698,16 +1639,16 @@ namespace Hooks
 					b = 0x00FF0000;
 
 				*dst++ = r | g | b | ALPHA_COMPONENT;
-			}
+			} while (--width);
 
 			src += srcPitch;
 			dst += dstPitch;
-		}
+		} while (--height);
 	}
 
 	VOID __stdcall Pixel_Sub(DWORD* src, LONG srcPitch, POINT* srcPos, DWORD* dst, LONG dstPitch, POINT* dstPos, SIZE* size)
 	{
-		if (!dst)
+		if (!dst || !size->cx || !size->cy)
 			return;
 
 		srcPitch >>= 1;
@@ -1720,13 +1661,11 @@ namespace Hooks
 		dstPitch -= size->cx;
 
 		DWORD height = size->cy;
-		while (height)
+		do
 		{
-			--height;
 			DWORD width = size->cx;
-			while (width)
+			do
 			{
-				--width;
 				DWORD cs = *src++;
 				DWORD cd = *dst;
 
@@ -1743,17 +1682,19 @@ namespace Hooks
 					b = 0;
 
 				*dst++ = r | g | b | ALPHA_COMPONENT;
-			}
+			} while (--width);
 
 			src += srcPitch;
 			dst += dstPitch;
-		}
+		} while (--height);
 	}
 
 	VOID __stdcall Pixel_BlitColorKey(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size, BYTE flag, DWORD colorKey)
 	{
-		if (!flag || flag == 0xFF || !dstData)
+		if (!flag || !dstData || !size->cx || !size->cy)
 			return;
+
+		flag = min(255, flag * 2);
 
 		colorKey = Convert565toRGB(colorKey);
 		srcPitch >>= 1;
@@ -1765,9 +1706,8 @@ namespace Hooks
 		BOOL check = (~dstPos->y ^ dstPos->x) & 1;
 
 		DWORD height = size->cy;
-		while (height)
+		do
 		{
-			--height;
 			DWORD* src = srcData;
 			DWORD* dst = dstData;
 
@@ -1779,12 +1719,10 @@ namespace Hooks
 				--width;
 			}
 
-			width = (width + 1) >> 1;
-			while (width)
+			for (DWORD i = (width + 1) >> 1; i; --i)
 			{
-				--width;
 				if ((*src & COLORKEY_AND) != colorKey)
-					*dst = *src;
+					*dst = Blend(*dst, *src, flag);
 
 				src += 2;
 				dst += 2;
@@ -1794,12 +1732,12 @@ namespace Hooks
 			dstData += dstPitch;
 
 			check = !check;
-		}
+		} while (--height);
 	}
 
 	VOID __stdcall Pixel_BlitEmptyColor(DWORD* srcData, LONG srcPitch, POINT* srcPos, DWORD* dstData, LONG dstPitch, POINT* dstPos, SIZE* size)
 	{
-		if (!dstData)
+		if (!dstData || !size->cx || !size->cy)
 			return;
 
 		srcPitch >>= 1;
@@ -1811,9 +1749,8 @@ namespace Hooks
 		BOOL check = (~dstPos->y ^ dstPos->x) & 1;
 
 		DWORD height = size->cy;
-		while (height)
+		do
 		{
-			--height;
 			DWORD* src = srcData;
 			DWORD* dst = dstData;
 
@@ -1825,10 +1762,8 @@ namespace Hooks
 				--width;
 			}
 
-			width = (width + 1) >> 1;
-			while (width)
+			for (DWORD i = (width + 1) >> 1; i; --i)
 			{
-				--width;
 				if (*src & COLORKEY_AND)
 					*dst = *src;
 
@@ -1840,23 +1775,24 @@ namespace Hooks
 			dstData += dstPitch;
 
 			check = !check;
-		}
+		} while (--height);
 	}
 
 	VOID __stdcall Pixel_DoubleLighter(DWORD* data, LONG pitch, SIZE* size, DWORD colorKey, BYTE flag)
 	{
+		if (!size->cx || !size->cy)
+			return;
+
 		colorKey = Convert565toRGB(colorKey);
 		pitch >>= 1;
 		pitch -= size->cx;
 
 		DWORD height = size->cy;
-		while (height)
+		do
 		{
-			--height;
 			DWORD width = size->cx;
-			while (width)
+			do
 			{
-				--width;
 				if ((*data & COLORKEY_AND) == colorKey)
 					*data = 0;
 				else if (flag)
@@ -1864,7 +1800,6 @@ namespace Hooks
 					DWORD r = *data & 0xFF;
 					DWORD g = (*data >> 8) & 0xFF;
 					DWORD b = (*data >> 16) & 0xFF;
-					DWORD a = (*data >> 24) & 0xFF;
 
 					if (r + g + b > 56)
 					{
@@ -1880,17 +1815,17 @@ namespace Hooks
 						if (b > 0xFF)
 							b = 0xFF;
 
-						*data = r | (g << 8) | (b << 16) | (a << 24);
+						*data = r | (g << 8) | (b << 16) | (*data & 0xFF000000);
 					}
 					else
 						*data = 0;
 				}
 
 				++data;
-			}
+			} while (--width);
 
 			data += pitch;
-		}
+		} while (--height);
 	}
 
 	const VOID* const pixelFunctions[] = {
@@ -1928,7 +1863,7 @@ namespace Hooks
 		if (pt->y < clipper->top)
 		{
 			size->cy += pt->y - clipper->top;
-			shift->x += clipper->top - pt->y;
+			shift->y += clipper->top - pt->y;
 			pt->y = clipper->top;
 		}
 
@@ -2070,45 +2005,41 @@ namespace Hooks
 
 	VOID __fastcall FillColor(BlitObject* obj, DWORD /*edx*/, DWORD color, RECT* rect)
 	{
-		if (obj->isTrueColor)
+		LONG width = rect->right - rect->left;
+		LONG height = rect->bottom - rect->top;
+
+		if (width && height)
 		{
-			DWORD pitch = obj->pitch >> 1;
-			color = Convert565toRGB(color);
-
-			DWORD* data = (DWORD*)obj->data + rect->top * pitch + rect->left;
-			DWORD height = rect->bottom - rect->top;
-			while (height)
+			if (obj->isTrueColor)
 			{
-				--height;
-				DWORD* ptr = data;
-				DWORD width = rect->right - rect->left;
-				while (width)
+				color = Convert565toRGB(color);
+				DWORD pitch = obj->pitch >> 1;
+				DWORD* data = (DWORD*)obj->data + rect->top * pitch + rect->left;
+				pitch -= width;
+				do
 				{
-					--width;
-					*ptr++ = color;
-				}
+					DWORD count = width;
+					do
+						*data++ = color;
+					while (--count);
 
-				data += pitch;
+					data += pitch;
+				} while (--height);
 			}
-		}
-		else
-		{
-			DWORD pitch = obj->pitch;
-
-			BYTE* data = (BYTE*)obj->data + rect->top * pitch + rect->left;
-			DWORD height = rect->bottom - rect->top;
-			while (height)
+			else
 			{
-				--height;
-				BYTE* ptr = data;
-				DWORD width = rect->right - rect->left;
-				while (width)
+				DWORD pitch = obj->pitch;
+				BYTE* data = (BYTE*)obj->data + rect->top * pitch + rect->left;
+				pitch -= width;
+				do
 				{
-					--width;
-					*ptr++ = LOBYTE(color);
-				}
+					DWORD count = width;
+					do
+						*data++ = LOBYTE(color);
+					while (--count);
 
-				data += pitch;
+					data += pitch;
+				} while (--height);
 			}
 		}
 	}
@@ -2373,14 +2304,7 @@ namespace Hooks
 				do
 				{
 					BYTE* srcPtr = src;
-					BYTE srcVal = *srcPtr;
-
-					DWORD count = 8 - mod;
-					while (count)
-					{
-						--count;
-						srcVal <<= 1;
-					}
+					BYTE srcVal = *srcPtr << (8 - mod);
 					DWORD mask = mod;
 
 					DWORD* dstPtr = dst;
@@ -2575,16 +2499,13 @@ namespace Hooks
 			DWORD* srcData = *((DWORD**)thisObj[11] + 1);
 			DWORD* dstData = (DWORD*)obj->data;
 
-			while (height)
+			for (LONG h = height; h; --h)
 			{
-				--height;
 				DWORD* src = srcData;
 				DWORD* dst = dstData;
 
-				INT count = width;
-				while (count)
+				for (LONG w = width; w; --w)
 				{
-					--count;
 					DWORD pix = *src;
 					if ((pix & COLORKEY_AND) != COLORKEY_CHECK)
 					{
@@ -2614,21 +2535,16 @@ namespace Hooks
 
 		DWORD idx = 0;
 
-		DWORD height = bottom - top;
-
 		if (config.renderer == RendererGDI)
 		{
-			while (height)
+			for (LONG h = bottom - top; h; --h)
 			{
-				--height;
 				DWORD* src = source;
 				DWORD* msk = mask;
 				DWORD* dst = destination;
 
-				LONG count = width;
-				while (count)
+				for (LONG w = width; w; --w)
 				{
-					--count;
 					DWORD pix = *src;
 					if (mskData || pixData_1->exists)
 						pix = Blend(pix, mskData ? *msk : _byteswap_ulong(_rotl(pixData_1->color, 8)), k);
@@ -2656,17 +2572,14 @@ namespace Hooks
 		}
 		else
 		{
-			while (height)
+			for (LONG h = bottom - top; h; --h)
 			{
-				--height;
 				DWORD* src = source;
 				DWORD* msk = mask;
 				DWORD* dst = destination;
 
-				LONG count = width;
-				while (count)
+				for (LONG w = width; w; --w)
 				{
-					--count;
 					DWORD pix = *src;
 					if (mskData || pixData_1->exists)
 						pix = Blend(pix, mskData ? *msk : pixData_1->color, k);
@@ -2700,11 +2613,8 @@ namespace Hooks
 		color = Convert565toRGB(color);
 
 		DWORD* data = (DWORD*)obj->data + loc->y * pitch + loc->x;
-		while (count)
-		{
-			--count;
+		for (; count; --count)
 			*data++ = color;
-		}
 	}
 
 	DWORD back_005383AA;
@@ -3747,7 +3657,8 @@ namespace Hooks
 
 			CHAR* p = (CHAR*)stream->data;
 			DWORD size = stream->size - stream->position;
-			while (TRUE)
+			
+			do
 			{
 				if (!size)
 				{
@@ -3760,7 +3671,7 @@ namespace Hooks
 
 				++p;
 				--size;
-			}
+			} while (TRUE);
 
 			if (p && p - (CHAR*)stream->data <= num - 1)
 			{
@@ -3799,108 +3710,6 @@ namespace Hooks
 		return GetStr(str, num, stream) ? ((CHAR * (__stdcall*)(CHAR*, INT, FILE*)) sub_fgets)(str, num, stream) : str;
 	}
 
-	DWORD sub_005A9A1E;
-	DWORD** __stdcall GetBattleBg(DWORD* thisObj, CHAR* name)
-	{
-		/*DWORD nl = StrLength(name);
-		const CHAR* nname = "WATER_0";
-		if (!StrCompare(&name[nl - StrLength("BG")], "BG"))
-		{
-			StrCopy(name, nname);
-			StrCat(name, "_BG");
-		}
-		else if (!StrCompare(&name[nl - StrLength("FG")], "FG"))
-		{
-			StrCopy(name, nname);
-			StrCat(name, "_FG");
-		}
-		else
-		{
-			StrCopy(name, nname);
-			StrCat(name, "_SHADOW");
-		}*/
-
-		DWORD** object = ((DWORD * *(__stdcall*)(DWORD, CHAR*, DWORD, DWORD, DWORD)) sub_005A9A1E)(thisObj[10], name, 0, 0, *thisObj);
-		if (object)
-		{
-			SIZE* size = (SIZE*)object[1][5];
-			DWORD length = StrLength(name);
-			DWORD index;
-			if (!StrCompare(&name[length - StrLength("BG")], "BG"))
-			{
-				battleBgIndices.mirror = config.battle.mirror ? (Random() & 1u) : FALSE;
-				index = 0;
-			}
-			else if (!StrCompare(&name[length - StrLength("FG")], "FG"))
-				index = 2;
-			else
-				index = 1;
-
-			battleBgIndices.states[index].active = TRUE;
-			battleBgIndices.states[index].ready = TRUE;
-			battleBgIndices.states[index].size = *size;
-
-			ImageIndices* indices = (ImageIndices*)object[1][7];
-			battleBgIndices.states[index].indices = (DWORD*)indices;
-
-			BOOL found = FALSE;
-			DWORD prev = index;
-			while (prev--)
-			{
-				if (battleBgIndices.states[prev].active && battleBgIndices.states[prev].indices == battleBgIndices.states[index].indices)
-				{
-					found = TRUE;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				BOOL isReversed = indices->size.height >> 31;
-				if (battleBgIndices.mirror)
-					indices->size.height |= 0x80000000;
-				else
-					indices->size.height &= 0x7FFFFFFF;
-
-				if (battleBgIndices.mirror != isReversed)
-				{
-					SpritePosition* pos = (SpritePosition*)indices->lpIndices;
-					DWORD count = indices->count;
-					while (count)
-					{
-						--count;
-						pos->dstPos.x = indices->size.width - (pos->dstPos.x + pos->srcRect.width);
-						pos->srcRect.x = size->cx - (pos->srcRect.x + pos->srcRect.width);
-						++pos;
-					}
-				}
-			}
-		}
-
-		return object;
-	}
-
-	DWORD sub_005A9AE9;
-	VOID __declspec(naked) hook_005AEF44()
-	{
-		__asm {
-			mov eax, [esp+0x4]
-			push eax
-			push [ecx]
-			call GetBattleBg
-			retn 0x4
-		}
-	}
-
-	VOID __declspec(naked) hook_00529AEB()
-	{
-		__asm {
-			and ecx, 0x7FFFFFFF
-			mov [eax+0x4], ecx
-			retn 0x4
-		}
-	}
-
 	DWORD rectListShift;
 	VOID __declspec(naked) hook_006307E8()
 	{
@@ -3922,6 +3731,40 @@ namespace Hooks
 		}
 	}
 #pragma endregion
+
+	#pragma region Mirror Battle
+	BOOL isMirror;
+	DWORD sub_005A9A1E;
+
+	DWORD __fastcall GetBattleBgNext(DWORD** thisObj, DWORD /*edx*/, CHAR* name)
+	{
+		/*DWORD nl = StrLength(name);
+		const CHAR* nname = "WATER_0";
+		if (!StrCompare(&name[nl - StrLength("BG")], "BG"))
+		{
+			StrCopy(name, nname);
+			StrCat(name, "_BG");
+		}
+		else if (!StrCompare(&name[nl - StrLength("FG")], "FG"))
+		{
+			StrCopy(name, nname);
+			StrCat(name, "_FG");
+		}
+		else
+		{
+			StrCopy(name, nname);
+			StrCat(name, "_SHADOW");
+		}*/
+
+		return ((DWORD(__stdcall*)(DWORD, CHAR*, BOOL, BOOL, DWORD))sub_005A9A1E)(thisObj[0][10], name, isMirror, TRUE /*isRandom*/, **thisObj);
+	}
+
+	DWORD __fastcall GetBattleBgFirts(DWORD** thisObj, DWORD /*edx*/, CHAR* name)
+	{
+		isMirror = config.battle.mirror ? (Random() & 1u) : FALSE;
+		return GetBattleBgNext(thisObj, NULL, name);
+	}
+	#pragma endregion
 
 #pragma region Custom Package
 	DWORD sub_LoadImgPackage;
@@ -5270,10 +5113,9 @@ namespace Hooks
 
 		DWORD total = 0;
 		DWORD* item = lineList;
-		DWORD count = size->height;
-		while (count)
+
+		for (DWORD i = size->height; i; --i)
 		{
-			--count;
 			*item++ = total;
 			total += size->width;
 		}
@@ -6109,6 +5951,13 @@ namespace Hooks
 		if (hookSpace->random_nop)
 			PatchNop(hooker, hookSpace->random_nop, 5);
 
+		// No CD
+		if (hookSpace->no_cd)
+		{
+			PatchDWord(hooker, hookSpace->no_cd, 0x9040C031);
+			PatchNop(hooker, hookSpace->no_cd + 4, 9);
+		}
+
 		// Interlock Fix
 		sub_EndLock = (ENDLOCK)RedirectCall(hooker, hookSpace->interlockFix, InterlockHook);
 
@@ -6121,13 +5970,6 @@ namespace Hooks
 			// Mouse move
 			PatchByte(hooker, hookSpace->mouse_pos_fix + 77 + 1, 0xBF);
 			PatchByte(hooker, hookSpace->mouse_pos_fix + 77 + 10 + 1, 0xBF);
-		}
-
-		// No CD
-		if (hookSpace->no_cd)
-		{
-			PatchDWord(hooker, hookSpace->no_cd, 0x9040C031);
-			PatchNop(hooker, hookSpace->no_cd + 4, 9);
 		}
 
 		// HD
@@ -6326,6 +6168,13 @@ namespace Hooks
 		// Random
 		PatchNop(hooker, hookSpace->random_nop, 5);
 
+		// No CD
+		if (hookSpace->no_cd)
+		{
+			PatchDWord(hooker, hookSpace->no_cd, 0x9040C031);
+			PatchNop(hooker, hookSpace->no_cd + 4, 6);
+		}
+
 		// AI list fix
 		if (hookSpace->ai_list_hook_1)
 		{
@@ -6421,7 +6270,6 @@ namespace Hooks
 		{
 			PatchByte(hooker, hookSpace->pkg_size + 1, 105);
 			sub_LoadImgPackage = RedirectCall(hooker, hookSpace->pkg_load, LoadImgPackage);
-			sub_005A9A1E = f(hookSpace->pkg_sub);
 
 			PatchHook(hooker, hookSpace->pkg_entry_load, LoadPackageIndex);
 			sub_0052A14E = f(hookSpace->pkg_entry_sub);
@@ -6435,13 +6283,15 @@ namespace Hooks
 				PatchHook(hooker, hookSpace->clouds_check, hook_005B91BB);
 				back_005B9214 = f(hookSpace->clouds_check + 89);
 			}
+		}
 
-			// Mirror battle bg
-			sub_005A9AE9 = RedirectCall(hooker, hookSpace->btlLoadBack_1, hook_005AEF44);
-			PatchCall(hooker, hookSpace->btlLoadBack_2, hook_005AEF44);
-			PatchCall(hooker, hookSpace->btlLoadBack_3, hook_005AEF44);
-
-			PatchHook(hooker, hookSpace->btlBackHeight, hook_00529AEB);
+		// Mirror battle bg
+		if (hookSpace->pkg_sub)
+		{
+			sub_005A9A1E = f(hookSpace->pkg_sub);
+			PatchCall(hooker, 0x005AEF44, GetBattleBgFirts);
+			PatchCall(hooker, 0x005AEF8D, GetBattleBgNext);
+			PatchCall(hooker, 0x005AEFD6, GetBattleBgNext);
 		}
 
 		// Sphere fix
