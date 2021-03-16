@@ -483,8 +483,8 @@ IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2021,3,16,1885
- PRODUCTVERSION 1,8,1,0
+ FILEVERSION 2021,3,16,1886
+ PRODUCTVERSION 1,8,2,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -500,10 +500,10 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2021.03.16.1885"
+			VALUE "FileVersion", "2021.03.16.1886"
 			VALUE "LegalCopyright", "© 2021 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4dll-R.dll"
-			VALUE "ProductVersion", "1.8.1"
+			VALUE "ProductVersion", "1.8.2"
 			VALUE "ProductName", "DisciplesGL"
 		END
 	END

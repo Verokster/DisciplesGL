@@ -6289,9 +6289,9 @@ namespace Hooks
 		if (hookSpace->pkg_sub)
 		{
 			sub_005A9A1E = f(hookSpace->pkg_sub);
-			PatchCall(hooker, 0x005AEF44, GetBattleBgFirts);
-			PatchCall(hooker, 0x005AEF8D, GetBattleBgNext);
-			PatchCall(hooker, 0x005AEFD6, GetBattleBgNext);
+			PatchCall(hooker, hookSpace->btlLoadBack_1, GetBattleBgFirts);
+			PatchCall(hooker, hookSpace->btlLoadBack_2, GetBattleBgNext);
+			PatchCall(hooker, hookSpace->btlLoadBack_3, GetBattleBgNext);
 		}
 
 		// Sphere fix
