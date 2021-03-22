@@ -382,17 +382,17 @@ VOID OpenDrawSurface::SwapBuffers()
 	{
 		DWORD offset = ((config.mode->height - stateBuffer->size.height) >> 1) * config.mode->width + ((config.mode->width - stateBuffer->size.width) >> 1);
 		DWORD pitch = config.mode->width;
-		DWORD fomat = config.renderer == RendererGDI ? PIXEL_BGR : PIXEL_RGB;
+		DWORD fomat;
 		VOID* lpBuffer;
 		if (config.mode->bpp != 16 || config.bpp32Hooked)
 		{
-			fomat |= PIXEL_TRUECOLOR;
+			fomat = PIXEL_TRUECOLOR | (config.renderer == RendererGDI ? PIXEL_BGR : PIXEL_RGB);
 			pitch <<= 2;
 			lpBuffer = (DWORD*)stateBuffer->data + offset;
 		}
 		else
 		{
-			fomat |= PIXEL_HIGHCOLOR;
+			fomat = PIXEL_HIGHCOLOR | PIXEL_BGR;
 			pitch <<= 1;
 			lpBuffer = (WORD*)stateBuffer->data + offset;
 		}

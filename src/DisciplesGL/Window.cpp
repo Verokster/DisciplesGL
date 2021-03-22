@@ -3107,7 +3107,8 @@ namespace Window
 		case WM_KEYDOWN:
 		case WM_KEYUP:
 		case WM_CHAR:
-			return WindowProc(GetParent(hWnd), uMsg, wParam, lParam);
+			PostMessage(GetParent(hWnd), uMsg, wParam, lParam);
+			return CallWindowProc(OldPanelProc, hWnd, uMsg, wParam, lParam);
 
 		default:
 			return CallWindowProc(OldPanelProc, hWnd, uMsg, wParam, lParam);
