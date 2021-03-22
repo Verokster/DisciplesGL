@@ -51,7 +51,7 @@ namespace Main
 
 	VOID __stdcall DrawFrame(DWORD width, DWORD height, LONG pitch, DWORD pixelFormat, VOID* buffer)
 	{
-		if (!config.enabled || !(pixelFormat & PIXEL_TRUECOLOR))
+		if (!config.enabled)
 			return;
 
 		const RECT padShadow = { 11, 7, 9, 3 };
@@ -80,8 +80,7 @@ namespace Main
 			break;
 		}
 
-		
-		COLORREF shadow = tick / 1000 ? RGB(104, 16, 0) : RGB(128, 128, 128);
+		COLORREF shadow = tick / 1000 ? RGB(104, 16, 0) : RGB(96, 96, 96);
 		COLORREF color = tick / 1000 ? RGB(209, 174, 9) : RGB(255, 255, 255);
 		if (!(pixelFormat & PIXEL_BGR))
 		{

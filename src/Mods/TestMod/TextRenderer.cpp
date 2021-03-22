@@ -125,17 +125,36 @@ VOID TextRenderer::Draw(const CHAR* text, COLORREF color, COLORREF chroma, DWORD
 
 		// draw back to frame
 		BYTE* srcData = (BYTE*)this->bmBuffer + rc.top * bmPitch + rc.left * sizeof(DWORD);
-		BYTE* dstData = (BYTE*)frame->buffer + rc.top * frame->pitch + rc.left * sizeof(DWORD);
-		for (LONG j = 0; j < bmHeight; ++j, srcData += bmPitch, dstData += frame->pitch)
+		if (frame->pixelFormat & PIXEL_TRUECOLOR)
 		{
-			DWORD* src = (DWORD*)srcData;
-			DWORD* dst = (DWORD*)dstData;
-
-			for (LONG i = 0; i < bmWidth; ++i)
+			BYTE* dstData = (BYTE*)frame->buffer + rc.top * frame->pitch + rc.left * sizeof(DWORD);
+			for (LONG j = 0; j < bmHeight; ++j, srcData += bmPitch, dstData += frame->pitch)
 			{
-				DWORD pix = src[i];
-				if ((pix & 0x00FFFFFF) != *(DWORD*)&chroma) // check if remove black
-					dst[i] = pix | 0xFF000000;
+				DWORD* src = (DWORD*)srcData;
+				DWORD* dst = (DWORD*)dstData;
+
+				for (LONG i = 0; i < bmWidth; ++i)
+				{
+					DWORD pix = src[i];
+					if ((pix & 0x00FFFFFF) != *(DWORD*)&chroma) // check if remove black
+						dst[i] = pix | 0xFF000000;
+				}
+			}
+		}
+		else
+		{
+			BYTE* dstData = (BYTE*)frame->buffer + rc.top * frame->pitch + rc.left * sizeof(WORD);
+			for (LONG j = 0; j < bmHeight; ++j, srcData += bmPitch, dstData += frame->pitch)
+			{
+				DWORD* src = (DWORD*)srcData;
+				WORD* dst = (WORD*)dstData;
+
+				for (LONG i = 0; i < bmWidth; ++i)
+				{
+					DWORD pix = src[i];
+					if ((pix & 0x00FFFFFF) != *(DWORD*)&chroma) // check if remove black
+						dst[i] = LOWORD(((pix & 0x0000F8) >> 3) | ((pix & 0x00FC00) >> 5) | ((pix & 0xF80000) >> 8));
+				}
 			}
 		}
 	}
