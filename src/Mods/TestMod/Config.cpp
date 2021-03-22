@@ -34,17 +34,29 @@ namespace Config
 	{
 		config.hModule = hModule;
 
+		// get config file path
 		HMODULE hMain = GetModuleHandle(NULL);
 		GetModuleFileName(hMain, config.file, MAX_PATH);
 		strcpy(strrchr(config.file, '\\'), "\\disciple.ini");
 
-		config.font = (HFONT)CreateFont(16, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET,
+		// create font for About dialog
+		config.font = CreateFont(16, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET,
 			OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
 			DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
 
+		// load custom font from resource
+		DWORD nFonts;
+		HRSRC res = FindResource(config.hModule, MAKEINTRESOURCE(IDR_FONT), RT_FONT);
+		HGLOBAL mem = LoadResource(config.hModule, res);
+		LPVOID data = LockResource(mem);
+		DWORD len = SizeofResource(config.hModule, res);
+		AddFontMemResourceEx(data, len, NULL, &nFonts);
+
+		// load mod state
 		config.enabled = (BOOL)Config::Get(CONFIG_MOD, "Enabled", TRUE);
 		config.tick = config.enabled ? GetTickCount() : 0;
 
+		// load display position
 		config.displayCorner = (DisplayCorner)Config::Get(CONFIG_MOD, "DisplayCorner", DisplayBottomLeft);
 		if (config.displayCorner < DisplayTopLeft || config.displayCorner > DisplayBottomRight)
 			config.displayCorner = DisplayTopLeft;

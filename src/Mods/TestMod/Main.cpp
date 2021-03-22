@@ -80,12 +80,16 @@ namespace Main
 			break;
 		}
 
-		txt->Draw(time, RGB(10, 10, 10), RGB(0, 0, 0), align, &padShadow, frame);
-
-		DWORD color = tick / 1000 ? RGB(255, 255, 255) : RGB(255, 255, 0);
+		
+		COLORREF shadow = tick / 1000 ? RGB(104, 16, 0) : RGB(128, 128, 128);
+		COLORREF color = tick / 1000 ? RGB(209, 174, 9) : RGB(255, 255, 255);
 		if (!(pixelFormat & PIXEL_BGR))
+		{
+			shadow = _byteswap_ulong(_rotl(shadow, 8));
 			color = _byteswap_ulong(_rotl(color, 8));
+		}
 
+		txt->Draw(time, shadow, RGB(0, 0, 0), align, &padShadow, frame);
 		txt->Draw(time, color, RGB(0, 0, 0), align, &padText, frame);
 	}
 }

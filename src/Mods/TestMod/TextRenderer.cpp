@@ -28,11 +28,11 @@
 
 TextRenderer* txt;
 
-TextRenderer::TextRenderer(const CHAR* fontFace, INT fontSize, DWORD fontQuality)
+TextRenderer::TextRenderer(HFONT hFont)
 {
 	this->hDc = NULL;
 	this->hBmp = NULL;
-	this->hFont = CreateFont(fontSize, 0, 0, 0, 0, 0, FALSE, FALSE, ANSI_CHARSET, 0, 0, fontQuality, 0, fontFace);
+	this->hFont = hFont;
 	this->width = 0;
 	this->height = 0;
 	this->bmBuffer = NULL;
@@ -40,9 +40,6 @@ TextRenderer::TextRenderer(const CHAR* fontFace, INT fontSize, DWORD fontQuality
 
 TextRenderer::~TextRenderer()
 {
-	if (this->hFont)
-		DeleteObject(this->hFont);
-
 	if (this->hBmp)
 		DeleteObject(this->hBmp);
 

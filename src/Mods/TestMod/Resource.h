@@ -3,6 +3,8 @@
 // Used by module.rc
 //
 
+#define IDR_FONT 10
+
 #define IDS_INFO 1
 #define IDS_INFO_RESTART 2
 

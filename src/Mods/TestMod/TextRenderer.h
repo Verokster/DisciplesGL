@@ -35,7 +35,7 @@ class TextRenderer : public Allocation {
 	VOID* bmBuffer;
 
 public:
-	TextRenderer(const CHAR* fontFace, INT fontSize, DWORD fontQuality);
+	TextRenderer(HFONT hFont);
 	~TextRenderer();
 
 	VOID Draw(const CHAR* text, COLORREF color, COLORREF chroma, DWORD align, const RECT* padding, const FrameType* frame);

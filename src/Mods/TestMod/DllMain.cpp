@@ -27,6 +27,8 @@
 #include "Hooks.h"
 #include "TextRenderer.h"
 
+HFONT hFont;
+
 BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 {
 	switch (fdwReason)
@@ -36,7 +38,12 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 		{
 			Config::Load(hModule);
 			Hooks::Load();
-			txt = new TextRenderer("Arial", 24, DEFAULT_QUALITY);
+
+			hFont = CreateFont(28, 0, 0, 0, 700, 0, FALSE, FALSE, ANSI_CHARSET, 0, 0, DEFAULT_QUALITY, 0, "Digital-7 Mono");
+			if (!hFont)
+				hFont = CreateFont(28, 0, 0, 0, 0, 0, FALSE, FALSE, ANSI_CHARSET, 0, 0, DEFAULT_QUALITY, 0, "Arial");
+			txt = new TextRenderer(hFont);
+
 			return TRUE;
 		}
 
@@ -45,6 +52,9 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	case DLL_PROCESS_DETACH:
 		if (txt)
 			delete txt;
+
+		if (hFont)
+			DeleteObject(hFont);
 
 		return TRUE;
 
