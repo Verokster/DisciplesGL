@@ -18,7 +18,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 IDR_MENU MENU DISCARDABLE
 BEGIN
 	MENUITEM "&Enabled",			IDM_ENABLED
-	MENUITEM "&Reset",				IDM_RESET
+	MENUITEM "&Reset\aAlt+R",		IDM_RESET
 	MENUITEM SEPARATOR
 	POPUP "&Display"
 	BEGIN
@@ -54,7 +54,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2021,3,22,14
+ FILEVERSION 2021,3,22,15
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -71,7 +71,7 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples - Test Mod"
-			VALUE "FileVersion", "2021.03.22.14"
+			VALUE "FileVersion", "2021.03.22.15"
 			VALUE "LegalCopyright", "© 2021 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "test.mod"
 			VALUE "ProductVersion", "1.0.0"

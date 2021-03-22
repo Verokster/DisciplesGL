@@ -32,7 +32,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	switch (fdwReason)
 	{
 	case DLL_PROCESS_ATTACH:
-		if (TRUE) // check if mod is compatible with executable
+		if (TRUE) // check if mod is compatible with an executable
 		{
 			Config::Load(hModule);
 			Hooks::Load();

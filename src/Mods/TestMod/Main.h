@@ -32,9 +32,34 @@ namespace Main
 {
 	extern "C"
 	{
+		/// <summary>
+		/// Get mod name. Uses for menu
+		/// </summary>
+		/// <returns></returns>
 		const CHAR* __stdcall GetName();
+
+		/// <summary>
+		/// Get mod menu handle
+		/// </summary>
+		/// <returns>if returns NULL, menu will not be visible </returns>
 		HMENU __stdcall GetMenu();
+
+		/// <summary>
+		/// Set window handle for window manipulations
+		/// </summary>
+		/// <param name="hWnd"></param>
+		/// <returns></returns>
 		VOID __stdcall SetHWND(HWND hWnd);
+
+		/// <summary>
+		/// Pre-rendering frame callback, for any blend operations
+		/// </summary>
+		/// <param name="width">width in pixels</param>
+		/// <param name="height">height in pixels</param>
+		/// <param name="pitch">row pitch in bytes</param>
+		/// <param name="pixelFormat">pixel format flags</param>
+		/// <param name="buffer">frame buffer pointer</param>
+		/// <returns></returns>
 		VOID __stdcall DrawFrame(DWORD width, DWORD height, LONG pitch, DWORD pixelFormat, VOID* buffer);
 	}
 }
