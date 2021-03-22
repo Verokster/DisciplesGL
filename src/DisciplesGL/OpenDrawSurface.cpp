@@ -30,6 +30,7 @@
 #include "Config.h"
 #include "Resource.h"
 #include "PngLib.h"
+#include "Mods.h"
 
 OpenDrawSurface::OpenDrawSurface(IDrawUnknown** list, OpenDraw* lpDD, SurfaceType type, OpenDrawSurface* attached)
 	: IDrawSurface7(list)
@@ -376,7 +377,30 @@ VOID OpenDrawSurface::ReleaseBuffer()
 
 VOID OpenDrawSurface::SwapBuffers()
 {
-	((StateBufferAligned*)this->backBuffer)->isReady = TRUE;
+	StateBufferAligned* stateBuffer = ((StateBufferAligned*)this->backBuffer);
+	if (mods)
+	{
+		DWORD offset = ((config.mode->height - stateBuffer->size.height) >> 1) * config.mode->width + ((config.mode->width - stateBuffer->size.width) >> 1);
+		DWORD pitch = config.mode->width;
+		DWORD fomat = config.renderer == RendererGDI ? PIXEL_BGR : PIXEL_RGB;
+		VOID* lpBuffer;
+		if (config.mode->bpp != 16 || config.bpp32Hooked)
+		{
+			fomat |= PIXEL_TRUECOLOR;
+			pitch <<= 2;
+			lpBuffer = (DWORD*)stateBuffer->data + offset;
+		}
+		else
+		{
+			fomat |= PIXEL_HIGHCOLOR;
+			pitch <<= 1;
+			lpBuffer = (WORD*)stateBuffer->data + offset;
+		}
+
+		Mods::DrawFrame(stateBuffer->size.width, stateBuffer->size.height, *(LONG*)&pitch, fomat, lpBuffer);
+	}
+
+	stateBuffer->isReady = TRUE;
 
 	StateBuffer** lpBuffer = !this->ddraw->bufferIndex ? &this->indexBuffer : &this->secondaryBuffer;
 	StateBuffer* buffer = *lpBuffer;

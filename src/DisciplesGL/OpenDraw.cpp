@@ -29,6 +29,7 @@
 #include "Main.h"
 #include "Config.h"
 #include "Window.h"
+#include "Mods.h"
 #include "Hooks.h"
 #include "PngLib.h"
 #include "Wingdi.h"
@@ -680,6 +681,7 @@ ULONG __stdcall OpenDraw::Release()
 HRESULT __stdcall OpenDraw::SetCooperativeLevel(HWND hWnd, DWORD dwFlags)
 {
 	this->hWnd = hWnd;
+	Mods::SetHWND(hWnd);
 
 	if (dwFlags & DDSCL_NORMAL)
 	{

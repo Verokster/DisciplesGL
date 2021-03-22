@@ -325,6 +325,10 @@ BEGIN
 			END
 		END
 	END
+	POPUP "&Mods"
+	BEGIN
+		MENUITEM "",								IDM_MODS
+	END
 	POPUP "&Help"
 	BEGIN
 		MENUITEM "About &Application...",			IDM_HELP_ABOUT_APPLICATION
@@ -483,7 +487,7 @@ IDR_DLG_EXCEPTIONAL_EDIT	RCDATA		DISCARDABLE			"..\\files\\DLG_EXCEPTIONAL_EDIT.
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2021,3,16,1890
+ FILEVERSION 2021,3,22,1896
  PRODUCTVERSION 1,8,2,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -500,7 +504,7 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples I & II - OpenGL wrapper"
-			VALUE "FileVersion", "2021.03.16.1890"
+			VALUE "FileVersion", "2021.03.22.1896"
 			VALUE "LegalCopyright", "© 2021 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "C4dll-R.dll"
 			VALUE "ProductVersion", "1.8.2"

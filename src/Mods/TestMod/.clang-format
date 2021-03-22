@@ -1,0 +1,20 @@
+﻿---
+BasedOnStyle: WebKit
+DerivePointerAlignment: 'false'
+PointerAlignment: Left
+UseTab: ForContinuationAndIndentation
+TabWidth: 4
+SortIncludes: false
+NamespaceIndentation: All
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true
+  AfterStruct: false
+  AfterControlStatement: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeElse: true
+  IndentBraces: false
+...

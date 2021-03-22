@@ -255,6 +255,7 @@
     <ClCompile Include="IDrawSurface7.cpp" />
     <ClCompile Include="IDrawUnknown.cpp" />
     <ClCompile Include="MidRenderer.cpp" />
+    <ClCompile Include="Mods.cpp" />
     <ClCompile Include="NewRenderer.cpp" />
     <ClCompile Include="OGLRenderer.cpp" />
     <ClCompile Include="OldRenderer.cpp" />
@@ -288,6 +289,7 @@
     <ClInclude Include="IDrawSurface7.h" />
     <ClInclude Include="IDrawUnknown.h" />
     <ClInclude Include="MidRenderer.h" />
+    <ClInclude Include="Mods.h" />
     <ClInclude Include="NewRenderer.h" />
     <ClInclude Include="OGLRenderer.h" />
     <ClInclude Include="OldRenderer.h" />

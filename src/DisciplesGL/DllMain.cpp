@@ -29,6 +29,7 @@
 #include "Main.h"
 #include "Config.h"
 #include "Window.h"
+#include "Mods.h"
 #include "Resource.h"
 
 BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
@@ -77,6 +78,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 			if (SetProcessDpiAwarenessC)
 				SetProcessDpiAwarenessC(PROCESS_PER_MONITOR_DPI_AWARE);
 
+			Mods::Load();
 			Window::CheckMenu();
 
 			timeBeginPeriod(1);

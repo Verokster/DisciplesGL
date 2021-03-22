@@ -281,6 +281,8 @@
 #define IDM_STRETCH_100 (IDM_STRETCH_OFF + 100)
 
 #define IDM_LOCALE_DEFAULT 5000
+
+#define IDM_MODS 10000
 #pragma endregion
 
 #pragma region Strings

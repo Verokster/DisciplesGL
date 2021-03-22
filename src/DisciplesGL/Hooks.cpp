@@ -28,12 +28,14 @@
 #include "Mmsystem.h"
 #include "Commdlg.h"
 #include "process.h"
+#include "intrin.h"
 #include "Hooks.h"
 #include "Main.h"
 #include "Config.h"
 #include "Resource.h"
 #include "Window.h"
 #include "PngLib.h"
+#include "Mods.h"
 #include "Hooker.h"
 
 #define PANEL_WIDTH 160
@@ -1277,24 +1279,80 @@ namespace Hooks
 
 #pragma region 32 BPP
 	DWORD pBinkCopyToBuffer;
-	LONG __stdcall BinkCopyToBufferHook(VOID* hBnk, DWORD* dest, LONG pitch, DWORD height, DWORD x, DWORD y, DWORD flags)
+	LONG __stdcall BinkCopyToBufferHook(VOID* hBnk, DWORD* dst, DWORD pitch, DWORD height, DWORD x, DWORD y, DWORD flags)
 	{
-		LONG res = ((LONG(__stdcall*)(VOID*, DWORD*, LONG, DWORD, DWORD, DWORD, DWORD))pBinkCopyToBuffer)(hBnk, dest, pitch * 2, height, x, y, BINKCOPYALL | (config.renderer == RendererGDI ? BINKSURFACE32 : BINKSURFACE32R));
+		LONG res = ((LONG(__stdcall*)(VOID*, DWORD*, DWORD, DWORD, DWORD, DWORD, DWORD))pBinkCopyToBuffer)(hBnk, dst, pitch << 1, height, x, y, BINKCOPYALL | (config.renderer == RendererGDI ? BINKSURFACE32 : BINKSURFACE32R));
 		if (!res)
 		{
-			pitch /= 2;
-			LONG width = pitch >= 0 ? pitch : -pitch;
+			pitch >>= 1;
 
-			do
+			if (config.isSSE2)
 			{
-				DWORD* dst = dest;
-				dest += pitch;
+				if (!(pitch & 0xF))
+				{
+					__m128i* d = (__m128i*)dst;
+					__m128i k = _mm_set1_epi32(ALPHA_COMPONENT);
 
-				LONG count = width;
+					DWORD c = height * (pitch >> 2);
+					if ((DWORD)dst & 0xF)
+					{
+						do
+							_mm_storeu_si128(d++, _mm_or_si128(_mm_loadu_si128(d), k));
+						while (--c);
+					}
+					else
+					{
+						do
+							_mm_store_si128(d++, _mm_or_si128(_mm_load_si128(d), k));
+						while (--c);
+					}
+				}
+				else
+				{
+					DWORD width = pitch;
+					DWORD count = width >> 2;
+					if (count)
+					{
+						DWORD step = width - (count << 2);
+
+						__m128i* d = (__m128i*)dst;
+						__m128i k = _mm_set1_epi32(ALPHA_COMPONENT);
+
+						DWORD h = height;
+						do
+						{
+							DWORD w = count;
+							do
+								_mm_storeu_si128(d++, _mm_or_si128(_mm_loadu_si128(d), k));
+							while (--w);
+
+							d = (__m128i*)((DWORD*)d + step);
+						} while (--h);
+
+						count <<= 2;
+						width -= count;
+						dst += count;
+					}
+
+					pitch -= width;
+					do
+					{
+						DWORD count = width;
+						do
+							*dst++ |= ALPHA_COMPONENT;
+						while (--count);
+
+						dst += pitch;
+					} while (--height);
+				}
+			}
+			else
+			{
+				DWORD c = height * pitch;
 				do
 					*dst++ |= ALPHA_COMPONENT;
-				while (--count);
-			} while (--height);
+				while (--c);
+			}
 		}
 
 		return res;
@@ -3677,7 +3735,7 @@ namespace Hooks
 
 			CHAR* p = (CHAR*)stream->data;
 			DWORD size = stream->size - stream->position;
-			
+
 			do
 			{
 				if (!size)
@@ -3752,7 +3810,7 @@ namespace Hooks
 	}
 #pragma endregion
 
-	#pragma region Mirror Battle
+#pragma region Mirror Battle
 	BOOL isMirror;
 	DWORD sub_005A9A1E;
 
@@ -3784,7 +3842,7 @@ namespace Hooks
 		isMirror = config.battle.mirror ? (Random() & 1u) : FALSE;
 		return GetBattleBgNext(thisObj, NULL, name);
 	}
-	#pragma endregion
+#pragma endregion
 
 #pragma region Custom Package
 	DWORD sub_LoadImgPackage;

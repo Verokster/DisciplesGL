@@ -225,7 +225,6 @@ namespace Config
 		}
 
 		CHAR* p = StrLastChar(config.file, '\\');
-		*p = NULL;
 		StrCopy(p, "\\disciple.ini");
 
 		DWORD base = (DWORD)hModule;
