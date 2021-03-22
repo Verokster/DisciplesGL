@@ -53,8 +53,8 @@ namespace Config
 		AddFontMemResourceEx(data, len, NULL, &nFonts);
 
 		// load mod state
-		config.enabled = (BOOL)Config::Get(CONFIG_MOD, "Enabled", TRUE);
-		config.tick = config.enabled ? GetTickCount() : 0;
+		config.state.enabled = (BOOL)Config::Get(CONFIG_MOD, "Enabled", TRUE);
+		config.tick.begin = config.tick.end = config.state.enabled ? GetTickCount() : 0;
 
 		// load display position
 		config.displayCorner = (DisplayCorner)Config::Get(CONFIG_MOD, "DisplayCorner", DisplayBottomLeft);

@@ -51,7 +51,7 @@ namespace Main
 
 	VOID __stdcall DrawFrame(DWORD width, DWORD height, LONG pitch, DWORD pixelFormat, VOID* buffer)
 	{
-		if (!config.enabled)
+		if (!config.state.enabled)
 			return;
 
 		const RECT padShadow = { 11, 7, 9, 3 };
@@ -60,7 +60,11 @@ namespace Main
 		const FrameType* frame = (const FrameType*)&width;
 
 		CHAR time[256];
-		DWORD tick = GetTickCount() - config.tick;
+
+		if (!config.state.paused)
+			config.tick.end = GetTickCount();
+
+		DWORD tick = config.tick.end - config.tick.begin;
 		sprintf(time, "%02d:%02d:%02d", tick / 3600000, (tick % 3600000) / 60000, (tick % 60000) / 1000);
 
 		DWORD align;
@@ -80,8 +84,18 @@ namespace Main
 			break;
 		}
 
-		COLORREF shadow = tick / 1000 ? RGB(104, 16, 0) : RGB(96, 96, 96);
-		COLORREF color = tick / 1000 ? RGB(209, 174, 9) : RGB(255, 255, 255);
+		COLORREF color, shadow;
+		if (!config.state.paused && tick / 1000)
+		{
+			color = RGB(209, 174, 9);
+			shadow = RGB(104, 16, 0);
+		}
+		else
+		{
+			color = RGB(255, 255, 255);
+			shadow = RGB(96, 96, 96);
+		}
+
 		if (!(pixelFormat & PIXEL_BGR))
 		{
 			shadow = _byteswap_ulong(_rotl(shadow, 8));

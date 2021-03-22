@@ -41,6 +41,8 @@ struct FrameType {
 enum MenuType
 {
 	MenuEnabled,
+	MenuPaused,
+	MenuReset,
 	MenuDisplay
 };
 
@@ -57,8 +59,14 @@ struct ConfigItems {
 	HWND hWnd;
 	HICON icon;
 	HFONT font;
-	BOOL enabled;
+	struct {
+		BOOL enabled;
+		BOOL paused;
+	} state;
+	struct {
+		DWORD begin;
+		DWORD end;
+	} tick;
 	DisplayCorner displayCorner;
-	DWORD tick;
 	CHAR file[MAX_PATH];
 };

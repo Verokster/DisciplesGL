@@ -43,8 +43,14 @@ namespace Window
 		switch (type)
 		{
 		case MenuEnabled:
-			CheckMenuItem(hMenu, IDM_ENABLED, MF_BYCOMMAND | (config.enabled ? MF_CHECKED : MF_UNCHECKED));
-			EnableMenuItem(hMenu, IDM_RESET, MF_BYCOMMAND | (config.enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItem(hMenu, IDM_ENABLED, MF_BYCOMMAND | (config.state.enabled ? MF_CHECKED : MF_UNCHECKED));
+			EnableMenuItem(hMenu, IDM_RESET, MF_BYCOMMAND | (config.state.enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			break;
+		case MenuPaused:
+			CheckMenuItem(hMenu, IDM_PAUSED, MF_BYCOMMAND | (config.state.paused ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		case MenuReset:
+			EnableMenuItem(hMenu, IDM_RESET, MF_BYCOMMAND | (config.state.enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			break;
 		case MenuDisplay:
 			CheckMenuItem(hMenu, IDM_TOP_LEFT, MF_BYCOMMAND | MF_UNCHECKED);
@@ -66,6 +72,8 @@ namespace Window
 	VOID CheckMenu(HMENU hMenu)
 	{
 		CheckMenu(hMenu, MenuEnabled);
+		CheckMenu(hMenu, MenuPaused);
+		CheckMenu(hMenu, MenuReset);
 		CheckMenu(hMenu, MenuDisplay);
 	}
 
@@ -127,8 +135,8 @@ namespace Window
 				SetDlgItemText(hDlg, IDC_COPYRIGHT, path);
 			}
 
-				sprintf(path, "<A HREF=\"mailto:%s\">%s</A>", "verokster@gmail.com", "verokster@gmail.com");
-				SetDlgItemText(hDlg, IDC_LNK_EMAIL, path);
+			sprintf(path, "<A HREF=\"mailto:%s\">%s</A>", "verokster@gmail.com", "verokster@gmail.com");
+			SetDlgItemText(hDlg, IDC_LNK_EMAIL, path);
 
 			break;
 		}
@@ -175,8 +183,22 @@ namespace Window
 		{
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN: {
-			if ((HIWORD(lParam) & KF_ALTDOWN) && wParam == 'R')
-				config.tick = config.enabled ? GetTickCount() : 0;
+			if (HIWORD(lParam) & KF_ALTDOWN)
+			{
+				switch (wParam)
+				{
+				case 'P':
+					WindowProc(hWnd, WM_COMMAND, IDM_PAUSED, NULL);
+					break;
+
+				case 'R':
+					WindowProc(hWnd, WM_COMMAND, IDM_RESET, NULL);
+					break;
+
+				default:
+					break;
+				}
+			}
 
 			return CallWindowProc(OldWindowProc, hWnd, uMsg, wParam, lParam);
 		}
@@ -185,14 +207,30 @@ namespace Window
 			switch (wParam)
 			{
 			case IDM_ENABLED:
-				config.enabled = !config.enabled;
-				config.tick = config.enabled ? GetTickCount() : 0;
-				Config::Set(CONFIG_MOD, "Enabled", config.enabled);
+				config.state.enabled = !config.state.enabled;
+				config.tick.begin = config.tick.end = config.state.enabled ? GetTickCount() : 0;
+				Config::Set(CONFIG_MOD, "Enabled", config.state.enabled);
 				Window::CheckMenu(hWnd, MenuEnabled);
+				Window::CheckMenu(hWnd, MenuReset);
+				return NULL;
+
+			case IDM_PAUSED:
+				config.state.paused = !config.state.paused;
+				if (!config.state.enabled)
+					config.tick.end = 0;
+				else
+				{
+					DWORD tick = GetTickCount();
+					if (!config.state.paused)
+						config.tick.begin = tick - (config.tick.end - config.tick.begin);
+					config.tick.end = tick;
+				}
+				
+				Window::CheckMenu(hWnd, MenuPaused);
 				return NULL;
 
 			case IDM_RESET:
-				config.tick = config.enabled ? GetTickCount() : 0;
+				config.tick.begin = config.tick.end = config.state.enabled ? GetTickCount() : 0;
 				return NULL;
 
 			case IDM_TOP_LEFT:
