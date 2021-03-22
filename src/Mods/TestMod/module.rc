@@ -62,7 +62,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2021,3,22,26
+ FILEVERSION 2021,3,22,27
  PRODUCTVERSION 1,0,3,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -79,7 +79,7 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "FileDescription", "Disciples - Test Mod"
-			VALUE "FileVersion", "2021.03.22.26"
+			VALUE "FileVersion", "2021.03.22.27"
 			VALUE "LegalCopyright", "© 2021 Verok (verokster@gmail.com)"
 			VALUE "OriginalFilename", "test.mod"
 			VALUE "ProductVersion", "1.0.3"

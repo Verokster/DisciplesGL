@@ -57,7 +57,7 @@ namespace Config
 		config.tick.begin = config.tick.end = config.state.enabled ? GetTickCount() : 0;
 
 		// load display position
-		config.displayCorner = (DisplayCorner)Config::Get(CONFIG_MOD, "DisplayCorner", DisplayBottomLeft);
+		config.displayCorner = (DisplayCorner)Config::Get(CONFIG_MOD, "DisplayCorner", DisplayTopLeft);
 		if (config.displayCorner < DisplayTopLeft || config.displayCorner > DisplayBottomRight)
 			config.displayCorner = DisplayTopLeft;
 	}
