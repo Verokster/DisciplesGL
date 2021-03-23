@@ -326,7 +326,7 @@ namespace Config
 					ptr = Add(ptr, "SceneSort", *(INT*)&config.scene.sort.real, "Sort scenarios (0 - by title 'default'; 1 - by file name; 2 - by map size 'ascending'; 3 - by map size 'descending')");
 					ptr = Add(ptr, "Renderer", *(INT*)&config.renderer, "Image renderer (0 - auto 'default'; 1 - opengl 1.1; 2 - opengl 2.0; 3 - opengl 3.0; 4 - windows gdi)");
 					ptr = Add(ptr, "HD", config.hd, "Enables HD options, like 32 bpp rendering and different resolutions support (0 - no; 1 - yes 'default')");
-					
+
 					if (config.type.sacred)
 					{
 						ptr = Add(ptr, "DisplayWidth", GAME_WIDTH, "Image resolution width (640 - min; 2048 - max)");
@@ -337,7 +337,7 @@ namespace Config
 						ptr = Add(ptr, "DisplayWidth", GAME_WIDTH, "Image resolution width (800 - min)");
 						ptr = Add(ptr, "DisplayHeight", GAME_HEIGHT, "Image resolution height (600 - min)");
 					}
-					
+
 					ptr = Add(ptr, "ImageAspect", config.image.aspect, "Keep image aspect ratio (0 - no; 1 - yes 'default')");
 					ptr = Add(ptr, "ImageVSync", config.image.vSync, "Enables vertical synchronization (0 - no; 1 - yes 'default')");
 					ptr = Add(ptr, "Interpolation", (INT)config.image.interpolation, "Image interpolation filter (0 - none; 1 - linear; 2 - hermite 'default'; 3 - cubic; 4 - lanczos)");
@@ -839,14 +839,12 @@ namespace Config
 			config.borderless.mode = FALSE;
 		}
 
-		DEVMODE devMode;
-		MemoryZero(&devMode, sizeof(DEVMODE));
+		DEVMODE devMode = {};
 		devMode.dmSize = sizeof(DEVMODE);
 		config.syncStep = 1000.0 / (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode) && (devMode.dmFields & DM_DISPLAYFREQUENCY) ? devMode.dmDisplayFrequency : 60);
 
 		CHAR buffer[256];
-		MENUITEMINFO info;
-		MemoryZero(&info, sizeof(MENUITEMINFO));
+		MENUITEMINFO info = {};
 		info.cbSize = sizeof(MENUITEMINFO);
 		info.fMask = MIIM_TYPE;
 		info.fType = MFT_STRING;

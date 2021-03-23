@@ -172,7 +172,7 @@ VOID OpenDraw::TakeSnapshot(Size* size, VOID* stateData, BOOL isTrueColor)
 					VOID* data = GlobalLock(hMemory);
 					{
 						BITMAPINFOHEADER* bmiHeader = (BITMAPINFOHEADER*)data;
-						MemoryZero(bmiHeader, sizeof(BITMAPINFOHEADER));
+						*bmiHeader = {};
 
 						bmiHeader->biSize = sizeof(BITMAPINFOHEADER);
 						bmiHeader->biWidth = snapSize.width;
@@ -604,7 +604,7 @@ OpenDraw::OpenDraw(IDrawUnknown** list)
 
 	this->flushTime = 0.0;
 
-	MemoryZero(&this->windowPlacement, sizeof(WINDOWPLACEMENT));
+	this->windowPlacement = {};
 }
 
 OpenDraw::~OpenDraw()
@@ -754,8 +754,7 @@ HRESULT __stdcall OpenDraw::CreateClipper(DWORD dwFlags, IDrawClipper** lplpDDCl
 
 HRESULT __stdcall OpenDraw::EnumDisplayModes(DWORD dwFlags, LPDDSURFACEDESC2 lpDDSurfaceDesc, LPVOID lpContext, LPDDENUMMODESCALLBACK2 lpEnumModesCallback)
 {
-	DDSURFACEDESC2 ddSurfaceDesc;
-	MemoryZero(&ddSurfaceDesc, sizeof(DDSURFACEDESC2));
+	DDSURFACEDESC2 ddSurfaceDesc = {};
 
 	DisplayMode* mode = modesList;
 	DWORD count = sizeof(modesList) / sizeof(DisplayMode);

@@ -35,7 +35,7 @@ ShaderProgram::ShaderProgram(const CHAR* version, DWORD vertexName, DWORD fragme
 	if (this->flags & SHADER_LEVELS)
 	{
 		this->colors = (Adjustment*)MemoryAlloc(sizeof(Adjustment));
-		MemoryZero(this->colors, sizeof(Adjustment));
+		*this->colors = {};
 	}
 	else
 		this->colors = NULL;

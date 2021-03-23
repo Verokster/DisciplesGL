@@ -340,7 +340,7 @@ namespace GL
 
 	VOID ResetPixelFormatDescription(PIXELFORMATDESCRIPTOR* pfd)
 	{
-		MemoryZero(pfd, sizeof(PIXELFORMATDESCRIPTOR));
+		*pfd = {};
 		pfd->nSize = sizeof(PIXELFORMATDESCRIPTOR);
 		pfd->nVersion = 1;
 	}

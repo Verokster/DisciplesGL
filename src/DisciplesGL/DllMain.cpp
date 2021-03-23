@@ -36,13 +36,12 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 {
 	switch (fdwReason)
 	{
-	case DLL_PROCESS_ATTACH:
-	{
+	case DLL_PROCESS_ATTACH: {
 		hDllModule = hModule;
 		if (Config::Load())
 		{
 			Hooks::Load();
-			
+
 			Window::SetCaptureKeys(TRUE);
 			{
 				WNDCLASS wc = {
@@ -64,8 +63,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 				CHAR path[MAX_PATH];
 				GetModuleFileName(hDllModule, path, MAX_PATH - 1);
 
-				ACTCTX actCtx;
-				MemoryZero(&actCtx, sizeof(ACTCTX));
+				ACTCTX actCtx = {};
 				actCtx.cbSize = sizeof(ACTCTX);
 				actCtx.lpSource = path;
 				actCtx.hModule = hDllModule;
@@ -89,8 +87,7 @@ BOOL __stdcall DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 		break;
 	}
 
-	case DLL_PROCESS_DETACH:
-	{
+	case DLL_PROCESS_DETACH: {
 		if (hDllModule)
 		{
 			timeEndPeriod(1);

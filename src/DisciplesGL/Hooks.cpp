@@ -1268,9 +1268,9 @@ namespace Hooks
 		return GetDeviceCaps(hdc, index);
 	}
 
-	const CLSID CLSID_DirectDraw = { 0xD7B70EE0, 0x4340, 0x11CF, 0xB0, 0x63, 0x00, 0x20, 0xAF, 0xC2, 0xCD, 0x35 };
 	HRESULT __stdcall CoCreateInstanceHook(REFCLSID rclsid, LPUNKNOWN pUnkOuter, DWORD dwClsContext, REFIID riid, LPVOID* ppv)
 	{
+		static const CLSID CLSID_DirectDraw = { 0xD7B70EE0, 0x4340, 0x11CF, 0xB0, 0x63, 0x00, 0x20, 0xAF, 0xC2, 0xCD, 0x35 };
 		if (!MemoryCompare(&rclsid, &CLSID_DirectDraw, sizeof(CLSID)))
 			return Main::DrawCreateEx(NULL, ppv, riid, NULL);
 
@@ -2856,14 +2856,14 @@ namespace Hooks
 
 	VOID __stdcall SetAnimSpeed()
 	{
-		const DOUBLE value = 1000.0 / 15.0;
+		static const DOUBLE value = 1000.0 / 15.0;
 		if (animSpeed)
 			*animSpeed = config.speed.enabled ? DWORD(value / config.speed.value) : 66;
 	}
 
 	VOID __stdcall SetMapSpeed()
 	{
-		const DOUBLE value = 1000.0 / 30.0;
+		static const DOUBLE value = 1000.0 / 30.0;
 		if (mapSpeed)
 			*mapSpeed = config.speed.enabled ? DWORD(value / config.speed.value) : 33;
 	}
@@ -2981,7 +2981,7 @@ namespace Hooks
 
 	DWORD __fastcall GetScrollTime(DWORD time)
 	{
-		const DOUBLE value = 1000.0 / 60.0;
+		static const DOUBLE value = 1000.0 / 60.0;
 
 		config.scroll.speed = time;
 		return !config.speed.hooked && config.speed.enabled ? DWORD(value * config.speed.value) : 16;
@@ -3634,30 +3634,28 @@ namespace Hooks
 		}
 	}
 
-	const ImageIndices battleIndices = {
-		990, 200,
-		&battleIndices.indices,
-		11,
-
-		0, 96, 346, 0, 279, 104,
-		279, 96, 594, 0, 20, 104,
-		299, 96, 550, 0, 180, 104,
-
-		511, 96, 346, 104, 180, 104,
-		691, 96, 458, 104, 20, 104,
-		711, 96, 451, 104, 279, 104,
-
-		0, 64, 346, 208, 148, 32,
-		843, 64, 346, 240, 147, 32,
-		0, 34, 346, 272, 123, 30,
-		869, 35, 346, 302, 121, 29,
-
-		479, 94, 346, 331, 32, 106
-	};
-
-	VOID __fastcall ChangeBattleIndices(DWORD* object)
+	VOID __fastcall ChangeBattleIndices(const ImageIndices*** object)
 	{
-		((DWORD*)object[1])[7] = (DWORD)&battleIndices;
+		static const SpritePosition battleSprites[] = {
+			0, 96, 346, 0, 279, 104,
+			279, 96, 594, 0, 20, 104,
+			299, 96, 550, 0, 180, 104,
+
+			511, 96, 346, 104, 180, 104,
+			691, 96, 458, 104, 20, 104,
+			711, 96, 451, 104, 279, 104,
+
+			0, 64, 346, 208, 148, 32,
+			843, 64, 346, 240, 147, 32,
+			0, 34, 346, 272, 123, 30,
+			869, 35, 346, 302, 121, 29,
+
+			479, 94, 346, 331, 32, 106
+		};
+
+		static const ImageIndices battleIndices = { 990, 200, battleSprites, sizeof(battleSprites) / sizeof(SpritePosition) };
+
+		object[1][7] = &battleIndices;
 	}
 
 	DWORD sub_00625387;
@@ -3908,7 +3906,7 @@ namespace Hooks
 			fmul clouds_factor
 
 			lbl_classic:
-			fmul config.cloudsFactor;
+			fmul dword ptr config.cloudsFactor;
 			fmul clouds_count
 			retn
 		}
@@ -3962,12 +3960,13 @@ namespace Hooks
 			lea edx, [ebp-0x2C]
 			call InitClouds
 
-			mov ecx, [ebp-0xC]
-			mov eax,esi
+			mov eax, esi
 			pop edi
 			pop esi
-			mov dword ptr fs:[0], ecx
 			pop ebx
+
+			mov ecx, [ebp-0xC]
+			mov dword ptr fs:[0], ecx
 			leave
 			retn
 		}
@@ -5203,7 +5202,7 @@ namespace Hooks
 	{
 		if (!config.type.editor)
 		{
-			const CHAR* dialogs[] = {
+			static const CHAR* dialogs[] = {
 				"DLG_CHOOSE_LORD",
 				"DLG_CHOOSE_RACE",
 				"DLG_CHOOSE_SKIRMISH",
@@ -5273,7 +5272,7 @@ namespace Hooks
 		}
 		else
 		{
-			const CHAR* dialogs[] = {
+			static const CHAR* dialogs[] = {
 				"DLG_DELETE_MAP",
 				"DLG_EDIT_MAP",
 				"DLG_EXPORT_MAP",
@@ -5896,7 +5895,7 @@ namespace Hooks
 			CHAR size[16];
 			StrPrint(size, "%d x %d", scene->size, scene->size);
 
-			MemoryZero(dst, sizeof(StringObject));
+			*dst = {};
 			CopyString(dst, pattern, StrLength(pattern));
 			PrintString(dst, "%SCEN%", buf);
 			PrintString(dst, "%SIZE%", size);

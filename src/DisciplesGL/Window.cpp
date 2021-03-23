@@ -139,7 +139,7 @@ namespace Window
 			if (GetMenuByChildID(config.menu, mData, i))
 				return TRUE;
 
-		MemoryZero(mData, sizeof(MenuItemData));
+		*mData = {};
 		return FALSE;
 	}
 
@@ -948,15 +948,15 @@ namespace Window
 			{
 				switch (wParam)
 				{
-				case IDC_LNK_WEB:
-					SHELLEXECUTEINFOW shExecInfo;
-					MemoryZero(&shExecInfo, sizeof(SHELLEXECUTEINFOW));
+				case IDC_LNK_WEB: {
+					SHELLEXECUTEINFOW shExecInfo = {};
 					shExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
 					shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
 					shExecInfo.lpFile = ((NMLINK*)lParam)->item.szUrl;
 					shExecInfo.nShow = SW_SHOW;
 					ShellExecuteExW(&shExecInfo);
 					break;
+				}
 
 				default:
 					break;
@@ -1050,15 +1050,15 @@ namespace Window
 				{
 				case IDC_LNK_EMAIL:
 				case IDC_LNK_WEB:
-				case IDC_LNK_PATRON:
-					SHELLEXECUTEINFOW shExecInfo;
-					MemoryZero(&shExecInfo, sizeof(SHELLEXECUTEINFOW));
+				case IDC_LNK_PATRON: {
+					SHELLEXECUTEINFOW shExecInfo = {};
 					shExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
 					shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
 					shExecInfo.lpFile = ((NMLINK*)lParam)->item.szUrl;
 					shExecInfo.nShow = SW_SHOW;
 					ShellExecuteExW(&shExecInfo);
 					break;
+				}
 
 				default:
 					break;
@@ -1131,7 +1131,7 @@ namespace Window
 			if (levelsData)
 			{
 				SetWindowLong(hDlg, GWLP_USERDATA, (LONG)levelsData);
-				MemoryZero(levelsData, sizeof(LevelsData));
+				*levelsData = {};
 				levelsData->delta = 0.7f;
 				levelsData->values = config.colors.active;
 
@@ -1212,8 +1212,7 @@ namespace Window
 						RECT rc;
 						GetClientRect(hImg, &rc);
 
-						BITMAPINFO bmi;
-						MemoryZero(&bmi, sizeof(BITMAPINFO));
+						BITMAPINFO bmi = {};
 						bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 						bmi.bmiHeader.biWidth = rc.right;
 						bmi.bmiHeader.biHeight = 100;
@@ -1367,7 +1366,7 @@ namespace Window
 								FLOAT p0 = src->chanel[(j - sh + 2) % 3];
 								FLOAT p1 = src->chanel[(j - sh + 3) % 3];
 								FLOAT p2 = src->chanel[(j - sh + 4) % 3];
-								FLOAT c = p1 + 0.5 * h * (p2 - p0 + h * (p0 - 5.0 * p1 + 4.0 * p2 + h * (3.0 * (p1 - p2))));
+								FLOAT c = FLOAT(p1 + 0.5 * h * (p2 - p0 + h * (p0 - 5.0 * p1 + 4.0 * p2 + h * (3.0 * (p1 - p2)))));
 								ex.chanel[j] = c;
 								sss += c;
 							}
@@ -3040,8 +3039,7 @@ namespace Window
 		}
 
 		case WM_DISPLAYCHANGE: {
-			DEVMODE devMode;
-			MemoryZero(&devMode, sizeof(DEVMODE));
+			DEVMODE devMode = {};
 			devMode.dmSize = sizeof(DEVMODE);
 			config.syncStep = 1000.0 / (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode) && (devMode.dmFields & DM_DISPLAYFREQUENCY) ? devMode.dmDisplayFrequency : 60);
 
@@ -3108,10 +3106,9 @@ namespace Window
 		case WM_KEYUP:
 		case WM_CHAR:
 			PostMessage(GetParent(hWnd), uMsg, wParam, lParam);
-			return CallWindowProc(OldPanelProc, hWnd, uMsg, wParam, lParam);
 
 		default:
-			return CallWindowProc(OldPanelProc, hWnd, uMsg, wParam, lParam);
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		}
 	}
 

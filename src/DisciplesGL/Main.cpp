@@ -179,8 +179,7 @@ namespace Main
 
 	VOID LoadBack(VOID* buffer, DWORD width, DWORD height)
 	{
-		Stream stream;
-		MemoryZero(&stream, sizeof(Stream));
+		Stream stream = {};
 		if (Main::LoadResource(MAKEINTRESOURCE(IDR_BACK), &stream))
 		{
 			png_structp png_ptr = pnglib_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);

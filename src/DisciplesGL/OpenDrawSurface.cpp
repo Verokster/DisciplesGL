@@ -81,8 +81,7 @@ StateBufferBorder* LoadBufferImage(LPSTR resourceId)
 {
 	StateBufferBorder* buffer = NULL;
 
-	Stream stream;
-	MemoryZero(&stream, sizeof(Stream));
+	Stream stream = {};
 	if (Main::LoadResource(resourceId, &stream))
 	{
 		png_structp png_ptr = pnglib_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);

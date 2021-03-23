@@ -484,9 +484,8 @@ struct SpritePosition {
 
 struct ImageIndices {
 	Size size;
-	const VOID* lpIndices;
+	const SpritePosition* lpIndices;
 	DWORD count;
-	SpritePosition indices[];
 };
 
 struct TimeScale {

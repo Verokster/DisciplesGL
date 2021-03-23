@@ -67,8 +67,7 @@ StateBufferAligned::StateBufferAligned()
 		{
 			this->hDc = CreateCompatibleDC(hDc);
 
-			BITMAPINFO bmi;
-			MemoryZero(&bmi, sizeof(BITMAPINFO));
+			BITMAPINFO bmi = {};
 			bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 			bmi.bmiHeader.biWidth = *(LONG*)&config.mode->width;
 			bmi.bmiHeader.biHeight = -*(LONG*)&config.mode->height;

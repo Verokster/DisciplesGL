@@ -84,8 +84,7 @@ BOOL GDIRenderer::Start()
 			this->hBmpFront = CreateCompatibleBitmap(hDcMain, config.mode->width, config.mode->height);
 			SelectObject(this->hDcFront, this->hBmpFront);
 				
-			BITMAPINFO bmi;
-			MemoryZero(&bmi, sizeof(BITMAPINFO));
+			BITMAPINFO bmi = {};
 			bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 			bmi.bmiHeader.biWidth = *(LONG*)&config.mode->width;
 			bmi.bmiHeader.biHeight = -*(LONG*)&config.mode->height;
@@ -193,8 +192,7 @@ BOOL GDIRenderer::ReadFrame(BYTE* dstData, Rect* rect, DWORD pitch, BOOL isBGR, 
 	HDC hDcTemp = CreateCompatibleDC(this->hDc);
 	if (hDcTemp)
 	{
-		BITMAPINFO bmi;
-		MemoryZero(&bmi, sizeof(BITMAPINFO));
+		BITMAPINFO bmi = {};
 		bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 		bmi.bmiHeader.biWidth = rect->width;
 		bmi.bmiHeader.biHeight = rect->height;
