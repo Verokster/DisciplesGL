@@ -35,8 +35,8 @@ namespace Main
 {
 	HRESULT __stdcall DrawEnumerateEx(LPDDENUMCALLBACKEXA lpCallback, LPVOID lpContext, DWORD dwFlags)
 	{
-		GUID id = { 0x51221AA6, 0xC5DA, 0x468F, 0x82, 0x31, 0x68, 0x0E, 0xC9, 0x03, 0xA3, 0xB8 };
-		lpCallback(&id, "OpenGL Wrapper", "OpenGL Wrapper", lpContext, NULL);
+		static const GUID id = { 0x51221AA6, 0xC5DA, 0x468F, 0x82, 0x31, 0x68, 0x0E, 0xC9, 0x03, 0xA3, 0xB8 };
+		lpCallback((GUID*)&id, "OpenGL Wrapper", "OpenGL Wrapper", lpContext, NULL);
 		return DD_OK;
 	}
 

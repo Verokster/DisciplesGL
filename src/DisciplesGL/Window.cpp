@@ -3104,8 +3104,11 @@ namespace Window
 		case WM_SYSKEYUP:
 		case WM_KEYDOWN:
 		case WM_KEYUP:
-		case WM_CHAR:
-			PostMessage(GetParent(hWnd), uMsg, wParam, lParam);
+		case WM_CHAR: {
+			HWND hParent = GetParent(hWnd);
+			WNDPROC proc = (WNDPROC)GetWindowLong(hParent, GWL_WNDPROC);
+			return CallWindowProc(proc, hParent, uMsg, wParam, lParam);
+		}
 
 		default:
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);

@@ -91,6 +91,9 @@ namespace Hooks
 		DWORD mouse_pos_fix;
 		DWORD speed_anim;
 		DWORD no_cd;
+
+		DWORD async_mid;
+		DWORD async_battle;
 	};
 
 	struct AddressSpaceV2 {
@@ -270,6 +273,7 @@ namespace Hooks
 		DWORD scene_sort_hook;
 		DWORD scene_print_edit_hook;
 		DWORD scene_print_delete_hook;
+
 		DWORD str_copy;
 		DWORD str_print;
 

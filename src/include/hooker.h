@@ -31,8 +31,14 @@
 
 #include "window.h"
 
+typedef VOID* HOOKER;
+
 #if !defined(DOUBLE)
 typedef double DOUBLE;
+#endif
+
+#if !defined(QWORD)
+typedef unsigned __int64 QWORD;
 #endif
 
 enum RedirectType
@@ -41,9 +47,6 @@ enum RedirectType
 	REDIRECT_JUMP = 0xE9,
 	REDIRECT_JUMP_SHORT = 0xEB
 };
-
-typedef VOID* HOOKER;
-typedef unsigned __int64 QWORD;
 
 extern "C"
 {
@@ -387,13 +390,24 @@ extern "C"
 	BOOL __stdcall PatchDouble(HOOKER hooker, DWORD address, DOUBLE value);
 
 	/// <summary>
-	/// Redirect relative call to new address
+	/// Redirect relative function call to new address
 	/// </summary>
 	/// <param name="hooker"></param>
 	/// <param name="address"></param>
 	/// <param name="funcAddress"></param>
 	/// <returns></returns>
 	DWORD __stdcall RedirectCall(HOOKER hooker, DWORD address, const VOID* funcAddress);
+	
+	/// <summary>
+	/// Redirect all relative function calls to new address
+	/// </summary>
+	/// <param name="hooker"></param>
+	/// <param name="address"></param>
+	/// <param name="funcAddress"></param>
+	/// <param name="flags"></param>
+	/// <param name="count"></param>
+	/// <returns></returns>
+	DWORD __stdcall RedirectCalls(HOOKER hooker, DWORD address, const VOID* funcAddress, DWORD flags = 0, DWORD* count = NULL);
 
 	/// <summary>
 	/// Redirects module imported function and retrives old address
