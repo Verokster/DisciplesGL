@@ -124,49 +124,35 @@ DOUBLE MathRound(DOUBLE number)
 
 struct Aligned {
 	Aligned* last;
-	VOID* data;
 	VOID* block;
+	DWORD data[1];
 } * alignedList;
 
 VOID* AlignedAlloc(size_t size)
 {
-	Aligned* entry = (Aligned*)MemoryAlloc(sizeof(Aligned));
+	Aligned* entry = (Aligned*)MemoryAlloc(sizeof(Aligned) + size + 12);
 	entry->last = alignedList;
+	entry->block = (VOID*)(DWORD(entry->data + 4) & 0xFFFFFFF0);
 	alignedList = entry;
-
-	entry->data = MemoryAlloc(size + 16);
-	entry->block = (VOID*)(((DWORD)entry->data + 16) & 0xFFFFFFF0);
-
+	
 	return entry->block;
 }
 
 VOID AlignedFree(VOID* block)
 {
+	Aligned** list = &alignedList;
 	Aligned* entry = alignedList;
-	if (entry)
+	while (entry)
 	{
 		if (entry->block == block)
 		{
-			Aligned* last = entry->last;
-			MemoryFree(entry->data);
+			*list = entry->last;
 			MemoryFree(entry);
-			alignedList = last;
-			return;
+			break;
 		}
-		else
-			while (entry->last)
-			{
-				if (entry->last->block == block)
-				{
-					Aligned* last = entry->last->last;
-					MemoryFree(entry->last->data);
-					MemoryFree(entry->last);
-					entry->last = last;
-					return;
-				}
 
-				entry = entry->last;
-			}
+		list = &entry->last;
+		entry = entry->last;
 	}
 }
 

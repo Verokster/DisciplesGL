@@ -507,7 +507,12 @@ VOID OpenDraw::RenderStart()
 
 VOID OpenDraw::RenderStop()
 {
-	delete this->renderer;
+	if (this->renderer)
+	{
+		this->renderer->Stop();
+		delete this->renderer;
+	}
+
 	ClipCursor(NULL);
 }
 

@@ -58,9 +58,9 @@ protected:
 
 public:
 	OGLRenderer(OpenDraw*);
-	~OGLRenderer();
 
 	BOOL Start();
+	BOOL Stop();
 
 	virtual VOID Begin() {};
 	virtual VOID End() {};

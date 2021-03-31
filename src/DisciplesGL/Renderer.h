@@ -43,7 +43,6 @@ protected:
 	std::atomic<BOOL> isFinish;
 	ShaderGroup* program;
 
-	BOOL Stop();
 	VOID Render();
 	BOOL CheckView(BOOL);
 
@@ -52,6 +51,7 @@ public:
 	virtual ~Renderer();
 
 	virtual BOOL Start();
+	virtual BOOL Stop();
 	virtual VOID Redraw() {}
 	virtual BOOL ReadFrame(BYTE*, Rect*, DWORD, BOOL, BOOL*) { return FALSE; };
 };

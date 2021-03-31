@@ -36,38 +36,6 @@ GDIRenderer::GDIRenderer(OpenDraw* ddraw)
 	this->isTrue = config.mode->bpp != 16 || config.bpp32Hooked;
 }
 
-GDIRenderer::~GDIRenderer()
-{
-	if (this->Stop())
-	{
-		if (this->hDc)
-		{
-			ReleaseDC(this->ddraw->hDraw, this->hDc);
-
-			if (this->hDcTemp)
-			{
-				if (this->hBmpTemp)
-					DeleteObject(this->hBmpTemp);
-				DeleteDC(this->hDcTemp);
-			}
-
-			if (this->hDcBack)
-			{
-				if (this->hBmpBack)
-					DeleteObject(this->hBmpBack);
-				DeleteDC(this->hDcBack);
-			}
-
-			if (this->hDcFront)
-			{
-				if (this->hBmpFront)
-					DeleteObject(this->hBmpFront);
-				DeleteDC(this->hDcFront);
-			}
-		}
-	}
-}
-
 BOOL GDIRenderer::Start()
 {
 	if (!Renderer::Start())
@@ -121,6 +89,40 @@ BOOL GDIRenderer::Start()
 
 	config.zoom.glallow = TRUE;
 	PostMessage(this->ddraw->hWnd, config.msgMenu, NULL, NULL);
+
+	return TRUE;
+}
+
+BOOL GDIRenderer::Stop()
+{
+	if (!Renderer::Stop())
+		return FALSE;
+
+	if (this->hDc)
+	{
+		ReleaseDC(this->ddraw->hDraw, this->hDc);
+
+		if (this->hDcTemp)
+		{
+			if (this->hBmpTemp)
+				DeleteObject(this->hBmpTemp);
+			DeleteDC(this->hDcTemp);
+		}
+
+		if (this->hDcBack)
+		{
+			if (this->hBmpBack)
+				DeleteObject(this->hBmpBack);
+			DeleteDC(this->hDcBack);
+		}
+
+		if (this->hDcFront)
+		{
+			if (this->hBmpFront)
+				DeleteObject(this->hBmpFront);
+			DeleteDC(this->hDcFront);
+		}
+	}
 
 	return TRUE;
 }

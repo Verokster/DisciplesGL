@@ -89,7 +89,8 @@ namespace Hooks
 
 		DWORD interlockFix;
 		DWORD mouse_pos_fix;
-		DWORD speed_anim;
+		DWORD anim_create;
+		DWORD anim_release;
 		DWORD no_cd;
 
 		DWORD async_mid;

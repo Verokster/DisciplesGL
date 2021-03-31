@@ -43,9 +43,9 @@ private:
 
 public:
 	GDIRenderer(OpenDraw*);
-	~GDIRenderer();
 
 	BOOL Start();
+	BOOL Stop();
 
 	VOID Redraw();
 	BOOL ReadFrame(BYTE*, Rect*, DWORD, BOOL, BOOL*);

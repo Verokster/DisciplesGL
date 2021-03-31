@@ -61,25 +61,6 @@ OGLRenderer::OGLRenderer(OpenDraw* ddraw)
 	this->singleThread = config.singleThread;
 }
 
-OGLRenderer::~OGLRenderer()
-{
-	if (this->Stop())
-	{
-		if (this->singleThread)
-		{
-			this->End();
-			GL::Release(this->ddraw->hDraw, &this->hDc, &this->hRc);
-		}
-		else
-		{
-			SetEvent(this->hDrawEvent);
-			WaitForSingleObject(this->hDrawThread, INFINITE);
-			CloseHandle(this->hDrawThread);
-			CloseHandle(this->hDrawEvent);
-		}
-	}
-}
-
 BOOL OGLRenderer::Start()
 {
 	if (!Renderer::Start())
@@ -98,6 +79,27 @@ BOOL OGLRenderer::Start()
 		this->hDrawThread = CreateThread(&sAttribs, NULL, OGLRenderer::RenderThread, this, HIGH_PRIORITY_CLASS, &threadId);
 	}
 	
+	return TRUE;
+}
+
+BOOL OGLRenderer::Stop()
+{
+	if (!Renderer::Stop())
+		return FALSE;
+
+	if (this->singleThread)
+	{
+		this->End();
+		GL::Release(this->ddraw->hDraw, &this->hDc, &this->hRc);
+	}
+	else
+	{
+		SetEvent(this->hDrawEvent);
+		WaitForSingleObject(this->hDrawThread, INFINITE);
+		CloseHandle(this->hDrawThread);
+		CloseHandle(this->hDrawEvent);
+	}
+
 	return TRUE;
 }
 

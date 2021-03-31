@@ -51,67 +51,67 @@ namespace Hooks
 		VER(99, 8, 17, 1),
 		0x004C25E4, 0x004D2D75, 0x00000000, 0x004D34C1, 0x004D33A7, 0x005829B5,
 		0x005CB220, 0x005D61A8, 0x004D4FA0, 0x0052B2B9, 0x00461263, 0x004E3621, 0x004E3E06, 0x004E40AA,
-		0x004D9FE3, 0x004DA04E, 0x004BF1F1, 0x004BF8EC, 0x004D49DD, 0x00401131, 0x0051D340, 0x00522E8A,
+		0x004D9FE3, 0x004DA04E, 0x004BF1F1, 0x004BF8EC, 0x004D3F05, 0x005CA5DC, 0x00401131, 0x0051D340, 0x00522E8A,
 
 		// v99.8.20.2
 		VER(99, 8, 20, 2),
 		0x004C3BD5, 0x004D439E, 0x00000000, 0x004D4AEA, 0x004D49D0, 0x00583F85,
 		0x005CD348, 0x005CDA58, 0x004D6597, 0x00545A91, 0x004623A7, 0x004E4E36, 0x004E55B6, 0x004E585A,
-		0x004DB63A, 0x004DB6A5, 0x004C063C, 0x004C0D37, 0x004D5FD4, 0x00401131, 0x00537D64, 0x0053D63D,
+		0x004DB63A, 0x004DB6A5, 0x004C063C, 0x004C0D37, 0x004D54FC, 0x005CC704, 0x00401131, 0x00537D64, 0x0053D63D,
 
 		// v99.12.15.1a
 		VER(99, 12, 15, 1),
 		0x004CD137, 0x004DFFA4, 0x00000000, 0x004E06D3, 0x004E05B9, 0x0058F7E3,
 		0x005E6320, 0x005DB2A0, 0x004E21B5, 0x00550B69, 0x00465296, 0x004F07F5, 0x004F1006, 0x004F12AA,
-		0x004E7094, 0x004E70FF, 0x004C9AFD, 0x004CA224, 0x004E1BF7, 0x0040112E, 0x00542A7D, 0x00548586,
+		0x004E7094, 0x004E70FF, 0x004C9AFD, 0x004CA224, 0x004E111F, 0x005DA1FC, 0x0040112E, 0x00542A7D, 0x00548586,
 
 		// v99.12.15.1b
 		VER(99, 12, 15, 1),
 		0x004CD1B2, 0x004E002A, 0x00000000, 0x004E0759, 0x004E063F, 0x0058F053,
 		0x005DB2B0, 0x005E6330, 0x004E21D6, 0x005507D6, 0x004652BF, 0x004F0A1C, 0x004F11B6, 0x004F145A,
-		0x004E7316, 0x004E7381, 0x004C9AAE, 0x004CA1D5, 0x004E1C13, 0x0040112E, 0x00542AB2, 0x0054847C,
+		0x004E7316, 0x004E7381, 0x004C9AAE, 0x004CA1D5, 0x004E113B, 0x005DA20C, 0x0040112E, 0x00542AB2, 0x0054847C,
 
 		// v2000.6.22.1 - Eng
 		VER(2000, 6, 22, 1),
 		0x004CD13E, 0x004DFF9C, 0x00000000, 0x004E0759, 0x004E063F, 0x0058F0D3,
 		0x005E6358, 0x005DB2D8, 0x004E225C, 0x0055037A, 0x0046523E, 0x004F07B0, 0x004F0FB6, 0x004F125A,
-		0x004E712F, 0x004E719A, 0x004C9B9A, 0x004CA2B4, 0x004E1C9E, 0x0040112E, 0x005426F4, 0x00548009,
+		0x004E712F, 0x004E719A, 0x004C9B9A, 0x004CA2B4, 0x004E11C6, 0x005DA234, 0x0040112E, 0x005426F4, 0x00548009,
 
 		// v2000.6.22.1 - Rus
 		VER(2000, 6, 22, 1),
 		0x004CD408, 0x004E0323, 0x00000000, 0x004E0AA8, 0x004E098E, 0x00590E03,
 		0x005E8430, 0x005DD278, 0x004E2565, 0x0055106A, 0x0046541D, 0x004F0B39, 0x004F12D6, 0x004F157A,
-		0x004E746D, 0x004E74D8, 0x004C9D9F, 0x004CA4C6, 0x004E1FA7, 0x0040112E, 0x00542F09, 0x00548A35,
+		0x004E746D, 0x004E74D8, 0x004C9D9F, 0x004CA4C6, 0x004E14CF, 0x005DC1D4, 0x0040112E, 0x00542F09, 0x00548A35,
 
 		// v2000.8.7.1 - Fre
 		VER(2000, 8, 7, 1),
 		0x004CCDD9, 0x004DFCAE, 0x00000000, 0x004E03DD, 0x004E02C3, 0x0058F103,
 		0x005E6360, 0x005DB2E0, 0x004E1E5A, 0x00550561, 0x00465070, 0x004F061E, 0x004F0DB6, 0x004F105A,
-		0x004E6F18, 0x004E6F83, 0x004C987E, 0x004C9FA5, 0x004E1897, 0x0040112E, 0x00542842, 0x00548207,
+		0x004E6F18, 0x004E6F83, 0x004C987E, 0x004C9FA5, 0x004E0DBF, 0x005DA23C, 0x0040112E, 0x00542842, 0x00548207,
 
 		// v99.8.17.2 Editor
 		VER(99, 8, 17, 2),
 		0x004444C2, 0x0044F4FD, 0x00426AE5, 0x0044FC2C, 0x0044FB12, 0x00000000,
 		0x0050C170, 0x00000000, 0x004517FC, 0x0049E957, 0x00000000, 0x004601D3, 0x00460966, 0x00460C0A,
-		0x00456896, 0x00456901, 0x004411CB, 0x004418D2, 0x0045123E, 0x00000000, 0x00000000, 0x00000000,
+		0x00456896, 0x00456901, 0x004411CB, 0x004418D2, 0x00450770, 0x0050B58C, 0x00000000, 0x00000000, 0x00000000,
 
 		// v99.12.15.1 Editor
 		VER(99, 12, 15, 1),
 		0x00443D2A, 0x004511FC, 0x00426437, 0x004519CE, 0x004518B4, 0x00000000,
 		0x00518530, 0x00000000, 0x0045358A, 0x0049FA73, 0x00000000, 0x0046204D, 0x00462796, 0x00462A3A,
-		0x0045871D, 0x00458788, 0x00440AC2, 0x004411C9, 0x00452FC7, 0x00000000, 0x00000000, 0x00000000,
+		0x0045871D, 0x00458788, 0x00440AC2, 0x004411C9, 0x004524F9, 0x0050D53C, 0x00000000, 0x00000000, 0x00000000,
 
 		// v2000.6.22.1 Editor - Eng
 		VER(2000, 6, 22, 1),
 		0x00443EDE, 0x0045147D, 0x004265E3, 0x00451BE8, 0x00451ACE, 0x00000000,
 		0x00519568, 0x00000000, 0x004537B8, 0x004A041A, 0x00000000, 0x0046229D, 0x00462AF6, 0x00462D9A,
-		0x00458961, 0x004589CC, 0x00440BC6, 0x004412CD, 0x004531FA, 0x00000000, 0x00000000, 0x00000000,
+		0x00458961, 0x004589CC, 0x00440BC6, 0x004412CD, 0x00452728, 0x0050E574, 0x00000000, 0x00000000, 0x00000000,
 
 		// v2000.6.22.1 Editor - Fre
 		VER(2000, 6, 22, 1),
 		0x00443D6B, 0x0045129C, 0x004264C9, 0x00451A07, 0x004518ED, 0x00000000,
 		0x00519770, 0x00000000, 0x0045359C, 0x0048A8AA, 0x00000000, 0x004620EA, 0x00462836, 0x00462ADA,
-		0x00458791, 0x004587FC, 0x00440B37, 0x0044123E, 0x00452FD9, 0x00000000, 0x00000000, 0x00000000
+		0x00458791, 0x004587FC, 0x00440B37, 0x0044123E, 0x0045250B, 0x0050E574, 0x00000000, 0x00000000, 0x00000000
 	};
 
 	const AddressSpaceV2 addressArrayV2[] = {
@@ -2869,11 +2869,24 @@ namespace Hooks
 		return config.speed.hooked || !config.speed.enabled ? GetDoubleClickTime() : DWORD((FLOAT)GetDoubleClickTime() * config.speed.value);
 	}
 
+	struct AnimListEntry {
+		AnimListEntry* last;
+		DWORD* speed;
+	} * animList;
+
 	VOID __stdcall SetAnimSpeed()
 	{
 		static const DOUBLE value = 1000.0 / 15.0;
-		if (animSpeed)
-			*animSpeed = config.speed.enabled ? DWORD(value / config.speed.value) : 66;
+		AnimListEntry* entry = animList;
+		if (entry)
+		{
+			DWORD speed = config.speed.enabled ? DWORD(value / config.speed.value) : 66;
+			do
+			{
+				*entry->speed = speed;
+				entry = entry->last;
+			} while (entry);
+		}
 	}
 
 	VOID __stdcall SetMapSpeed()
@@ -2889,14 +2902,54 @@ namespace Hooks
 		SetMapSpeed();
 	}
 
-	VOID __declspec(naked) hook_004E1FA7()
+	DWORD sub_CreateAnimation;
+	DWORD* __fastcall CreateAnimation(DWORD* _this, DWORD /*edx*/, DWORD a2, DWORD a3, DWORD a4)
 	{
-		__asm
+		DWORD* res = ((DWORD * (__thiscall*)(DWORD*, DWORD, DWORD, DWORD)) sub_CreateAnimation)(_this, a2, a3, a4);
+
+		AnimListEntry* entry = (AnimListEntry*)MemoryAlloc(sizeof(AnimListEntry));
+		entry->last = animList;
+		entry->speed = &res[38];
+		animList = entry;
+
+		SetAnimSpeed();
+		return res;
+	}
+
+	DWORD sub_ReleaseAnimation;
+	DWORD* __fastcall ReleaseAnimation(DWORD* _this, DWORD /*edx*/, DWORD flag)
+	{
+		if (flag & 1)
 		{
-			lea eax, [esi+0x98]
-			mov animSpeed, eax
-			jmp SetAnimSpeed
+			DWORD* speed = &_this[38];
+
+			AnimListEntry** list = &animList;
+			AnimListEntry* entry = animList;
+			while (entry)
+			{
+				if (entry->speed == speed)
+				{
+					*list = entry->last;
+					MemoryFree(entry);
+					break;
+				}
+
+				list = &entry->last;
+				entry = entry->last;
+			}
 		}
+
+		return ((DWORD * (__thiscall*)(DWORD*, DWORD)) sub_ReleaseAnimation)(_this, flag);
+	}
+
+	VOID __fastcall SetAnimation(DWORD* _this)
+	{
+		AnimListEntry* entry = (AnimListEntry*)MemoryAlloc(sizeof(AnimListEntry));
+		entry->last = animList;
+		entry->speed = &_this[13];
+		animList = entry;
+
+		SetAnimSpeed();
 	}
 
 	VOID __declspec(naked) hook_00519FF1()
@@ -2904,11 +2957,8 @@ namespace Hooks
 		__asm
 		{
 			push ecx
-
-			lea eax, [esi+0x34]
-			mov animSpeed, eax
-			call SetAnimSpeed
-
+			mov ecx, esi
+			call SetAnimation
 			pop ecx
 			retn
 		}
@@ -6049,9 +6099,11 @@ namespace Hooks
 	VOID LoadV1(HOOKER hooker, const AddressSpaceV1* hookSpace)
 	{
 		// Game Speed
+		if (ReadDWord(hooker, hookSpace->anim_release, &sub_ReleaseAnimation))
 		{
 			config.speed.hooked = TRUE;
-			PatchCall(hooker, hookSpace->speed_anim, hook_004E1FA7, 5);
+			sub_CreateAnimation = RedirectCall(hooker, hookSpace->anim_create, CreateAnimation);
+			PatchPtr(hooker, hookSpace->anim_release, ReleaseAnimation);
 		}
 
 		// Scroll
