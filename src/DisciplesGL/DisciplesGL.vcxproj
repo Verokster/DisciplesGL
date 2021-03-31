@@ -80,7 +80,7 @@
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Install\DirectX SDK\DirectX_7.1_SDK\include;$(SolutionDir)include;$(IncludePath)</IncludePath>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
-    <OutDir>D:\Games\Sacred Lands\Exe</OutDir>
+    <OutDir>D:\Games\Disciples\Exe</OutDir>
     <TargetName>C4dll-R</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

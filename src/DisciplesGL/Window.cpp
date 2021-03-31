@@ -2187,6 +2187,8 @@ namespace Window
 						Hooks::SetGameSpeed();
 						CheckMenu(MenuSpeed);
 					}
+
+					return NULL;
 				}
 				else if (config.keys.imageFilter && config.keys.imageFilter + VK_F1 - 1 == wParam)
 				{
