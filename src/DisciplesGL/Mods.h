@@ -32,7 +32,7 @@
 #define PIXEL_BGR 2
 
 typedef const CHAR*(__stdcall* GETNAME)();
-typedef HMENU(__stdcall* GETMENU)();
+typedef HMENU(__stdcall* GETMENU)(DWORD);
 typedef VOID(__stdcall* SETHWND)(HWND);
 typedef VOID(__stdcall* DRAWFRAME)(DWORD, DWORD, LONG, DWORD, VOID*);
 
@@ -40,6 +40,8 @@ struct Mod {
 	Mod* last;
 	HWND hWnd;
 	HMODULE hModule;
+	BOOL added;
+	CHAR name[256];
 
 	GETNAME GetName;
 	GETMENU GetMenu;

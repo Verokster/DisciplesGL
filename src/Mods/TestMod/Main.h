@@ -41,8 +41,9 @@ namespace Main
 		/// <summary>
 		/// Get mod menu handle
 		/// </summary>
-		/// <returns>if returns NULL, menu will not be visible </returns>
-		HMENU __stdcall GetMenu();
+		/// <param name="offset">ID offset </param>
+		/// <returns>if returns NULL, menu will not be visible</returns>
+		HMENU __stdcall GetModMenu(DWORD offset);
 
 		/// <summary>
 		/// Set window handle for window manipulations

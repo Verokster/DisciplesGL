@@ -27,6 +27,7 @@
 #include "intrin.h"
 #include "Resource.h"
 #include "Window.h"
+#include "Hooker.h"
 
 LONG GAME_WIDTH;
 LONG GAME_HEIGHT;
@@ -225,24 +226,14 @@ namespace Config
 		}
 
 		CHAR* p = StrLastChar(config.file, '\\');
-		StrCopy(p, "\\disciple.ini");
+		StrCopy(p + 1, "disciple.ini");
 
-		DWORD base = (DWORD)hModule;
-		PIMAGE_NT_HEADERS headNT = (PIMAGE_NT_HEADERS)((BYTE*)base + ((PIMAGE_DOS_HEADER)hModule)->e_lfanew);
-
-		PIMAGE_DATA_DIRECTORY dataDir = &headNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
-		if (dataDir->Size)
+		HOOKER hooker = CreateHooker(hModule);
+		if (hooker)
 		{
-			PIMAGE_IMPORT_DESCRIPTOR imports = (PIMAGE_IMPORT_DESCRIPTOR)(base + dataDir->VirtualAddress);
-			for (DWORD idx = 0; imports->Name; ++idx, ++imports)
-			{
-				CHAR* libraryName = (CHAR*)(base + imports->Name);
-				if (!StrCompareInsensitive(libraryName, "smackw32.dll"))
-					config.type.sacred = TRUE;
-
-				if (!StrCompareInsensitive(libraryName, "comdlg32.dll"))
-					config.type.editor = TRUE;
-			}
+			config.type.sacred = RedirectImports(hooker, "smackw32.dll");
+			config.type.editor = RedirectImports(hooker, "comdlg32.dll");
+			ReleaseHooker(hooker);
 		}
 
 		if (config.type.sacred)

@@ -2839,9 +2839,12 @@ namespace Hooks
 #pragma endregion
 
 #pragma region Game Speed
-	DWORD* animSpeed;
+	struct AnimListEntry {
+		AnimListEntry* last;
+		DWORD* speed;
+	} * animList;
 	DWORD* mapSpeed;
-
+	
 	TimeScale gameSpeed;
 	DWORD GetTimeSpeed(TimeScale* time, DOUBLE scale)
 	{
@@ -2868,11 +2871,6 @@ namespace Hooks
 	{
 		return config.speed.hooked || !config.speed.enabled ? GetDoubleClickTime() : DWORD((FLOAT)GetDoubleClickTime() * config.speed.value);
 	}
-
-	struct AnimListEntry {
-		AnimListEntry* last;
-		DWORD* speed;
-	} * animList;
 
 	VOID __stdcall SetAnimSpeed()
 	{
@@ -6112,8 +6110,8 @@ namespace Hooks
 
 			if (hookSpace->scroll_nop)
 			{
-				PatchBlock(hooker, hookSpace->scroll_nop, (VOID*)nop4, sizeof(nop4));
-				PatchBlock(hooker, hookSpace->scroll_nop + 33, (VOID*)nop4, sizeof(nop4));
+				PatchBlock(hooker, hookSpace->scroll_nop, nop4, sizeof(nop4));
+				PatchBlock(hooker, hookSpace->scroll_nop + 33, nop4, sizeof(nop4));
 			}
 
 			PatchCall(hooker, hookSpace->scroll_speed, hook_004E0323);
@@ -6286,14 +6284,14 @@ namespace Hooks
 
 			if (hookSpace->scroll_nop_1)
 			{
-				PatchBlock(hooker, hookSpace->scroll_nop_1, (VOID*)nop4, sizeof(nop4));
-				PatchBlock(hooker, hookSpace->scroll_nop_1 + 33, (VOID*)nop4, sizeof(nop4));
+				PatchBlock(hooker, hookSpace->scroll_nop_1, nop4, sizeof(nop4));
+				PatchBlock(hooker, hookSpace->scroll_nop_1 + 33, nop4, sizeof(nop4));
 			}
 
 			if (hookSpace->scroll_nop_2)
 			{
-				PatchBlock(hooker, hookSpace->scroll_nop_2, (VOID*)nop4, sizeof(nop4));
-				PatchBlock(hooker, hookSpace->scroll_nop_2 + 33, (VOID*)nop4, sizeof(nop4));
+				PatchBlock(hooker, hookSpace->scroll_nop_2, nop4, sizeof(nop4));
+				PatchBlock(hooker, hookSpace->scroll_nop_2 + 33, nop4, sizeof(nop4));
 			}
 
 			PatchCall(hooker, hookSpace->scroll_speed, hook_0053D185, 1);
@@ -6818,30 +6816,27 @@ namespace Hooks
 
 	VOID Load()
 	{
+		CHAR path[MAX_PATH];
+		GetModuleFileName(NULL, path, MAX_PATH);
+		CHAR* p = StrLastChar(path, '\\');
+		StrCopy(p + 1, "DDRAW.dll");
+		HOOKER hooker = CreateHooker(GetModuleHandle(path));
+		if (hooker)
 		{
-			CHAR path[MAX_PATH];
-			GetModuleFileName(NULL, path, MAX_PATH - 1);
-			CHAR* p = StrLastChar(path, '\\');
-			StrCopy(p, "\\DDRAW.dll");
-			HMODULE hLib = GetModuleHandle(path);
-			if (hLib)
-			{
-				HOOKER hooker = CreateHooker(hLib);
-				{
-					PatchEntry(hooker, FakeEntryPoint);
-				}
-				ReleaseHooker(hooker);
-			}
+			PatchEntry(hooker, FakeEntryPoint);
+			ReleaseHooker(hooker);
 		}
 
-		HOOKER user = CreateHooker(GetModuleHandle("USER32.dll"));
+		hooker = CreateHooker(GetModuleHandle("USER32.dll"));
+		if (hooker)
 		{
-			PatchExport(user, "MessageBoxA", MessageBoxHook);
-			PatchExport(user, "DialogBoxParamA", DialogBoxParamHook);
+			PatchExport(hooker, "MessageBoxA", MessageBoxHook);
+			PatchExport(hooker, "DialogBoxParamA", DialogBoxParamHook);
+			ReleaseHooker(hooker);
 		}
-		ReleaseHooker(user);
-
-		HOOKER hooker = CreateHooker(GetModuleHandle(NULL));
+		
+		hooker = CreateHooker(GetModuleHandle(NULL));
+		if (hooker)
 		{
 			{
 				PatchImportByName(hooker, "GetDeviceCaps", GetDeviceCapsHook);
@@ -6948,8 +6943,9 @@ namespace Hooks
 
 			if (!config.speed.hooked)
 				PatchImportByName(hooker, "timeGetTime", timeGetTimeHook);
+
+			ReleaseHooker(hooker);
 		}
-		ReleaseHooker(hooker);
 	}
 #pragma optimize("", on)
 }

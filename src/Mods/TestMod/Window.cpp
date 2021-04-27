@@ -35,6 +35,16 @@ namespace Window
 {
 	WNDPROC OldWindowProc;
 
+	BOOL EnableMenuItemOffset(HMENU hMenu, UINT uIDEnableItem, UINT uEnable)
+	{
+		return EnableMenuItem(hMenu, uIDEnableItem + config.index, uEnable);
+	}
+
+	DWORD CheckMenuItemOffset(HMENU hMenu, UINT uIDCheckItem, UINT uCheck)
+	{
+		return CheckMenuItem(hMenu, uIDCheckItem + config.index, uCheck);
+	}
+
 	VOID CheckMenu(HMENU hMenu, MenuType type)
 	{
 		if (!hMenu)
@@ -43,21 +53,21 @@ namespace Window
 		switch (type)
 		{
 		case MenuEnabled:
-			CheckMenuItem(hMenu, IDM_ENABLED, MF_BYCOMMAND | (config.state.enabled ? MF_CHECKED : MF_UNCHECKED));
-			EnableMenuItem(hMenu, IDM_RESET, MF_BYCOMMAND | (config.state.enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			CheckMenuItemOffset(hMenu, IDM_ENABLED, MF_BYCOMMAND | (config.state.enabled ? MF_CHECKED : MF_UNCHECKED));
+			EnableMenuItemOffset(hMenu, IDM_RESET, MF_BYCOMMAND | (config.state.enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			break;
 		case MenuPaused:
-			CheckMenuItem(hMenu, IDM_PAUSED, MF_BYCOMMAND | (config.state.paused ? MF_CHECKED : MF_UNCHECKED));
+			CheckMenuItemOffset(hMenu, IDM_PAUSED, MF_BYCOMMAND | (config.state.paused ? MF_CHECKED : MF_UNCHECKED));
 			break;
 		case MenuReset:
-			EnableMenuItem(hMenu, IDM_RESET, MF_BYCOMMAND | (config.state.enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+			EnableMenuItemOffset(hMenu, IDM_RESET, MF_BYCOMMAND | (config.state.enabled ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 			break;
 		case MenuDisplay:
-			CheckMenuItem(hMenu, IDM_TOP_LEFT, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(hMenu, IDM_TOP_RIGHT, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(hMenu, IDM_BOTTOM_LEFT, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(hMenu, IDM_BOTTOM_RIGHT, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(hMenu, IDM_TOP_LEFT + (config.displayCorner - DisplayTopLeft), MF_BYCOMMAND | MF_CHECKED);
+			CheckMenuItemOffset(hMenu, IDM_TOP_LEFT, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItemOffset(hMenu, IDM_TOP_RIGHT, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItemOffset(hMenu, IDM_BOTTOM_LEFT, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItemOffset(hMenu, IDM_BOTTOM_RIGHT, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItemOffset(hMenu, IDM_TOP_LEFT + (config.displayCorner - DisplayTopLeft), MF_BYCOMMAND | MF_CHECKED);
 			break;
 		default:
 			break;
@@ -204,12 +214,13 @@ namespace Window
 		}
 
 		case WM_COMMAND: {
-			switch (wParam)
+			WPARAM cmd = wParam - config.index;
+			switch (cmd)
 			{
 			case IDM_ENABLED:
 				config.state.enabled = !config.state.enabled;
 				config.tick.begin = config.tick.end = config.state.enabled ? GetTickCount() : 0;
-				Config::Set(CONFIG_MOD, "Enabled", config.state.enabled);
+				Config::Set("Enabled", config.state.enabled);
 				Window::CheckMenu(hWnd, MenuEnabled);
 				Window::CheckMenu(hWnd, MenuReset);
 				return NULL;
@@ -237,8 +248,8 @@ namespace Window
 			case IDM_TOP_RIGHT:
 			case IDM_BOTTOM_LEFT:
 			case IDM_BOTTOM_RIGHT:
-				config.displayCorner = DisplayCorner(DisplayTopLeft + wParam - IDM_TOP_LEFT);
-				Config::Set(CONFIG_MOD, "DisplayCorner", config.displayCorner);
+				config.displayCorner = DisplayCorner(DisplayTopLeft + cmd - IDM_TOP_LEFT);
+				Config::Set("DisplayCorner", config.displayCorner);
 				Window::CheckMenu(hWnd, MenuDisplay);
 				return NULL;
 

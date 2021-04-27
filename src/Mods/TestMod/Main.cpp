@@ -36,9 +36,38 @@ namespace Main
 		return "Test Mod";
 	}
 
-	HMENU __stdcall GetMenu()
+	VOID ChangeMenuID(HMENU hMenu, MENUITEMINFO* info)
 	{
+		INT count = GetMenuItemCount(hMenu);
+		for (INT i = 0; i < count; ++i)
+		{
+			info->fMask = MIIM_ID | MIIM_SUBMENU | MIIM_FTYPE;
+			if (GetMenuItemInfo(hMenu, i, TRUE, info))
+			{
+				if (info->fType & MFT_SEPARATOR)
+					continue;
+
+				if (!info->hSubMenu)
+				{
+					info->fMask = MIIM_ID;
+					info->wID += config.index;
+					SetMenuItemInfo(hMenu, i, TRUE, info);
+				}
+				else
+					ChangeMenuID(info->hSubMenu, info);
+			}
+		}
+	}
+
+	HMENU __stdcall GetModMenu(DWORD offset)
+	{
+		config.index = offset;
 		HMENU hMenu = LoadMenu(config.hModule, MAKEINTRESOURCE(IDR_MENU));
+
+		MENUITEMINFO info = {};
+		info.cbSize = sizeof(MENUITEMINFO);
+		ChangeMenuID(hMenu, &info);
+
 		Window::CheckMenu(hMenu);
 		return hMenu;
 	}

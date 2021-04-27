@@ -282,7 +282,7 @@
 
 #define IDM_LOCALE_DEFAULT 5000
 
-#define IDM_MODS 10000
+#define IDM_MODS 9999
 #pragma endregion
 
 #pragma region Strings

@@ -456,7 +456,7 @@ extern "C"
 	/// <param name="libName"></param>
 	/// <param name="hLib"></param>
 	/// <returns></returns>
-	VOID __stdcall RedirectImports(HOOKER hooker, const CHAR* libName, HMODULE hLib);
+	BOOL __stdcall RedirectImports(HOOKER hooker, const CHAR* libName, HMODULE hLib = NULL);
 	
 	/// <summary>
 	/// Map module file into memory

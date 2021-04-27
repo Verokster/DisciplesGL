@@ -54,7 +54,7 @@
     <GenerateManifest>false</GenerateManifest>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
     <TargetName>test</TargetName>
-    <OutDir>D:\Games\Disciples II\Gallean%27s Return\Mods</OutDir>
+    <OutDir>D:\Games\Disciples II\Gallean%27s Return\Mods\</OutDir>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
@@ -62,7 +62,7 @@
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <GenerateManifest>false</GenerateManifest>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
-    <OutDir>D:\Games\Disciples II\Gallean%27s Return\Mods</OutDir>
+    <OutDir>D:\Games\Disciples II\Gallean%27s Return\Mods\</OutDir>
     <TargetName>test</TargetName>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>

@@ -26,15 +26,13 @@
 
 #include "ExtraTypes.h"
 
-#define CONFIG_MOD "TestMod"
-
 extern ConfigItems config;
 
 namespace Config
 {
 	VOID Load(HMODULE hModule);
-	INT Get(const CHAR* app, const CHAR* key, INT default);
-	DWORD Get(const CHAR* app, const CHAR* key, const CHAR* default, CHAR* returnString, DWORD nSize);
-	BOOL Set(const CHAR* app, const CHAR* key, INT value);
-	BOOL Set(const CHAR* app, const CHAR* key, CHAR* value);
+	INT Get(const CHAR* key, INT default);
+	DWORD Get(const CHAR* key, const CHAR* default, CHAR* returnString, DWORD nSize);
+	BOOL Set(const CHAR* key, INT value);
+	BOOL Set(const CHAR* key, CHAR* value);
 }

@@ -34,10 +34,16 @@ namespace Config
 	{
 		config.hModule = hModule;
 
+		// get config file name for ini section
+		GetModuleFileName(config.hModule, config.file, MAX_PATH);
+		strcpy(config.section, strrchr(config.file, '\\') + 1);
+		*strrchr(config.section, '.') = NULL;
+		_strupr(config.section);
+
 		// get config file path
 		HMODULE hMain = GetModuleHandle(NULL);
 		GetModuleFileName(hMain, config.file, MAX_PATH);
-		strcpy(strrchr(config.file, '\\'), "\\disciple.ini");
+		strcpy(strrchr(config.file, '\\') + 1, "disciple.ini");
 
 		// create font for About dialog
 		config.font = CreateFont(16, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET,
@@ -53,34 +59,34 @@ namespace Config
 		AddFontMemResourceEx(data, len, NULL, &nFonts);
 
 		// load mod state
-		config.state.enabled = (BOOL)Config::Get(CONFIG_MOD, "Enabled", TRUE);
+		config.state.enabled = (BOOL)Config::Get("Enabled", TRUE);
 		config.tick.begin = config.tick.end = config.state.enabled ? GetTickCount() : 0;
 
 		// load display position
-		config.displayCorner = (DisplayCorner)Config::Get(CONFIG_MOD, "DisplayCorner", DisplayTopLeft);
+		config.displayCorner = (DisplayCorner)Config::Get("DisplayCorner", DisplayTopLeft);
 		if (config.displayCorner < DisplayTopLeft || config.displayCorner > DisplayBottomRight)
 			config.displayCorner = DisplayTopLeft;
 	}
 
-	INT Get(const CHAR* app, const CHAR* key, INT default)
+	INT Get( const CHAR* key, INT default)
 	{
-		return GetPrivateProfileInt(app, key, (INT)default, config.file);
+		return GetPrivateProfileInt(config.section, key, (INT) default, config.file);
 	}
 
-	DWORD Get(const CHAR* app, const CHAR* key, const CHAR* default, CHAR* returnString, DWORD nSize)
+	DWORD Get(const CHAR* key, const CHAR* default, CHAR* returnString, DWORD nSize)
 	{
-		return GetPrivateProfileString(app, key, default, returnString, nSize, config.file);
+		return GetPrivateProfileString(config.section, key, default, returnString, nSize, config.file);
 	}
 
-	BOOL Set(const CHAR* app, const CHAR* key, INT value)
+	BOOL Set(const CHAR* key, INT value)
 	{
 		CHAR res[20];
 		_itoa(value, res, 10);
-		return WritePrivateProfileString(app, key, res, config.file);
+		return WritePrivateProfileString(config.section, key, res, config.file);
 	}
 
-	BOOL Set(const CHAR* app, const CHAR* key, CHAR* value)
+	BOOL Set(const CHAR* key, CHAR* value)
 	{
-		return WritePrivateProfileString(app, key, value, config.file);
+		return WritePrivateProfileString(config.section, key, value, config.file);
 	}
 }

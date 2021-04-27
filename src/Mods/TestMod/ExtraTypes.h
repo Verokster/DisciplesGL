@@ -57,6 +57,7 @@ enum DisplayCorner
 struct ConfigItems {
 	HMODULE hModule;
 	HWND hWnd;
+	DWORD index;
 	HICON icon;
 	HFONT font;
 	struct {
@@ -68,5 +69,7 @@ struct ConfigItems {
 		DWORD end;
 	} tick;
 	DisplayCorner displayCorner;
+
+	CHAR section[MAX_PATH];
 	CHAR file[MAX_PATH];
 };

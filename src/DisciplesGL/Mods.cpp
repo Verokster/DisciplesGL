@@ -47,6 +47,7 @@ namespace Mods
 		HANDLE hFile = FindFirstFile(file, &fData);
 		if (hFile && hFile != INVALID_HANDLE_VALUE)
 		{
+			Mod* last;
 			do
 			{
 				StrCopy(p, fData.cFileName);
@@ -56,7 +57,6 @@ namespace Mods
 					Mod* mod = (Mod*)MemoryAlloc(sizeof(Mod));
 					if (mod)
 					{
-						mod->hWnd = NULL;
 						mod->GetName = (GETNAME)GetProcAddress(hModule, "GetName");
 						mod->GetMenu = (GETMENU)GetProcAddress(hModule, "GetMenu");
 						mod->SetHWND = (SETHWND)GetProcAddress(hModule, "SetHWND");
@@ -64,8 +64,16 @@ namespace Mods
 
 						if (mod->GetName && mod->GetMenu && mod->SetHWND && mod->DrawFrame)
 						{
-							mod->last = mods;
-							mods = mod;
+							mod->hWnd = NULL;
+							StrCopy(mod->name, mod->GetName());
+
+							mod->last = NULL;
+							if (!mods)
+								mods = mod;
+							else
+								last->last = mod;
+							last = mod;
+
 							continue;
 						}
 						
@@ -79,6 +87,7 @@ namespace Mods
 			FindClose(hFile);
 		}
 
+		DWORD offset = 10000;
 		MenuItemData mData;
 		mData.childId = IDM_MODS;
 		if (Window::GetMenuByChildID(&mData) && DeleteMenu(config.menu, IDM_MODS, MF_BYCOMMAND))
@@ -87,9 +96,39 @@ namespace Mods
 			Mod* mod = mods;
 			while (mod)
 			{
-				HMENU hMenu = mod->GetMenu();
-				if (hMenu && InsertMenu(mData.hMenu, 0, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hMenu, mod->GetName()))
-					added = TRUE;
+				mod->added = FALSE;
+				if (mod->name)
+				{
+					HMENU hMenu = mod->GetMenu(offset);
+					if (hMenu)
+					{
+						DWORD idx = 0;
+						Mod* check = mods;
+						while (check)
+						{
+							if (check == mod)
+								break;
+
+							if (check->added && !StrCompare(check->name, mod->name))
+								++idx;
+
+							check = check->last;
+						}
+
+						CHAR name[256];
+						if (idx)
+							StrPrint(name, "%s\t#%d", mod->name, idx + 1);
+						else
+							StrPrint(name, "%s\t", mod->name);
+
+						if (AppendMenu(mData.hMenu, MF_POPUP, (UINT_PTR)hMenu, name))
+						{
+							mod->added = TRUE;
+							offset += 1000;
+							added = TRUE;
+						}
+					}
+				}
 
 				mod = mod->last;
 			}

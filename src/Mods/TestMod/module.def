@@ -1,6 +1,6 @@
 LIBRARY	"RESMOD"
 EXPORTS
 	GetName			= _GetName@0			PRIVATE
-	GetMenu			= _GetMenu@0			PRIVATE
+	GetMenu			= _GetModMenu@4			PRIVATE
 	SetHWND			= _SetHWND@4			PRIVATE
 	DrawFrame		= _DrawFrame@20			PRIVATE
